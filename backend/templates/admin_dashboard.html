@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — AutoDocs AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040d1a; --bg2: #060f22; --surface: #0a1628;
+      --border: #112240; --accent: #00d4ff; --accent2: #7c3aed;
+      --accent3: #10b981; --warn: #f59e0b; --danger: #ef4444;
+      --text: #ccd6f6; --muted: #8892b0; --white: #e6f1ff;
+      --mono: 'Space Mono', monospace; --sans: 'Syne', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; min-height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; bottom: 0; }
+    .logo { font-family: var(--mono); font-size: 0.95rem; color: var(--white); padding: 0.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.4rem; }
+    .logo span { color: var(--accent); }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.9rem; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; margin-bottom: 0.35rem; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--white); }
+    .nav-item.active { background: rgba(0,212,255,0.08); color: var(--accent); }
+    .nav-section { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; padding: 1rem 0.8rem 0.5rem; }
+    .sidebar-bottom { margin-top: auto; }
+    .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem; display: flex; align-items: center; gap: 0.75rem; }
+    .avatar { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--bg); flex-shrink: 0; }
+    .user-info .name { font-size: 0.92rem; color: var(--white); font-weight: 700; }
+    .user-info .plan { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); }
+    .main { margin-left: 260px; flex: 1; padding: 2rem 2.5rem; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; gap: 1rem; }
+    .page-title h1 { font-size: 1.9rem; font-weight: 800; color: var(--white); }
+    .page-title p { color: var(--muted); font-size: 0.95rem; margin-top: 0.35rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.7rem 1.2rem; border-radius: 8px; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { background: #33dcff; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem 1.4rem; position: relative; overflow: hidden; }
+    .stat-card .stat-icon { position: absolute; top: 1.2rem; right: 1.2rem; font-size: 1.4rem; opacity: 0.22; }
+    .stat-label { font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.8rem; }
+    .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--white); }
+    .stat-text { font-size: 0.85rem; color: var(--muted); margin-top: 0.6rem; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; gap: 1rem; }
+    .section-header h2 { font-size: 1.15rem; font-weight: 700; color: var(--white); }
+    .section-header p { color: var(--muted); font-size: 0.9rem; }
+    .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem; }
+    .card h3 { font-size: 1rem; margin-bottom: 1rem; color: var(--white); }
+    .card table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .card th, .card td { padding: 0.8rem 0.85rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .card th { color: var(--muted); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .card td { color: var(--text); }
+    .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-family: var(--mono); font-weight: 700; }
+    .badge.completed { background: rgba(16,185,129,0.12); color: var(--accent3); border: 1px solid rgba(16,185,129,0.18); }
+    .badge.pending { background: rgba(136,146,176,0.12); color: var(--muted); border: 1px solid rgba(136,146,176,0.18); }
+    .badge.error { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.18); }
+    .pill { display: inline-flex; gap: 0.4rem; align-items: center; padding: 0.35rem 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.04); color: var(--muted); font-size: 0.78rem; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .tag { background: rgba(0,212,255,0.08); color: var(--accent); padding: 0.45rem 0.85rem; border-radius: 999px; font-size: 0.82rem; }
+    .table-overflow { overflow-x: auto; }
+    .data-pill { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.04); border-radius: 999px; color: var(--text); padding: 0.45rem 0.75rem; margin: 0.25rem 0.15rem 0 0; font-size: 0.82rem; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .analytics-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 1rem; }
+    .analytics-card span { display: block; font-size: 0.95rem; color: var(--muted); margin-bottom: 0.45rem; }
+    .analytics-card strong { display: block; font-size: 1.35rem; color: var(--white); }
+    .loading { text-align: center; color: var(--muted); padding: 2rem 0; }
+    @media(max-width: 1100px) { .stats-row { grid-template-columns: repeat(2, minmax(0,1fr)); } .grid-2 { grid-template-columns: 1fr; } .main { padding: 1.5rem; margin-left: 0; } .sidebar { position: relative; width: 100%; min-height: auto; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Auto<span>Docs</span> AI
+    </div>
+    <div class="nav-section">Principal</div>
+    <a href="/dashboard" class="nav-item">Dashboard</a>
+    <a href="/admin" class="nav-item active">Admin</a>
+    <a href="/projects" class="nav-item">Proyectos</a>
+    <div class="nav-section">Gestión</div>
+    <a href="#users-section" class="nav-item">Usuarios</a>
+    <a href="#analysis-section" class="nav-item">Análisis</a>
+    <a href="#projects-section" class="nav-item">Proyectos</a>
+    <a href="/" class="nav-item" onclick="logout()">Cerrar sesión</a>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="avatar" id="user-avatar">A</div>
+        <div class="user-info">
+          <div class="name" id="user-name">Administrador</div>
+          <div class="plan" id="user-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <h1>Panel de Administrador</h1>
+        <p>Supervisa usuarios, proyectos y análisis de documentación desde un lugar central.</p>
+      </div>
+      <button class="btn btn-primary" onclick="window.location.href='/dashboard'">Ver Dashboard</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card blue">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Usuarios registrados</div>
+        <div class="stat-value" id="stat-users">0</div>
+        <div class="stat-text">Usuarios con cuenta activa</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">📁</div>
+        <div class="stat-label">Proyectos</div>
+        <div class="stat-value" id="stat-projects">0</div>
+        <div class="stat-text">Proyectos subidos</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Completados</div>
+        <div class="stat-value" id="stat-completed">0</div>
+        <div class="stat-text">Análisis terminados</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-label">Calidad media</div>
+        <div class="stat-value" id="stat-quality">0</div>
+        <div class="stat-text">Score promedio de documentación</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>Resumen de análisis</h2>
+      <p>Palabras clave, términos técnicos y coincidencias extraídas de la documentación generada.</p>
+    </div>
+
+    <div class="analytics-grid" id="analysis-grid">
+      <div class="analytics-card">
+        <span>Total de documentos analizados</span>
+        <strong id="doc-count">0</strong>
+      </div>
+      <div class="analytics-card">
+        <span>Palabras clave</span>
+        <strong id="keyword-count">0</strong>
+      </div>
+      <div class="analytics-card">
+        <span>Términos técnicos</span>
+        <strong id="technical-count">0</strong>
+      </div>
+      <div class="analytics-card">
+        <span>Coincidencias</span>
+        <strong id="matching-count">0</strong>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Usuarios registrados</h3>
+        <div class="table-overflow">
+          <table>
+            <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Proyectos</th><th>Creado</th></tr></thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Proyectos recientes</h3>
+        <div class="table-overflow">
+          <table>
+            <thead><tr><th>Proyecto</th><th>Propietario</th><th>Lenguaje</th><th>Estado</th><th>Score</th></tr></thead>
+            <tbody id="projects-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="analysis-section">
+      <h3>Análisis de datos de documentación</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
+        <div>
+          <p class="pill">Palabras clave más frecuentes</p>
+          <div class="tag-list" id="keywords-list"></div>
+        </div>
+        <div>
+          <p class="pill">Términos técnicos detectados</p>
+          <div class="tag-list" id="technical-list"></div>
+        </div>
+        <div>
+          <p class="pill">Coincidencias entre términos</p>
+          <div class="tag-list" id="matching-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Distribución de lenguajes</h3>
+      <div id="languages-list" style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.75rem;"></div>
+    </div>
+
+    <div class="loading" id="loading-state">Cargando panel administrador…</div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) {
+      document.getElementById('user-name').textContent = user.name;
+      document.getElementById('user-avatar').textContent = user.name[0].toUpperCase();
+      document.getElementById('user-role').textContent = user.role === 'admin' ? 'Administrador' : 'Usuario';
+    }
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    }
+
+    function createTag(text) {
+      const el = document.createElement('span');
+      el.className = 'tag';
+      el.textContent = text;
+      return el;
+    }
+
+    function renderBadge(status) {
+      const span = document.createElement('span');
+      span.className = `badge ${status === 'completed' ? 'completed' : status === 'error' ? 'error' : 'pending'}`;
+      span.textContent = status === 'completed' ? 'Completado' : status === 'error' ? 'Error' : 'Pendiente';
+      return span;
+    }
+
+    async function loadAdminOverview() {
+      try {
+        const res = await fetch('/api/admin/overview', { headers: authHeaders() });
+        if (!res.ok) {
+          if (res.status === 403) window.location.href = '/dashboard';
+          throw new Error('No autorizado');
+        }
+        const data = await res.json();
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('stat-users').textContent = data.stats.total_users;
+        document.getElementById('stat-projects').textContent = data.stats.total_projects;
+        document.getElementById('stat-completed').textContent = data.stats.completed_projects;
+        document.getElementById('stat-quality').textContent = data.stats.average_quality_score;
+        document.getElementById('doc-count').textContent = data.data_analysis.document_count;
+        document.getElementById('keyword-count').textContent = data.data_analysis.keywords.length;
+        document.getElementById('technical-count').textContent = data.data_analysis.technical_terms.length;
+        document.getElementById('matching-count').textContent = data.data_analysis.matching_terms.length;
+
+        const usersBody = document.getElementById('users-table');
+        usersBody.innerHTML = data.users.map(user => `
+          <tr>
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.role}</td>
+            <td>${user.projects_count}</td>
+            <td>${new Date(user.created_at).toLocaleDateString('es-MX')}</td>
+          </tr>
+        `).join('');
+
+        const projectsBody = document.getElementById('projects-table');
+        projectsBody.innerHTML = data.projects.slice(0, 12).map(proj => `
+          <tr>
+            <td>${proj.name}</td>
+            <td>${proj.owner}</td>
+            <td>${proj.language}</td>
+            <td>${proj.status}</td>
+            <td>${proj.quality_score}</td>
+          </tr>
+        `).join('');
+
+        const keywordList = document.getElementById('keywords-list');
+        keywordList.innerHTML = '';
+        data.data_analysis.keywords.forEach(word => keywordList.appendChild(createTag(word)));
+
+        const technicalList = document.getElementById('technical-list');
+        technicalList.innerHTML = '';
+        data.data_analysis.technical_terms.forEach(word => technicalList.appendChild(createTag(word)));
+
+        const matchingList = document.getElementById('matching-list');
+        matchingList.innerHTML = '';
+        if (data.data_analysis.matching_terms.length === 0) {
+          matchingList.appendChild(createTag('No hay coincidencias claras'));
+        } else {
+          data.data_analysis.matching_terms.forEach(word => matchingList.appendChild(createTag(word)));
+        }
+
+        const languagesList = document.getElementById('languages-list');
+        languagesList.innerHTML = '';
+        Object.entries(data.stats.language_distribution).sort((a,b) => b[1]-a[1]).forEach(([lang, count]) => {
+          const pill = document.createElement('div');
+          pill.className = 'data-pill';
+          pill.textContent = `${lang} · ${count}`;
+          languagesList.appendChild(pill);
+        });
+      } catch (error) {
+        console.error(error);
+        document.getElementById('loading-state').textContent = 'Error cargando el panel administrador.';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    loadAdminOverview();
+  </script>
+</body>
+</html>
