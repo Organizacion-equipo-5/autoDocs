@@ -7,11 +7,15 @@ from collections import defaultdict
 
 class ProjectAnalyzer:
     """
-    Analyzes a project directory and extracts:
-    - File structure & language detection (40+ languages)
-    - Functions, classes, and their signatures
-    - API endpoints (Flask, FastAPI, Django, Express, NestJS, Spring, Laravel, Rails, Gin, Actix...)
-    - Quality metrics
+    Analiza un proyecto completo y extrae información estructural y técnica.
+
+    Este script se usa para:
+    - recorrer el árbol de archivos del proyecto
+    - detectar el lenguaje dominante
+    - extraer funciones, clases y endpoints
+    - calcular métricas de calidad
+
+    Los resultados se consumen luego por DocGenerator para generar la documentación.
     """
 
     LANGUAGE_EXTENSIONS = {
@@ -85,16 +89,42 @@ class ProjectAnalyzer:
         }
 
     def analyze(self) -> dict:
+        """
+        Ejecuta el pipeline completo de análisis.
+
+        1. Recorre el proyecto y detecta archivos/lenguajes.
+        2. Calcula el lenguaje principal.
+        3. Extrae funciones, clases y endpoints según el lenguaje.
+        4. Calcula la puntuación de calidad del proyecto.
+        """
         if not self.project_path.exists():
             self.results["error"] = "Project path does not exist"
             return self.results
+
+        # Paso 1: construir la estructura y contar lenguajes.
         self._scan_structure()
+
+        # Paso 2: identificar el lenguaje dominante del proyecto.
         self._detect_primary_language()
+
+        # Paso 3: analizar archivos relevantes para extraer funciones y endpoints.
         self._analyze_code_files()
+
+        # Paso 4: calcular métricas agregadas de calidad.
         self._calculate_quality_score()
         return self.results
 
     def _scan_structure(self):
+        """
+        Recorre todos los archivos del proyecto y guarda:
+        - ruta relativa
+        - nombre
+        - extensión
+        - lenguaje inferido
+        - tamaño
+
+        Solo guarda un máximo de 300 archivos para no cargar demasiado la respuesta.
+        """
         structure = []
         lang_count = defaultdict(int)
         total = 0
@@ -123,6 +153,12 @@ class ProjectAnalyzer:
         self.results["languages"] = dict(lang_count)
 
     def _detect_primary_language(self):
+        """
+        Elige el lenguaje principal del proyecto.
+
+        Se excluyen archivos de configuración (JSON, YAML, HTML, CSS, etc.)
+        para que el lenguaje dominante refleje el código real del proyecto.
+        """
         config_langs = {'JSON', 'YAML', 'TOML', 'INI', 'XML', 'HTML', 'CSS',
                         'SCSS', 'Sass', 'LESS', 'SQL', 'C/C++ Header'}
         langs = {k: v for k, v in self.results["languages"].items() if k not in config_langs}
@@ -158,6 +194,12 @@ class ProjectAnalyzer:
         return None
 
     def _analyze_code_files(self):
+        """
+        Selecciona el analizador correcto para cada archivo detectado.
+
+        El diccionario `dispatch` mapea el lenguaje a su función específica,
+        evitando tener que hacer ifs repetitivos para cada archivo.
+        """
         dispatch = {
             'Python': self._analyze_python_file,
             'JavaScript': self._analyze_js_ts_file,
@@ -217,6 +259,11 @@ class ProjectAnalyzer:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
     def _detect_python_endpoints(self, source, filepath):
+        """
+        Detecta endpoints en archivos Python usando patrones habituales de frameworks.
+
+        Soporta Flask/FastAPI, rutas con `methods=` y decoradores de Django.
+        """
         patterns = [
             (r'@(?:\w+)\.(get|post|put|delete|patch|options|head)\(\s*["\']([^"\']+)["\']', 'Flask/FastAPI'),
             (r'@(?:\w+)\.route\(\s*["\']([^"\']+)["\'].*?methods\s*=\s*\[([^\]]+)\]', 'Flask'),
@@ -441,6 +488,12 @@ class ProjectAnalyzer:
         return complexity
 
     def _calculate_quality_score(self):
+        """
+        Calcula una puntuación global del proyecto.
+
+        Se penaliza por falta de documentación, complejidad alta y errores
+        detectados durante el análisis. Se premia la presencia de tests.
+        """
         score = 100
         funcs = self.results["functions"]
         if funcs:

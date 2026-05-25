@@ -8,21 +8,34 @@ import threading
 
 analysis_bp = Blueprint('analysis', __name__)
 
+
 def run_analysis_async(project_id, project_path, db):
-    """Run analysis in background thread."""
+    """
+    Ejecuta el análisis en segundo plano.
+
+    1. Marca el proyecto como "analyzing".
+    2. Analiza el código con ProjectAnalyzer.
+    3. Genera documentación con DocGenerator.
+    4. Guarda los resultados en la base de datos.
+    5. Actualiza el estado del proyecto a "completed" o "error".
+    """
     try:
-        # Validar que project_path existe
+        # Validar que project_path existe antes de iniciar.
         if not project_path:
             raise ValueError("No se proporcionó una ruta de proyecto válida. Debes subir un archivo o proporcionar una URL de GitHub.")
-        
+
+        # Marca el proyecto como en proceso de análisis.
         db.projects.update_one({"_id": project_id}, {"$set": {"status": "analyzing"}})
-        
+
+        # Analiza el proyecto y extrae métricas y estructura.
         analyzer = ProjectAnalyzer(project_path)
         results = analyzer.analyze()
-        
+
+        # Convierte esos resultados en documentación técnica.
         doc_gen = DocGenerator(results)
         documentation = doc_gen.generate()
-        
+
+        # Guarda resultados y documentación en la colección de análisis.
         db.analysis_results.replace_one(
             {"project_id": project_id},
             {
@@ -33,7 +46,8 @@ def run_analysis_async(project_id, project_path, db):
             },
             upsert=True
         )
-        
+
+        # Actualiza el estado del proyecto con estadísticas finales.
         db.projects.update_one({"_id": project_id}, {
             "$set": {
                 "status": "completed",
@@ -49,6 +63,7 @@ def run_analysis_async(project_id, project_path, db):
             }
         })
     except Exception as e:
+        # Si algo falla, se guarda el error para poder consultarlo desde la UI.
         db.projects.update_one({"_id": project_id}, {
             "$set": {"status": "error", "error_message": str(e)}
         })
