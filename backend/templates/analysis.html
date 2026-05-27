@@ -143,10 +143,15 @@
   <main class="main">
     <div class="topbar">
       <a href="/dashboard" class="back-link">← Volver al dashboard</a>
-      <div class="export-btns" id="export-btns" style="display:none;">
-        <button class="btn btn-ghost" onclick="exportMd()">⬇ Markdown</button>
-        <button class="btn btn-ghost" onclick="exportHtml()">⬇ HTML</button>
-        <button class="btn btn-primary" onclick="exportPdf()"> PDF</button>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button id="themeButton" class="btn btn-ghost" title="Cambiar tema">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <div class="export-btns" id="export-btns" style="display:none;">
+          <button class="btn btn-ghost" onclick="exportMd()">⬇ Markdown</button>
+          <button class="btn btn-ghost" onclick="exportHtml()">⬇ HTML</button>
+          <button class="btn btn-primary" onclick="exportPdf()"> PDF</button>
+        </div>
       </div>
     </div>
 
@@ -421,5 +426,6 @@
 
     loadProject();
   </script>
+  <script src="/static/theme.js"></script>
 </body>
 </html>

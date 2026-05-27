@@ -214,7 +214,12 @@
         <h1>Dashboard</h1>
         <p id="greeting">Bienvenido de vuelta</p>
       </div>
-      <button class="btn btn-primary" onclick="openUploadModal()"> Nuevo proyecto</button>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button id="themeButton" class="btn btn-ghost" title="Cambiar tema">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <button class="btn btn-primary" onclick="openUploadModal()"> Nuevo proyecto</button>
+      </div>
     </div>
 
     <!-- STATS -->
@@ -409,5 +414,6 @@
     loadProjects();
     setInterval(loadProjects, 8000);
   </script>
+  <script src="/static/theme.js"></script>
 </body>
 </html>

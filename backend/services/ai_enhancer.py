@@ -1,42 +1,101 @@
 import os
+import json
+import urllib.request
+import urllib.error
 from typing import Optional
-from openai import OpenAI
 
 
 class AIEnhancer:
     """
-    Mejora la documentación técnica usando IA (OpenAI GPT).
+    Mejora la documentación técnica usando IA (Google Gemini).
     Genera descripciones más detalladas, explica patrones de diseño,
     y proporciona insights técnicos avanzados.
     """
 
+    GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
     def __init__(self):
-        self.client = None
-        self.api_key = os.getenv('OPENAI_API_KEY')
-        if self.api_key:
-            self.client = OpenAI(api_key=self.api_key)
+        self.api_key = os.getenv('GEMINI_API_KEY')
 
     def is_available(self) -> bool:
-        """Verifica si la API de OpenAI está configurada y disponible."""
-        return self.client is not None and self.api_key
+        """Verifica si la API de Gemini está configurada y disponible."""
+        return bool(self.api_key)
+
+    def _call_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
+        """
+        Realiza una llamada a la API de Gemini.
+
+        Args:
+            system_prompt: Instrucción del sistema
+            user_prompt: Mensaje del usuario
+            max_tokens: Máximo de tokens en la respuesta
+
+        Returns:
+            Texto generado o None si hay error
+        """
+        if not self.is_available():
+            return None
+
+        url = f"{self.GEMINI_API_URL}?key={self.api_key}"
+
+        payload = {
+            "system_instruction": {
+                "parts": [{"text": system_prompt}]
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [{"text": user_prompt}]
+                }
+            ],
+            "generationConfig": {
+                "maxOutputTokens": max_tokens,
+                "temperature": 0.7
+            }
+        }
+
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode("utf-8"))
+                candidates = result.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        return parts[0].get("text", "").strip()
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="ignore")
+            print(f"[AI Gemini] HTTP {e.code}: {body[:300]}")
+        except urllib.error.URLError as e:
+            print(f"[AI Gemini] URL error: {e}")
+        except Exception as e:
+            print(f"[AI Gemini] Error inesperado: {e}")
+
+        return None
 
     def enhance_function_description(self, function: dict, context: str = "") -> str:
         """
         Genera una descripción mejorada para una función usando IA.
-        
+
         Args:
             function: Diccionario con información de la función
             context: Contexto adicional del proyecto
-            
+
         Returns:
             Descripción mejorada de la función
         """
         if not self.is_available():
             return function.get('docstring', '') or f"Función {function['name']}"
-        
-        try:
-            params = ', '.join(function.get('params', []))
-            prompt = f"""Analiza esta función y genera una descripción técnica profesional:
+
+        params = ', '.join(function.get('params', []))
+        prompt = f"""Analiza esta función y genera una descripción técnica profesional:
 
 Nombre: {function['name']}
 Parámetros: {params}
@@ -53,40 +112,35 @@ Genera una descripción que incluya:
 
 Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
 
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=300,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"[AI] Error al mejorar descripción de función: {e}")
-            return function.get('docstring', '') or f"Función {function['name']}"
+        result = self._call_gemini(
+            "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas.",
+            prompt,
+            max_tokens=300
+        )
+        if result:
+            return result
+
+        print(f"[AI] No se pudo mejorar descripción de función: {function['name']}")
+        return function.get('docstring', '') or f"Función {function['name']}"
 
     def enhance_class_description(self, class_info: dict, context: str = "") -> str:
         """
         Genera una descripción mejorada para una clase usando IA.
-        
+
         Args:
             class_info: Diccionario con información de la clase
             context: Contexto adicional del proyecto
-            
+
         Returns:
             Descripción mejorada de la clase
         """
         if not self.is_available():
             return class_info.get('docstring', '') or f"Clase {class_info['name']}"
-        
-        try:
-            methods = ', '.join(class_info.get('methods', [])[:10])
-            bases = ', '.join(class_info.get('bases', []))
-            
-            prompt = f"""Analiza esta clase y genera una descripción técnica profesional:
+
+        methods = ', '.join(class_info.get('methods', [])[:10])
+        bases = ', '.join(class_info.get('bases', []))
+
+        prompt = f"""Analiza esta clase y genera una descripción técnica profesional:
 
 Nombre: {class_info['name']}
 Hereda de: {bases or 'object'}
@@ -104,37 +158,32 @@ Genera una descripción que incluya:
 
 Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
 
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=300,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"[AI] Error al mejorar descripción de clase: {e}")
-            return class_info.get('docstring', '') or f"Clase {class_info['name']}"
+        result = self._call_gemini(
+            "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas.",
+            prompt,
+            max_tokens=300
+        )
+        if result:
+            return result
+
+        print(f"[AI] No se pudo mejorar descripción de clase: {class_info['name']}")
+        return class_info.get('docstring', '') or f"Clase {class_info['name']}"
 
     def enhance_endpoint_description(self, endpoint: dict, context: str = "") -> str:
         """
         Genera una descripción mejorada para un endpoint de API usando IA.
-        
+
         Args:
             endpoint: Diccionario con información del endpoint
             context: Contexto adicional del proyecto
-            
+
         Returns:
             Descripción mejorada del endpoint
         """
         if not self.is_available():
             return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
-        
-        try:
-            prompt = f"""Analiza este endpoint de API y genera una descripción técnica profesional:
+
+        prompt = f"""Analiza este endpoint de API y genera una descripción técnica profesional:
 
 Método: {endpoint.get('method')}
 Ruta: {endpoint.get('path')}
@@ -151,42 +200,37 @@ Genera una descripción que incluya:
 
 Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
 
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Eres un experto en documentación de APIs REST. Genera descripciones claras, precisas y técnicas."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=300,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"[AI] Error al mejorar descripción de endpoint: {e}")
-            return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
+        result = self._call_gemini(
+            "Eres un experto en documentación de APIs REST. Genera descripciones claras, precisas y técnicas.",
+            prompt,
+            max_tokens=300
+        )
+        if result:
+            return result
+
+        print(f"[AI] No se pudo mejorar descripción de endpoint: {endpoint.get('path')}")
+        return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
 
     def generate_architecture_insights(self, analysis_results: dict) -> str:
         """
         Genera insights sobre la arquitectura del proyecto usando IA.
-        
+
         Args:
             analysis_results: Resultados del análisis del proyecto
-            
+
         Returns:
             Insights sobre arquitectura y patrones detectados
         """
         if not self.is_available():
-            return "Insights de IA no disponibles - configura OPENAI_API_KEY"
-        
-        try:
-            lang = analysis_results.get('primary_language', 'desconocido')
-            langs = analysis_results.get('languages', {})
-            functions = analysis_results.get('functions', [])
-            classes = analysis_results.get('classes', [])
-            endpoints = analysis_results.get('endpoints', [])
-            
-            prompt = f"""Analiza esta información de un proyecto de software y genera insights arquitectónicos:
+            return "Insights de IA no disponibles - configura GEMINI_API_KEY en el archivo .env"
+
+        lang = analysis_results.get('primary_language', 'desconocido')
+        langs = analysis_results.get('languages', {})
+        functions = analysis_results.get('functions', [])
+        classes = analysis_results.get('classes', [])
+        endpoints = analysis_results.get('endpoints', [])
+
+        prompt = f"""Analiza esta información de un proyecto de software y genera insights arquitectónicos:
 
 Lenguaje principal: {lang}
 Lenguajes detectados: {langs}
@@ -203,56 +247,56 @@ Genera insights sobre:
 
 Mantén los insights concisos y accionables (máximo 200 palabras)."""
 
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Eres un arquitecto de software senior. Genera insights técnicos y prácticos sobre arquitectura de proyectos."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=400,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"[AI] Error al generar insights de arquitectura: {e}")
-            return "No se pudieron generar insights de arquitectura"
+        result = self._call_gemini(
+            "Eres un arquitecto de software senior. Genera insights técnicos y prácticos sobre arquitectura de proyectos.",
+            prompt,
+            max_tokens=400
+        )
+        if result:
+            return result
+
+        print("[AI] No se pudieron generar insights de arquitectura")
+        return "No se pudieron generar insights de arquitectura"
 
     def enhance_documentation(self, analysis_results: dict) -> dict:
         """
-        Mejora toda la documentación del proyecto usando IA.
-        
+        Mejora toda la documentación del proyecto usando IA (Gemini).
+
         Args:
             analysis_results: Resultados del análisis del proyecto
-            
+
         Returns:
             Resultados con descripciones mejoradas por IA
         """
         if not self.is_available():
-            print("[AI] OpenAI no configurado, usando documentación básica")
+            print("[AI] Gemini no configurado, usando documentación básica. "
+                  "Agrega GEMINI_API_KEY en tu archivo .env para habilitar la mejora con IA.")
             return analysis_results
-        
-        print("[AI] Mejorando documentación con IA...")
-        
+
+        print("[AI] Mejorando documentación con Gemini...")
+
         # Contexto del proyecto
-        context = f"Proyecto en {analysis_results.get('primary_language', 'desconocido')} con {len(analysis_results.get('functions', []))} funciones"
-        
-        # Mejorar funciones
-        for func in analysis_results.get('functions', [])[:20]:  # Limitar a 20 para no exceder límites
+        context = (
+            f"Proyecto en {analysis_results.get('primary_language', 'desconocido')} "
+            f"con {len(analysis_results.get('functions', []))} funciones"
+        )
+
+        # Mejorar funciones (limitar a 20 para no exceder cuotas)
+        for func in analysis_results.get('functions', [])[:20]:
             if not func.get('docstring'):
                 func['ai_description'] = self.enhance_function_description(func, context)
-        
-        # Mejorar clases
+
+        # Mejorar clases (limitar a 15)
         for cls in analysis_results.get('classes', [])[:15]:
             if not cls.get('docstring'):
                 cls['ai_description'] = self.enhance_class_description(cls, context)
-        
-        # Mejorar endpoints
+
+        # Mejorar endpoints (limitar a 15)
         for ep in analysis_results.get('endpoints', [])[:15]:
             ep['ai_description'] = self.enhance_endpoint_description(ep, context)
-        
+
         # Generar insights de arquitectura
         analysis_results['ai_architecture_insights'] = self.generate_architecture_insights(analysis_results)
-        
-        print("[AI] Documentación mejorada exitosamente")
+
+        print("[AI] Documentación mejorada exitosamente con Gemini")
         return analysis_results

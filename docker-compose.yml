@@ -10,6 +10,7 @@ services:
       - MONGO_URI=mongodb://mongo:27017/autodocs_ai
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-change-me}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
       - ./backend:/app
       - uploads_data:/app/uploads

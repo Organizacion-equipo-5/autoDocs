@@ -132,7 +132,12 @@
   <main class="main">
     <div class="topbar">
       <div class="page-title"><h1>Proyectos</h1><p id="projects-count">Cargando...</p></div>
-      <button class="btn btn-primary" onclick="openUploadModal()"> Nuevo proyecto</button>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button id="themeButton" class="btn btn-ghost" title="Cambiar tema">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <button class="btn btn-primary" onclick="openUploadModal()"> Nuevo proyecto</button>
+      </div>
     </div>
     <div class="search-bar">
       <input type="text" class="search-input" placeholder=" Buscar proyecto..." id="search-input" oninput="filterProjects()" />
@@ -237,5 +242,6 @@
 
     loadProjects();
   </script>
+  <script src="/static/theme.js"></script>
 </body>
 </html>
