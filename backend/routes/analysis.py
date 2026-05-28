@@ -5,6 +5,7 @@ from services.analyzer import ProjectAnalyzer
 from services.doc_generator import DocGenerator
 from datetime import datetime
 import threading
+import requests
 
 analysis_bp = Blueprint('analysis', __name__)
 
@@ -110,3 +111,88 @@ def get_status(project_id):
     if not project:
         return jsonify({"error": "Project not found"}), 404
     return jsonify({"status": project.get("status", "pending"), "error": project.get("error_message")}), 200
+
+@analysis_bp.route('/suggest-docstring', methods=['POST'])
+@jwt_required()
+def suggest_docstring():
+    """
+    Endpoint para generar sugerencias de docstrings usando la API de Anthropic.
+    Evita problemas de CORS al hacer la petición desde el backend.
+    """
+    try:
+        data = request.json
+        name = data.get('name', '')
+        file = data.get('file', '')
+        params = data.get('params', '')
+        kind = data.get('kind', 'function')
+        lang = data.get('lang', 'Python')
+        
+        if kind == 'class':
+            prompt = f"""Genera SOLO el docstring para esta clase en {lang}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
+
+Clase: {name}
+Archivo: {file}
+
+Formato esperado (Python):
+    \"\"\"
+    Descripción breve de la clase.
+
+    Attributes:
+        attr1: Descripción del atributo.
+    \"\"\""""
+        else:
+            prompt = f"""Genera SOLO el docstring para esta función en {lang}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
+
+Función: {name}
+Parámetros: {params or 'ninguno'}
+Archivo: {file}
+
+Formato esperado (Python):
+    \"\"\"
+    Descripción breve de la función.
+
+    Args:
+        param1: Descripción del parámetro.
+
+    Returns:
+        Descripción del valor retornado.
+    \"\"\""""
+        
+        # Hacer la petición a la API de Anthropic desde el backend
+        response = requests.post(
+            'https://api.anthropic.com/v1/messages',
+            headers={
+                'Content-Type': 'application/json',
+                'x-api-key': 'sk-ant-api03-...'  # Debería configurarse como variable de entorno
+            },
+            json={
+                'model': 'claude-sonnet-4-20250514',
+                'max_tokens': 1000,
+                'messages': [{'role': 'user', 'content': prompt}]
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            text = ''.join([b.get('text', '') for b in data.get('content', [])]).strip()
+            return jsonify({'suggestion': text}), 200
+        else:
+            # Si falla la API, devolver un template básico
+            if kind == 'class':
+                fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
+            else:
+                fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n{(params or "").split(",") if params else ""}\n\n    Returns:\n        Describe el valor de retorno.\n    """'
+            return jsonify({'suggestion': fallback}), 200
+            
+    except Exception as e:
+        # En caso de error, devolver un template básico
+        data = request.json
+        kind = data.get('kind', 'function')
+        name = data.get('name', '')
+        params = data.get('params', '')
+        if kind == 'class':
+            fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
+        else:
+            fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n{(params or "").split(",") if params else ""}\n\n    Returns:\n        Describe el valor de retorno.\n    """'
+        return jsonify({'suggestion': fallback}), 200
