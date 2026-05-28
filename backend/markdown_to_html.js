@@ -7,7 +7,10 @@ process.stdin.setEncoding('utf8');
 process.stdin.on('data', chunk => data += chunk);
 process.stdin.on('end', async () => {
   try {
-    const file = await remark().use(remarkGfm).use(remarkHtml).process(data);
+    const file = await remark()
+      .use(remarkGfm)
+      .use(remarkHtml, { allowDangerousHtml: true })
+      .process(data);
     process.stdout.write(String(file));
   } catch (err) {
     console.error(err);

@@ -185,7 +185,7 @@
     <!-- Botón flotante de tema -->
     <div class="theme-float-switch glass">
         <button id="themeButton" type="button" aria-label="Alternar tema" class="bg-transparent border-0 p-0 cursor-pointer text-2xl">
-            <span id="themeIcon">☀️</span>
+            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
         </button>
     </div>
 
@@ -394,7 +394,12 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                    <div class="relative">
+                        <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                        <button type="button" onclick="togglePassword('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="text-error text-xs font-code-md mb-2 hidden" id="login-error">Credenciales inválidas. Intenta de nuevo.</div>
                 <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleLogin()">Iniciar sesión</button>
@@ -413,7 +418,12 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
-                    <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                    <div class="relative">
+                        <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                        <button type="button" onclick="togglePassword('reg-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="text-error text-xs font-code-md mb-2 hidden" id="reg-error">Error al registrar. Intenta de nuevo.</div>
                 <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleRegister()">Crear cuenta</button>
@@ -453,6 +463,37 @@
                 tabLogin.classList.remove('bg-primary', 'text-white', 'border-primary');
             }
         }
+
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        // Event listener para Enter en login
+        document.getElementById('login-email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('login-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // Event listener para Enter en registro
+        document.getElementById('reg-name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
+        document.getElementById('reg-email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
+        document.getElementById('reg-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
 
         async function handleLogin() {
             const email = document.getElementById('login-email').value;
@@ -503,7 +544,7 @@
         const savedTheme = localStorage.getItem('theme') || 'dark';
 
         function setThemeIcon(theme) {
-            themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+            themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
         }
 
         function applyTheme(theme) {
@@ -629,5 +670,6 @@
             initTilt();
         });
     </script>
+    <script src="/static/theme.js"></script>
 </body>
 </html>

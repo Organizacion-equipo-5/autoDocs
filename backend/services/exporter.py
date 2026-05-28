@@ -85,6 +85,29 @@ class DocumentExporter:
 
         html_body = re.sub(r'<table(?![^>]*class=)', '<table class="report-table"', html_body)
 
+        # Inject section IDs onto h1/h2 headings so TOC links work
+        sec_counter = [0]
+        def inject_section_id(m):
+            sec_counter[0] += 1
+            tag = m.group(1)
+            text = m.group(2)
+            return f'<{tag} id="sec{sec_counter[0]}">{text}</{tag}>'
+        html_body = re.sub(r'<(h[12])>(.*?)</\1>', inject_section_id, html_body, flags=re.DOTALL)
+
+        # Wrap each diagram heading + image into a .diagram-section so they stay visually together
+        # Matches: <h3>2.N Diagrama ...</h3> followed (possibly across whitespace) by <img ...>
+        html_body = re.sub(
+            r'(<h3>(2\.\d+\s+Diagrama[^<]*)</h3>)(\s*(?:<p>\s*)?(<img[^>]+>)(?:\s*</p>)?)',
+            lambda m: (
+                f'<div class="diagram-section">'
+                f'<h3>{m.group(2)}</h3>'
+                f'{m.group(4)}'
+                f'</div>'
+            ),
+            html_body,
+            flags=re.DOTALL
+        )
+
         def image_replacer(match):
             attrs = match.group(1)
             src = match.group(2)
@@ -169,8 +192,29 @@ class DocumentExporter:
   .toc li {{ margin: 0.4rem 0; }}
   .toc a {{ color: var(--accent); text-decoration: none; }}
   .toc a:hover {{ text-decoration: underline; }}
-  .doc-footer {{ margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }}
-  .doc-footer span {{ color: var(--accent); }}
+  .doc-footer {{ margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }}
+  .doc-footer span {{ color: var(--accent); font-weight: 700; }}
+  .doc-footer .footer-grid {{ display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }}
+  .doc-footer .footer-item {{ display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }}
+  .doc-footer .footer-item .fi-label {{ color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }}
+  .doc-footer .footer-item .fi-val {{ color: var(--text); font-size: 0.82rem; }}
+  .doc-footer .footer-divider {{ border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }}
+  .doc-footer .footer-brand {{ color: var(--muted); font-size: 0.72rem; }}
+  .diagram-section {{ margin: 2rem 0; }}
+  /* Page numbers for print/PDF export */
+  @media print {{
+    @page {{ margin: 2cm; @bottom-center {{ content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; }} }}
+    .doc-header {{ page-break-after: avoid; }}
+    .toc {{ page-break-after: always; }}
+    h2 {{ page-break-before: auto; page-break-after: avoid; }}
+    h3 {{ page-break-after: avoid; }}
+    .diagram-section {{ page-break-inside: avoid; }}
+    pre {{ page-break-inside: avoid; }}
+    body {{ background: white !important; color: #1e293b !important; }}
+    .container {{ max-width: 100%; padding: 0; }}
+  }}
+  .diagram-section h3 {{ margin-bottom: 0.75rem !important; }}
+  .diagram-section img {{ margin-top: 0 !important; }}
   .material-icons {{ font-size: 1.2em; vertical-align: middle; }}
   .material-symbols-outlined {{ font-size: 1.2em; vertical-align: middle; }}
 </style>
@@ -202,7 +246,40 @@ class DocumentExporter:
     </ol>
   </div>
   <div class="content">{html_body}</div>
-  <div class="doc-footer">Generado por <span>AutoDocs AI</span> · {datetime.utcnow().strftime('%Y-%m-%d')}</div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">{project_name}</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">{self.results.get('total_files', 0)}</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">{len(self.results.get('classes', []))}</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">{len(self.results.get('functions', []))}</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">{len(self.results.get('endpoints', []))}</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:{score_color}">{score}/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">{datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
 </div>
 </body>
 </html>"""

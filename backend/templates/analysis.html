@@ -86,6 +86,160 @@
             color: #0f172a;
         }
 
+        /* Tema oscuro */
+        html.dark body {
+            background: #0f1418;
+            color: #e2e8f0;
+        }
+
+        html.dark .glass {
+            background: rgba(15, 20, 24, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        html.dark .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
+        }
+
+        html.dark .quality-bar {
+            background: #1e293b;
+        }
+
+        /* Mejorar legibilidad de textos en modo oscuro */
+        html.dark .text-on-surface {
+            color: #f1f5f9 !important;
+        }
+
+        html.dark .text-on-surface-variant {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/60 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/70 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/50 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/40 {
+            color: #475569 !important;
+        }
+
+        html.dark .text-primary {
+            color: #38bdf8 !important;
+        }
+
+        html.dark .text-primary\/80 {
+            color: #7dd3fc !important;
+        }
+
+        html.dark .text-secondary {
+            color: #818cf8 !important;
+        }
+
+        html.dark .border-outline-variant\/20 {
+            border-color: rgba(148, 163, 184, 0.2) !important;
+        }
+
+        html.dark .border-outline-variant\/30 {
+            border-color: rgba(148, 163, 184, 0.3) !important;
+        }
+
+        html.dark .border-primary\/30 {
+            border-color: rgba(56, 189, 248, 0.3) !important;
+        }
+
+        html.dark .border-primary\/40 {
+            border-color: rgba(56, 189, 248, 0.4) !important;
+        }
+
+        html.dark .bg-primary\/15 {
+            background: rgba(56, 189, 248, 0.15) !important;
+        }
+
+        html.dark .bg-primary\/5 {
+            background: rgba(56, 189, 248, 0.05) !important;
+        }
+
+        html.dark .bg-surface-container\/50 {
+            background: rgba(30, 41, 59, 0.5) !important;
+        }
+
+        html.dark .bg-gray-100 {
+            background: #1e293b !important;
+        }
+
+        html.dark .text-gray-600 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        html.dark .border-green-200 {
+            border-color: #166534 !important;
+        }
+
+        html.dark .text-green-700 {
+            color: #4ade80 !important;
+        }
+
+        html.dark .bg-green-100 {
+            background: #14532d !important;
+        }
+
+        html.dark .border-yellow-200 {
+            border-color: #854d0e !important;
+        }
+
+        html.dark .text-yellow-700 {
+            color: #fbbf24 !important;
+        }
+
+        html.dark .bg-yellow-100 {
+            background: #713f12 !important;
+        }
+
+        html.dark .border-red-200 {
+            border-color: #991b1b !important;
+        }
+
+        html.dark .text-red-700 {
+            color: #f87171 !important;
+        }
+
+        html.dark .bg-red-100 {
+            background: #7f1d1d !important;
+        }
+
+        html.dark .text-purple-700 {
+            color: #c084fc !important;
+        }
+
+        html.dark .bg-purple-100 {
+            background: #581c87 !important;
+        }
+
+        html.dark .bg-blue-100 {
+            background: #1e3a8a !important;
+        }
+
+        html.dark .text-blue-700 {
+            color: #60a5fa !important;
+        }
+
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -219,10 +373,15 @@
                 <a href="/dashboard" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline flex items-center gap-1 font-code-md">
                     <span class="material-symbols-outlined text-sm">arrow_back</span> Volver al dashboard
                 </a>
-                <div class="flex gap-3" id="export-btns" style="display:none;">
-                    <button onclick="exportMd()" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">⬇ Markdown</button>
-                    <button onclick="exportHtml()" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">⬇ HTML</button>
-                    <button onclick="exportPdf()" class="px-5 py-2 glass glass-hover rounded-xl text-xs font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95">PDF</button>
+                <div class="flex gap-3">
+                    <button id="themeButton" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                    <div class="flex gap-3" id="export-btns" style="display:none;">
+                        <button onclick="exportMd()" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">⬇ Markdown</button>
+                        <button onclick="exportHtml()" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">⬇ HTML</button>
+                        <button onclick="exportPdf()" class="px-5 py-2 glass glass-hover rounded-xl text-xs font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95">PDF</button>
+                    </div>
                 </div>
             </header>
 
@@ -643,5 +802,6 @@
             loadProject();
         });
     </script>
+    <script src="/static/theme.js"></script>
 </body>
 </html>

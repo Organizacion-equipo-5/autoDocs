@@ -86,6 +86,104 @@
             color: #0f172a;
         }
 
+        /* Tema oscuro */
+        html.dark body {
+            background: #0f1418;
+            color: #e2e8f0;
+        }
+
+        html.dark .glass {
+            background: rgba(15, 20, 24, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        html.dark .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Mejorar legibilidad de textos en modo oscuro */
+        html.dark .text-on-surface {
+            color: #f1f5f9 !important;
+        }
+
+        html.dark .text-on-surface-variant {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/60 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/70 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/50 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/40 {
+            color: #475569 !important;
+        }
+
+        html.dark .text-primary {
+            color: #38bdf8 !important;
+        }
+
+        html.dark .text-primary\/80 {
+            color: #7dd3fc !important;
+        }
+
+        html.dark .text-secondary {
+            color: #818cf8 !important;
+        }
+
+        html.dark .border-outline-variant\/20 {
+            border-color: rgba(148, 163, 184, 0.2) !important;
+        }
+
+        html.dark .border-outline-variant\/30 {
+            border-color: rgba(148, 163, 184, 0.3) !important;
+        }
+
+        html.dark .border-primary\/30 {
+            border-color: rgba(56, 189, 248, 0.3) !important;
+        }
+
+        html.dark .border-primary\/40 {
+            border-color: rgba(56, 189, 248, 0.4) !important;
+        }
+
+        html.dark .bg-primary\/15 {
+            background: rgba(56, 189, 248, 0.15) !important;
+        }
+
+        html.dark .bg-primary\/5 {
+            background: rgba(56, 189, 248, 0.05) !important;
+        }
+
+        html.dark .bg-surface-container\/50 {
+            background: rgba(30, 41, 59, 0.5) !important;
+        }
+
+        html.dark .bg-gray-100 {
+            background: #1e293b !important;
+        }
+
+        html.dark .text-gray-600 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -189,6 +287,9 @@
                     <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="projects-count">Cargando...</p>
                 </div>
                 <div class="flex gap-4">
+                    <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
                     <button onclick="openUploadModal()" class="px-6 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all active:scale-95 hover:bg-primary/5">
                         <span class="material-symbols-outlined text-xl">upload</span>
                         Nuevo Proyecto
@@ -411,5 +512,6 @@
             loadProjects();
         });
     </script>
+    <script src="/static/theme.js"></script>
 </body>
 </html>

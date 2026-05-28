@@ -349,8 +349,10 @@ Este proyecto está desarrollado principalmente en **{lang}** y cuenta con
             diagram_path = self._generate_plantuml_diagram(use_cases_puml)
             if diagram_path:
                 use_case_diagram = (
-                    f"\n\n<img src=\"{diagram_path}\" alt=\"Diagrama de Casos de Uso\" "
-                    f"style=\"max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid #cbd5e1; border-radius: 8px;\">\n"
+                    f"\n\n<div style=\"margin: 1.5rem 0;\">"
+                    f"<img src=\"{diagram_path}\" alt=\"Diagrama de Casos de Uso\" "
+                    f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
+                    f"</div>\n"
                 )
 
         # Diagrama de infraestructura en PlantUML
@@ -382,8 +384,10 @@ cli --> routes
         diagram_path = self._generate_plantuml_diagram(infra_puml)
         if diagram_path:
             infra_diagram = (
-                f"\n\n<img src=\"{diagram_path}\" alt=\"Diagrama de Infraestructura\" "
-                f"style=\"max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid #cbd5e1; border-radius: 8px;\">\n"
+                f"\n\n<div style=\"margin: 1.5rem 0;\">"
+                f"<img src=\"{diagram_path}\" alt=\"Diagrama de Infraestructura\" "
+                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
+                f"</div>\n"
             )
 
         # Diagrama de clases en PlantUML
@@ -399,15 +403,30 @@ cli --> routes
             class_puml += '}\n'
         class_puml += "@enduml"
         
+        # Detectar clases "básicas" (sin métodos ni atributos)
+        basic_classes = [c for c in cls if not c.get("methods") and not c.get("attributes")]
+        basic_class_warning = ""
+        if basic_classes:
+            names = ", ".join(f"`{c.get('name', '?')}`" for c in basic_classes[:10])
+            extra = f" y {len(basic_classes) - 10} más" if len(basic_classes) > 10 else ""
+            basic_class_warning = (
+                f"\n\n> ⚠️ **Clases con información incompleta:** Las siguientes clases aparecen sin métodos ni atributos documentados: "
+                f"{names}{extra}. "
+                f"Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.\n"
+            )
+
         # Generar diagrama de clases
         class_diagram = ""
         if cls:
             diagram_path = self._generate_plantuml_diagram(class_puml)
             if diagram_path:
                 class_diagram = (
-                    f"\n\n<img src=\"{diagram_path}\" alt=\"Diagrama de Clases\" "
-                    f"style=\"max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid #cbd5e1; border-radius: 8px;\">\n"
+                    f"\n\n<div style=\"margin: 1.5rem 0;\">"
+                    f"<img src=\"{diagram_path}\" alt=\"Diagrama de Clases\" "
+                    f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
+                    f"</div>\n"
                 )
+            class_diagram += basic_class_warning
 
         return f"""## 2. Documentación de Arquitectura y Diseño
 
@@ -444,7 +463,7 @@ proyecto/
 
 ### 2.8 Insights de Arquitectura (IA)
 
-{ai_insights if ai_insights else "No se generaron insights de IA - configura OPENAI_API_KEY para habilitar esta función."}
+{ai_insights if ai_insights else "No se generaron insights de IA - configura GEMINI_API_KEY en el archivo .env para habilitar esta función."}
 """
 
     def _detect_patterns(self) -> str:
@@ -546,6 +565,10 @@ python app.py  # o npm run dev
                 out += f"##### {icon} `{ep.get('method')} {ep.get('path')}`\n\n"
                 out += f"- **Framework**: {ep.get('framework', 'Desconocido')}\n"
                 out += f"- **Archivo**: `{ep.get('file')}`\n\n"
+                # Mostrar descripción de IA si está disponible
+                ai_desc = ep.get("ai_description")
+                if ai_desc:
+                    out += f"> {ai_desc}\n\n"
                 out += "**Parámetros esperados:**\n\n"
                 method = ep.get("method", "GET")
                 if method in ("POST", "PUT", "PATCH"):
@@ -637,8 +660,10 @@ python app.py  # o npm run dev
             out += f"- **Hereda de:** {', '.join(c.get('bases', [])) or 'object'}\n"
             out += f"- **Métodos:** {len(c.get('methods', []))}\n"
             out += f"- **Documentada:** {'[OK] Sí' if c.get('docstring') else '[X] No'}\n\n"
-            if c.get("docstring"):
-                out += f"> {c['docstring']}\n\n"
+            # Mostrar descripción de IA o docstring
+            ai_desc = c.get("ai_description") or c.get("docstring")
+            if ai_desc:
+                out += f"> {ai_desc}\n\n"
             if c.get("methods"):
                 out += "**Métodos:**\n\n"
                 for m in c["methods"][:20]:
@@ -693,15 +718,20 @@ python app.py  # o npm run dev
                 out += f"- Async: {asyn}\n"
                 out += f"- Complejidad: {cx_icon} {cx}\n"
                 out += f"- Documentada: {doc_icon}\n\n"
+                # Mostrar descripción de IA o docstring
+                ai_desc = fn.get("ai_description") or fn.get("docstring")
+                if ai_desc:
+                    out += f"> {ai_desc}\n\n"
             out += "---\n\n"
 
-            # Detalle de funciones con docstring
+            # Detalle de funciones con docstring o descripción IA
             for fn in funcs:
-                if fn.get("docstring"):
+                ai_desc = fn.get("ai_description") or fn.get("docstring")
+                if ai_desc and fn.get("docstring"):
                     params_str = ", ".join(fn.get("params", []))
                     out += f"#### `{fn['name']}({params_str})`\n\n"
                     out += f"**Ubicación:** `{fn.get('file', 'desconocido')}`\n\n"
-                    out += f"> {fn['docstring']}\n\n"
+                    out += f"> {ai_desc}\n\n"
                     # Agregar ejemplo de código si está disponible
                     if fn.get("code_snippet"):
                         out += f"**Ejemplo de código:**\n\n```python\n{fn['code_snippet']}\n```\n\n"
