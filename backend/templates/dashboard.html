@@ -1,419 +1,631 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — AutoDocs AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #040d1a; --bg2: #060f22; --surface: #0a1628;
-      --border: #112240; --accent: #00d4ff; --accent2: #7c3aed;
-      --accent3: #10b981; --warn: #f59e0b; --danger: #ef4444;
-      --text: #ccd6f6; --muted: #8892b0; --white: #e6f1ff;
-      --mono: 'JetBrains Mono', monospace;
-      --sans: 'Inter', sans-serif;
-    }
-    body[data-theme="light"] {
-      --bg: #f5f5f5;
-      --bg2: #e8e8e8;
-      --surface: #ffffff;
-      --border: #d0d0d0;
-      --accent: #2563eb;
-      --accent2: #7c3aed;
-      --accent3: #059669;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --white: #ffffff;
-    }
-    body[data-theme="light"] .logo { color: #1f2937; }
-    body[data-theme="light"] .nav-item:hover { background: rgba(0,0,0,0.05); color: #1f2937; }
-    body[data-theme="light"] .user-info .name { color: #1f2937; }
-    body[data-theme="light"] .page-title h1 { color: #1f2937; }
-    body[data-theme="light"] .stat-val { color: #1f2937; }
-    body[data-theme="light"] .section-header h2 { color: #1f2937; }
-    body[data-theme="light"] .project-name { color: #1f2937; }
-    body[data-theme="light"] .project-stat span { color: #1f2937; }
-    body[data-theme="light"] .empty-state h3 { color: #1f2937; }
-    body[data-theme="light"] .modal h3 { color: #1f2937; }
-    body[data-theme="light"] input[type="text"], body[data-theme="light"] input[type="url"], body[data-theme="light"] textarea { color: #1f2937; }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; display: flex; min-height: 100vh; }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 240px; min-height: 100vh;
-      background: var(--bg2);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      padding: 1.5rem 1rem;
-      position: fixed; top: 0; left: 0; bottom: 0;
-    }
-    .logo { font-family: var(--mono); font-size: 0.95rem; color: var(--white); padding: 0.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.4rem; }
-    .logo span { color: var(--accent); }
-    .nav-item {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.7rem 0.8rem; border-radius: 8px;
-      color: var(--muted); text-decoration: none;
-      font-size: 0.9rem; transition: all 0.15s;
-      margin-bottom: 0.2rem; cursor: pointer; border: none; background: none; width: 100%; text-align: left;
-    }
-    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--white); }
-    .nav-item.active { background: rgba(0,212,255,0.08); color: var(--accent); }
-    .nav-section { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; padding: 1rem 0.8rem 0.5rem; }
-    .sidebar-bottom { margin-top: auto; }
-    .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; display: flex; align-items: center; gap: 0.75rem; }
-    .avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--bg); flex-shrink: 0; }
-    .user-info .name { font-size: 0.85rem; color: var(--white); font-weight: 600; }
-    .user-info .plan { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); }
-
-    /* MAIN */
-    .main { margin-left: 240px; flex: 1; padding: 2rem 2.5rem; }
-
-    /* TOPBAR */
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
-    .page-title h1 { font-size: 1.8rem; font-weight: 800; color: var(--white); }
-    .page-title p { color: var(--muted); font-size: 0.9rem; margin-top: 0.2rem; }
-    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.2rem; border-radius: 6px; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
-    .btn-primary { background: var(--accent); color: var(--bg); }
-    .btn-primary:hover { background: #33dcff; }
-
-    /* STATS CARDS */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; transition: border-color 0.2s; }
-    .stat-card:hover { border-color: rgba(59, 130, 246, 0.3); }
-    .stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-    .stat-card.blue::after { background: var(--accent); }
-    .stat-card.purple::after { background: var(--accent2); }
-    .stat-card.green::after { background: var(--accent3); }
-    .stat-card.yellow::after { background: var(--warn); }
-    .stat-label2 { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
-    .stat-val { font-size: 2.2rem; font-weight: 800; color: var(--white); line-height: 1; }
-    .stat-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; }
-    .stat-icon { position: absolute; top: 1.2rem; right: 1.2rem; font-size: 1.5rem; opacity: 0.4; }
-
-    /* PROJECTS GRID */
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
-    .section-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--white); }
-    .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
-    .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: all 0.2s; cursor: pointer; }
-    .project-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-2px); }
-    .project-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
-    .project-name { font-size: 1rem; font-weight: 700; color: var(--white); }
-    .project-desc { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
-    .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.6rem; border-radius: 100px; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; }
-    .badge.completed { background: rgba(16,185,129,0.1); color: var(--accent3); border: 1px solid rgba(16,185,129,0.2); }
-    .badge.analyzing { background: rgba(245,158,11,0.1); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
-    .badge.pending { background: rgba(136,146,176,0.1); color: var(--muted); border: 1px solid var(--border); }
-    .badge.error { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
-    .project-stats { display: flex; gap: 1rem; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem; }
-    .project-stat span { color: var(--white); }
-    .quality-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 0.75rem; overflow: hidden; }
-    .quality-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent3), var(--accent)); transition: width 1s ease; }
-
-    /* EMPTY STATE */
-    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
-    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
-    .empty-state h3 { color: var(--white); margin-bottom: 0.5rem; }
-
-    /* UPLOAD MODAL */
-    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(4,13,26,0.9); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
-    .modal-overlay.active { display: flex; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 500px; animation: fadeDown 0.2s ease; position: relative; }
-    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; }
-    .modal h3 { color: var(--white); margin-bottom: 0.25rem; font-size: 1.3rem; }
-    .modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
-    .form-group { margin-bottom: 1rem; }
-    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.3rem; font-family: var(--mono); }
-    input[type="text"], input[type="url"], textarea {
-      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-      padding: 0.65rem 1rem; color: var(--white); font-family: var(--mono); font-size: 0.85rem; outline: none; transition: border-color 0.2s;
-    }
-    input:focus, textarea:focus { border-color: var(--accent); }
-    .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 1rem; }
-    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(0,212,255,0.03); }
-    .upload-zone .icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .upload-zone p { color: var(--muted); font-size: 0.85rem; }
-    .upload-zone strong { color: var(--accent); }
-    @keyframes fadeDown { from{opacity:0;transform:translateY(-15px)} to{opacity:1;transform:translateY(0)} }
-    
-    /* LOADING MODAL */
-    .loading-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: rgba(4, 13, 26, 0.9);
-      backdrop-filter: blur(8px);
-      align-items: center;
-      justify-content: center;
-    }
-    .loading-modal.active { display: flex; }
-    .loading-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 3rem;
-      text-align: center;
-      animation: fadeIn 0.3s ease;
-    }
-    .loading-spinner {
-      width: 60px;
-      height: 60px;
-      border: 4px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      margin: 0 auto 1.5rem;
-      animation: spin 1s linear infinite;
-    }
-    .loading-text {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 0.5rem;
-    }
-    .loading-subtext {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-  </style>
-</head>
-<body>
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      Auto<span>Docs</span> AI
-    </div>
-    <div class="nav-section">Principal</div>
-    <a href="/dashboard" class="nav-item active"> Dashboard</a>
-    <a href="/projects" class="nav-item"> Proyectos</a>
-    <div class="nav-section">Herramientas</div>
-    <button class="nav-item" onclick="openUploadModal()">⬆ Nuevo proyecto</button>
-    <a href="#" class="nav-item"> Configuración</a>
-    <a href="/" class="nav-item" onclick="logout()">Cerrar sesión</a>
-    <div class="sidebar-bottom">
-      <div class="user-card">
-        <div class="avatar" id="user-avatar">U</div>
-        <div class="user-info">
-          <div class="name" id="user-name">Usuario</div>
-          <div class="plan">Plan Gratuito</div>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-    <div class="topbar">
-      <div class="page-title">
-        <h1>Dashboard</h1>
-        <p id="greeting">Bienvenido de vuelta</p>
-      </div>
-      <div style="display: flex; gap: 1rem; align-items: center;">
-        <button id="themeButton" class="btn btn-ghost" title="Cambiar tema">
-          <span id="themeIcon">☀️</span>
-        </button>
-        <button class="btn btn-primary" onclick="openUploadModal()"> Nuevo proyecto</button>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-card blue">
-        <div class="stat-icon"></div>
-        <div class="stat-label2">Proyectos</div>
-        <div class="stat-val" id="stat-projects">0</div>
-        <div class="stat-sub">Totales creados</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon"></div>
-        <div class="stat-label2">Completados</div>
-        <div class="stat-val" id="stat-completed">0</div>
-        <div class="stat-sub">Análisis listos</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon"></div>
-        <div class="stat-label2">Funciones</div>
-        <div class="stat-val" id="stat-functions">0</div>
-        <div class="stat-sub">Detectadas en total</div>
-      </div>
-      <div class="stat-card yellow">
-        <div class="stat-icon"></div>
-        <div class="stat-label2">Endpoints</div>
-        <div class="stat-val" id="stat-endpoints">0</div>
-        <div class="stat-sub">API documentadas</div>
-      </div>
-    </div>
-
-    <!-- PROJECTS -->
-    <div class="section-header">
-      <h2>Proyectos recientes</h2>
-    </div>
-    <div class="projects-grid" id="projects-grid">
-      <div class="empty-state" style="grid-column:1/-1;">
-        <div class="icon"></div>
-        <h3>Sin proyectos aún</h3>
-        <p>Sube tu primer proyecto para comenzar a generar documentación automática.</p>
-      </div>
-    </div>
-  </main>
-
-  <!-- UPLOAD MODAL -->
-  <div class="modal-overlay" id="uploadModal">
-    <div class="modal">
-      <button class="modal-close" onclick="closeUploadModal()">✕</button>
-      <h3>Nuevo proyecto</h3>
-      <p class="modal-sub">Sube un archivo ZIP o TAR.GZ con tu proyecto</p>
-      <div class="form-group">
-        <label>Nombre del proyecto</label>
-        <input type="text" id="proj-name" placeholder="Mi Proyecto Flask" />
-      </div>
-      <div class="form-group">
-        <label>Descripción (opcional)</label>
-        <input type="text" id="proj-desc" placeholder="Breve descripción del proyecto" />
-      </div>
-      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-        <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
-        <div class="icon"></div>
-        <p><strong>Haz clic para seleccionar</strong> o arrastra aquí</p>
-        <p style="margin-top:0.25rem;font-size:0.75rem;">ZIP, TAR.GZ, .py, .js hasta 50MB</p>
-      </div>
-      <div id="file-name" style="font-family:var(--mono);font-size:0.8rem;color:var(--accent);margin-bottom:1rem;display:none;"></div>
-      <div class="form-group">
-        <label>O ingresa URL de GitHub</label>
-        <input type="url" id="proj-github" placeholder="https://github.com/usuario/repositorio" />
-      </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:.75rem" onclick="createProject()">
-        Crear y analizar →
-      </button>
-    </div>
-  </div>
-
-  <!-- LOADING MODAL -->
-  <div class="loading-modal" id="loadingModal">
-    <div class="loading-content">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Analizando proyecto...</div>
-      <div class="loading-subtext">Procesando código y generando documentación</div>
-    </div>
-  </div>
-
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/';
-
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.name) {
-      document.getElementById('user-name').textContent = user.name;
-      document.getElementById('user-avatar').textContent = user.name[0].toUpperCase();
-      document.getElementById('greeting').textContent = `Bienvenido, ${user.name}`;
-    }
-
-    function authHeaders() {
-      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-    }
-
-    async function loadProjects() {
-      try {
-        const res = await fetch('/api/projects/', { headers: authHeaders() });
-        if (!res.ok) return;
-        const projects = await res.json();
-        renderStats(projects);
-        renderProjects(projects);
-      } catch(e) { console.error(e); }
-    }
-
-    function renderStats(projects) {
-      document.getElementById('stat-projects').textContent = projects.length;
-      const completed = projects.filter(p => p.status === 'completed').length;
-      document.getElementById('stat-completed').textContent = completed;
-      const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
-      document.getElementById('stat-functions').textContent = totalFuncs;
-      const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
-      document.getElementById('stat-endpoints').textContent = totalEp;
-    }
-
-    function renderProjects(projects) {
-      const grid = document.getElementById('projects-grid');
-      if (!projects.length) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">📂</div><h3>Sin proyectos aún</h3><p>Sube tu primer proyecto para comenzar.</p></div>`;
-        return;
-      }
-      grid.innerHTML = projects.map(p => {
-        const statusMap = { completed: 'completed', analyzing: 'analyzing', pending: 'pending', error: 'error' };
-        const statusLabel = { completed: '✓ Completado', analyzing: '⟳ Analizando', pending: '○ Pendiente', error: '✕ Error' };
-        const q = p.stats?.quality_score || 0;
-        const color = q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444';
-        return `<div class="project-card" onclick="window.location.href='/analysis/${p._id}'">
-          <div class="project-card-top">
-            <div>
-              <div class="project-name">${p.name}</div>
-              <div class="project-desc">${p.language || 'Desconocido'}</div>
-            </div>
-            <span class="badge ${statusMap[p.status] || 'pending'}">${statusLabel[p.status] || p.status}</span>
-          </div>
-          ${p.status === 'completed' ? `
-          <div style="font-size:.75rem;color:var(--muted);font-family:var(--mono);margin-bottom:.5rem;">Calidad: <span style="color:${color}">${q}/100</span></div>
-          <div class="quality-bar"><div class="quality-fill" style="width:${q}%;background:${color}"></div></div>
-          ` : ''}
-          <div class="project-stats">
-            <div>Archivos <span>${p.stats?.files || 0}</span></div>
-            <div>Funciones <span>${p.stats?.functions || 0}</span></div>
-            <div>Endpoints <span>${p.stats?.endpoints || 0}</span></div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    function openUploadModal() { document.getElementById('uploadModal').classList.add('active'); }
-    function closeUploadModal() { document.getElementById('uploadModal').classList.remove('active'); }
-    document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
-
-    let selectedFile = null;
-    function onFileSelect(e) {
-      selectedFile = e.target.files[0];
-      const el = document.getElementById('file-name');
-      el.textContent = '📦 ' + selectedFile.name;
-      el.style.display = 'block';
-    }
-
-    async function createProject() {
-      const name = document.getElementById('proj-name').value || 'Nuevo Proyecto';
-      const desc = document.getElementById('proj-desc').value;
-      const github = document.getElementById('proj-github').value;
-      const fd = new FormData();
-      fd.append('name', name);
-      fd.append('description', desc);
-      fd.append('github_url', github);
-      if (selectedFile) fd.append('file', selectedFile);
-      try {
-        const res = await fetch('/api/projects/', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: fd
-        });
-        const data = await res.json();
-        if (res.ok) {
-          closeUploadModal();
-          const modal = document.getElementById('loadingModal');
-          modal.classList.add('active');
-          await fetch(`/api/analysis/${data.id}/start`, { method: 'POST', headers: authHeaders() });
-          modal.classList.remove('active');
-          loadProjects();
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#001f2b",
+                        "tertiary-container": "#ffdbb7",
+                        "surface-tint": "#38bdf8",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#07006c",
+                        "secondary": "#818cf8",
+                        "primary": "#38bdf8",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary-container": "#613b00",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-variant": "#cbd5e1",
+                        "secondary-container": "#e0e7ff",
+                        "on-surface-variant": "#334155",
+                        "primary-fixed": "#bae6fd",
+                        "surface-container-highest": "#e2e8f0",
+                        "surface-dim": "#cbd5e1",
+                        "outline-variant": "#94a3b8",
+                        "on-surface": "#0f172a",
+                        "on-secondary-container": "#1e1b4b",
+                        "secondary-fixed": "#e0e7ff",
+                        "tertiary": "#7c5800",
+                        "primary-fixed-dim": "#7dd3fc",
+                        "background": "#f1f5f9",
+                        "primary-container": "#e0f2fe",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "surface-bright": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001e2c",
+                        "inverse-on-surface": "#eef2f5",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7d2fe",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#004c69",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "inverse-primary": "#7dd3fc",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-primary": "#ffffff",
+                        "outline": "#64748b",
+                        "surface-container-low": "#f8fafc",
+                        "surface": "#f1f5f9",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#1e293b"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
+                },
+            },
         }
-      } catch(e) { alert('Error al crear proyecto'); }
-    }
+    </script>
+    <style>
+        body {
+            background: #f1f5f9;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: #0f172a;
+        }
 
-    function logout() { localStorage.clear(); window.location.href = '/'; }
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
 
-    loadProjects();
-    setInterval(loadProjects, 8000);
-  </script>
-  <script src="/static/theme.js"></script>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transform: translate3d(0, 0, 0);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out;
+            will-change: transform, opacity;
+        }
+
+        .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+        }
+
+        .glow-cyan {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .glow-violet {
+            text-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
+        }
+
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(20px) translate3d(0,0,0);
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in, .animate-float, .glass-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+        }
+
+        .progress-ring { transform: rotate(-90deg); }
+
+        .tilt-card {
+            perspective: 1000px;
+        }
+
+        .quality-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+        }
+        .quality-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #10b981, #38bdf8);
+            transition: width 1s ease;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-anim { animation: fadeDown 0.2s ease; }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    <canvas id="particle-canvas"></canvas>
+    <div class="flex min-h-screen w-full relative z-10">
+        <!-- Sidebar -->
+        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
+            <div class="mb-12">
+                <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                </div>
+            </div>
+            <nav class="flex-1 flex flex-col gap-8">
+                <!-- Dashboard -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
+                    <span class="material-symbols-outlined text-primary text-2xl group-hover:glow-cyan">dashboard</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Dashboard
+                    </span>
+                </a>
+                <!-- Proyectos -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Proyectos
+                    </span>
+                </a>
+                <!-- Nuevo proyecto -->
+                <button class="group relative flex items-center justify-center hover:scale-110 transition-transform bg-transparent border-none cursor-pointer" onclick="openUploadModal()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">upload</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Nuevo proyecto
+                    </span>
+                </button>
+                <!-- Configuración -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="#">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">settings</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Configuración
+                    </span>
+                </a>
+                <!-- Cerrar sesión -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Cerrar sesión
+                    </span>
+                </a>
+            </nav>
+            <div class="mt-auto">
+                <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative">
+                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
+                <div>
+                    <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="greeting">Bienvenido de vuelta</p>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="openUploadModal()" class="px-6 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all active:scale-95 hover:bg-primary/5">
+                        <span class="material-symbols-outlined text-xl">upload</span>
+                        Nuevo Proyecto
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats and Quick Panel -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                <!-- Left: Stats Cards -->
+                <div class="xl:col-span-4 flex flex-col gap-8">
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.2s;">
+                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Proyectos</span>
+                                <span class="material-symbols-outlined text-primary">description</span>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-6xl font-bold glow-cyan tracking-tighter text-on-surface" id="stat-projects">0</div>
+                                <div class="text-on-surface-variant text-xs font-bold mb-2">Totales creados</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.3s;">
+                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Completados</span>
+                                <span class="material-symbols-outlined text-green-500">check_circle</span>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-6xl font-bold glow-cyan tracking-tighter text-on-surface" id="stat-completed">0</div>
+                                <div class="text-green-500 text-xs font-bold mb-2 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">trending_up</span> <span id="stat-completed-percent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.4s;">
+                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Funciones</span>
+                                <span class="material-symbols-outlined text-secondary">functions</span>
+                            </div>
+                            <div class="text-5xl font-bold mb-4 text-on-surface" id="stat-functions">0</div>
+                            <div class="text-xs text-on-surface-variant/50">Detectadas en total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Quick Stats & Progress -->
+                <div class="xl:col-span-8 flex flex-col gap-10">
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.5s;">
+                        <div class="glass rounded-3xl overflow-hidden glass-hover flex flex-col lg:flex-row items-center gap-8 p-8 card-interaction">
+                            <div class="relative w-24 h-24">
+                                <svg class="progress-ring w-24 h-24">
+                                    <circle class="text-surface-variant/30 stroke-current" cx="48" cy="48" fill="transparent" r="40" stroke-width="8"></circle>
+                                    <circle id="progress-circle" class="text-primary stroke-current" cx="48" cy="48" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke-width="8" style="filter: drop-shadow(0 0 8px rgba(56,189,248,0.6))"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center font-bold text-xl text-on-surface" id="progress-percent">0%</div>
+                            </div>
+                            <div>
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold block mb-1">Tasa de completitud</span>
+                                <div class="text-2xl font-semibold text-on-surface" id="progress-label">Sin proyectos</div>
+                                <div class="text-[10px] text-on-surface-variant/40 mt-1">Proyectos finalizados sobre el total</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-in" style="animation-delay: 0.6s;">
+                        <div class="glass p-6 rounded-2xl flex items-center gap-6 border-l-4 border-secondary hover:border-l-8 transition-all glass-hover group">
+                            <div class="text-4xl font-bold glow-violet group-hover:scale-110 transition-transform text-on-surface" id="stat-endpoints">0</div>
+                            <div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Endpoints</div>
+                                <div class="text-secondary text-sm">API documentadas</div>
+                            </div>
+                        </div>
+                        <div class="glass p-6 rounded-2xl flex items-center gap-6 border-l-4 border-primary hover:border-l-8 transition-all glass-hover group">
+                            <div class="text-4xl font-bold glow-cyan group-hover:scale-110 transition-transform text-on-surface" id="stat-active-projects">0</div>
+                            <div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Activos</div>
+                                <div class="text-primary text-sm">En análisis o pendientes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Projects (Cards Grid) -->
+            <section class="stagger-in mt-4" style="animation-delay: 0.7s;">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-bold tracking-tight text-on-surface">Proyectos Recientes</h2>
+                    <a class="text-primary text-xs uppercase tracking-widest font-bold hover:underline underline-offset-8 transition-all" href="/projects">Explorar Todo</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="projects-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
+        <div class="glass p-8 rounded-3xl w-full max-w-lg modal-anim relative border border-outline-variant/20 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold glow-cyan mb-1 text-on-surface">Nuevo proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Sube un archivo ZIP o TAR.GZ con tu proyecto</p>
+            <div class="form-group mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
+                <input type="text" id="proj-name" placeholder="Mi Proyecto Flask" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+            </div>
+            <div class="form-group mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción (opcional)</label>
+                <input type="text" id="proj-desc" placeholder="Breve descripción del proyecto" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+            </div>
+            <div class="upload-zone border-2 border-dashed border-outline-variant/30 rounded-xl p-6 text-center cursor-pointer hover:border-primary transition-colors mb-4" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
+                <span class="material-symbols-outlined text-3xl text-primary mb-2">cloud_upload</span>
+                <p class="text-on-surface-variant/60 text-sm"><strong class="text-primary">Haz clic para seleccionar</strong> o arrastra aquí</p>
+                <p class="text-on-surface-variant/40 text-xs mt-1">ZIP, TAR.GZ, .py, .js hasta 50MB</p>
+            </div>
+            <div id="file-name" class="font-mono text-xs text-primary mb-4 hidden"></div>
+            <div class="form-group mb-6">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">O ingresa URL de GitHub</label>
+                <input type="url" id="proj-github" placeholder="https://github.com/usuario/repositorio" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+            </div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-fixed-dim transition-colors active:scale-95 flex items-center justify-center gap-2" onclick="createProject()">
+                Crear y analizar <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="loadingModal">
+        <div class="glass p-10 rounded-3xl text-center modal-anim border border-outline-variant/20 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
+            <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin mx-auto mb-6"></div>
+            <p class="text-xl font-semibold text-on-surface">Analizando proyecto...</p>
+            <p class="text-on-surface-variant/50 text-sm mt-2">Procesando código y generando documentación</p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== LÓGICA ORIGINAL DEL DASHBOARD ====================
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/';
+
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            document.getElementById('sidebar-user-name').textContent = user.name;
+            document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
+            document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
+            document.getElementById('greeting').textContent = `Bienvenido, ${user.name}`;
+        }
+
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
+
+        async function loadProjects() {
+            try {
+                const res = await fetch('/api/projects/', { headers: authHeaders() });
+                if (!res.ok) return;
+                const projects = await res.json();
+                renderStats(projects);
+                renderProjects(projects);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderStats(projects) {
+            document.getElementById('stat-projects').textContent = projects.length;
+            const completed = projects.filter(p => p.status === 'completed').length;
+            document.getElementById('stat-completed').textContent = completed;
+            const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
+            document.getElementById('stat-functions').textContent = totalFuncs;
+            const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
+            document.getElementById('stat-endpoints').textContent = totalEp;
+            const active = projects.filter(p => p.status !== 'completed').length;
+            document.getElementById('stat-active-projects').textContent = active;
+
+            const percent = projects.length ? Math.round((completed / projects.length) * 100) : 0;
+            document.getElementById('progress-percent').textContent = percent + '%';
+            document.getElementById('stat-completed-percent').textContent = percent + '%';
+            const circle = document.getElementById('progress-circle');
+            const circumference = 251.2;
+            const offset = circumference - (percent / 100) * circumference;
+            circle.setAttribute('stroke-dashoffset', offset);
+            document.getElementById('progress-label').textContent = 
+                projects.length === 0 ? 'Sin proyectos' : completed === projects.length ? 'Todo completado' : `${completed} de ${projects.length} completados`;
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('projects-grid');
+            if (!projects.length) {
+                grid.innerHTML = `<div class="col-span-full glass p-12 rounded-3xl text-center text-on-surface-variant/50">
+                    <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
+                    <p class="text-lg font-semibold">Sin proyectos aún</p>
+                    <p class="text-sm">Sube tu primer proyecto para comenzar a generar documentación automática.</p>
+                </div>`;
+                return;
+            }
+            const statusMap = {
+                completed: { class: 'bg-green-100 text-green-700 border-green-200', label: 'Completado' },
+                analyzing: { class: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: 'Analizando' },
+                pending: { class: 'bg-gray-100 text-gray-600 border-gray-200', label: 'Pendiente' },
+                error: { class: 'bg-red-100 text-red-700 border-red-200', label: 'Error' }
+            };
+            grid.innerHTML = projects.map(p => {
+                const st = statusMap[p.status] || statusMap.pending;
+                const lang = p.language || 'Desconocido';
+                const q = p.stats?.quality_score || 0;
+                const color = q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444';
+                return `<div class="tilt-card">
+                    <div class="glass rounded-2xl p-6 glass-hover card-interaction cursor-pointer transition-all hover:shadow-md h-full" onclick="window.location.href='/analysis/${p._id}'">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                                    <span class="material-symbols-outlined text-xl">${p.status === 'completed' ? 'check_circle' : p.status === 'analyzing' ? 'sync' : 'pending'}</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-on-surface">${p.name}</h3>
+                                    <p class="text-xs text-on-surface-variant/60 font-mono">${lang}</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 ${st.class} text-[10px] font-bold uppercase rounded-full border">${st.label}</span>
+                        </div>
+                        ${p.status === 'completed' ? `
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs text-on-surface-variant">Calidad:</span>
+                            <span class="text-xs font-bold" style="color:${color}">${q}/100</span>
+                            <div class="flex-1 h-2 bg-surface-variant/30 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" style="width:${q}%;background:${color}"></div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="flex justify-between text-xs text-on-surface-variant/70 border-t border-outline-variant/10 pt-4 mt-4">
+                            <span>Archivos <strong class="text-on-surface">${p.stats?.files || 0}</strong></span>
+                            <span>Funciones <strong class="text-on-surface">${p.stats?.functions || 0}</strong></span>
+                            <span>Endpoints <strong class="text-on-surface">${p.stats?.endpoints || 0}</strong></span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            // Activar tilt sobre las nuevas tarjetas
+            initTilt();
+        }
+
+        function openUploadModal() { document.getElementById('uploadModal').classList.add('flex'); document.getElementById('uploadModal').classList.remove('hidden'); }
+        function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); document.getElementById('uploadModal').classList.remove('flex'); }
+        document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
+
+        let selectedFile = null;
+        function onFileSelect(e) {
+            selectedFile = e.target.files[0];
+            const el = document.getElementById('file-name');
+            el.textContent = '📦 ' + selectedFile.name;
+            el.classList.remove('hidden');
+        }
+
+        async function createProject() {
+            const name = document.getElementById('proj-name').value || 'Nuevo Proyecto';
+            const desc = document.getElementById('proj-desc').value;
+            const github = document.getElementById('proj-github').value;
+            const fd = new FormData();
+            fd.append('name', name);
+            fd.append('description', desc);
+            fd.append('github_url', github);
+            if (selectedFile) fd.append('file', selectedFile);
+            try {
+                const res = await fetch('/api/projects/', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: fd
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    closeUploadModal();
+                    const modal = document.getElementById('loadingModal');
+                    modal.classList.add('flex');
+                    modal.classList.remove('hidden');
+                    await fetch(`/api/analysis/${data.id}/start`, { method: 'POST', headers: authHeaders() });
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    loadProjects();
+                }
+            } catch(e) { alert('Error al crear proyecto'); }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        // ==================== PARTÍCULAS Y TILT SUAVE ====================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+        const particleCount = 80;
+        const repulsionRadius = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(129, 140, 248, 0.2)';
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < repulsionRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (repulsionRadius - distance) / repulsionRadius;
+                        this.x -= Math.cos(angle) * force * 2;
+                        this.y -= Math.sin(angle) * force * 2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    const d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - d/120)})`;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        function initTilt() {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                // Evitar múltiples listeners
+                if (card.hasTilt) return;
+                card.hasTilt = true;
+                card.addEventListener('mousemove', (e) => {
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 40;
+                    const rotateY = (centerX - x) / 40;
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animate();
+            initTilt();
+            loadProjects();
+            setInterval(loadProjects, 8000);
+        });
+    </script>
 </body>
 </html>
