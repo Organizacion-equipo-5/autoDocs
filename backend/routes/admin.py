@@ -1,7 +1,10 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.db import get_db
 from functools import wraps
+from werkzeug.security import generate_password_hash
+from datetime import datetime
+import uuid
 import re
 
 admin_bp = Blueprint('admin', __name__)
@@ -61,6 +64,203 @@ def extract_technical_terms(text: str, known_names=None, limit=12):
 
 def common_terms(keywords, technical):
     return [term for term in keywords if term in technical][:12]
+
+
+def find_user_by_identifier(db, identifier):
+    if not identifier:
+        return None
+    user = db.users.find_one({"email": identifier})
+    if user:
+        return user
+    return db.users.find_one({"_id": identifier})
+
+
+@admin_bp.route('/users', methods=['GET'])
+@jwt_required()
+@admin_required
+def admin_list_users():
+    db = get_db()
+    users = list(db.users.find({}, {"password": 0}))
+    return jsonify([
+        {
+            "_id": user.get('_id'),
+            "name": user.get('name'),
+            "email": user.get('email'),
+            "role": user.get('role', 'user'),
+            "created_at": user.get('created_at'),
+            "projects_count": user.get('projects_count', 0)
+        }
+        for user in users
+    ]), 200
+
+
+@admin_bp.route('/users', methods=['POST'])
+@jwt_required()
+@admin_required
+def admin_create_user():
+    data = request.get_json() or {}
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role', 'user')
+
+    if not name or not email or not password:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    db = get_db()
+    if db.users.find_one({"email": email}):
+        return jsonify({"error": "Email already registered"}), 409
+
+    user = {
+        "_id": str(uuid.uuid4()),
+        "name": name,
+        "email": email,
+        "password": generate_password_hash(password),
+        "created_at": datetime.utcnow().isoformat(),
+        "role": role,
+        "projects_count": 0,
+        "plan": "free"
+    }
+    db.users.insert_one(user)
+    return jsonify({
+        "_id": user['_id'],
+        "name": user['name'],
+        "email": user['email'],
+        "role": user['role'],
+        "created_at": user['created_at'],
+        "projects_count": user['projects_count']
+    }), 201
+
+
+@admin_bp.route('/users/<user_id>', methods=['PUT'])
+@jwt_required()
+@admin_required
+def admin_update_user(user_id):
+    data = request.get_json() or {}
+    db = get_db()
+    existing = db.users.find_one({"_id": user_id})
+    if not existing:
+        return jsonify({"error": "User not found"}), 404
+
+    update = {}
+    if data.get('name'):
+        update['name'] = data.get('name')
+    if data.get('email'):
+        if db.users.find_one({"email": data['email'], "_id": {"$ne": user_id}}):
+            return jsonify({"error": "Email already registered"}), 409
+        update['email'] = data.get('email')
+    if data.get('role'):
+        update['role'] = data.get('role')
+    if data.get('password'):
+        update['password'] = generate_password_hash(data.get('password'))
+
+    if update:
+        db.users.update_one({"_id": user_id}, {"$set": update})
+    return jsonify({"message": "User updated"}), 200
+
+
+@admin_bp.route('/users/<user_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def admin_delete_user(user_id):
+    db = get_db()
+    result = db.users.delete_one({"_id": user_id})
+    if result.deleted_count == 0:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify({"message": "User deleted"}), 200
+
+
+@admin_bp.route('/projects', methods=['GET'])
+@jwt_required()
+@admin_required
+def admin_list_projects():
+    db = get_db()
+    users = list(db.users.find({}, {"_id": 1, "name": 1}))
+    user_map = {user['_id']: user['name'] for user in users}
+    projects = list(db.projects.find({}))
+    return jsonify([
+        {
+            "_id": project.get('_id'),
+            "name": project.get('name'),
+            "owner": user_map.get(project.get('user_id'), 'Desconocido'),
+            "user_id": project.get('user_id'),
+            "language": project.get('language'),
+            "status": project.get('status'),
+            "quality_score": project.get('stats', {}).get('quality_score') if project.get('stats') else None,
+            "created_at": project.get('created_at')
+        }
+        for project in projects
+    ]), 200
+
+
+@admin_bp.route('/projects', methods=['POST'])
+@jwt_required()
+@admin_required
+def admin_create_project():
+    data = request.get_json() or {}
+    name = data.get('name')
+    owner = data.get('owner')
+    language = data.get('language', 'Unknown')
+    status = data.get('status', 'pending')
+
+    if not name or not owner:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    db = get_db()
+    user = find_user_by_identifier(db, owner)
+    if not user:
+        return jsonify({"error": "Owner user not found"}), 404
+
+    project = {
+        "_id": str(uuid.uuid4()),
+        "name": name,
+        "user_id": user['_id'],
+        "language": language,
+        "status": status,
+        "created_at": datetime.utcnow().isoformat(),
+        "stats": {}
+    }
+    db.projects.insert_one(project)
+    return jsonify({"message": "Project created", "project": project}), 201
+
+
+@admin_bp.route('/projects/<project_id>', methods=['PUT'])
+@jwt_required()
+@admin_required
+def admin_update_project(project_id):
+    data = request.get_json() or {}
+    db = get_db()
+    project = db.projects.find_one({"_id": project_id})
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+
+    update = {}
+    if data.get('name'):
+        update['name'] = data.get('name')
+    if data.get('owner'):
+        user = find_user_by_identifier(db, data.get('owner'))
+        if not user:
+            return jsonify({"error": "Owner user not found"}), 404
+        update['user_id'] = user['_id']
+    if data.get('language'):
+        update['language'] = data.get('language')
+    if data.get('status'):
+        update['status'] = data.get('status')
+
+    if update:
+        db.projects.update_one({"_id": project_id}, {"$set": update})
+    return jsonify({"message": "Project updated"}), 200
+
+
+@admin_bp.route('/projects/<project_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def admin_delete_project(project_id):
+    db = get_db()
+    result = db.projects.delete_one({"_id": project_id})
+    if result.deleted_count == 0:
+        return jsonify({"error": "Project not found"}), 404
+    return jsonify({"message": "Project deleted"}), 200
 
 
 @admin_bp.route('/overview', methods=['GET'])

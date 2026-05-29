@@ -53,7 +53,7 @@
             --color-surface-container-high: #252b2e;
             --color-on-surface: #dee3e8;
             --color-on-surface-variant: #bdc8d1;
-            --color-primary: #8ed5ff;
+            --color-primary: #39b2f8;
             --color-secondary: #c0c1ff;
             --color-outline-variant: #3e484f;
             --color-error: #ffb4ab;
@@ -419,10 +419,23 @@
                 <div class="mb-4">
                     <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
                     <div class="relative">
-                        <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                        <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" oninput="checkPasswordStrength(this.value)" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
                         <button type="button" onclick="togglePassword('reg-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
                             <span class="material-symbols-outlined">visibility</span>
                         </button>
+                    </div>
+                    <!-- Indicador de fortaleza de contraseña -->
+                    <div id="pwd-strength-bar" class="hidden mt-2">
+                        <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
+                            <div id="pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                        </div>
+                        <p id="pwd-strength-label" class="text-xs mt-1 font-semibold"></p>
+                        <ul id="pwd-requirements" class="text-xs mt-1 space-y-0.5 text-on-surface-variant/70">
+                            <li id="req-length">✗ Mínimo 8 caracteres</li>
+                            <li id="req-upper">✗ Al menos 1 mayúscula</li>
+                            <li id="req-lower">✗ Al menos 1 minúscula</li>
+                            <li id="req-number">✗ Al menos 1 número</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="text-error text-xs font-code-md mb-2 hidden" id="reg-error">Error al registrar. Intenta de nuevo.</div>
@@ -512,8 +525,52 @@
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 succEl.classList.remove('hidden');
-                setTimeout(() => window.location.href = '/dashboard', 1000);
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => window.location.href = redirectUrl, 1000);
             } catch { errEl.classList.remove('hidden'); }
+        }
+
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('pwd-strength-bar');
+            const fill = document.getElementById('pwd-strength-fill');
+            const label = document.getElementById('pwd-strength-label');
+
+            if (!password) { bar.classList.add('hidden'); return; }
+            bar.classList.remove('hidden');
+
+            const hasLength = password.length >= 8;
+            const hasUpper  = /[A-Z]/.test(password);
+            const hasLower  = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            const mark = (id, ok) => {
+                const el = document.getElementById(id);
+                el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
+                el.style.color = ok ? 'var(--md-sys-color-tertiary, #4caf50)' : '';
+            };
+            mark('req-length', hasLength);
+            mark('req-upper',  hasUpper);
+            mark('req-lower',  hasLower);
+            mark('req-number', hasNumber);
+
+            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+
+            if (score <= 1) {
+                fill.style.width = '25%';
+                fill.style.background = '#ef4444';
+                label.textContent = 'Contraseña débil';
+                label.style.color = '#ef4444';
+            } else if (score === 2 || score === 3) {
+                fill.style.width = '60%';
+                fill.style.background = '#f97316';
+                label.textContent = 'Contraseña media';
+                label.style.color = '#f97316';
+            } else {
+                fill.style.width = '100%';
+                fill.style.background = '#22c55e';
+                label.textContent = 'Contraseña segura';
+                label.style.color = '#22c55e';
+            }
         }
 
         async function handleRegister() {
@@ -523,6 +580,13 @@
             const errEl = document.getElementById('reg-error');
             const succEl = document.getElementById('reg-success');
             errEl.classList.add('hidden');
+
+            // Validación de contraseña
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                errEl.textContent = 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
+                errEl.classList.remove('hidden');
+                return;
+            }
             try {
                 const res = await fetch('/api/auth/register', {
                     method: 'POST',
@@ -534,7 +598,8 @@
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 succEl.classList.remove('hidden');
-                setTimeout(() => window.location.href = '/dashboard', 1000);
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => window.location.href = redirectUrl, 1000);
             } catch { errEl.classList.remove('hidden'); }
         }
 

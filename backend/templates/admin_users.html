@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Usuarios — AutoDocs AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <style>
+    /* Minimal styles copied from admin_dashboard to match theme */
+    :root{--bg:#040d1a;--bg2:#060f22;--surface:#0a1628;--border:#112240;--accent:#00d4ff;--accent2:#7c3aed;--text:#ccd6f6;--muted:#8892b0;--white:#e6f1ff;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;min-height:100vh;margin:0}
+    .sidebar{width:260px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;position:fixed}
+    .logo{font-family:var(--mono);font-size:.95rem;color:var(--white);margin-bottom:2rem}
+    .nav-item{display:block;color:var(--muted);padding:.6rem;border-radius:8px;text-decoration:none;margin-bottom:.35rem}
+    .nav-item.active{background:rgba(0,212,255,0.08);color:var(--accent)}
+    .main{margin-left:260px;flex:1;padding:2rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+    .table-overflow{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th,td{padding:.7rem .8rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
+    th{color:var(--muted);font-family:var(--mono);font-size:.75rem}
+    .btn{background:var(--accent);color:var(--bg);padding:.6rem .9rem;border-radius:8px;border:none;cursor:pointer}
+    .table-button{background:rgba(255,255,255,0.04);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.4rem .6rem;cursor:pointer}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,13,26,0.85);align-items:center;justify-content:center}
+    .modal-overlay.active{display:flex}
+    .modal{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1rem;width:min(720px,96%)}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">Auto<span style="color:var(--accent)">Docs</span> AI</div>
+    <a href="/admin" class="nav-item">Overview</a>
+    <a href="/admin/users" class="nav-item active">Usuarios</a>
+    <a href="/admin/projects" class="nav-item">Proyectos</a>
+    <a href="/admin/documents" class="nav-item">Análisis</a>
+    <div style="margin-top:auto"><a href="/" class="nav-item" onclick="logout()">Cerrar sesión</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin:0">Usuarios</h2>
+        <button class="btn" onclick="openModal('user')">Nuevo usuario</button>
+      </div>
+      <div class="table-overflow">
+        <table>
+          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Proyectos</th><th>Creado</th><th>Acciones</th></tr></thead>
+          <tbody id="table-users"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div id="adminModal" class="modal-overlay">
+    <div class="modal">
+      <button style="float:right" onclick="closeModal()">✕</button>
+      <h3 id="modal-title">Nuevo usuario</h3>
+      <div id="modal-content"></div>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+        <button class="table-button" onclick="closeModal()">Cancelar</button>
+        <button class="btn" id="modal-submit" onclick="submitModal()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token'); if(!token) window.location.href = '/';
+    const user = JSON.parse(localStorage.getItem('user')||'{}'); if(user.role!=='admin'&&user.role!=='superadmin') window.location.href='/dashboard';
+    function authHeaders(){return {'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}}
+    let usersData = [];
+    let currentModalType=null,currentModalId=null;
+
+    function openModal(type,item=null){currentModalType=type;currentModalId=item?item.id:null;document.getElementById('modal-title').textContent=item? 'Editar usuario':'Nuevo usuario';
+      const content=document.getElementById('modal-content');content.innerHTML='';
+      content.innerHTML += `<label>Nombre</label><input id="modal-name" value="${item?item.name:''}" />`;
+      content.innerHTML += `<label>Email</label><input id="modal-email" value="${item?item.email:''}" />`;
+      content.innerHTML += `<label>Rol</label><select id="modal-role"><option value="user">user</option><option value="admin">admin</option><option value="superadmin">superadmin</option></select>`;
+      document.getElementById('modal-role').value = item?item.role||'user':'user';
+      content.innerHTML += `<label>Contraseña</label><input id="modal-password" type="password" placeholder="Dejar en blanco para no cambiar"/>`;
+      document.getElementById('adminModal').classList.add('active');
+    }
+    function closeModal(){document.getElementById('adminModal').classList.remove('active');currentModalType=null;currentModalId=null}
+
+    async function submitModal(){const data={};data.name=document.getElementById('modal-name').value;data.email=document.getElementById('modal-email').value;data.role=document.getElementById('modal-role').value;const pwd=document.getElementById('modal-password').value;if(pwd) data.password=pwd;const url=`/api/admin/users${currentModalId?'/'+currentModalId:''}`;const method=currentModalId?'PUT':'POST';const res=await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(data)});if(!res.ok){alert('Error al guardar');return;}closeModal();loadUsersTable();}
+
+    async function loadUsersTable(){try{const res=await fetch('/api/admin/users',{headers:authHeaders()});if(!res.ok) return;usersData=await res.json();document.getElementById('table-users').innerHTML = usersData.map(u=>`<tr><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td><td>${u.projects_count}</td><td>${u.created_at?new Date(u.created_at).toLocaleDateString():'-'}</td><td><button class="table-button" onclick='openModal("user", ${JSON.stringify(u).replace(/'/g,"\\'")})'>Editar</button> <button class="table-button" onclick="deleteRecord('user','${u.id}')">Eliminar</button></td></tr>`).join('');}catch(e){console.error(e)}}
+
+    async function deleteRecord(type,id){if(!confirm('¿Eliminar?')) return;const res=await fetch(`/api/admin/${type==='user'?'users':type==='project'?'projects':'documents'}/${id}`,{method:'DELETE',headers:authHeaders()});if(!res.ok){alert('Error');return;}loadUsersTable();}
+
+    function logout(){localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='/'}
+
+    loadUsersTable();
+  </script>
+</body>
+</html>

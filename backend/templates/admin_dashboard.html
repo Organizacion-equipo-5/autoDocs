@@ -4,309 +4,414 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard — AutoDocs AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #040d1a; --bg2: #060f22; --surface: #0a1628;
-      --border: #112240; --accent: #00d4ff; --accent2: #7c3aed;
-      --accent3: #10b981; --warn: #f59e0b; --danger: #ef4444;
-      --text: #ccd6f6; --muted: #8892b0; --white: #e6f1ff;
-      --mono: 'Space Mono', monospace; --sans: 'Syne', sans-serif;
+    /* ====== TEMA OSCURO (por defecto) ====== */
+    :root, body[data-theme="dark"] {
+      --color-background: #0f1418;
+      --color-surface: rgba(27,32,36,0.4);
+      --color-surface-container: #1b2024;
+      --color-surface-container-high: #252b2e;
+      --color-on-surface: #dee3e8;
+      --color-on-surface-variant: #bdc8d1;
+      --color-primary: #8ed5ff;
+      --color-secondary: #c0c1ff;
+      --color-outline-variant: #3e484f;
+      --color-error: #ffb4ab;
+      --color-green-accent: #10b981;
+      --color-tertiary: #ffc176;
+      --glass-border: rgba(123,208,255,0.1);
+      --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+      --glass-hover-border: rgba(123,208,255,0.3);
+      --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+      --particle-color-1: rgba(142,213,255,0.4);
+      --particle-color-2: rgba(192,193,255,0.2);
+      --particle-line: rgba(142,213,255,0.12);
     }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); display: flex; min-height: 100vh; }
-    .sidebar { width: 260px; min-height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; bottom: 0; }
-    .logo { font-family: var(--mono); font-size: 0.95rem; color: var(--white); padding: 0.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.4rem; }
-    .logo span { color: var(--accent); }
-    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.9rem; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; margin-bottom: 0.35rem; }
-    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--white); }
-    .nav-item.active { background: rgba(0,212,255,0.08); color: var(--accent); }
-    .nav-section { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; padding: 1rem 0.8rem 0.5rem; }
-    .sidebar-bottom { margin-top: auto; }
-    .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem; display: flex; align-items: center; gap: 0.75rem; }
-    .avatar { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--bg); flex-shrink: 0; }
-    .user-info .name { font-size: 0.92rem; color: var(--white); font-weight: 700; }
-    .user-info .plan { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); }
-    .main { margin-left: 260px; flex: 1; padding: 2rem 2.5rem; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; gap: 1rem; }
-    .page-title h1 { font-size: 1.9rem; font-weight: 800; color: var(--white); }
-    .page-title p { color: var(--muted); font-size: 0.95rem; margin-top: 0.35rem; }
-    .btn { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.7rem 1.2rem; border-radius: 8px; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
-    .btn-primary { background: var(--accent); color: var(--bg); }
-    .btn-primary:hover { background: #33dcff; }
-    .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem 1.4rem; position: relative; overflow: hidden; }
-    .stat-card .stat-icon { position: absolute; top: 1.2rem; right: 1.2rem; font-size: 1.4rem; opacity: 0.22; }
-    .stat-label { font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.8rem; }
-    .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--white); }
-    .stat-text { font-size: 0.85rem; color: var(--muted); margin-top: 0.6rem; }
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; gap: 1rem; }
-    .section-header h2 { font-size: 1.15rem; font-weight: 700; color: var(--white); }
-    .section-header p { color: var(--muted); font-size: 0.9rem; }
-    .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem; }
-    .card h3 { font-size: 1rem; margin-bottom: 1rem; color: var(--white); }
-    .card table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    .card th, .card td { padding: 0.8rem 0.85rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .card th { color: var(--muted); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
-    .card td { color: var(--text); }
-    .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-family: var(--mono); font-weight: 700; }
-    .badge.completed { background: rgba(16,185,129,0.12); color: var(--accent3); border: 1px solid rgba(16,185,129,0.18); }
-    .badge.pending { background: rgba(136,146,176,0.12); color: var(--muted); border: 1px solid rgba(136,146,176,0.18); }
-    .badge.error { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.18); }
-    .pill { display: inline-flex; gap: 0.4rem; align-items: center; padding: 0.35rem 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.04); color: var(--muted); font-size: 0.78rem; }
-    .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
-    .tag { background: rgba(0,212,255,0.08); color: var(--accent); padding: 0.45rem 0.85rem; border-radius: 999px; font-size: 0.82rem; }
-    .table-overflow { overflow-x: auto; }
-    .data-pill { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.04); border-radius: 999px; color: var(--text); padding: 0.45rem 0.75rem; margin: 0.25rem 0.15rem 0 0; font-size: 0.82rem; }
-    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .analytics-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 1rem; }
-    .analytics-card span { display: block; font-size: 0.95rem; color: var(--muted); margin-bottom: 0.45rem; }
-    .analytics-card strong { display: block; font-size: 1.35rem; color: var(--white); }
-    .loading { text-align: center; color: var(--muted); padding: 2rem 0; }
-    @media(max-width: 1100px) { .stats-row { grid-template-columns: repeat(2, minmax(0,1fr)); } .grid-2 { grid-template-columns: 1fr; } .main { padding: 1.5rem; margin-left: 0; } .sidebar { position: relative; width: 100%; min-height: auto; } }
+    body[data-theme="light"] {
+      --color-background: #f1f5f9;
+      --color-surface: rgba(255,255,255,0.7);
+      --color-surface-container: #ffffff;
+      --color-surface-container-high: #e2e8f0;
+      --color-on-surface: #0f172a;
+      --color-on-surface-variant: #334155;
+      --color-primary: #38bdf8;
+      --color-secondary: #818cf8;
+      --color-outline-variant: #cbd5e1;
+      --color-error: #ba1a1a;
+      --color-green-accent: #10b981;
+      --color-tertiary: #7c5800;
+      --glass-border: rgba(0,0,0,0.04);
+      --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      --glass-hover-border: rgba(56,189,248,0.3);
+      --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+      --particle-color-1: rgba(56,189,248,0.25);
+      --particle-color-2: rgba(129,140,248,0.2);
+      --particle-line: rgba(56,189,248,0.12);
+    }
+    body {
+      background: var(--color-background);
+      color: var(--color-on-surface);
+      font-family: 'Geist', sans-serif;
+      transition: background 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+    #particle-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .glass {
+      background: var(--color-surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .glass-hover:hover {
+      border-color: var(--glass-hover-border);
+      box-shadow: var(--glass-hover-shadow);
+    }
+    .glass input,
+    .glass select,
+    .glass textarea {
+      color: #0f1418;
+    }
+    .sidebar {
+      background: var(--color-surface-container);
+      backdrop-filter: blur(8px);
+      border-right: 1px solid var(--glass-border);
+    }
+    .btn-primary {
+      background: var(--color-primary);
+      color: #0f1418;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: scale(0.98);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+    .badge.completed { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .badge.pending { background: rgba(136,146,176,0.2); color: var(--color-on-surface-variant); border: 1px solid rgba(136,146,176,0.2); }
+    .badge.error { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .modal-anim { animation: fadeDown 0.2s ease; }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .action-icon {
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      border-radius: 0.375rem;
+    }
+    .action-icon:hover { background: var(--color-outline-variant); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
   </style>
 </head>
-<body>
-  <aside class="sidebar">
-    <div class="logo">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      Auto<span>Docs</span> AI
+<body data-theme="dark">
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Sidebar -->
+  <aside class="sidebar fixed left-0 top-0 bottom-0 w-72 p-5 flex flex-col z-20">
+    <div class="flex items-center gap-2 font-mono text-xl font-bold mb-8">
+      <span class="material-symbols-outlined text-primary">terminal</span>
+      Auto<span class="text-primary">Docs</span> AI
     </div>
-    <div class="nav-section">Principal</div>
-    <a href="/dashboard" class="nav-item">Dashboard</a>
-    <a href="/admin" class="nav-item active">Admin</a>
-    <a href="/projects" class="nav-item">Proyectos</a>
-    <div class="nav-section">Gestión</div>
-    <a href="#users-section" class="nav-item">Usuarios</a>
-    <a href="#analysis-section" class="nav-item">Análisis</a>
-    <a href="#projects-section" class="nav-item">Proyectos</a>
-    <a href="/" class="nav-item" onclick="logout()">Cerrar sesión</a>
-    <div class="sidebar-bottom">
-      <div class="user-card">
-        <div class="avatar" id="user-avatar">A</div>
-        <div class="user-info">
-          <div class="name" id="user-name">Administrador</div>
-          <div class="plan" id="user-role">Administrador</div>
+    <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mb-3">Principal</div>
+
+    <a href="/perfil" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all">Perfil</a>
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-primary bg-primary/10 transition-all"> Admin</a>
+    
+    <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mt-6 mb-3">Gestión</div>
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all" onclick="scrollToSection('users')"> Usuarios</a>
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all" onclick="scrollToSection('projects')"> Proyectos</a>
+    <div class="flex-1"></div>
+    <a href="/perfil" class="glass p-3 rounded-2xl mt-4 block hover:no-underline">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background" id="user-avatar">A</div>
+        <div>
+          <div class="font-bold text-sm" id="user-name">Administrador</div>
+          <div class="text-xs text-on-surface-variant/70" id="user-role">Admin</div>
         </div>
       </div>
-    </div>
+    </a>
+    <button onclick="logout()" class="mt-4 flex items-center gap-2 justify-center w-full py-2 rounded-xl border border-outline-variant text-sm text-on-surface-variant hover:text-error transition-all">Cerrar sesión</button>
   </aside>
 
-  <main class="main">
-    <div class="topbar">
-      <div class="page-title">
-        <h1>Panel de Administrador</h1>
-        <p>Supervisa usuarios, proyectos y análisis de documentación desde un lugar central.</p>
+  <!-- Main content -->
+  <main class="ml-72 p-8 relative z-10">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-4xl font-extrabold tracking-tight">Panel de Administrador</h1>
+        <p class="text-on-surface-variant/60">Supervisión total de usuarios, proyectos y análisis</p>
       </div>
-      <button class="btn btn-primary" onclick="window.location.href='/dashboard'">Ver Dashboard</button>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-card blue">
-        <div class="stat-icon">👥</div>
-        <div class="stat-label">Usuarios registrados</div>
-        <div class="stat-value" id="stat-users">0</div>
-        <div class="stat-text">Usuarios con cuenta activa</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">📁</div>
-        <div class="stat-label">Proyectos</div>
-        <div class="stat-value" id="stat-projects">0</div>
-        <div class="stat-text">Proyectos subidos</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">✅</div>
-        <div class="stat-label">Completados</div>
-        <div class="stat-value" id="stat-completed">0</div>
-        <div class="stat-text">Análisis terminados</div>
-      </div>
-      <div class="stat-card yellow">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-label">Calidad media</div>
-        <div class="stat-value" id="stat-quality">0</div>
-        <div class="stat-text">Score promedio de documentación</div>
+      <div class="flex gap-3">
+        <button id="themeButton" class="glass p-2 rounded-full w-10 h-10 flex items-center justify-center">
+          <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+        </button>
       </div>
     </div>
 
-    <div class="section-header">
-      <h2>Resumen de análisis</h2>
-      <p>Palabras clave, términos técnicos y coincidencias extraídas de la documentación generada.</p>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Usuarios registrados</span><span class="material-symbols-outlined text-primary/40">group</span></div><div class="text-3xl font-bold mt-2" id="stat-users">0</div></div>
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Proyectos totales</span><span class="material-symbols-outlined text-primary/40">folder</span></div><div class="text-3xl font-bold mt-2" id="stat-projects">0</div></div>
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Completados</span><span class="material-symbols-outlined text-green-accent/40">check_circle</span></div><div class="text-3xl font-bold mt-2" id="stat-completed">0</div></div>
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Calidad media</span><span class="material-symbols-outlined text-tertiary/40">star</span></div><div class="text-3xl font-bold mt-2" id="stat-quality">0</div></div>
     </div>
 
-    <div class="analytics-grid" id="analysis-grid">
-      <div class="analytics-card">
-        <span>Total de documentos analizados</span>
-        <strong id="doc-count">0</strong>
+    <!-- Análisis rápido -->
+    <div class="glass rounded-2xl p-6 mb-10">
+      <h2 class="text-xl font-bold mb-4">Análisis de documentación</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div><div class="text-on-surface-variant/60 text-sm">Documentos</div><div class="text-2xl font-bold" id="doc-count">0</div></div>
+        <div><div class="text-on-surface-variant/60 text-sm">Palabras clave</div><div class="text-2xl font-bold" id="keyword-count">0</div></div>
+        <div><div class="text-on-surface-variant/60 text-sm">Términos técnicos</div><div class="text-2xl font-bold" id="technical-count">0</div></div>
+        <div><div class="text-on-surface-variant/60 text-sm">Coincidencias</div><div class="text-2xl font-bold" id="matching-count">0</div></div>
       </div>
-      <div class="analytics-card">
-        <span>Palabras clave</span>
-        <strong id="keyword-count">0</strong>
-      </div>
-      <div class="analytics-card">
-        <span>Términos técnicos</span>
-        <strong id="technical-count">0</strong>
-      </div>
-      <div class="analytics-card">
-        <span>Coincidencias</span>
-        <strong id="matching-count">0</strong>
-      </div>
+      <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
     </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3>Usuarios registrados</h3>
-        <div class="table-overflow">
-          <table>
-            <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Proyectos</th><th>Creado</th></tr></thead>
+    <!-- Tabla de Usuarios con CRUD -->
+    <div id="users-section" class="mb-12">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold"> Usuarios</h2>
+        <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo usuario</button>
+      </div>
+      <div class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="border-b border-outline-variant/30 bg-surface-container/30">
+              <tr class="text-on-surface-variant/70 text-sm">
+                <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
+              </tr>
+            </thead>
             <tbody id="users-table"></tbody>
           </table>
         </div>
       </div>
-      <div class="card">
-        <h3>Proyectos recientes</h3>
-        <div class="table-overflow">
-          <table>
-            <thead><tr><th>Proyecto</th><th>Propietario</th><th>Lenguaje</th><th>Estado</th><th>Score</th></tr></thead>
+    </div>
+
+    <!-- Tabla de Proyectos con CRUD básico -->
+    <div id="projects-section">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold"> Proyectos recientes</h2>
+        <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto</button>
+      </div>
+      <div class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="border-b border-outline-variant/30">
+              <tr class="text-on-surface-variant/70 text-sm">
+                <th class="p-4">Nombre</th><th class="p-4">Propietario</th><th class="p-4">Lenguaje</th><th class="p-4">Estado</th><th class="p-4">Score</th><th class="p-4">Acciones</th>
+              </tr>
+            </thead>
             <tbody id="projects-table"></tbody>
           </table>
         </div>
       </div>
     </div>
+  </main>
 
-    <div class="card" id="analysis-section">
-      <h3>Análisis de datos de documentación</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
-        <div>
-          <p class="pill">Palabras clave más frecuentes</p>
-          <div class="tag-list" id="keywords-list"></div>
-        </div>
-        <div>
-          <p class="pill">Términos técnicos detectados</p>
-          <div class="tag-list" id="technical-list"></div>
-        </div>
-        <div>
-          <p class="pill">Coincidencias entre términos</p>
-          <div class="tag-list" id="matching-list"></div>
-        </div>
+  <!-- MODAL USUARIO -->
+  <div id="userModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-all" onclick="if(event.target===this) closeUserModal()">
+    <div class="glass rounded-2xl p-6 w-full max-w-md modal-anim">
+      <h3 class="text-xl font-bold mb-4" id="userModalTitle">Agregar Usuario</h3>
+      <input type="hidden" id="userId">
+      <div class="mb-3"><label class="block text-xs uppercase tracking-wider mb-1">Nombre</label><input id="userName" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2 focus:border-primary outline-none"></div>
+      <div class="mb-3"><label class="block text-xs uppercase tracking-wider mb-1">Email</label><input id="userEmail" type="email" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2 focus:border-primary outline-none"></div>
+      <div class="mb-3"><label class="block text-xs uppercase tracking-wider mb-1">Contraseña (solo para nuevo)</label><input id="userPassword" type="password" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2 focus:border-primary outline-none"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-wider mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant">Cancelar</button>
+        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl">Guardar</button>
       </div>
     </div>
+  </div>
 
-    <div class="card">
-      <h3>Distribución de lenguajes</h3>
-      <div id="languages-list" style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.75rem;"></div>
+  <!-- MODAL PROYECTO -->
+  <div id="projectModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden" onclick="if(event.target===this) closeProjectModal()">
+    <div class="glass rounded-2xl p-6 w-full max-w-md modal-anim">
+      <h3 class="text-xl font-bold mb-4" id="projectModalTitle">Agregar Proyecto</h3>
+      <input type="hidden" id="projectId">
+      <div class="mb-3"><label class="block text-xs uppercase mb-1">Nombre del proyecto</label><input id="projectName" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"></div>
+      <div class="mb-3"><label class="block text-xs uppercase mb-1">Propietario (email)</label><input id="projectOwner" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"></div>
+      <div class="mb-3"><label class="block text-xs uppercase mb-1">Lenguaje</label><input id="projectLanguage" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2" value="Python"></div>
+      <div class="mb-4"><label class="block text-xs uppercase mb-1">Estado</label><select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"><option value="pending">Pendiente</option><option value="completed">Completado</option><option value="error">Error</option></select></div>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant">Cancelar</button>
+        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl">Guardar</button>
+      </div>
     </div>
-
-    <div class="loading" id="loading-state">Cargando panel administrador…</div>
-  </main>
+  </div>
 
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
-
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.name) {
-      document.getElementById('user-name').textContent = user.name;
-      document.getElementById('user-avatar').textContent = user.name[0].toUpperCase();
-      document.getElementById('user-role').textContent = user.role === 'admin' ? 'Administrador' : 'Usuario';
-    }
+    if (user.role !== 'admin') window.location.href = '/dashboard';
+    document.getElementById('user-name').innerText = user.name || 'Admin';
+    document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
 
-    function authHeaders() {
-      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-    }
+    function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
 
-    function createTag(text) {
-      const el = document.createElement('span');
-      el.className = 'tag';
-      el.textContent = text;
-      return el;
-    }
-
-    function renderBadge(status) {
-      const span = document.createElement('span');
-      span.className = `badge ${status === 'completed' ? 'completed' : status === 'error' ? 'error' : 'pending'}`;
-      span.textContent = status === 'completed' ? 'Completado' : status === 'error' ? 'Error' : 'Pendiente';
-      return span;
-    }
-
-    async function loadAdminOverview() {
+    // Carga datos iniciales
+    async function loadStats() {
       try {
         const res = await fetch('/api/admin/overview', { headers: authHeaders() });
-        if (!res.ok) {
-          if (res.status === 403) window.location.href = '/dashboard';
-          throw new Error('No autorizado');
-        }
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('stat-users').textContent = data.stats.total_users;
-        document.getElementById('stat-projects').textContent = data.stats.total_projects;
-        document.getElementById('stat-completed').textContent = data.stats.completed_projects;
-        document.getElementById('stat-quality').textContent = data.stats.average_quality_score;
-        document.getElementById('doc-count').textContent = data.data_analysis.document_count;
-        document.getElementById('keyword-count').textContent = data.data_analysis.keywords.length;
-        document.getElementById('technical-count').textContent = data.data_analysis.technical_terms.length;
-        document.getElementById('matching-count').textContent = data.data_analysis.matching_terms.length;
+        document.getElementById('stat-users').innerText = data.stats.total_users;
+        document.getElementById('stat-projects').innerText = data.stats.total_projects;
+        document.getElementById('stat-completed').innerText = data.stats.completed_projects;
+        document.getElementById('stat-quality').innerText = data.stats.average_quality_score;
+        document.getElementById('doc-count').innerText = data.data_analysis.document_count;
+        document.getElementById('keyword-count').innerText = data.data_analysis.keywords.length;
+        document.getElementById('technical-count').innerText = data.data_analysis.technical_terms.length;
+        document.getElementById('matching-count').innerText = data.data_analysis.matching_terms.length;
+        const kwContainer = document.getElementById('keywords-list');
+        kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
+      } catch (error) { console.error(error); }
+    }
 
-        const usersBody = document.getElementById('users-table');
-        usersBody.innerHTML = data.users.map(user => `
-          <tr>
-            <td>${user.name}</td>
-            <td>${user.email}</td>
-            <td>${user.role}</td>
-            <td>${user.projects_count}</td>
-            <td>${new Date(user.created_at).toLocaleDateString('es-MX')}</td>
-          </tr>
-        `).join('');
+    async function loadUsers() {
+      const res = await fetch('/api/admin/users', { headers: authHeaders() });
+      if (!res.ok) return;
+      const users = await res.json();
+      document.getElementById('users-table').innerHTML = users.map(u => `
+        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+          <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
+          <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
+          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
+        </tr>
+      `).join('');
+    }
 
-        const projectsBody = document.getElementById('projects-table');
-        projectsBody.innerHTML = data.projects.slice(0, 12).map(proj => `
-          <tr>
-            <td>${proj.name}</td>
-            <td>${proj.owner}</td>
-            <td>${proj.language}</td>
-            <td>${proj.status}</td>
-            <td>${proj.quality_score}</td>
-          </tr>
-        `).join('');
+    async function loadProjects() {
+      const res = await fetch('/api/admin/projects', { headers: authHeaders() });
+      if (!res.ok) return;
+      const projects = await res.json();
+      document.getElementById('projects-table').innerHTML = projects.map(p => `
+        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+          <td class="p-4">${escapeHtml(p.name)}</td><td class="p-4">${escapeHtml(p.owner)}</td><td class="p-4">${p.language}</td>
+          <td class="p-4"><span class="badge ${p.status}">${p.status === 'completed' ? 'Completado' : p.status === 'error' ? 'Error' : 'Pendiente'}</span></td>
+          <td class="p-4">${p.quality_score || '—'}</td>
+          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editProject('${p._id}','${escapeHtml(p.name)}','${escapeHtml(p.owner)}','${p.language}','${p.status}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteProject('${p._id}')">delete</span></div></td>
+        </tr>
+      `).join('');
+    }
 
-        const keywordList = document.getElementById('keywords-list');
-        keywordList.innerHTML = '';
-        data.data_analysis.keywords.forEach(word => keywordList.appendChild(createTag(word)));
-
-        const technicalList = document.getElementById('technical-list');
-        technicalList.innerHTML = '';
-        data.data_analysis.technical_terms.forEach(word => technicalList.appendChild(createTag(word)));
-
-        const matchingList = document.getElementById('matching-list');
-        matchingList.innerHTML = '';
-        if (data.data_analysis.matching_terms.length === 0) {
-          matchingList.appendChild(createTag('No hay coincidencias claras'));
-        } else {
-          data.data_analysis.matching_terms.forEach(word => matchingList.appendChild(createTag(word)));
-        }
-
-        const languagesList = document.getElementById('languages-list');
-        languagesList.innerHTML = '';
-        Object.entries(data.stats.language_distribution).sort((a,b) => b[1]-a[1]).forEach(([lang, count]) => {
-          const pill = document.createElement('div');
-          pill.className = 'data-pill';
-          pill.textContent = `${lang} · ${count}`;
-          languagesList.appendChild(pill);
-        });
-      } catch (error) {
-        console.error(error);
-        document.getElementById('loading-state').textContent = 'Error cargando el panel administrador.';
+    // CRUD Usuarios
+    function openUserModal(edit = false) { document.getElementById('userModal').classList.remove('hidden'); if(!edit) { document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; document.getElementById('userId').value = ''; document.getElementById('userName').value = ''; document.getElementById('userEmail').value = ''; document.getElementById('userPassword').value = ''; document.getElementById('userRole').value = 'user'; } }
+    function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+    window.editUser = (id, name, email, role) => {
+      document.getElementById('userModalTitle').innerText = 'Editar Usuario';
+      document.getElementById('userId').value = id;
+      document.getElementById('userName').value = name;
+      document.getElementById('userEmail').value = email;
+      document.getElementById('userPassword').value = '';
+      document.getElementById('userRole').value = role;
+      openUserModal(true);
+    };
+    async function saveUser() {
+      const id = document.getElementById('userId').value;
+      const name = document.getElementById('userName').value;
+      const email = document.getElementById('userEmail').value;
+      const password = document.getElementById('userPassword').value;
+      const role = document.getElementById('userRole').value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
+      const body = { name, email, role };
+      if (password) body.password = password;
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+      if (res.ok) { closeUserModal(); loadUsers(); loadStats(); }
+      else alert('Error al guardar usuario');
+    }
+    window.deleteUser = async (id) => {
+      if(confirm('¿Eliminar usuario permanentemente?')) {
+        const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if(res.ok) { loadUsers(); loadStats(); }
       }
-    }
+    };
 
-    function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/';
+    // CRUD Proyectos
+    function openProjectModal() { document.getElementById('projectModal').classList.remove('hidden'); document.getElementById('projectId').value = ''; document.getElementById('projectName').value = ''; document.getElementById('projectOwner').value = ''; document.getElementById('projectLanguage').value = 'Python'; document.getElementById('projectStatus').value = 'pending'; document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; }
+    function closeProjectModal() { document.getElementById('projectModal').classList.add('hidden'); }
+    window.editProject = (id, name, owner, lang, status) => {
+      document.getElementById('projectModalTitle').innerText = 'Editar Proyecto';
+      document.getElementById('projectId').value = id;
+      document.getElementById('projectName').value = name;
+      document.getElementById('projectOwner').value = owner;
+      document.getElementById('projectLanguage').value = lang;
+      document.getElementById('projectStatus').value = status;
+      document.getElementById('projectModal').classList.remove('hidden');
+    };
+    async function saveProject() {
+      const id = document.getElementById('projectId').value;
+      const name = document.getElementById('projectName').value;
+      const owner = document.getElementById('projectOwner').value;
+      const language = document.getElementById('projectLanguage').value;
+      const status = document.getElementById('projectStatus').value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/admin/projects/${id}` : '/api/admin/projects';
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify({ name, owner, language, status }) });
+      if (res.ok) { closeProjectModal(); loadProjects(); loadStats(); }
+      else alert('Error guardando proyecto');
     }
+    window.deleteProject = async (id) => {
+      if(confirm('¿Eliminar este proyecto?')) {
+        const res = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if(res.ok) loadProjects();
+      }
+    };
 
-    loadAdminOverview();
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function scrollToSection(section) { document.getElementById(`${section}-section`).scrollIntoView({ behavior: 'smooth' }); }
+    function logout() { localStorage.clear(); window.location.href = '/'; }
+
+    // Tema claro/oscuro con persistencia
+    const themeBtn = document.getElementById('themeButton');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    function applyTheme(theme) { document.body.setAttribute('data-theme', theme); themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode'; localStorage.setItem('theme', theme); }
+    applyTheme(savedTheme);
+    themeBtn?.addEventListener('click', () => { const cur = document.body.getAttribute('data-theme'); applyTheme(cur === 'light' ? 'dark' : 'light'); });
+
+    // Partículas (igual que index)
+    const canvas = document.getElementById('particle-canvas');
+    let ctx = canvas.getContext('2d');
+    let particles = [], mouse = { x: null, y: null };
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    class Particle { constructor() { this.reset(); } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; } update() { this.x += this.vx; this.y += this.vy; if (mouse.x) { let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy); if (d < 150) { let angle = Math.atan2(dy, dx), force = (150 - d) / 150; this.x -= Math.cos(angle) * force * 1.2; this.y -= Math.sin(angle) * force * 1.2; } } if (this.x < 0) this.x = canvas.width; if (this.x > canvas.width) this.x = 0; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; } draw() { const style = getComputedStyle(document.body); const c1 = style.getPropertyValue('--particle-color-1').trim(); const c2 = style.getPropertyValue('--particle-color-2').trim(); ctx.fillStyle = Math.random() > 0.7 ? c1 : c2; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); particles.forEach(p => { if (Math.hypot(this.x - p.x, this.y - p.y) < 100) { ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(p.x, p.y); ctx.strokeStyle = style.getPropertyValue('--particle-line').trim(); ctx.stroke(); } }); } }
+    function initParticles() { particles = []; for (let i = 0; i < 70; i++) particles.push(new Particle()); }
+    function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+    resizeCanvas(); initParticles(); animate();
+
+    // Cargar todo
+    loadStats(); loadUsers(); loadProjects();
   </script>
 </body>
 </html>

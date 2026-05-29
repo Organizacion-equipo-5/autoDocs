@@ -11,9 +11,17 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
+@web_bp.route('/perfil')
+def perfil():
+    return render_template('perfil.html')
+
 @web_bp.route('/projects')
 def projects():
     return render_template('projects.html')
+
+@web_bp.route('/admin_dashboard')
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
 
 @web_bp.route('/analysis/<project_id>')
 def analysis(project_id):

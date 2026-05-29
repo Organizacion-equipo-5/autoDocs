@@ -17,11 +17,13 @@ def create_app():
     from routes.analysis import analysis_bp
     from routes.export import export_bp
     from routes.web import web_bp
+    from routes.admin import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(projects_bp, url_prefix='/api/projects')
     app.register_blueprint(analysis_bp, url_prefix='/api/analysis')
     app.register_blueprint(export_bp, url_prefix='/api/export')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(web_bp)
 
     @app.errorhandler(404)

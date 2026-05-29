@@ -133,7 +133,7 @@
         <div class="modal-box modal-anim">
             <div class="modal-header">
                 <div>
-                    <div class="modal-title" id="modal-title-text">💡 Sugerencia de Docstring</div>
+                    <div class="modal-title" id="modal-title-text">Sugerencia de Docstring</div>
                     <div class="modal-subtitle" id="modal-fn-label">cargando...</div>
                 </div>
                 <button class="modal-close" onclick="closeModal()" title="Cerrar">✕</button>
@@ -148,7 +148,7 @@
                     <div class="suggestion-code" id="modal-code"></div>
                     <div class="flex gap-2 mt-4">
                         <button class="copy-btn" id="copy-btn" onclick="copySuggestion()">
-                            <span>📋</span> Copiar al portapapeles
+                            <span></span> Copiar al portapapeles
                         </button>
                     </div>
                     <p class="text-xs text-on-surface-variant/50 mt-4 font-code-md">Agrega este bloque justo después de la línea <code style="background:rgba(56,189,248,0.08);padding:1px 5px;border-radius:3px;">def ...</code> o <code style="background:rgba(56,189,248,0.08);padding:1px 5px;border-radius:3px;">class ...</code> correspondiente.</p>
@@ -198,11 +198,9 @@
                 </a>
                 <div class="flex gap-3 items-center">
                     <button id="themeButton" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
-                        <span id="themeIcon">☀️</span>
+                        <span id="themeIcon" class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">light_mode</span>
                     </button>
                     <div class="flex gap-3" id="export-btns" style="display:none;">
-                        <button onclick="exportMd()" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">⬇ Markdown</button>
-                        <button onclick="exportHtml()" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">⬇ HTML</button>
                         <button onclick="exportPdf()" class="px-5 py-2 glass glass-hover rounded-xl text-xs font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95">PDF</button>
                     </div>
                 </div>
