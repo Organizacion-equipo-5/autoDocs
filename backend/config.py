@@ -7,7 +7,7 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
     
     # MongoDB
-    MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/autodocs_ai')
+    MONGO_URI = os.environ.get('MONGO_URI', 'mongodb+srv://bri_db_user:hc087879@cluster.uvx8yek.mongodb.net/autodocs_ai?retryWrites=true&w=majority&appName=Cluster')
     
     # Upload settings
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', './uploads')

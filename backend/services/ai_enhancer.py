@@ -12,7 +12,7 @@ class AIEnhancer:
     y proporciona insights técnicos avanzados.
     """
 
-    GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    GEMINI_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
     def __init__(self):
         self.api_key = os.getenv('GEMINI_API_KEY')
@@ -21,62 +21,54 @@ class AIEnhancer:
         """Verifica si la API de Gemini está configurada y disponible."""
         return bool(self.api_key)
 
-    def _call_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
-        """
-        Realiza una llamada a la API de Gemini.
-
-        Args:
-            system_prompt: Instrucción del sistema
-            user_prompt: Mensaje del usuario
-            max_tokens: Máximo de tokens en la respuesta
-
-        Returns:
-            Texto generado o None si hay error
-        """
+    def _call_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int = 400):
         if not self.is_available():
             return None
 
-        url = f"{self.GEMINI_API_URL}?key={self.api_key}"
-
         payload = {
-            "system_instruction": {
-                "parts": [{"text": system_prompt}]
-            },
-            "contents": [
+            "model": "google/gemma-4-31b:free",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
                 {
                     "role": "user",
-                    "parts": [{"text": user_prompt}]
+                    "content": user_prompt
                 }
             ],
-            "generationConfig": {
-                "maxOutputTokens": max_tokens,
-                "temperature": 0.7
-            }
+            "max_tokens": max_tokens,
+            "temperature": 0.7
         }
 
         data = json.dumps(payload).encode("utf-8")
+
         req = urllib.request.Request(
-            url,
+            self.GEMINI_API_URL,
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}"
+            },
             method="POST"
         )
 
         try:
             with urllib.request.urlopen(req, timeout=30) as response:
                 result = json.loads(response.read().decode("utf-8"))
-                candidates = result.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        return parts[0].get("text", "").strip()
+
+                return (
+                    result.get("choices", [{}])[0]
+                    .get("message", {})
+                    .get("content", "")
+                    .strip()
+                )
+
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", errors="ignore")
-            print(f"[AI Gemini] HTTP {e.code}: {body[:300]}")
-        except urllib.error.URLError as e:
-            print(f"[AI Gemini] URL error: {e}")
+            print(f"[AI OpenRouter] HTTP {e.code}: {body[:300]}")
         except Exception as e:
-            print(f"[AI Gemini] Error inesperado: {e}")
+            print(f"[AI OpenRouter] Error: {e}")
 
         return None
 
