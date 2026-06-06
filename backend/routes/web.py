@@ -19,6 +19,18 @@ def perfil():
 def projects():
     return render_template('projects.html')
 
+@web_bp.route('/admin')
+def admin():
+    return render_template('admin_dashboard.html')
+
+@web_bp.route('/admin/users')
+def admin_users():
+    return render_template('admin_users.html')
+
+@web_bp.route('/admin/projects')
+def admin_projects():
+    return render_template('admin_projects.html')
+
 @web_bp.route('/admin_dashboard')
 def admin_dashboard():
     return render_template('admin_dashboard.html')

@@ -704,25 +704,40 @@
         }
 
         function renderStats(projects) {
-            document.getElementById('stat-projects').textContent = projects.length;
+            console.log('Rendering stats for projects:', projects);
+
+            const statProjects = document.getElementById('stat-projects');
+            const statCompleted = document.getElementById('stat-completed');
+            const statFunctions = document.getElementById('stat-functions');
+            const statEndpoints = document.getElementById('stat-endpoints');
+            const statActiveProjects = document.getElementById('stat-active-projects');
+            const progressPercent = document.getElementById('progress-percent');
+            const statCompletedPercent = document.getElementById('stat-completed-percent');
+            const progressCircle = document.getElementById('progress-circle');
+            const progressLabel = document.getElementById('progress-label');
+
+            if (statProjects) statProjects.textContent = projects.length;
             const completed = projects.filter(p => p.status === 'completed').length;
-            document.getElementById('stat-completed').textContent = completed;
+            if (statCompleted) statCompleted.textContent = completed;
             const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
-            document.getElementById('stat-functions').textContent = totalFuncs;
+            if (statFunctions) statFunctions.textContent = totalFuncs;
             const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
-            document.getElementById('stat-endpoints').textContent = totalEp;
+            if (statEndpoints) statEndpoints.textContent = totalEp;
             const active = projects.filter(p => p.status !== 'completed').length;
-            document.getElementById('stat-active-projects').textContent = active;
+            if (statActiveProjects) statActiveProjects.textContent = active;
 
             const percent = projects.length ? Math.round((completed / projects.length) * 100) : 0;
-            document.getElementById('progress-percent').textContent = percent + '%';
-            document.getElementById('stat-completed-percent').textContent = percent + '%';
-            const circle = document.getElementById('progress-circle');
-            const circumference = 251.2;
-            const offset = circumference - (percent / 100) * circumference;
-            circle.setAttribute('stroke-dashoffset', offset);
-            document.getElementById('progress-label').textContent = 
-                projects.length === 0 ? 'Sin proyectos' : completed === projects.length ? 'Todo completado' : `${completed} de ${projects.length} completados`;
+            if (progressPercent) progressPercent.textContent = percent + '%';
+            if (statCompletedPercent) statCompletedPercent.textContent = percent + '%';
+            if (progressCircle) {
+                const circumference = 251.2;
+                const offset = circumference - (percent / 100) * circumference;
+                progressCircle.setAttribute('stroke-dashoffset', offset);
+            }
+            if (progressLabel) {
+                progressLabel.textContent =
+                    projects.length === 0 ? 'Sin proyectos' : completed === projects.length ? 'Todo completado' : `${completed} de ${projects.length} completados`;
+            }
         }
 
         function renderProjects(projects) {

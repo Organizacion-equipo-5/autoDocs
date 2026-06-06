@@ -141,11 +141,11 @@
     <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mb-3">Principal</div>
 
     <a href="/perfil" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all">Perfil</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-primary bg-primary/10 transition-all"> Admin</a>
-    
+    <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-xl text-primary bg-primary/10 transition-all"> Admin</a>
+
     <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mt-6 mb-3">Gestión</div>
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all" onclick="scrollToSection('users')"> Usuarios</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all" onclick="scrollToSection('projects')"> Proyectos</a>
+    <a href="/admin/users" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all"> Usuarios</a>
+    <a href="/admin/projects" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all"> Proyectos</a>
     <div class="flex-1"></div>
     <a href="/perfil" class="glass p-3 rounded-2xl mt-4 block hover:no-underline">
       <div class="flex items-center gap-3">
@@ -280,8 +280,12 @@
     async function loadStats() {
       try {
         const res = await fetch('/api/admin/overview', { headers: authHeaders() });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+          console.error('Error loading stats:', res.status, res.statusText);
+          throw new Error();
+        }
         const data = await res.json();
+        console.log('Admin stats data:', data);
         document.getElementById('stat-users').innerText = data.stats.total_users;
         document.getElementById('stat-projects').innerText = data.stats.total_projects;
         document.getElementById('stat-completed').innerText = data.stats.completed_projects;
@@ -292,7 +296,7 @@
         document.getElementById('matching-count').innerText = data.data_analysis.matching_terms.length;
         const kwContainer = document.getElementById('keywords-list');
         kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
-      } catch (error) { console.error(error); }
+      } catch (error) { console.error('Error loading stats:', error); }
     }
 
     async function loadUsers() {
@@ -387,7 +391,6 @@
     };
 
     function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-    function scrollToSection(section) { document.getElementById(`${section}-section`).scrollIntoView({ behavior: 'smooth' }); }
     function logout() { localStorage.clear(); window.location.href = '/'; }
 
     // Tema claro/oscuro con persistencia

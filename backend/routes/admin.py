@@ -267,84 +267,90 @@ def admin_delete_project(project_id):
 @jwt_required()
 @admin_required
 def admin_overview():
-    db = get_db()
+    try:
+        db = get_db()
 
-    users = list(db.users.find({}, {"password": 0}))
-    projects = list(db.projects.find({}, {"_id": 1, "name": 1, "user_id": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
-    analyses = list(db.analysis_results.find({}, {"project_id": 1, "results": 1, "documentation": 1}))
+        users = list(db.users.find({}, {"password": 0}))
+        projects = list(db.projects.find({}, {"_id": 1, "name": 1, "user_id": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
+        analyses = list(db.analysis_results.find({}, {"project_id": 1, "results": 1, "documentation": 1}))
 
-    total_users = len(users)
-    total_projects = len(projects)
-    completed_projects = sum(1 for p in projects if p.get('status') == 'completed')
-    pending_projects = sum(1 for p in projects if p.get('status') == 'pending')
-    errored_projects = sum(1 for p in projects if p.get('status') == 'error')
-    quality_scores = [p.get('stats', {}).get('quality_score', 0) for p in projects if p.get('stats', {}).get('quality_score') is not None]
-    average_quality = round(sum(quality_scores) / max(len(quality_scores), 1), 1) if quality_scores else 0
+        total_users = len(users)
+        total_projects = len(projects)
+        completed_projects = sum(1 for p in projects if p.get('status') == 'completed')
+        pending_projects = sum(1 for p in projects if p.get('status') == 'pending')
+        errored_projects = sum(1 for p in projects if p.get('status') == 'error')
+        quality_scores = [p.get('stats', {}).get('quality_score', 0) for p in projects if p.get('stats', {}).get('quality_score') is not None]
+        average_quality = round(sum(quality_scores) / max(len(quality_scores), 1), 1) if quality_scores else 0
 
-    language_counts = {}
-    for p in projects:
-        lang = (p.get('language') or 'unknown').lower()
-        language_counts[lang] = language_counts.get(lang, 0) + 1
+        language_counts = {}
+        for p in projects:
+            lang = (p.get('language') or 'unknown').lower()
+            language_counts[lang] = language_counts.get(lang, 0) + 1
 
-    docs_text = ' '.join([analysis.get('documentation', '') for analysis in analyses if analysis.get('documentation')])
-    keywords = [term for term, _ in top_terms(docs_text, limit=20)]
+        docs_text = ' '.join([analysis.get('documentation', '') for analysis in analyses if analysis.get('documentation')])
+        keywords = [term for term, _ in top_terms(docs_text, limit=20)]
 
-    known_names = set()
-    for analysis in analyses:
-        results = analysis.get('results', {})
-        for fn in results.get('functions', []):
-            if fn.get('name'): known_names.add(fn['name'].lower())
-        for cls in results.get('classes', []):
-            if cls.get('name'): known_names.add(cls['name'].lower())
-        for ep in results.get('endpoints', []):
-            path = ep.get('path', '')
-            for token in re.findall(r'[A-Za-z_][A-Za-z0-9_]{3,}', path):
-                known_names.add(token.lower())
+        known_names = set()
+        for analysis in analyses:
+            results = analysis.get('results', {})
+            for fn in results.get('functions', []):
+                if fn.get('name'): known_names.add(fn['name'].lower())
+            for cls in results.get('classes', []):
+                if cls.get('name'): known_names.add(cls['name'].lower())
+            for ep in results.get('endpoints', []):
+                path = ep.get('path', '')
+                for token in re.findall(r'[A-Za-z_][A-Za-z0-9_]{3,}', path):
+                    known_names.add(token.lower())
 
-    technical_terms = extract_technical_terms(docs_text, known_names=known_names, limit=20)
-    matching_terms = common_terms(keywords, technical_terms)
+        technical_terms = extract_technical_terms(docs_text, known_names=known_names, limit=20)
+        matching_terms = common_terms(keywords, technical_terms)
 
-    user_map = {user['_id']: user for user in users}
-    projects_with_user = [
-        {
-            "id": p['_id'],
-            "name": p.get('name', 'Sin nombre'),
-            "language": p.get('language', 'unknown'),
-            "status": p.get('status', 'pending'),
-            "quality_score": p.get('stats', {}).get('quality_score', 0),
-            "owner": user_map.get(p.get('user_id'), {}).get('name', 'Desconocido'),
-            "created_at": p.get('created_at')
-        }
-        for p in projects
-    ]
-
-    return jsonify({
-        "stats": {
-            "total_users": total_users,
-            "total_projects": total_projects,
-            "completed_projects": completed_projects,
-            "pending_projects": pending_projects,
-            "errored_projects": errored_projects,
-            "average_quality_score": average_quality,
-            "language_distribution": language_counts,
-            "total_documents": len(analyses)
-        },
-        "users": [
+        user_map = {user['_id']: user for user in users}
+        projects_with_user = [
             {
-                "id": user['_id'],
-                "name": user.get('name'),
-                "email": user.get('email'),
-                "role": user.get('role', 'user'),
-                "created_at": user.get('created_at'),
-                "projects_count": user.get('projects_count', 0)
+                "id": p['_id'],
+                "name": p.get('name', 'Sin nombre'),
+                "language": p.get('language', 'unknown'),
+                "status": p.get('status', 'pending'),
+                "quality_score": p.get('stats', {}).get('quality_score', 0),
+                "owner": user_map.get(p.get('user_id'), {}).get('name', 'Desconocido'),
+                "created_at": p.get('created_at')
             }
-            for user in users
-        ],
-        "projects": projects_with_user,
-        "data_analysis": {
-            "keywords": keywords[:12],
-            "technical_terms": technical_terms[:12],
-            "matching_terms": matching_terms,
-            "document_count": len(analyses)
-        }
-    }), 200
+            for p in projects
+        ]
+
+        return jsonify({
+            "stats": {
+                "total_users": total_users,
+                "total_projects": total_projects,
+                "completed_projects": completed_projects,
+                "pending_projects": pending_projects,
+                "errored_projects": errored_projects,
+                "average_quality_score": average_quality,
+                "language_distribution": language_counts,
+                "total_documents": len(analyses)
+            },
+            "users": [
+                {
+                    "id": user['_id'],
+                    "name": user.get('name'),
+                    "email": user.get('email'),
+                    "role": user.get('role', 'user'),
+                    "created_at": user.get('created_at'),
+                    "projects_count": user.get('projects_count', 0)
+                }
+                for user in users
+            ],
+            "projects": projects_with_user,
+            "data_analysis": {
+                "keywords": keywords[:12],
+                "technical_terms": technical_terms[:12],
+                "matching_terms": matching_terms,
+                "document_count": len(analyses)
+            }
+        }), 200
+    except Exception as e:
+        print(f"Error in admin_overview: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500

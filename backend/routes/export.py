@@ -6,8 +6,39 @@ from services.exporter import DocumentExporter
 from services.doc_generator import DocGenerator
 import os
 import traceback
+import json
 
 export_bp = Blueprint('export', __name__)
+
+def filter_results_by_selection(results, selected):
+    """Filter results based on user selection"""
+    if not selected:
+        return results
+    
+    try:
+        selected_data = json.loads(selected) if isinstance(selected, str) else selected
+    except (json.JSONDecodeError, TypeError):
+        return results
+    
+    filtered = results.copy()
+    
+    # Filter endpoints
+    if 'endpoints' in selected_data and selected_data['endpoints']:
+        filtered['endpoints'] = [results['endpoints'][i] for i in selected_data['endpoints'] if i < len(results.get('endpoints', []))]
+    
+    # Filter functions
+    if 'functions' in selected_data and selected_data['functions']:
+        filtered['functions'] = [results['functions'][i] for i in selected_data['functions'] if i < len(results.get('functions', []))]
+    
+    # Filter classes
+    if 'classes' in selected_data and selected_data['classes']:
+        filtered['classes'] = [results['classes'][i] for i in selected_data['classes'] if i < len(results.get('classes', []))]
+    
+    # Filter structure
+    if 'structure' in selected_data and selected_data['structure']:
+        filtered['structure'] = [results['structure'][i] for i in selected_data['structure'] if i < len(results.get('structure', []))]
+    
+    return filtered
 
 def get_identity_flexible():
     """Acepta JWT del header Authorization O del query param ?token="""
@@ -40,11 +71,18 @@ def export_pdf(project_id):
     if not result:
         return jsonify({"error": "Sin resultados de análisis"}), 404
 
+    # Get selected items from query parameter
+    selected = request.args.get('selected')
+
     try:
-        if result.get('results'):
-            documentation = DocGenerator(result['results']).generate()
+        results_to_use = result.get('results')
+        if results_to_use:
+            # Filter results based on selection
+            if selected:
+                results_to_use = filter_results_by_selection(results_to_use, selected)
+            documentation = DocGenerator(results_to_use).generate()
             db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
-            exporter = DocumentExporter(project, {"results": result['results'], "documentation": documentation})
+            exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
         else:
             exporter = DocumentExporter(project, result)
         file_path = exporter.to_pdf()
@@ -91,10 +129,17 @@ def export_html(project_id):
     if not result:
         return jsonify({"error": "Sin resultados de análisis"}), 404
 
-    if result.get('results'):
-        documentation = DocGenerator(result['results']).generate()
+    # Get selected items from query parameter
+    selected = request.args.get('selected')
+
+    results_to_use = result.get('results')
+    if results_to_use:
+        # Filter results based on selection
+        if selected:
+            results_to_use = filter_results_by_selection(results_to_use, selected)
+        documentation = DocGenerator(results_to_use).generate()
         db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
-        exporter = DocumentExporter(project, {"results": result['results'], "documentation": documentation})
+        exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
     else:
         exporter = DocumentExporter(project, result)
     html = exporter.to_html()
@@ -120,10 +165,17 @@ def export_markdown(project_id):
     if not result:
         return jsonify({"error": "Sin resultados de análisis"}), 404
 
-    if result.get('results'):
-        documentation = DocGenerator(result['results']).generate()
+    # Get selected items from query parameter
+    selected = request.args.get('selected')
+
+    results_to_use = result.get('results')
+    if results_to_use:
+        # Filter results based on selection
+        if selected:
+            results_to_use = filter_results_by_selection(results_to_use, selected)
+        documentation = DocGenerator(results_to_use).generate()
         db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
-        exporter = DocumentExporter(project, {"results": result['results'], "documentation": documentation})
+        exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
     else:
         exporter = DocumentExporter(project, result)
     md = exporter.to_markdown()

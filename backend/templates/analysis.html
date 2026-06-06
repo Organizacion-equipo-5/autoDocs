@@ -123,6 +123,46 @@
         .suggestion-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 6px; font-family: "JetBrains Mono", monospace; }
         .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-size: 0.78rem; font-family: "JetBrains Mono", monospace; cursor: pointer; transition: all 0.15s; }
         .copy-btn:hover { background: rgba(56,189,248,0.2); }
+
+        /* Checkbox styling */
+        .item-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(56, 189, 248, 0.4);
+            border-radius: 4px;
+            background: rgba(15, 20, 24, 0.5);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .item-checkbox:hover {
+            border-color: rgba(56, 189, 248, 0.7);
+            background: rgba(56, 189, 248, 0.05);
+        }
+        .item-checkbox:checked {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border-color: #38bdf8;
+        }
+        .item-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        html.dark .item-checkbox {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+        html.dark .item-checkbox:hover {
+            border-color: rgba(56, 189, 248, 0.7);
+            background: rgba(56, 189, 248, 0.1);
+        }
     </style>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
@@ -289,13 +329,25 @@
                 <div id="tab-endpoints">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
-                            <h3 class="font-semibold text-on-surface">Endpoints API detectados</h3>
-                            <span class="text-xs font-code-md text-on-surface-variant/50" id="ep-count">0 endpoints</span>
+                            <div class="flex items-center gap-4">
+                                <h3 class="font-semibold text-on-surface">Endpoints API detectados</h3>
+                                <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer">
+                                    <input type="checkbox" id="select-all-endpoints" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" onchange="toggleSelectAll('endpoints')">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="ep-count">0 endpoints</span>
+                                <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">save</span>
+                                    Guardar cambios
+                                </button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-surface-container/50 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
-                                    <tr><th class="px-6 py-3">Método</th><th class="px-6 py-3">Ruta</th><th class="px-6 py-3">Framework</th><th class="px-6 py-3">Archivo</th></tr>
+                                    <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Método</th><th class="px-6 py-3">Ruta</th><th class="px-6 py-3">Framework</th><th class="px-6 py-3">Archivo</th></tr>
                                 </thead>
                                 <tbody id="endpoints-table" class="divide-y divide-outline-variant/10"></tbody>
                             </table>
@@ -307,13 +359,25 @@
                 <div id="tab-functions" style="display:none;">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
-                            <h3 class="font-semibold text-on-surface">Funciones detectadas</h3>
-                            <span class="text-xs font-code-md text-on-surface-variant/50" id="fn-count">0 funciones</span>
+                            <div class="flex items-center gap-4">
+                                <h3 class="font-semibold text-on-surface">Funciones detectadas</h3>
+                                <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer">
+                                    <input type="checkbox" id="select-all-functions" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" onchange="toggleSelectAll('functions')">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="fn-count">0 funciones</span>
+                                <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">save</span>
+                                    Guardar cambios
+                                </button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-surface-container/50 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
-                                    <tr><th class="px-6 py-3">Nombre</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Parámetros</th><th class="px-6 py-3">Complejidad</th><th class="px-6 py-3">Documentada</th></tr>
+                                    <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Nombre</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Parámetros</th><th class="px-6 py-3">Complejidad</th><th class="px-6 py-3">Documentada</th></tr>
                                 </thead>
                                 <tbody id="functions-table" class="divide-y divide-outline-variant/10"></tbody>
                             </table>
@@ -325,13 +389,25 @@
                 <div id="tab-classes" style="display:none;">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
-                            <h3 class="font-semibold text-on-surface">Clases detectadas</h3>
-                            <span class="text-xs font-code-md text-on-surface-variant/50" id="cls-count">0 clases</span>
+                            <div class="flex items-center gap-4">
+                                <h3 class="font-semibold text-on-surface">Clases detectadas</h3>
+                                <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer">
+                                    <input type="checkbox" id="select-all-classes" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" onchange="toggleSelectAll('classes')">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="cls-count">0 clases</span>
+                                <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">save</span>
+                                    Guardar cambios
+                                </button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-surface-container/50 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
-                                    <tr><th class="px-6 py-3">Clase</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Métodos</th><th class="px-6 py-3">Hereda de</th><th class="px-6 py-3">Documentada</th></tr>
+                                    <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Clase</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Métodos</th><th class="px-6 py-3">Hereda de</th><th class="px-6 py-3">Documentada</th></tr>
                                 </thead>
                                 <tbody id="classes-table" class="divide-y divide-outline-variant/10"></tbody>
                             </table>
@@ -343,13 +419,25 @@
                 <div id="tab-structure" style="display:none;">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
-                            <h3 class="font-semibold text-on-surface">Estructura del proyecto</h3>
-                            <span class="text-xs font-code-md text-on-surface-variant/50" id="struct-count">0 archivos</span>
+                            <div class="flex items-center gap-4">
+                                <h3 class="font-semibold text-on-surface">Estructura del proyecto</h3>
+                                <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer">
+                                    <input type="checkbox" id="select-all-structure" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" onchange="toggleSelectAll('structure')">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="struct-count">0 archivos</span>
+                                <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">save</span>
+                                    Guardar cambios
+                                </button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-surface-container/50 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
-                                    <tr><th class="px-6 py-3">Ruta</th><th class="px-6 py-3">Lenguaje</th><th class="px-6 py-3">Tamaño</th></tr>
+                                    <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Ruta</th><th class="px-6 py-3">Lenguaje</th><th class="px-6 py-3">Tamaño</th></tr>
                                 </thead>
                                 <tbody id="structure-table" class="divide-y divide-outline-variant/10"></tbody>
                             </table>
@@ -377,6 +465,45 @@
     const projectId = window.location.pathname.split('/').pop();
     let pollInterval;
     let cachedResults = null;   // raw results from API
+
+    // Storage key for selections
+    const SELECTION_STORAGE_KEY = `selections_${projectId}`;
+
+    // Save selections to localStorage
+    function saveSelections() {
+        const selections = getSelectedItems();
+        localStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(selections));
+    }
+
+    // Load selections from localStorage
+    function loadSelections() {
+        const saved = localStorage.getItem(SELECTION_STORAGE_KEY);
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error('Error loading selections:', e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    // Apply saved selections to checkboxes
+    function applySelections(selections) {
+        if (!selections) return;
+
+        ['endpoints', 'functions', 'classes', 'structure'].forEach(type => {
+            const indices = selections[type] || [];
+            const checkboxes = document.querySelectorAll(`.item-checkbox[data-type="${type}"]`);
+            checkboxes.forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                cb.checked = indices.includes(index);
+            });
+            // Update select all checkbox
+            updateSelectAll(type);
+        });
+    }
 
     function headers()     { return { 'Authorization': `Bearer ${token}` }; }
     function jsonHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
@@ -460,20 +587,23 @@
         document.getElementById('ep-count').textContent = eps.length + ' endpoints';
         document.getElementById('endpoints-table').innerHTML = eps.length
             ? eps.map((ep, i) => {
+                const epId = `ep-${i}`;
                 const mColor = ep.method==='GET'?'bg-green-100 text-green-700':ep.method==='POST'?'bg-blue-100 text-blue-700':ep.method==='PUT'?'bg-yellow-100 text-yellow-700':ep.method==='DELETE'?'bg-red-100 text-red-700':'bg-purple-100 text-purple-700';
                 return `<tr class="hover:bg-primary/5 transition-colors">
+                    <td class="px-6 py-3"><input type="checkbox" id="${epId}" class="item-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" data-type="endpoints" data-index="${i}" onchange="updateSelectAll('endpoints')"></td>
                     <td class="px-6 py-3"><span class="px-2 py-0.5 rounded text-xs font-bold uppercase ${mColor}">${ep.method}</span></td>
                     <td class="px-6 py-3 font-code-md text-sm"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${ep.path}</code></td>
                     <td class="px-6 py-3 text-sm text-on-surface-variant">${ep.framework||'—'}</td>
                     <td class="px-6 py-3 text-sm text-on-surface-variant/50">${ep.file}</td>
                 </tr>`;
             }).join('')
-            : '<tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron endpoints</td></tr>';
+            : '<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron endpoints</td></tr>';
 
         // ── Functions ──
         const fns = r.functions || [];
         document.getElementById('fn-count').textContent = fns.length + ' funciones';
         document.getElementById('functions-table').innerHTML = fns.slice(0,100).map((fn, i) => {
+            const fnId = `fn-${i}`;
             const cx = fn.complexity || 1;
             const cxClass = cx<=5?'text-green-600':cx<=10?'text-yellow-600':'text-red-600';
             const asyncTag = fn.is_async ? '<span class="text-secondary font-code-md text-xs">async </span>' : '';
@@ -484,43 +614,94 @@
                 ? '<span class="text-green-600 font-bold">✓</span>'
                 : `<button class="btn-suggest" onclick="openSuggestionModal('${fn.name.replace(/'/g,"\\'")}','${fn.file.replace(/'/g,"\\'")}','${paramsRaw.replace(/'/g,"\\'")}','function')">💡 Sugerencia</button>`;
             return `<tr class="hover:bg-primary/5 transition-colors">
+                <td class="px-6 py-3"><input type="checkbox" id="${fnId}" class="item-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" data-type="functions" data-index="${i}" onchange="updateSelectAll('functions')"></td>
                 <td class="px-6 py-3">${asyncTag}<code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${fn.name}</code></td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant/50">${fn.file}</td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant">${params}</td>
                 <td class="px-6 py-3 font-code-md font-bold ${cxClass}">${cx}</td>
                 <td class="px-6 py-3">${docCell}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron funciones</td></tr>';
+        }).join('') || '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron funciones</td></tr>';
 
         // ── Classes ──
         const cls = r.classes || [];
         document.getElementById('cls-count').textContent = cls.length + ' clases';
         document.getElementById('classes-table').innerHTML = cls.map((c, i) => {
+            const clsId = `cls-${i}`;
             const hasDoc = !!c.docstring;
             const paramsRaw = (c.methods||[]).slice(0,3).join(', ');
             const docCell = hasDoc
                 ? '<span class="text-green-600 font-bold">✓</span>'
                 : `<button class="btn-suggest" onclick="openSuggestionModal('${c.name.replace(/'/g,"\\'")}','${c.file.replace(/'/g,"\\'")}','${paramsRaw.replace(/'/g,"\\'")}','class')">💡 Sugerencia</button>`;
             return `<tr class="hover:bg-primary/5 transition-colors">
+                <td class="px-6 py-3"><input type="checkbox" id="${clsId}" class="item-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" data-type="classes" data-index="${i}" onchange="updateSelectAll('classes')"></td>
                 <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${c.name}</code></td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant/50">${c.file}</td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant">${(c.methods||[]).length}</td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant">${(c.bases||[]).join(', ')||'—'}</td>
                 <td class="px-6 py-3">${docCell}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron clases</td></tr>';
+        }).join('') || '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron clases</td></tr>';
 
         // ── Structure ──
         const struct = r.structure || [];
         document.getElementById('struct-count').textContent = struct.length + ' archivos';
         document.getElementById('structure-table').innerHTML = struct.slice(0,50).map((f, i) => {
+            const structId = `struct-${i}`;
             const size = f.size > 1024 ? (f.size/1024).toFixed(1)+'KB' : f.size+'B';
             return `<tr class="hover:bg-primary/5 transition-colors">
+                <td class="px-6 py-3"><input type="checkbox" id="${structId}" class="item-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" data-type="structure" data-index="${i}" onchange="updateSelectAll('structure')"></td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant/70 font-code-md">${f.path}</td>
                 <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${f.language}</code></td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant/50">${size}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="3" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron archivos</td></tr>';
+        }).join('') || '<tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron archivos</td></tr>';
+
+        // Apply saved selections after rendering
+        const savedSelections = loadSelections();
+        if (savedSelections) {
+            applySelections(savedSelections);
+        } else {
+            // If no saved selections, select all by default
+            ['endpoints', 'functions', 'classes', 'structure'].forEach(type => {
+                const selectAllCheckbox = document.getElementById(`select-all-${type}`);
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = true;
+                    toggleSelectAll(type);
+                }
+            });
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  SELECTION FUNCTIONS
+    // ══════════════════════════════════════════════════════════
+    function toggleSelectAll(type) {
+        const selectAllCheckbox = document.getElementById(`select-all-${type}`);
+        const checkboxes = document.querySelectorAll(`.item-checkbox[data-type="${type}"]`);
+        checkboxes.forEach(cb => {
+            cb.checked = selectAllCheckbox.checked;
+        });
+        saveSelections();
+    }
+
+    function updateSelectAll(type) {
+        const checkboxes = document.querySelectorAll(`.item-checkbox[data-type="${type}"]`);
+        const selectAllCheckbox = document.getElementById(`select-all-${type}`);
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+        saveSelections();
+    }
+
+    function getSelectedItems() {
+        const selected = { endpoints: [], functions: [], classes: [], structure: [] };
+        ['endpoints', 'functions', 'classes', 'structure'].forEach(type => {
+            const checkboxes = document.querySelectorAll(`.item-checkbox[data-type="${type}"]:checked`);
+            checkboxes.forEach(cb => {
+                selected[type].push(parseInt(cb.dataset.index));
+            });
+        });
+        return selected;
     }
 
     // ══════════════════════════════════════════════════════════
@@ -549,9 +730,18 @@
         URL.revokeObjectURL(a.href);
     }
 
-    async function exportMd()   { await downloadFile(`/api/export/${projectId}/markdown`, `docs_${projectId}.md`, 'text/markdown'); }
-    async function exportHtml() { await downloadFile(`/api/export/${projectId}/html`, `docs_${projectId}.html`, 'text/html'); }
-    async function exportPdf()  { window.open(`/api/export/${projectId}/pdf?token=${token}`, '_blank'); }
+    async function exportMd() {
+        const selected = getSelectedItems();
+        await downloadFile(`/api/export/${projectId}/markdown?selected=${encodeURIComponent(JSON.stringify(selected))}`, `docs_${projectId}.md`, 'text/markdown');
+    }
+    async function exportHtml() {
+        const selected = getSelectedItems();
+        await downloadFile(`/api/export/${projectId}/html?selected=${encodeURIComponent(JSON.stringify(selected))}`, `docs_${projectId}.html`, 'text/html');
+    }
+    async function exportPdf() {
+        const selected = getSelectedItems();
+        window.open(`/api/export/${projectId}/pdf?token=${token}&selected=${encodeURIComponent(JSON.stringify(selected))}`, '_blank');
+    }
 
     // ══════════════════════════════════════════════════════════
     //  LOAD PROJECT / RESULTS
@@ -646,9 +836,9 @@
                 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX-rect.left, y = e.clientY-rect.top;
-                const rx = (y-rect.height/2)/40, ry = (rect.width/2-x)/40;
+                const rx = (y-rect.height/2)/80, ry = (rect.width/2-x)/80;
                 const t = card.querySelector('.card-interaction');
-                if (t) t.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02,1.02,1.02)`;
+                if (t) t.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.01,1.01,1.01)`;
             });
             card.addEventListener('mouseleave', () => {
                 const t = card.querySelector('.card-interaction');
