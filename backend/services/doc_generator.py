@@ -463,7 +463,7 @@ proyecto/
 
 ### 2.8 Insights de Arquitectura (IA)
 
-{ai_insights if ai_insights else "No se generaron insights de IA - configura GEMINI_API_KEY en el archivo .env para habilitar esta función."}
+{ai_insights if ai_insights else "No se generaron insights de IA - configura GROQ_API_KEY en el archivo .env para habilitar esta función."}
 """
 
     def _detect_patterns(self) -> str:
@@ -775,6 +775,286 @@ python app.py  # o npm run dev
 
         return out + "\n"
 
+    def _generate_star_schema(self) -> str:
+        """
+        A partir de las clases tipo Model/Schema detectadas,
+        genera un diagrama estrella de Data Warehouse en PlantUML.
+        """
+        classes = self.r.get("classes", [])
+        model_classes = [c for c in classes if any(
+            kw in c["name"].lower() for kw in ["model", "schema", "entity", "dto", "dao"]
+        )]
+
+        if not model_classes:
+            return ""
+
+        # Identificar tabla de hechos (clases con más métodos o relaciones)
+        fact_table = None
+        dimension_tables = []
+
+        for cls in model_classes:
+            methods = cls.get("methods", [])
+            # Si tiene métodos CRUD, es probablemente una tabla de hechos
+            if any(m in methods for m in ["create", "update", "delete", "save"]):
+                if not fact_table:
+                    fact_table = cls
+                else:
+                    dimension_tables.append(cls)
+            else:
+                dimension_tables.append(cls)
+
+        # Si no se encontró tabla de hechos, usar la primera como tabla de hechos
+        if not fact_table and model_classes:
+            fact_table = model_classes[0]
+            dimension_tables = model_classes[1:]
+
+        # Generar diagrama PlantUML estrella
+        puml = "@startuml\n"
+        puml += "!include <archimate/Archimate>\n"
+        puml += "skinparam backgroundColor #FEFEFE\n"
+        puml += "title Diagrama Estrella de Data Warehouse\n\n"
+
+        # Tabla de hechos
+        if fact_table:
+            puml += f"rectangle \"{fact_table['name']}\" as fact <<Fact Table>> {{\n"
+            puml += "  **Fact Table**\n"
+            for method in fact_table.get("methods", [])[:5]:
+                puml += f"  -- {method}\n"
+            puml += "}\n\n"
+
+        # Tablas de dimensión
+        for dim in dimension_tables[:8]:
+            puml += f"rectangle \"{dim['name']}\" as {dim['name'].lower()} <<Dimension>> {{\n"
+            puml += f"  **Dimension**\n"
+            for method in dim.get("methods", [])[:3]:
+                puml += f"  -- {method}\n"
+            puml += "}\n\n"
+
+        # Relaciones
+        if fact_table:
+            for dim in dimension_tables[:8]:
+                puml += f"{dim['name'].lower()} --> fact : FK\n"
+
+        puml += "@enduml"
+
+        # Generar imagen
+        diagram_path = self._generate_plantuml_diagram(puml)
+        if diagram_path:
+            return (
+                f"\n\n<div style=\"margin: 1.5rem 0;\">"
+                f"<img src=\"{diagram_path}\" alt=\"Diagrama Estrella de Data Warehouse\" "
+                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
+                f"</div>\n"
+            )
+
+        return ""
+
+    def _generate_snowflake_schema(self) -> str:
+        """
+        Genera un diagrama copo de nieve (snowflake) de Data Warehouse en PlantUML.
+        """
+        classes = self.r.get("classes", [])
+        model_classes = [c for c in classes if any(
+            kw in c["name"].lower() for kw in ["model", "schema", "entity", "dto", "dao"]
+        )]
+
+        if len(model_classes) < 3:
+            return ""
+
+        # Generar diagrama PlantUML copo de nieve
+        puml = "@startuml\n"
+        puml += "!include <archimate/Archimate>\n"
+        puml += "skinparam backgroundColor #FEFEFE\n"
+        puml += "title Diagrama Copo de Nieve de Data Warehouse\n\n"
+
+        # Tabla central (hechos)
+        central = model_classes[0]
+        puml += f"rectangle \"{central['name']}\" as central <<Fact Table>> {{\n"
+        puml += "  **Central Fact**\n"
+        for method in central.get("methods", [])[:3]:
+            puml += f"  -- {method}\n"
+        puml += "}\n\n"
+
+        # Dimensiones primarias
+        for i, dim in enumerate(model_classes[1:5]):
+            puml += f"rectangle \"{dim['name']}\" as dim{i} <<Dimension>> {{\n"
+            puml += f"  **Dimension**\n"
+            for method in dim.get("methods", [])[:2]:
+                puml += f"  -- {method}\n"
+            puml += "}\n\n"
+            puml += f"dim{i} --> central : FK\n\n"
+
+        # Sub-dimensiones (copo de nieve)
+        for i, dim in enumerate(model_classes[5:8]):
+            parent_dim = i % 4  # Ciclar entre dimensiones primarias
+            puml += f"rectangle \"{dim['name']}\" as subdim{i} <<Sub-Dimension>> {{\n"
+            puml += f"  **Sub-Dimension**\n"
+            for method in dim.get("methods", [])[:2]:
+                puml += f"  -- {method}\n"
+            puml += "}\n\n"
+            puml += f"subdim{i} --> dim{parent_dim} : FK\n\n"
+
+        puml += "@enduml"
+
+        # Generar imagen
+        diagram_path = self._generate_plantuml_diagram(puml)
+        if diagram_path:
+            return (
+                f"\n\n<div style=\"margin: 1.5rem 0;\">"
+                f"<img src=\"{diagram_path}\" alt=\"Diagrama Copo de Nieve de Data Warehouse\" "
+                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
+                f"</div>\n"
+            )
+
+        return ""
+
+    def _data_analysis_section(self) -> str:
+        """
+        Genera la Sección 9: Análisis de Datos del Proyecto.
+
+        Incluye:
+        - Esquema de Data Warehouse inferido (estrella/copo de nieve)
+        - Tipos y fuentes de datos detectados en el repositorio
+        - Reporte de limpieza de datos
+        - Diagrama del pipeline ETL
+        """
+        out = "## 9. Análisis de Datos del Proyecto\n\n"
+
+        # 9.1 Tipos y fuentes de datos detectados
+        data_types = self.r.get("data_types", {"structured": [], "semi_structured": [], "unstructured": []})
+        structured = data_types.get("structured", [])
+        semi_structured = data_types.get("semi_structured", [])
+        unstructured = data_types.get("unstructured", [])
+
+        out += "### 9.1 Tipos y Fuentes de Datos Detectados\n\n"
+        out += f"**Datos Estructurados:** {len(structured)} archivos\n"
+        if structured:
+            for file in structured[:10]:
+                out += f"- `{file}`\n"
+            if len(structured) > 10:
+                out += f"- ... y {len(structured) - 10} más\n"
+
+        out += f"\n**Datos Semi-estructurados:** {len(semi_structured)} archivos\n"
+        if semi_structured:
+            for file in semi_structured[:10]:
+                out += f"- `{file}`\n"
+            if len(semi_structured) > 10:
+                out += f"- ... y {len(semi_structured) - 10} más\n"
+
+        out += f"\n**Datos No Estructurados:** {len(unstructured)} archivos\n"
+        if unstructured:
+            for file in unstructured[:10]:
+                out += f"- `{file}`\n"
+            if len(unstructured) > 10:
+                out += f"- ... y {len(unstructured) - 10} más\n"
+
+        # 9.2 Esquema de Data Warehouse inferido
+        out += "\n### 9.2 Esquema de Data Warehouse Inferido\n\n"
+        star_schema = self._generate_star_schema()
+        snowflake_schema = self._generate_snowflake_schema()
+
+        if star_schema:
+            out += "**Diagrama Estrella (Star Schema):**\n\n"
+            out += star_schema
+            out += "\nEl esquema estrella es adecuado para consultas analíticas rápidas, con una tabla de hechos central conectada a tablas de dimensión.\n\n"
+        elif snowflake_schema:
+            out += "**Diagrama Copo de Nieve (Snowflake Schema):**\n\n"
+            out += snowflake_schema
+            out += "\nEl esquema copo de nieve normaliza las dimensiones para reducir redundancia, a costa de consultas más complejas.\n\n"
+        else:
+            out += "No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.\n\n"
+
+        # 9.3 Reporte de limpieza de datos
+        out += "### 9.3 Reporte de Calidad de Datos\n\n"
+
+        # Aplicar limpieza de datos al análisis
+        from services.data_cleaner import DataCleaner
+        cleaner = DataCleaner()
+
+        # Detectar problemas en el código
+        code_issues = cleaner.clean_code_issues(self.r)
+
+        out += "**Problemas Detectados en el Código:**\n\n"
+
+        if code_issues.get("missing_docstrings"):
+            out += f"- **Funciones sin documentar:** {len(code_issues['missing_docstrings'])}\n"
+            for issue in code_issues["missing_docstrings"][:5]:
+                out += f"  - `{issue['name']}` en `{issue['file']}`\n"
+            if len(code_issues["missing_docstrings"]) > 5:
+                out += f"  - ... y {len(code_issues['missing_docstrings']) - 5} más\n"
+
+        if code_issues.get("high_complexity"):
+            out += f"\n- **Funciones de alta complejidad:** {len(code_issues['high_complexity'])}\n"
+            for issue in code_issues["high_complexity"][:5]:
+                out += f"  - `{issue['name']}` en `{issue['file']}` (complejidad: {issue['complexity']})\n"
+            if len(code_issues["high_complexity"]) > 5:
+                out += f"  - ... y {len(code_issues['high_complexity']) - 5} más\n"
+
+        if code_issues.get("naming_conventions"):
+            out += f"\n- **Problemas de naming conventions:** {len(code_issues['naming_conventions'])}\n"
+            for issue in code_issues["naming_conventions"][:5]:
+                out += f"  - `{issue['name']}`: {issue['message']}\n"
+
+        # 9.4 Minería de datos aplicada al código
+        out += "\n### 9.4 Minería de Datos Aplicada al Código\n\n"
+
+        mining_results = self.r.get("mining_results", {})
+        if mining_results:
+            frequent_patterns = mining_results.get("frequent_patterns", [])
+            complexity_clusters = mining_results.get("complexity_clusters", [])
+            function_clusters = mining_results.get("function_clusters", [])
+
+            out += "**Patrones Frecuentes Detectados:**\n\n"
+            if frequent_patterns:
+                for pattern in frequent_patterns:
+                    out += f"- **{pattern.get('pattern', 'N/A')}**: {pattern.get('frequency', 0)} ocurrencias\n"
+                    if pattern.get('examples'):
+                        out += f"  - Ejemplos: {pattern['examples']}\n"
+            else:
+                out += "- No se detectaron patrones frecuentes significativos.\n"
+
+            out += "\n**Clustering por Complejidad:**\n\n"
+            if complexity_clusters:
+                for cluster in complexity_clusters:
+                    out += f"- **{cluster.get('cluster', 'N/A')}**: {cluster.get('count', 0)} funciones "
+                    out += f"(complejidad promedio: {cluster.get('avg_complexity', 0)})\n"
+            else:
+                out += "- No se pudo realizar el clustering por complejidad.\n"
+
+            out += "\n**Clustering por Funcionalidad:**\n\n"
+            if function_clusters:
+                for cluster in function_clusters[:10]:
+                    out += f"- **{cluster.get('cluster', 'N/A')}**: {cluster.get('count', 0)} archivos\n"
+            else:
+                out += "- No se pudo realizar el clustering por funcionalidad.\n"
+        else:
+            out += "La minería de datos no está disponible. Configura GROQ_API_KEY para habilitar esta función.\n\n"
+
+        # 9.5 Diagrama del Pipeline ETL
+        out += "### 9.5 Pipeline ETL Utilizado\n\n"
+        out += "El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):\n\n"
+
+        from services.etl_pipeline import ETLPipeline
+        pipeline = ETLPipeline()
+        etl_diagram = pipeline.get_pipeline_diagram()
+
+        # Generar imagen del diagrama ETL
+        etl_image = self._generate_plantuml_diagram(etl_diagram)
+        if etl_image:
+            out += (
+                f"\n<div style=\"margin: 1.5rem 0;\">"
+                f"<img src=\"{etl_image}\" alt=\"Diagrama del Pipeline ETL\" "
+                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
+                f"</div>\n"
+            )
+
+        out += "\n**Fases del Pipeline:**\n\n"
+        out += "- **Extract:** Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales\n"
+        out += "- **Transform:** Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones\n"
+        out += "- **Load:** Generación de documentación en HTML, PDF o almacenamiento en MongoDB\n\n"
+
+        return out
+
     # ─── 7. DESPLIEGUE ────────────────────────────────────────────────────────
     def _deployment(self) -> str:
         lang = self.r.get("primary_language", "Python")
@@ -969,6 +1249,7 @@ Tendencia: {"↑ Aumentando" if cx.get('avg', 1) > 5 else "→ Estable" if cx.ge
             self._functions_section()+ separator +
             self._data_models()    + separator +
             self._deployment()     + separator +
-            self._quality_report() +
+            self._quality_report() + separator +
+            self._data_analysis_section() +
             f"\n\n---\n*Documentación generada automáticamente por AutoDocs AI — {self.now}*\n"
         )

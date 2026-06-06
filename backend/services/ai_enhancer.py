@@ -1,7 +1,6 @@
 import os
 import json
-import urllib.request
-import urllib.error
+import requests
 from typing import Optional
 
 
@@ -12,21 +11,20 @@ class AIEnhancer:
     y proporciona insights técnicos avanzados.
     """
 
-    GEMINI_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-
     def __init__(self):
-        self.api_key = os.getenv('GEMINI_API_KEY')
+        self.api_key = os.getenv('GROQ_API_KEY')
+        self.API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
     def is_available(self) -> bool:
         """Verifica si la API de Gemini está configurada y disponible."""
         return bool(self.api_key)
 
-    def _call_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int = 400):
+    def _call_ai(self, system_prompt: str, user_prompt: str, max_tokens: int = 400):
         if not self.is_available():
             return None
 
         payload = {
-            "model": "google/gemma-4-31b:free",
+            "model": "llama-3.3-70b-versatile",
             "messages": [
                 {
                     "role": "system",
@@ -41,34 +39,35 @@ class AIEnhancer:
             "temperature": 0.7
         }
 
-        data = json.dumps(payload).encode("utf-8")
-
-        req = urllib.request.Request(
-            self.GEMINI_API_URL,
-            data=data,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}"
-            },
-            method="POST"
-        )
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+            "User-Agent": "AutoDocs/1.0"
+        }
 
         try:
-            with urllib.request.urlopen(req, timeout=30) as response:
-                result = json.loads(response.read().decode("utf-8"))
+            response = requests.post(
+                self.API_URL,
+                json=payload,
+                headers=headers,
+                timeout=30,
+                verify=True
+            )
 
+            if response.status_code == 200:
+                result = response.json()
                 return (
                     result.get("choices", [{}])[0]
                     .get("message", {})
                     .get("content", "")
                     .strip()
                 )
+            else:
+                print(f"[AI] HTTP Error: {response.status_code} - {response.text[:300]}")
 
-        except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8", errors="ignore")
-            print(f"[AI OpenRouter] HTTP {e.code}: {body[:300]}")
         except Exception as e:
-            print(f"[AI OpenRouter] Error: {e}")
+            print(f"[AI] Error calling AI: {e}")
+            # No lanzar excepción, permitir que el sistema continúe sin IA
 
         return None
 
@@ -87,7 +86,7 @@ class AIEnhancer:
             return function.get('docstring', '') or f"Función {function['name']}"
 
         params = ', '.join(function.get('params', []))
-        prompt = f"""Analiza esta función y genera una descripción técnica profesional:
+        prompt = f"""Analiza esta función y genera una descripción sencilla y comprensible para personas no técnicas:
 
 Nombre: {function['name']}
 Parámetros: {params}
@@ -96,15 +95,15 @@ Docstring existente: {function.get('docstring', 'ninguna')}
 Contexto del proyecto: {context}
 
 Genera una descripción que incluya:
-1. Propósito de la función
-2. Qué parámetros recibe y su función
-3. Qué retorna (si es inferible)
-4. Casos de uso típicos
-5. Notas importantes sobre su implementación
+1. Propósito de la función en lenguaje simple (explicado como si fuera para alguien sin conocimientos de programación)
+2. Qué datos necesita para funcionar (explicado de forma sencilla)
+3. Qué resultado produce (explicado de forma sencilla)
+4. Para qué se usa en la vida real (ejemplos prácticos)
+5. Importancia de esta función en el sistema
 
-Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
+Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla. Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
 
-        result = self._call_gemini(
+        result = self._call_ai(
             "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas.",
             prompt,
             max_tokens=300
@@ -132,7 +131,7 @@ Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
         methods = ', '.join(class_info.get('methods', [])[:10])
         bases = ', '.join(class_info.get('bases', []))
 
-        prompt = f"""Analiza esta clase y genera una descripción técnica profesional:
+        prompt = f"""Analiza esta clase y genera una descripción sencilla y comprensible para personas no técnicas:
 
 Nombre: {class_info['name']}
 Hereda de: {bases or 'object'}
@@ -142,16 +141,16 @@ Docstring existente: {class_info.get('docstring', 'ninguna')}
 Contexto del proyecto: {context}
 
 Genera una descripción que incluya:
-1. Propósito y responsabilidad de la clase
-2. Patrones de diseño que implementa (si aplica)
-3. Relación con otras clases (herencia, composición)
-4. Métodos principales y su función
-5. Casos de uso típicos
+1. Propósito de la clase en lenguaje simple (explicado como si fuera para alguien sin conocimientos de programación)
+2. Qué representa esta clase en el sistema (analogías con el mundo real si es posible)
+3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)
+4. Para qué se usa en la vida real (ejemplos prácticos)
+5. Importancia de esta clase en el sistema
 
-Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
+Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla."""
 
-        result = self._call_gemini(
-            "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas.",
+        result = self._call_ai(
+            "Eres un experto en explicar conceptos técnicos de forma sencilla para personas sin conocimientos de programación. Genera descripciones claras, comprensibles y prácticas.",
             prompt,
             max_tokens=300
         )
@@ -175,7 +174,7 @@ Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
         if not self.is_available():
             return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
 
-        prompt = f"""Analiza este endpoint de API y genera una descripción técnica profesional:
+        prompt = f"""Analiza este endpoint de API y genera una descripción sencilla y comprensible para personas no técnicas:
 
 Método: {endpoint.get('method')}
 Ruta: {endpoint.get('path')}
@@ -184,16 +183,16 @@ Archivo: {endpoint.get('file', 'desconocido')}
 Contexto del proyecto: {context}
 
 Genera una descripción que incluya:
-1. Propósito del endpoint
-2. Qué recursos manipula
-3. Parámetros esperados (query params, body, headers)
-4. Respuestas típicas y códigos de estado
-5. Casos de uso y consideraciones de seguridad
+1. Propósito del endpoint en lenguaje simple (explicado como si fuera para alguien sin conocimientos de programación)
+2. Qué hace este endpoint (funcionalidad explicada de forma sencilla)
+3. Qué información necesita para funcionar (explicado de forma sencilla)
+4. Qué resultado devuelve (explicado de forma sencilla)
+5. Para qué se usa en la vida real (ejemplos prácticos)
 
-Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
+Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla."""
 
-        result = self._call_gemini(
-            "Eres un experto en documentación de APIs REST. Genera descripciones claras, precisas y técnicas.",
+        result = self._call_ai(
+            "Eres un experto en explicar conceptos técnicos de forma sencilla para personas sin conocimientos de programación. Genera descripciones claras, comprensibles y prácticas.",
             prompt,
             max_tokens=300
         )
@@ -239,7 +238,7 @@ Genera insights sobre:
 
 Mantén los insights concisos y accionables (máximo 200 palabras)."""
 
-        result = self._call_gemini(
+        result = self._call_ai(
             "Eres un arquitecto de software senior. Genera insights técnicos y prácticos sobre arquitectura de proyectos.",
             prompt,
             max_tokens=400
@@ -261,11 +260,11 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
             Resultados con descripciones mejoradas por IA
         """
         if not self.is_available():
-            print("[AI] Gemini no configurado, usando documentación básica. "
+            print("[AI] Groq no configurado, usando documentación básica. "
                   "Agrega GEMINI_API_KEY en tu archivo .env para habilitar la mejora con IA.")
             return analysis_results
 
-        print("[AI] Mejorando documentación con Gemini...")
+        print("[AI] Mejorando documentación con Groq...")
 
         # Contexto del proyecto
         context = (
@@ -275,13 +274,11 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
 
         # Mejorar funciones (limitar a 20 para no exceder cuotas)
         for func in analysis_results.get('functions', [])[:20]:
-            if not func.get('docstring'):
-                func['ai_description'] = self.enhance_function_description(func, context)
+            func['ai_description'] = self.enhance_function_description(func, context)
 
         # Mejorar clases (limitar a 15)
         for cls in analysis_results.get('classes', [])[:15]:
-            if not cls.get('docstring'):
-                cls['ai_description'] = self.enhance_class_description(cls, context)
+            cls['ai_description'] = self.enhance_class_description(cls, context)
 
         # Mejorar endpoints (limitar a 15)
         for ep in analysis_results.get('endpoints', [])[:15]:
@@ -292,3 +289,146 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
 
         print("[AI] Documentación mejorada exitosamente con Gemini")
         return analysis_results
+
+    def mine_code_patterns(self, analysis_results: dict) -> dict:
+        """
+        Aplica conceptos de minería de datos al código:
+        - Detección de patrones frecuentes (funciones similares)
+        - Clasificación de módulos por complejidad
+        - Clustering de archivos por lenguaje/función
+
+        Args:
+            analysis_results: Resultados del análisis del proyecto
+
+        Returns:
+            Diccionario con patrones minados del código
+        """
+        if not self.is_available():
+            return {
+                "frequent_patterns": [],
+                "complexity_clusters": [],
+                "function_clusters": [],
+                "insights": "Minería de patrones no disponible - configura GROQ_API_KEY"
+            }
+
+        functions = analysis_results.get("functions", [])
+        classes = analysis_results.get("classes", [])
+        structure = analysis_results.get("structure", [])
+
+        # Extraer información para análisis
+        function_names = [f["name"] for f in functions]
+        class_names = [c["name"] for c in classes]
+        file_paths = [s["path"] for s in structure]
+
+        prompt = f"""Analiza este código y aplica técnicas de minería de datos para detectar patrones. Genera un análisis sencillo y comprensible para personas no técnicas:
+
+Funciones detectadas ({len(function_names)}): {function_names[:20]}
+Clases detectadas ({len(class_names)}): {class_names[:15]}
+Archivos del proyecto ({len(file_paths)}): {file_paths[:15]}
+
+Genera un análisis que incluya:
+1. **Patrones frecuentes**: Nombres o estructuras de funciones que se repiten (explicados de forma sencilla)
+2. **Clustering por complejidad**: Agrupa funciones en categorías (baja, media, alta complejidad) con explicaciones sencillas
+3. **Clustering por funcionalidad**: Agrupa archivos/módulos por su propósito (explicado de forma sencilla)
+4. **Anomalías**: Funciones o clases que no siguen el patrón general del proyecto (explicado de forma sencilla)
+
+Formato de respuesta JSON:
+{{
+    "frequent_patterns": [
+        {{"pattern": "nombre_patron", "description": "explicación sencilla del patrón", "frequency": 5, "examples": ["func1", "func2"]}}
+    ],
+    "complexity_clusters": [
+        {{"cluster": "baja", "description": "explicación sencilla", "count": 10, "avg_complexity": 2}},
+        {{"cluster": "media", "description": "explicación sencilla", "count": 5, "avg_complexity": 7}},
+        {{"cluster": "alta", "description": "explicación sencilla", "count": 2, "avg_complexity": 15}}
+    ],
+    "function_clusters": [
+        {{"cluster": "controllers", "description": "explicación sencilla", "files": ["file1", "file2"], "functions": ["func1", "func2"]}}
+    ],
+    "anomalies": [
+        {{"type": "funcion", "name": "nombre", "description": "explicación sencilla del motivo"}}
+    ]
+}}
+
+Responde solo con el JSON, sin texto adicional. Usa lenguaje claro y evita términos técnicos complejos."""
+
+        result = self._call_ai(
+            "Eres un experto en explicar conceptos técnicos de minería de datos de forma sencilla para personas sin conocimientos de programación. Genera análisis JSON estructurados con descripciones claras y comprensibles.",
+            prompt,
+            max_tokens=600
+        )
+
+        if result:
+            try:
+                import json
+                # Intentar extraer JSON de la respuesta
+                json_start = result.find('{')
+                json_end = result.rfind('}') + 1
+                if json_start != -1 and json_end > json_start:
+                    json_str = result[json_start:json_end]
+                    patterns = json.loads(json_str)
+                    patterns["insights"] = "Análisis de minería de datos completado exitosamente"
+                    return patterns
+            except Exception as e:
+                print(f"[AI] Error al parsear JSON de minería de patrones: {e}")
+
+        # Fallback: análisis simple sin IA
+        return self._mine_patterns_simple(analysis_results)
+
+    def _mine_patterns_simple(self, analysis_results: dict) -> dict:
+        """
+        Realiza minería de patrones simple sin IA (fallback).
+        """
+        functions = analysis_results.get("functions", [])
+        classes = analysis_results.get("classes", [])
+        structure = analysis_results.get("structure", [])
+
+        # Detectar patrones frecuentes en nombres de funciones
+        from collections import Counter
+        prefixes = []
+        for f in functions:
+            name = f["name"].lower()
+            for prefix in ["get_", "post_", "put_", "delete_", "create_", "update_", "find_", "save_", "validate_", "check_"]:
+                if name.startswith(prefix):
+                    prefixes.append(prefix)
+
+        prefix_counts = Counter(prefixes)
+        frequent_patterns = [
+            {"pattern": prefix, "frequency": count, "examples": f"Operaciones {prefix} repetidas"}
+            for prefix, count in prefix_counts.most_common(5)
+        ]
+
+        # Clustering por complejidad
+        low_cx = [f for f in functions if f.get("complexity", 1) <= 5]
+        med_cx = [f for f in functions if 5 < f.get("complexity", 1) <= 10]
+        high_cx = [f for f in functions if f.get("complexity", 1) > 10]
+
+        complexity_clusters = [
+            {"cluster": "baja", "count": len(low_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in low_cx) / max(len(low_cx), 1), 2)},
+            {"cluster": "media", "count": len(med_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in med_cx) / max(len(med_cx), 1), 2)},
+            {"cluster": "alta", "count": len(high_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in high_cx) / max(len(high_cx), 1), 2)},
+        ]
+
+        # Clustering por directorio
+        dir_clusters = {}
+        for item in structure:
+            path = item["path"]
+            parts = path.replace("\\", "/").split("/")
+            if len(parts) > 1:
+                dir_name = parts[0]
+                if dir_name not in dir_clusters:
+                    dir_clusters[dir_name] = []
+                dir_clusters[dir_name].append(path)
+
+        function_clusters = [
+            {"cluster": dir_name, "files": files, "count": len(files)}
+            for dir_name, files in list(dir_clusters.items())[:10]
+        ]
+
+        return {
+            "frequent_patterns": frequent_patterns,
+            "complexity_clusters": complexity_clusters,
+            "function_clusters": function_clusters,
+            "anomalies": [],
+            "insights": "Análisis de minería de datos completado (modo simple sin IA)"
+        }

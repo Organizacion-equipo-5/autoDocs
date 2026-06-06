@@ -6,7 +6,65 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 
 UPLOAD_BASE = Path('./uploads')
-ALLOWED_EXTENSIONS = {'zip', 'tar', 'gz', 'py', 'js', 'ts', 'java', 'php', 'go', 'rb'}
+ALLOWED_EXTENSIONS = {'zip', 'tar', 'gz', 'py', 'js', 'ts', 'java', 'php', 'go', 'rb', 'csv', 'json', 'sql'}
+
+def classify_file_type(filename: str) -> dict:
+    """
+    Clasifica el tipo de archivo según su contenido potencial.
+
+    Returns:
+        dict: {
+            'type': 'structured' | 'semi_structured' | 'unstructured',
+            'category': str,
+            'description': str
+        }
+    """
+    ext = Path(filename).suffix.lower()
+
+    structured = {
+        '.sql': {'category': 'database', 'description': 'Archivo SQL - datos estructurados'},
+        '.csv': {'category': 'tabular', 'description': 'Archivo CSV - datos tabulares'},
+        '.db': {'category': 'database', 'description': 'Base de datos SQLite'},
+        '.sqlite': {'category': 'database', 'description': 'Base de datos SQLite'},
+        '.sqlite3': {'category': 'database', 'description': 'Base de datos SQLite'},
+        '.parquet': {'category': 'analytics', 'description': 'Archivo Parquet - columnar'},
+        '.avro': {'category': 'analytics', 'description': 'Archivo Avro - serialización'},
+    }
+
+    semi_structured = {
+        '.json': {'category': 'document', 'description': 'Archivo JSON - datos semiestructurados'},
+        '.xml': {'category': 'document', 'description': 'Archivo XML - datos jerárquicos'},
+        '.yaml': {'category': 'config', 'description': 'Archivo YAML - configuración'},
+        '.yml': {'category': 'config', 'description': 'Archivo YAML - configuración'},
+        '.toml': {'category': 'config', 'description': 'Archivo TOML - configuración'},
+        '.ini': {'category': 'config', 'description': 'Archivo INI - configuración'},
+        '.py': {'category': 'code', 'description': 'Código Python - semiestructurado'},
+        '.js': {'category': 'code', 'description': 'Código JavaScript - semiestructurado'},
+        '.ts': {'category': 'code', 'description': 'Código TypeScript - semiestructurado'},
+    }
+
+    unstructured = {
+        '.txt': {'category': 'text', 'description': 'Archivo de texto plano'},
+        '.log': {'category': 'log', 'description': 'Archivo de logs'},
+        '.md': {'category': 'documentation', 'description': 'Archivo Markdown'},
+        '.rst': {'category': 'documentation', 'description': 'Archivo reStructuredText'},
+        '.png': {'category': 'image', 'description': 'Imagen PNG'},
+        '.jpg': {'category': 'image', 'description': 'Imagen JPEG'},
+        '.jpeg': {'category': 'image', 'description': 'Imagen JPEG'},
+        '.gif': {'category': 'image', 'description': 'Imagen GIF'},
+        '.bmp': {'category': 'image', 'description': 'Imagen BMP'},
+        '.svg': {'category': 'image', 'description': 'Imagen SVG'},
+        '.pdf': {'category': 'document', 'description': 'Documento PDF'},
+    }
+
+    if ext in structured:
+        return {'type': 'structured', **structured[ext]}
+    elif ext in semi_structured:
+        return {'type': 'semi_structured', **semi_structured[ext]}
+    elif ext in unstructured:
+        return {'type': 'unstructured', **unstructured[ext]}
+    else:
+        return {'type': 'unstructured', 'category': 'unknown', 'description': f'Archivo {ext} - tipo desconocido'}
 
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -23,17 +81,39 @@ def clone_github_repo(github_url: str, project_id: str) -> str:
     clone_path = project_dir / repo_name
     
     try:
-        # Clone the repository
-        subprocess.run(
+        # Clone the repository with timeout
+        result = subprocess.run(
             ['git', 'clone', github_url, str(clone_path)],
             check=True,
             capture_output=True,
-            text=True
+            text=True,
+            timeout=120  # 2 minutos timeout
         )
-        return str(clone_path)
+        print(f"[Git Clone] Successfully cloned {github_url} to {clone_path}")
+        return str(clone_path.resolve())
+    except subprocess.TimeoutExpired:
+        print(f"[Git Clone Error] Timeout cloning {github_url}")
+        # Remove partial clone if exists
+        if clone_path.exists():
+            import shutil
+            shutil.rmtree(clone_path, ignore_errors=True)
+        raise Exception(f"Timeout cloning repository: operation took too long")
     except subprocess.CalledProcessError as e:
-        print(f"[Git Clone Error] {e.stderr}")
+        print(f"[Git Clone Error] Command failed with return code {e.returncode}")
+        print(f"[Git Clone Error] stdout: {e.stdout}")
+        print(f"[Git Clone Error] stderr: {e.stderr}")
+        # Remove partial clone if exists
+        if clone_path.exists():
+            import shutil
+            shutil.rmtree(clone_path, ignore_errors=True)
         raise Exception(f"Failed to clone repository: {e.stderr}")
+    except Exception as e:
+        print(f"[Git Clone Error] Unexpected error: {e}")
+        # Remove partial clone if exists
+        if clone_path.exists():
+            import shutil
+            shutil.rmtree(clone_path, ignore_errors=True)
+        raise Exception(f"Failed to clone repository: {e}")
 
 def save_uploaded_project(file, project_id: str) -> str:
     """Save uploaded file and extract if archive. Returns project folder path."""
@@ -53,12 +133,12 @@ def save_uploaded_project(file, project_id: str) -> str:
             z.extractall(project_dir / 'src')
         # Remove the zip file after extraction
         file_path.unlink()
-        return str(project_dir / 'src')
+        return str((project_dir / 'src').resolve())
     elif ext in ('tar', 'gz'):
         with tarfile.open(file_path, 'r:*') as t:
             t.extractall(project_dir / 'src')
         # Remove the tar file after extraction
         file_path.unlink()
-        return str(project_dir / 'src')
+        return str((project_dir / 'src').resolve())
     else:
-        return str(project_dir)
+        return str(project_dir.resolve())

@@ -70,17 +70,39 @@ class ProjectAnalyzer:
     def __init__(self, project_path: str):
         if not project_path:
             raise ValueError("project_path no puede ser None o vacío")
-        
-        self.project_path = Path(project_path)
-        
-        # Validar que la ruta existe
-        if not self.project_path.exists():
+
+        p = Path(project_path)
+        try:
+            p = p.resolve()
+        except Exception:
+            p = Path(project_path)
+
+        if p.exists() and p.is_file():
+            suffix = p.suffix.lower()
+            if suffix in {'.zip', '.tar', '.gz', '.tgz', '.tar.gz'}:
+                try:
+                    import zipfile, tarfile
+                    dest = p.parent / 'src'
+                    dest.mkdir(parents=True, exist_ok=True)
+                    if suffix == '.zip':
+                        with zipfile.ZipFile(p, 'r') as z:
+                            z.extractall(dest)
+                    else:
+                        with tarfile.open(p, 'r:*') as t:
+                            t.extractall(dest)
+                    p = dest.resolve()
+                except Exception:
+                    p = p.parent
+            else:
+                p = p.parent
+
+        if not p.exists():
             raise ValueError(f"La ruta del proyecto no existe: {project_path}")
-        
-        # Validar que sea un directorio
-        if not self.project_path.is_dir():
+
+        if not p.is_dir():
             raise ValueError(f"La ruta no es un directorio: {project_path}")
-        
+
+        self.project_path = p
         self.results = {
             "total_files": 0, "primary_language": "unknown",
             "languages": {}, "structure": [], "functions": [],

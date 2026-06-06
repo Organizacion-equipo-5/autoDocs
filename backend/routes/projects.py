@@ -37,12 +37,27 @@ def create_project():
     # Prioridad: archivo subido > URL de GitHub
     if has_file:
         f = request.files['file']
-        project_path = save_uploaded_project(f, project_id)
+        try:
+            project_path = save_uploaded_project(f, project_id)
+        except Exception as e:
+            return jsonify({"error": f"Failed to save uploaded project: {str(e)}"}), 500
     elif github_url:
         try:
             project_path = clone_github_repo(github_url, project_id)
         except Exception as e:
             return jsonify({"error": f"Failed to clone repository: {str(e)}"}), 400
+
+    # Normalizar y verificar la ruta devuelta por los helpers
+    from pathlib import Path
+    try:
+        if project_path:
+            p = Path(project_path)
+            # Resolver ruta absoluta para evitar problemas con el cwd en hilos
+            project_path = str(p.resolve())
+            if not p.exists():
+                return jsonify({"error": "Project path does not exist after extraction/cloning"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Invalid project path: {str(e)}"}), 500
 
     project = {
         "_id": project_id,

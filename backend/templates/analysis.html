@@ -76,8 +76,8 @@
         html.dark .bg-blue-100 { background: #1e3a8a !important; }
         html.dark .text-blue-700 { color: #60a5fa !important; }
         #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.02); transform: translate3d(0,0,0); transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out; will-change: transform, opacity; }
-        .glass-hover:hover { border-color: rgba(56,189,248,0.3); box-shadow: 0 12px 30px rgba(56,189,248,0.12); }
+        .glass { background: var(--color-surface); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); transform: translate3d(0,0,0); transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out; will-change: transform, opacity; }
+        .glass-hover:hover { border-color: var(--glass-hover-border); box-shadow: var(--glass-hover-shadow); }
         .glow-cyan { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
         .glow-violet { text-shadow: 0 0 12px rgba(129,140,248,0.4); }
         .stagger-in { opacity: 0; transform: translateY(20px) translate3d(0,0,0); animation: fadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
@@ -194,6 +194,25 @@
                     <p class="text-xs text-on-surface-variant/50 mt-4 font-code-md">Agrega este bloque justo después de la línea <code style="background:rgba(56,189,248,0.08);padding:1px 5px;border-radius:3px;">def ...</code> o <code style="background:rgba(56,189,248,0.08);padding:1px 5px;border-radius:3px;">class ...</code> correspondiente.</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PDF LOADING MODAL ══════════════ -->
+    <div id="pdf-loading-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)] flex flex-col items-center gap-6">
+            <div class="modal-spinner" style="width:48px;height:48px;border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+            <p class="text-center font-semibold text-on-surface text-lg">Generando PDF, por favor espere...</p>
+        </div>
+    </div>
+
+    <!-- ══════════════ PDF SUCCESS MODAL ══════════════ -->
+    <div id="pdf-success-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)] flex flex-col items-center gap-6">
+            <span class="material-symbols-outlined text-6xl text-green-500">check_circle</span>
+            <p class="text-center font-semibold text-on-surface text-lg">El archivo PDF se descargó correctamente.</p>
+            <button onclick="closePdfSuccessModal()" class="px-6 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95">
+                Cerrar
+            </button>
         </div>
     </div>
 
@@ -738,10 +757,57 @@
         const selected = getSelectedItems();
         await downloadFile(`/api/export/${projectId}/html?selected=${encodeURIComponent(JSON.stringify(selected))}`, `docs_${projectId}.html`, 'text/html');
     }
+
     async function exportPdf() {
         const selected = getSelectedItems();
-        window.open(`/api/export/${projectId}/pdf?token=${token}&selected=${encodeURIComponent(JSON.stringify(selected))}`, '_blank');
+
+        // Mostrar modal de carga
+        document.getElementById('pdf-loading-modal').classList.add('flex');
+        document.getElementById('pdf-loading-modal').classList.remove('hidden');
+
+        try {
+            const url = `/api/export/${projectId}/pdf?token=${token}&selected=${encodeURIComponent(JSON.stringify(selected))}`;
+            const res = await fetch(url, { headers: headers() });
+
+            if (!res.ok) {
+                throw new Error('Error al generar PDF');
+            }
+
+            const blob = await res.blob();
+
+            // Descargar automáticamente el PDF sin abrir pestaña
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `docs_${projectId}.pdf`;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+
+            // Cerrar modal de carga
+            document.getElementById('pdf-loading-modal').classList.remove('flex');
+            document.getElementById('pdf-loading-modal').classList.add('hidden');
+
+            // Mostrar modal de éxito
+            document.getElementById('pdf-success-modal').classList.add('flex');
+            document.getElementById('pdf-success-modal').classList.remove('hidden');
+        } catch (err) {
+            console.error('Error exportando PDF:', err);
+            document.getElementById('pdf-loading-modal').classList.remove('flex');
+            document.getElementById('pdf-loading-modal').classList.add('hidden');
+            alert('Error al generar PDF: ' + (err.message || 'Error desconocido'));
+        }
     }
+
+    function closePdfSuccessModal() {
+        document.getElementById('pdf-success-modal').classList.remove('flex');
+        document.getElementById('pdf-success-modal').classList.add('hidden');
+    }
+
+    document.getElementById('pdf-success-modal').addEventListener('click', function(e) {
+        if (e.target === this) closePdfSuccessModal();
+    });
 
     // ══════════════════════════════════════════════════════════
     //  LOAD PROJECT / RESULTS
