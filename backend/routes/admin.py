@@ -55,6 +55,14 @@ def extract_technical_terms(text: str, known_names=None, limit=12):
     tokens = set(re.findall(r'\b[A-Za-z_][A-Za-z0-9_]{3,}\b', text))
     technical = []
     for token in sorted(tokens, key=lambda t: (-len(t), t)):
+        # Filtrar hashes largos y códigos aleatorios
+        if len(token) > 50:
+            continue
+        if re.match(r'^[a-f0-9]{32,}$', token.lower()):
+            continue
+        if re.match(r'^[a-z0-9]{20,}$', token.lower()):
+            continue
+
         if token in known_names or '_' in token or re.search(r'[A-Z]', token) or token.endswith('ID') or token.endswith('Url'):
             lower = token.lower()
             if lower not in STOPWORDS and lower not in technical:
@@ -319,6 +327,12 @@ def admin_overview():
                     print(f"[Admin Overview] Error processing documentation: {e}")
         docs_text = ' '.join(docs_parts)
 
+        # Limitar el texto a procesar para evitar timeouts
+        max_text_length = 100000  # 100k caracteres
+        if len(docs_text) > max_text_length:
+            docs_text = docs_text[:max_text_length]
+            print(f"[Admin Overview] Texto limitado a {max_text_length} caracteres")
+
         print(f"[Admin Overview] Longitud de docs_text: {len(docs_text)}")
 
         keywords = []
@@ -328,7 +342,7 @@ def admin_overview():
         if docs_text:
             try:
                 keywords = [term for term, _ in top_terms(docs_text, limit=20)]
-                print(f"[Admin Overview] Keywords extraídos: {keywords[:5]}...")
+                print(f"[Admin Overview] Keywords extraídos: {len(keywords)}")
 
                 known_names = set()
                 for analysis in analyses:
@@ -344,9 +358,9 @@ def admin_overview():
 
                 print(f"[Admin Overview] Known names: {len(known_names)}")
                 technical_terms = extract_technical_terms(docs_text, known_names=known_names, limit=20)
-                print(f"[Admin Overview] Technical terms extraídos: {technical_terms[:5]}...")
+                print(f"[Admin Overview] Technical terms extraídos: {len(technical_terms)}")
                 matching_terms = common_terms(keywords, technical_terms)
-                print(f"[Admin Overview] Matching terms: {matching_terms[:5]}...")
+                print(f"[Admin Overview] Matching terms: {len(matching_terms)}")
             except Exception as e:
                 print(f"[Admin Overview] Error en análisis de documentación: {e}")
                 import traceback
