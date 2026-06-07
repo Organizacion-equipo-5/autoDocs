@@ -21,16 +21,41 @@ def create_project():
     user_id = get_jwt_identity()
     db = get_db()
 
+    # Obtener información del usuario
+    user = db.users.find_one({"_id": user_id})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Solo aplicar límites a usuarios normales (no admin)
+    if user.get('role') == 'user':
+        plan = user.get('plan', 'free')
+        project_limits = {
+            'free': 3,
+            'pro': 20,
+            'enterprise': -1  # -1 significa ilimitado
+        }
+        limit = project_limits.get(plan, 3)
+
+        # Contar proyectos actuales del usuario
+        current_count = db.projects.count_documents({"user_id": user_id})
+
+        # Verificar límite (si no es ilimitado)
+        if limit != -1 and current_count >= limit:
+            plan_names = {'free': 'Gratuito', 'pro': 'Pro', 'enterprise': 'Enterprise'}
+            return jsonify({
+                "error": f"Has alcanzado el límite de proyectos para tu plan {plan_names.get(plan, plan)}. Límite actual: {limit} proyectos."
+            }), 400
+
     name = request.form.get('name', 'Unnamed Project')
     description = request.form.get('description', '')
     github_url = request.form.get('github_url', '')
-    
+
     project_id = str(uuid.uuid4())
     project_path = None
 
     # Validar que se proporcione al menos archivo o URL
     has_file = 'file' in request.files and request.files['file'].filename
-    
+
     if not has_file and not github_url:
         return jsonify({"error": "Debes proporcionar un archivo o una URL de GitHub"}), 400
 
@@ -77,6 +102,11 @@ def create_project():
         }
     }
     db.projects.insert_one(project)
+
+    # Actualizar contador de proyectos del usuario
+    new_count = db.projects.count_documents({"user_id": user_id})
+    db.users.update_one({"_id": user_id}, {"$set": {"projects_count": new_count}})
+
     return jsonify({"id": project_id, "message": "Project created successfully"}), 201
 
 @projects_bp.route('/<project_id>', methods=['GET'])
@@ -98,4 +128,9 @@ def delete_project(project_id):
     if result.deleted_count == 0:
         return jsonify({"error": "Project not found"}), 404
     db.analysis_results.delete_many({"project_id": project_id})
+
+    # Actualizar contador de proyectos del usuario
+    new_count = db.projects.count_documents({"user_id": user_id})
+    db.users.update_one({"_id": user_id}, {"$set": {"projects_count": new_count}})
+
     return jsonify({"message": "Project deleted"}), 200

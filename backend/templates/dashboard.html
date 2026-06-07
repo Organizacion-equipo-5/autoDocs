@@ -676,6 +676,43 @@
         </div>
     </div>
 
+    <!-- Limit Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="limitModal">
+        <div class="glass p-8 rounded-3xl max-w-lg w-full mx-4 modal-anim border border-outline-variant/20 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-error text-3xl">block</span>
+                </div>
+                <h3 class="text-2xl font-bold text-on-surface mb-2">Límite alcanzado</h3>
+                <p id="limitMessage" class="text-on-surface-variant/70">Has alcanzado el límite de proyectos para tu plan actual.</p>
+            </div>
+            <div class="space-y-3 mb-6">
+                <div class="glass rounded-xl p-4 border border-outline-variant/20">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-on-surface">Plan Pro</span>
+                        <span class="text-primary font-bold">$9.99/mes</span>
+                    </div>
+                    <p class="text-sm text-on-surface-variant/60">20 proyectos, 100 análisis/mes, PDF + IA</p>
+                </div>
+                <div class="glass rounded-xl p-4 border border-outline-variant/20">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-on-surface">Plan Enterprise</span>
+                        <span class="text-secondary font-bold">$29.99/mes</span>
+                    </div>
+                    <p class="text-sm text-on-surface-variant/60">Proyectos ilimitados, análisis ilimitados</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeLimitModal()" class="flex-1 py-3 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all font-medium">
+                    Cerrar
+                </button>
+                <button onclick="location.href='/pricing'" class="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/80 transition-all">
+                    Ver planes
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== LÓGICA ORIGINAL DEL DASHBOARD ====================
         const token = localStorage.getItem('token');
@@ -833,11 +870,31 @@
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
                     loadProjects();
+                } else {
+                    // Verificar si es error por límite de proyectos
+                    if (data.error && data.error.includes('límite') && data.error.includes('plan')) {
+                        showLimitModal(data.error);
+                    } else {
+                        alert(data.error || 'Error al crear proyecto');
+                    }
                 }
             } catch(e) { alert('Error al crear proyecto'); }
         }
 
         function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        function showLimitModal(message) {
+            const modal = document.getElementById('limitModal');
+            document.getElementById('limitMessage').textContent = message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLimitModal() {
+            const modal = document.getElementById('limitModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
 
         // ==================== PARTÍCULAS Y TILT SUAVE ====================
         const canvas = document.getElementById('particle-canvas');

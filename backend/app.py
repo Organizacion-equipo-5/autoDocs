@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import Config
+from routes.payments import payments_bp
 
 def create_app():
     app = Flask(__name__)
@@ -19,6 +20,7 @@ def create_app():
     from routes.web import web_bp
     from routes.admin import admin_bp
 
+    app.register_blueprint(payments_bp, url_prefix='/api/payments')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(projects_bp, url_prefix='/api/projects')
     app.register_blueprint(analysis_bp, url_prefix='/api/analysis')

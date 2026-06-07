@@ -11,25 +11,25 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     data = request.get_json()
     db = get_db()
-    
+
     if not data or not all(k in data for k in ['email', 'password', 'name']):
         return jsonify({"error": "Missing required fields"}), 400
-    
+
     if db.users.find_one({"email": data['email']}):
         return jsonify({"error": "Email already registered"}), 409
-    
+
     user = {
         "_id": str(uuid.uuid4()),
         "name": data['name'],
         "email": data['email'],
         "password": generate_password_hash(data['password']),
         "created_at": datetime.utcnow().isoformat(),
-        "plan": "free",
+        "plan": data.get('plan', 'free'),
         "projects_count": 0,
         "role": "user"
     }
     db.users.insert_one(user)
-    
+
     token = create_access_token(identity=user['_id'])
     return jsonify({"token": token, "user": {"id": user['_id'], "name": user['name'], "email": user['email'], "role": user['role']}}), 201
 

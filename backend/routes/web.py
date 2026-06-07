@@ -3,6 +3,10 @@ import os
 
 web_bp = Blueprint('web', __name__)
 
+@web_bp.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
 @web_bp.route('/')
 def index():
     return render_template('index.html')

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planes — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#818cf8", "primary": "#38bdf8",
+                        "surface-container-high": "#e2e8f0", "surface-variant": "#cbd5e1",
+                        "secondary-container": "#e0e7ff", "on-surface-variant": "#334155",
+                        "outline-variant": "#94a3b8", "on-surface": "#0f172a",
+                        "background": "#f1f5f9", "primary-container": "#e0f2fe",
+                        "surface-bright": "#ffffff", "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a", "on-primary": "#ffffff", "outline": "#64748b",
+                        "surface-container-low": "#f8fafc", "surface": "#f1f5f9",
+                        "on-secondary": "#ffffff", "inverse-surface": "#1e293b"
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                    fontFamily: { "body-md": ["Geist"], "headline-lg": ["Geist"], "display-lg": ["Geist"], "code-md": ["JetBrains Mono"] }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { background: #f1f5f9; overflow-x: hidden; min-height: 100vh; color: #0f172a; }
+        html.dark body { background: #0f1418; color: #e2e8f0; }
+        html.dark .glass { background: rgba(15,20,24,0.7); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        html.dark .glass-hover:hover { border-color: rgba(56,189,248,0.4); box-shadow: 0 12px 30px rgba(56,189,248,0.2); }
+        html.dark .text-on-surface { color: #f1f5f9 !important; }
+        html.dark .text-on-surface-variant { color: #94a3b8 !important; }
+        html.dark .text-on-surface-variant\/60 { color: #64748b !important; }
+        html.dark .text-primary { color: #38bdf8 !important; }
+        html.dark .border-outline-variant\/20 { border-color: rgba(148,163,184,0.2) !important; }
+        html.dark .border-outline-variant\/30 { border-color: rgba(148,163,184,0.3) !important; }
+        html.dark .border-primary\/30 { border-color: rgba(56,189,248,0.3) !important; }
+        html.dark .bg-primary\/15 { background: rgba(56,189,248,0.15) !important; }
+        html.dark .bg-primary\/5 { background: rgba(56,189,248,0.05) !important; }
+        html.dark .modal-bg { background: rgba(15,20,24,0.95) !important; }
+        #particle-canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: border-color .4s, box-shadow .4s; }
+        .glass-hover:hover { border-color: rgba(56,189,248,0.3); box-shadow: 0 12px 30px rgba(56,189,248,0.12); }
+        .glow-cyan { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
+        .stagger-in { opacity:0; transform:translateY(20px); animation: fadeInUp .8s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius:10px; }
+        .plan-featured { border-color: rgba(56,189,248,0.4) !important; box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 12px 40px rgba(56,189,248,0.1); }
+        html.dark .plan-featured { border-color: rgba(56,189,248,0.5) !important; }
+
+        /* Modal */
+        #payment-modal { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        #payment-modal.open { display:flex; }
+        @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+        .modal-anim { animation: modalIn .25s ease; }
+
+        /* Tarjeta animada */
+        .card-preview { background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 14px; padding: 20px 24px; color:#fff; font-family: 'JetBrains Mono', monospace; position:relative; overflow:hidden; }
+        .card-preview::before { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.1); }
+        .card-preview::after { content:''; position:absolute; bottom:-40px; left:-20px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.07); }
+
+        /* Input estilo glass */
+        .card-input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius:8px; color: inherit; padding: 10px 14px; font-size:0.875rem; width:100%; outline:none; transition: border-color .2s; }
+        html.light .card-input { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #0f172a; }
+        .card-input:focus { border-color: rgba(56,189,248,0.6); }
+        .card-input::placeholder { color: #94a3b8; }
+
+        /* Success state */
+        @keyframes checkIn { from { transform: scale(0); } to { transform: scale(1); } }
+        .check-anim { animation: checkIn .4s cubic-bezier(.34,1.56,.64,1); }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+<canvas id="particle-canvas"></canvas>
+<div class="flex min-h-screen w-full relative z-10">
+
+    <!-- Sidebar -->
+    <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay:.1s;">
+        <div class="mb-12">
+            <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+                <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+            </div>
+        </div>
+        <nav class="flex-1 flex flex-col gap-8">
+            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/pricing">
+                <span class="material-symbols-outlined text-primary text-2xl glow-cyan">workspace_premium</span>
+                <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Planes</span>
+            </a>
+        </nav>
+        <div class="mt-auto">
+            <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative inline-flex">
+                <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                    <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
+                </span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+
+        <!-- Header -->
+        <header class="flex justify-between items-center stagger-in" style="animation-delay:.15s;">
+            <div>
+                <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">Planes <span class="text-primary/80">& Precios</span></h1>
+                <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]">Elige el plan que se adapta a tu equipo</p>
+            </div>
+            <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+            </button>
+        </header>
+
+        <!-- Plan actual -->
+        <div class="stagger-in" style="animation-delay:.2s;">
+            <div class="glass rounded-3xl p-5 border border-outline-variant/20 flex items-center gap-4">
+                <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold">Tu plan actual</p>
+                    <p class="text-on-surface font-bold text-lg" id="current-plan-label">Cargando...</p>
+                </div>
+                <div class="ml-auto" id="current-plan-badge"></div>
+            </div>
+        </div>
+
+        <!-- Cards de planes -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:.25s;">
+
+            <!-- FREE -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant/60 mb-3">Free</p>
+                    <div class="flex items-end gap-1">
+                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$0</span>
+                        <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                    </div>
+                    <p class="text-on-surface-variant/60 text-sm mt-2">Para proyectos personales y pruebas.</p>
+                </div>
+                <div class="border-t border-outline-variant/20"></div>
+                <ul class="flex flex-col gap-3 flex-1 text-sm">
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>3 proyectos</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Exportar PDF</li>
+                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Mejoras con IA</li>
+                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
+                </ul>
+                <button onclick="openModal('free')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                    Seleccionar Free
+                </button>
+            </div>
+
+            <!-- PRO -->
+            <div class="glass rounded-3xl p-8 border plan-featured flex flex-col gap-6 relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold tracking-wide shadow-lg">Más popular</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Pro</p>
+                    <div class="flex items-end gap-1">
+                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$9.99</span>
+                        <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                    </div>
+                    <p class="text-on-surface-variant/60 text-sm mt-2">Para desarrolladores y equipos.</p>
+                </div>
+                <div class="border-t border-primary/20"></div>
+                <ul class="flex flex-col gap-3 flex-1 text-sm">
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>20 proyectos</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA</li>
+                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
+                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>SSO / CI/CD</li>
+                </ul>
+                <button onclick="openModal('pro')" class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
+                    Suscribirse a Pro
+                </button>
+            </div>
+
+            <!-- ENTERPRISE -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-3">Enterprise</p>
+                    <div class="flex items-end gap-1">
+                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$29.99</span>
+                        <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                    </div>
+                    <p class="text-on-surface-variant/60 text-sm mt-2">Equipos grandes, acceso ilimitado.</p>
+                </div>
+                <div class="border-t border-outline-variant/20"></div>
+                <ul class="flex flex-col gap-3 flex-1 text-sm">
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Proyectos ilimitados</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA avanzadas</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Soporte prioritario 24/7</li>
+                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>SSO / integración CI/CD</li>
+                </ul>
+                <button onclick="openModal('enterprise')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/5 transition-all">
+                    Suscribirse a Enterprise
+                </button>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ===== MODAL DE PAGO ===== -->
+<div id="payment-modal" onclick="closeModalOutside(event)">
+    <div class="glass rounded-3xl border border-outline-variant/20 w-full max-w-md mx-4 modal-anim overflow-hidden" id="modal-box">
+
+        <!-- Estado: formulario -->
+        <div id="modal-form-state">
+            <div class="p-7 border-b border-outline-variant/20 flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold">Suscribirse a</p>
+                    <p class="text-on-surface font-bold text-xl" id="modal-plan-name">Pro</p>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full glass glass-hover border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+
+            <div class="p-7 flex flex-col gap-5">
+                <!-- Tarjeta visual -->
+                <div class="card-preview">
+                    <div class="text-xs opacity-60 mb-4 tracking-widest">AUTODOCS AI</div>
+                    <div class="text-lg tracking-[0.2em] mb-4" id="card-display">•••• •••• •••• ••••</div>
+                    <div class="flex justify-between text-xs opacity-70">
+                        <span id="name-display">NOMBRE APELLIDO</span>
+                        <span id="expiry-display">MM/AA</span>
+                    </div>
+                </div>
+
+                <!-- Nombre del titular -->
+                <div>
+                    <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Nombre del titular</label>
+                    <input type="text" id="card-name" class="card-input" placeholder="Juan Pérez"
+                        oninput="document.getElementById('name-display').textContent = this.value.toUpperCase() || 'NOMBRE APELLIDO'">
+                </div>
+
+                <!-- Número de tarjeta -->
+                <div>
+                    <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Número de tarjeta</label>
+                    <input type="text" id="card-number" class="card-input" placeholder="1234 5678 9012 3456" maxlength="19"
+                        oninput="formatCard(this)">
+                </div>
+
+                <div class="flex gap-4">
+                    <!-- Vencimiento -->
+                    <div class="flex-1">
+                        <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Vencimiento</label>
+                        <input type="text" id="card-expiry" class="card-input" placeholder="MM/AA" maxlength="5"
+                            oninput="formatExpiry(this)">
+                    </div>
+                    <!-- CVV -->
+                    <div class="flex-1">
+                        <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">CVV</label>
+                        <input type="text" id="card-cvv" class="card-input" placeholder="123" maxlength="3">
+                    </div>
+                </div>
+
+                <p id="modal-error" class="text-error text-sm hidden"></p>
+
+                <button onclick="submitPayment()" id="pay-btn"
+                    class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)] flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">lock</span>
+                    <span id="pay-btn-text">Confirmar pago</span>
+                </button>
+                <p class="text-center text-xs text-on-surface-variant/40">🔒 Pago seguro simulado · Sin cobro real</p>
+            </div>
+        </div>
+
+        <!-- Estado: éxito -->
+        <div id="modal-success-state" class="hidden p-10 flex flex-col items-center gap-5 text-center">
+            <div class="w-20 h-20 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center check-anim">
+                <span class="material-symbols-outlined text-primary text-4xl">check_circle</span>
+            </div>
+            <div>
+                <p class="font-bold text-xl text-on-surface mb-1">¡Pago exitoso!</p>
+                <p class="text-on-surface-variant/60 text-sm">Tu plan ha sido actualizado a <strong id="success-plan-name" class="text-primary"></strong></p>
+            </div>
+            <button onclick="closeModal(); location.reload();"
+                class="px-8 py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95">
+                Continuar
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 glass rounded-2xl px-5 py-3 border border-outline-variant/20 text-sm text-on-surface shadow-lg translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none"></div>
+
+<script>
+    const API = window.location.origin;
+    let selectedPlan = 'pro';
+    const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+
+    // Tema
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? 'dark_mode' : 'light_mode';
+    document.getElementById('themeButton').addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeIcon').textContent = isDark ? 'dark_mode' : 'light_mode';
+    });
+
+    // Cargar usuario
+    async function loadUser() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('current-plan-label').textContent = 'No autenticado';
+            return;
+        }
+        try {
+            const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) {
+                if (res.status === 422) {
+                    console.error('Token inválido o expirado');
+                    localStorage.removeItem('token');
+                    document.getElementById('current-plan-label').textContent = 'Sesión expirada';
+                    return;
+                }
+                throw new Error(`HTTP ${res.status}`);
+            }
+            const user = await res.json();
+            document.getElementById('user-avatar-sidebar').textContent = (user.name || 'U')[0].toUpperCase();
+            document.getElementById('sidebar-user-name').textContent = user.name || 'Usuario';
+            const plan = user.plan || 'free';
+            document.getElementById('sidebar-user-plan').textContent = planNames[plan] || plan;
+            document.getElementById('current-plan-label').textContent = planNames[plan] || plan;
+            const badgeColors = { free: 'bg-primary/15 border-primary/30 text-primary', pro: 'bg-primary/20 border-primary/40 text-primary', enterprise: 'bg-secondary/20 border-secondary/40 text-secondary' };
+            document.getElementById('current-plan-badge').innerHTML = `<span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColors[plan]}">${(planNames[plan] || plan).toUpperCase()}</span>`;
+        } catch(e) {
+            console.error('Error cargando usuario:', e);
+            document.getElementById('current-plan-label').textContent = 'Error de conexión';
+        }
+    }
+    loadUser();
+
+    // Modal
+    function openModal(plan) {
+        selectedPlan = plan;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Inicia sesión primero.');
+            return;
+        }
+
+        if (plan === 'free') {
+            // Para free, actualizar directo sin pago
+            fetch(`${API}/api/payments/upgrade`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ plan: 'free', card: { number: '0', expiry: '00/00', cvv: '000' } })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    if (res.status === 422) {
+                        localStorage.removeItem('token');
+                        showToast('Sesión expirada. Inicia sesión nuevamente.');
+                        setTimeout(() => location.href = '/', 2000);
+                        return;
+                    }
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(() => {
+                showToast('Cambiaste al plan Free.');
+                setTimeout(() => location.reload(), 1500);
+            })
+            .catch(e => {
+                console.error('Error cambiando a plan free:', e);
+                showToast('Error al cambiar de plan. Intenta nuevamente.');
+            });
+            return;
+        }
+        document.getElementById('modal-plan-name').textContent = planNames[plan];
+        document.getElementById('modal-form-state').classList.remove('hidden');
+        document.getElementById('modal-success-state').classList.add('hidden');
+        // Reset campos
+        ['card-name','card-number','card-expiry','card-cvv'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('card-display').textContent = '•••• •••• •••• ••••';
+        document.getElementById('name-display').textContent = 'NOMBRE APELLIDO';
+        document.getElementById('expiry-display').textContent = 'MM/AA';
+        document.getElementById('modal-error').classList.add('hidden');
+        document.getElementById('payment-modal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('payment-modal').classList.remove('open');
+    }
+
+    function closeModalOutside(e) {
+        if (e.target === document.getElementById('payment-modal')) closeModal();
+    }
+
+    // Formateo tarjeta
+    function formatCard(input) {
+        let v = input.value.replace(/\D/g, '').substring(0, 16);
+        input.value = v.replace(/(.{4})/g, '$1 ').trim();
+        const display = v.padEnd(16, '•');
+        document.getElementById('card-display').textContent =
+            display.substring(0,4) + ' ' + display.substring(4,8) + ' ' + display.substring(8,12) + ' ' + display.substring(12,16);
+    }
+
+    function formatExpiry(input) {
+        let v = input.value.replace(/\D/g, '').substring(0, 4);
+        if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2);
+        input.value = v;
+        document.getElementById('expiry-display').textContent = v || 'MM/AA';
+    }
+
+    // Enviar pago
+    async function submitPayment() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Inicia sesión primero.');
+            closeModal();
+            return;
+        }
+
+        const number = document.getElementById('card-number').value.replace(/\s/g,'');
+        const expiry = document.getElementById('card-expiry').value;
+        const cvv = document.getElementById('card-cvv').value;
+        const name = document.getElementById('card-name').value;
+        const errEl = document.getElementById('modal-error');
+
+        if (!name || number.length < 16 || expiry.length < 5 || cvv.length < 3) {
+            errEl.textContent = 'Por favor completa todos los campos correctamente.';
+            errEl.classList.remove('hidden');
+            return;
+        }
+        errEl.classList.add('hidden');
+
+        const btn = document.getElementById('pay-btn');
+        btn.disabled = true;
+        document.getElementById('pay-btn-text').textContent = 'Procesando…';
+
+        // Simular delay de procesamiento
+        await new Promise(r => setTimeout(r, 1800));
+
+        try {
+            const res = await fetch(`${API}/api/payments/upgrade`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ plan: selectedPlan, card: { number, expiry, cvv } })
+            });
+
+            if (!res.ok) {
+                if (res.status === 422) {
+                    localStorage.removeItem('token');
+                    errEl.textContent = 'Sesión expirada. Inicia sesión nuevamente.';
+                    errEl.classList.remove('hidden');
+                    btn.disabled = false;
+                    document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                    setTimeout(() => location.href = '/', 2000);
+                    return;
+                }
+                const data = await res.json();
+                errEl.textContent = data.error || 'Error al procesar el pago.';
+                errEl.classList.remove('hidden');
+                btn.disabled = false;
+                document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                return;
+            }
+
+            const data = await res.json();
+            document.getElementById('modal-form-state').classList.add('hidden');
+            document.getElementById('modal-success-state').classList.remove('hidden');
+            document.getElementById('success-plan-name').textContent = planNames[selectedPlan];
+        } catch(e) {
+            console.error('Error procesando pago:', e);
+            errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+            errEl.classList.remove('hidden');
+            btn.disabled = false;
+            document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+        }
+    }
+
+    // Toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerHTML = `<span class="material-symbols-outlined text-primary text-base">info</span> ${msg}`;
+        t.classList.remove('translate-y-16','opacity-0');
+        t.classList.add('translate-y-0','opacity-100');
+        setTimeout(() => { t.classList.add('translate-y-16','opacity-0'); t.classList.remove('translate-y-0','opacity-100'); }, 4000);
+    }
+
+    function logout() { localStorage.removeItem('token'); }
+
+    // Partículas
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
+    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+    for (let i = 0; i < 40; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3, size:Math.random()*2+.5, opacity:Math.random()*.4+.1 });
+    function animateParticles() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const isDark = document.documentElement.classList.contains('dark');
+        particles.forEach(p => {
+            p.x+=p.vx; p.y+=p.vy;
+            if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+            if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+            ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+            ctx.fillStyle = isDark ? `rgba(56,189,248,${p.opacity})` : `rgba(56,189,248,${p.opacity*.5})`;
+            ctx.fill();
+        });
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+</script>
+</body>
+</html>

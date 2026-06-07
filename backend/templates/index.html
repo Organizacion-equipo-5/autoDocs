@@ -177,6 +177,7 @@
             <a href="#features" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Funciones</a>
             <a href="#how" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Cómo funciona</a>
             <a href="#stack" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Stack</a>
+            <a href="/pricing" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Planes</a>
             <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary bg-transparent hover:bg-primary/5 transition-all" onclick="openModal()">Iniciar sesión</button>
             <button class="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95" onclick="openModal('register')">Comenzar gratis</button>
         </div>
@@ -601,30 +602,6 @@
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
                 setTimeout(() => window.location.href = redirectUrl, 1000);
             } catch { errEl.classList.remove('hidden'); }
-        }
-
-        // ==================== TEMA OSCURO / CLARO (FUNCIONAL) ====================
-        const themeButton = document.getElementById('themeButton');
-        const themeIcon = document.getElementById('themeIcon');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-
-        function setThemeIcon(theme) {
-            themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
-        }
-
-        function applyTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            setThemeIcon(theme);
-            localStorage.setItem('theme', theme);
-        }
-
-        applyTheme(savedTheme === 'light' ? 'light' : 'dark');
-
-        if (themeButton) {
-            themeButton.addEventListener('click', () => {
-                const currentTheme = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-                applyTheme(currentTheme);
-            });
         }
 
         // ==================== PARTÍCULAS ====================

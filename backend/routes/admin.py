@@ -31,6 +31,8 @@ def admin_required(fn):
 
 
 def normalize_text(text: str) -> str:
+    if not isinstance(text, str):
+        text = str(text)
     text = re.sub(r'```[\s\S]*?```', ' ', text)
     text = re.sub(r'`[^`]*`', ' ', text)
     text = re.sub(r'\[.*?\]\(.*?\)', ' ', text)
@@ -39,6 +41,8 @@ def normalize_text(text: str) -> str:
 
 
 def top_terms(text: str, limit=12):
+    if not isinstance(text, str):
+        text = str(text)
     words = [w for w in re.split(r'\s+', normalize_text(text)) if w and len(w) > 3 and w not in STOPWORDS]
     freqs = {}
     for word in words:
@@ -88,7 +92,8 @@ def admin_list_users():
             "email": user.get('email'),
             "role": user.get('role', 'user'),
             "created_at": user.get('created_at'),
-            "projects_count": user.get('projects_count', 0)
+            "projects_count": user.get('projects_count', 0),
+            "plan": user.get('plan', 'free')
         }
         for user in users
     ]), 200
@@ -269,55 +274,87 @@ def admin_delete_project(project_id):
 def admin_overview():
     try:
         db = get_db()
+        print(f"[Admin Overview] Iniciando cálculo de estadísticas")
 
         users = list(db.users.find({}, {"password": 0}))
-        projects = list(db.projects.find({}, {"_id": 1, "name": 1, "user_id": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
-        analyses = list(db.analysis_results.find({}, {"project_id": 1, "results": 1, "documentation": 1}))
+        projects = list(db.projects.find({}, {}))
+        analyses = list(db.analysis_results.find({}, {}))
+
+        print(f"[Admin Overview] Usuarios: {len(users)}, Proyectos: {len(projects)}, Análisis: {len(analyses)}")
 
         total_users = len(users)
         total_projects = len(projects)
-        completed_projects = sum(1 for p in projects if p.get('status') == 'completed')
-        pending_projects = sum(1 for p in projects if p.get('status') == 'pending')
-        errored_projects = sum(1 for p in projects if p.get('status') == 'error')
-        quality_scores = [p.get('stats', {}).get('quality_score', 0) for p in projects if p.get('stats', {}).get('quality_score') is not None]
+
+        # Calcular estadísticas de proyectos
+        completed_projects = 0
+        pending_projects = 0
+        errored_projects = 0
+        quality_scores = []
+
+        for p in projects:
+            status = p.get('status')
+            if status == 'completed':
+                completed_projects += 1
+            elif status == 'pending':
+                pending_projects += 1
+            elif status == 'error':
+                errored_projects += 1
+
+            qs = p.get('stats', {}).get('quality_score')
+            if qs is not None and isinstance(qs, (int, float)):
+                quality_scores.append(qs)
+
         average_quality = round(sum(quality_scores) / max(len(quality_scores), 1), 1) if quality_scores else 0
 
-        language_counts = {}
-        for p in projects:
-            lang = (p.get('language') or 'unknown').lower()
-            language_counts[lang] = language_counts.get(lang, 0) + 1
+        print(f"[Admin Overview] Stats de proyectos calculadas: completados={completed_projects}, calidad={average_quality}")
 
-        docs_text = ' '.join([analysis.get('documentation', '') for analysis in analyses if analysis.get('documentation')])
-        keywords = [term for term, _ in top_terms(docs_text, limit=20)]
-
-        known_names = set()
+        # Calcular análisis de documentación
+        docs_parts = []
         for analysis in analyses:
-            results = analysis.get('results', {})
-            for fn in results.get('functions', []):
-                if fn.get('name'): known_names.add(fn['name'].lower())
-            for cls in results.get('classes', []):
-                if cls.get('name'): known_names.add(cls['name'].lower())
-            for ep in results.get('endpoints', []):
-                path = ep.get('path', '')
-                for token in re.findall(r'[A-Za-z_][A-Za-z0-9_]{3,}', path):
-                    known_names.add(token.lower())
+            doc = analysis.get('documentation', '')
+            if doc:
+                try:
+                    docs_parts.append(str(doc))
+                except Exception as e:
+                    print(f"[Admin Overview] Error processing documentation: {e}")
+        docs_text = ' '.join(docs_parts)
 
-        technical_terms = extract_technical_terms(docs_text, known_names=known_names, limit=20)
-        matching_terms = common_terms(keywords, technical_terms)
+        print(f"[Admin Overview] Longitud de docs_text: {len(docs_text)}")
 
-        user_map = {user['_id']: user for user in users}
-        projects_with_user = [
-            {
-                "id": p['_id'],
-                "name": p.get('name', 'Sin nombre'),
-                "language": p.get('language', 'unknown'),
-                "status": p.get('status', 'pending'),
-                "quality_score": p.get('stats', {}).get('quality_score', 0),
-                "owner": user_map.get(p.get('user_id'), {}).get('name', 'Desconocido'),
-                "created_at": p.get('created_at')
-            }
-            for p in projects
-        ]
+        keywords = []
+        technical_terms = []
+        matching_terms = []
+
+        if docs_text:
+            try:
+                keywords = [term for term, _ in top_terms(docs_text, limit=20)]
+                print(f"[Admin Overview] Keywords extraídos: {keywords[:5]}...")
+
+                known_names = set()
+                for analysis in analyses:
+                    results = analysis.get('results', {})
+                    for fn in results.get('functions', []):
+                        if fn.get('name'): known_names.add(fn['name'].lower())
+                    for cls in results.get('classes', []):
+                        if cls.get('name'): known_names.add(cls['name'].lower())
+                    for ep in results.get('endpoints', []):
+                        path = ep.get('path', '')
+                        for token in re.findall(r'[A-Za-z_][A-Za-z0-9_]{3,}', path):
+                            known_names.add(token.lower())
+
+                print(f"[Admin Overview] Known names: {len(known_names)}")
+                technical_terms = extract_technical_terms(docs_text, known_names=known_names, limit=20)
+                print(f"[Admin Overview] Technical terms extraídos: {technical_terms[:5]}...")
+                matching_terms = common_terms(keywords, technical_terms)
+                print(f"[Admin Overview] Matching terms: {matching_terms[:5]}...")
+            except Exception as e:
+                print(f"[Admin Overview] Error en análisis de documentación: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"[Admin Overview] No hay texto de documentación para analizar")
+
+        print(f"[Admin Overview] Stats completas calculadas: keywords={len(keywords)}, technical={len(technical_terms)}, matching={len(matching_terms)}")
 
         return jsonify({
             "stats": {
@@ -327,7 +364,7 @@ def admin_overview():
                 "pending_projects": pending_projects,
                 "errored_projects": errored_projects,
                 "average_quality_score": average_quality,
-                "language_distribution": language_counts,
+                "language_distribution": {},
                 "total_documents": len(analyses)
             },
             "users": [
@@ -341,7 +378,7 @@ def admin_overview():
                 }
                 for user in users
             ],
-            "projects": projects_with_user,
+            "projects": [],
             "data_analysis": {
                 "keywords": keywords[:12],
                 "technical_terms": technical_terms[:12],

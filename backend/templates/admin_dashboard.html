@@ -204,7 +204,7 @@
           <table class="w-full text-left">
             <thead class="border-b border-outline-variant/30 bg-surface-container/30">
               <tr class="text-on-surface-variant/70 text-sm">
-                <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
+                <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Plan</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
               </tr>
             </thead>
             <tbody id="users-table"></tbody>
@@ -282,30 +282,51 @@
         const res = await fetch('/api/admin/overview', { headers: authHeaders() });
         if (!res.ok) {
           console.error('Error loading stats:', res.status, res.statusText);
+          const errorData = await res.json().catch(() => ({}));
+          console.error('Error data:', errorData);
+          if (res.status === 403) {
+            alert('No tienes permisos de administrador. Redirigiendo al dashboard...');
+            window.location.href = '/dashboard';
+            return;
+          }
           throw new Error();
         }
         const data = await res.json();
         console.log('Admin stats data:', data);
-        document.getElementById('stat-users').innerText = data.stats.total_users;
-        document.getElementById('stat-projects').innerText = data.stats.total_projects;
-        document.getElementById('stat-completed').innerText = data.stats.completed_projects;
-        document.getElementById('stat-quality').innerText = data.stats.average_quality_score;
-        document.getElementById('doc-count').innerText = data.data_analysis.document_count;
-        document.getElementById('keyword-count').innerText = data.data_analysis.keywords.length;
-        document.getElementById('technical-count').innerText = data.data_analysis.technical_terms.length;
-        document.getElementById('matching-count').innerText = data.data_analysis.matching_terms.length;
+
+        if (!data.stats) {
+          console.error('No stats in response:', data);
+          return;
+        }
+
+        document.getElementById('stat-users').innerText = data.stats.total_users || 0;
+        document.getElementById('stat-projects').innerText = data.stats.total_projects || 0;
+        document.getElementById('stat-completed').innerText = data.stats.completed_projects || 0;
+        document.getElementById('stat-quality').innerText = data.stats.average_quality_score || 0;
+        document.getElementById('doc-count').innerText = data.data_analysis?.document_count || 0;
+        document.getElementById('keyword-count').innerText = data.data_analysis?.keywords?.length || 0;
+        document.getElementById('technical-count').innerText = data.data_analysis?.technical_terms?.length || 0;
+        document.getElementById('matching-count').innerText = data.data_analysis?.matching_terms?.length || 0;
         const kwContainer = document.getElementById('keywords-list');
-        kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
-      } catch (error) { console.error('Error loading stats:', error); }
+        if (data.data_analysis?.keywords) {
+          kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        alert('Error al cargar estadísticas. Verifica la consola para más detalles.');
+      }
     }
 
     async function loadUsers() {
       const res = await fetch('/api/admin/users', { headers: authHeaders() });
       if (!res.ok) return;
       const users = await res.json();
+      const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
+      const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
       document.getElementById('users-table').innerHTML = users.map(u => `
         <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
           <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
+          <td class="p-4"><span class="badge ${planColors[u.plan] || 'pending'}">${planNames[u.plan] || u.plan || 'Gratuito'}</span></td>
           <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
           <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
         </tr>
