@@ -177,7 +177,7 @@
             <a href="#features" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Funciones</a>
             <a href="#how" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Cómo funciona</a>
             <a href="#stack" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Stack</a>
-            <a href="/pricing" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Planes</a>
+            <a href="#pricing" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Planes</a>
             <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary bg-transparent hover:bg-primary/5 transition-all" onclick="openModal()">Iniciar sesión</button>
             <button class="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95" onclick="openModal('register')">Comenzar gratis</button>
         </div>
@@ -357,6 +357,59 @@
         </div>
     </section>
 
+    <!-- Planes Promocionales -->
+    <section id="pricing" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
+        <div class="text-center mb-16 stagger-in">
+            <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// planes</span>
+            <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Elige tu plan</h2>
+            <p class="text-on-surface-variant/60 max-w-lg mx-auto">Comienza gratis y escala cuando lo necesites.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Plan Gratuito -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Gratuito</h3>
+                    <p class="text-4xl font-bold text-primary mb-1">$0<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> 3 proyectos</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis básico</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Exportación PDF</li>
+                </ul>
+                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register')">Empezar gratis</button>
+            </div>
+            <!-- Plan Pro -->
+            <div class="glass rounded-3xl p-8 border border-primary/40 plan-featured stagger-in relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Pro</h3>
+                    <p class="text-4xl font-bold text-primary mb-1">$350<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Proyectos ilimitados</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis avanzado</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Exportación HTML</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario</li>
+                </ul>
+                <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register')">Comenzar</button>
+            </div>
+            <!-- Plan Enterprise -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Enterprise</h3>
+                    <p class="text-4xl font-bold text-secondary mb-1">$850<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Todo en Pro</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> API dedicada</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Integración personalizada</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Soporte 24/7</li>
+                </ul>
+                <button class="w-full py-3 bg-secondary text-white rounded-xl hover:bg-secondary/80 transition-all font-semibold" onclick="openModal('register')">Comenzar</button>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section class="relative z-10 max-w-6xl mx-auto py-16 px-8">
         <div class="glass rounded-3xl p-16 text-center relative overflow-hidden shadow-[0_0_80px_var(--color-primary)] stagger-in">
@@ -404,6 +457,9 @@
                 </div>
                 <div class="text-error text-xs font-code-md mb-2 hidden" id="login-error">Credenciales inválidas. Intenta de nuevo.</div>
                 <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleLogin()">Iniciar sesión</button>
+                <div class="text-center mt-3">
+                    <button onclick="showForgotPassword()" class="text-xs text-primary hover:text-primary/80 transition-colors">¿Olvidaste tu contraseña?</button>
+                </div>
                 <div class="text-green-accent text-sm text-center mt-4 hidden" id="login-success">¡Bienvenido! Redirigiendo...</div>
             </div>
 
@@ -446,6 +502,74 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="forgotModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Recuperar contraseña</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu correo para recibir un código de recuperación</p>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
+                <input type="email" id="forgot-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+            </div>
+            <div class="text-error text-xs font-code-md mb-2 hidden" id="forgot-error">Error al enviar código. Intenta de nuevo.</div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleForgotPassword()">Enviar código</button>
+            <div class="text-green-accent text-sm text-center mt-4 hidden" id="forgot-success">Código enviado. Revisa tu correo.</div>
+        </div>
+    </div>
+
+    <!-- Verify Code Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="verifyModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Verificar código</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa el código de 6 dígitos que recibiste en tu correo</p>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Código de recuperación</label>
+                <input type="text" id="verify-code" placeholder="123456" maxlength="6" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors text-center text-2xl tracking-widest font-code-md" />
+            </div>
+            <div class="text-error text-xs font-code-md mb-2 hidden" id="verify-error">Código inválido o expirado. Intenta de nuevo.</div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleVerifyCode()">Verificar código</button>
+            <div class="text-center mt-3">
+                <button onclick="showForgotPassword()" class="text-xs text-primary hover:text-primary/80 transition-colors">Volver a enviar código</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="resetModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeResetModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Nueva contraseña</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu nueva contraseña</p>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nueva contraseña</label>
+                <div class="relative">
+                    <input type="password" id="reset-password" placeholder="Mínimo 8 caracteres" oninput="checkResetPasswordStrength(this.value)" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                    <button type="button" onclick="togglePassword('reset-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                </div>
+                <!-- Indicador de fortaleza de contraseña -->
+                <div id="reset-pwd-strength-bar" class="hidden mt-2">
+                    <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
+                        <div id="reset-pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                    </div>
+                    <p id="reset-pwd-strength-label" class="text-xs mt-1 font-semibold"></p>
+                    <ul id="reset-pwd-requirements" class="text-xs mt-1 space-y-0.5 text-on-surface-variant/70">
+                        <li id="reset-req-length">✗ Mínimo 8 caracteres</li>
+                        <li id="reset-req-upper">✗ Al menos 1 mayúscula</li>
+                        <li id="reset-req-lower">✗ Al menos 1 minúscula</li>
+                        <li id="reset-req-number">✗ Al menos 1 número</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-error text-xs font-code-md mb-2 hidden" id="reset-error">Error al cambiar contraseña. Intenta de nuevo.</div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleResetPassword()">Cambiar contraseña</button>
+            <div class="text-green-accent text-sm text-center mt-4 hidden" id="reset-success">¡Contraseña cambiada! Redirigiendo al login...</div>
+        </div>
+    </div>
+
     <script>
         // ==================== LÓGICA DE AUTENTICACIÓN ====================
         function openModal(tab = 'login') {
@@ -460,6 +584,204 @@
         document.getElementById('authModal').addEventListener('click', e => {
             if (e.target === e.currentTarget) closeModal();
         });
+
+        // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
+        let forgotEmail = '';
+
+        function showForgotPassword() {
+            closeModal();
+            document.getElementById('forgotModal').classList.add('flex');
+            document.getElementById('forgotModal').classList.remove('hidden');
+            document.getElementById('forgot-email').value = document.getElementById('login-email').value;
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.add('hidden');
+            document.getElementById('forgotModal').classList.remove('flex');
+            document.getElementById('forgot-error').classList.add('hidden');
+            document.getElementById('forgot-success').classList.add('hidden');
+        }
+
+        function showVerifyModal(email) {
+            forgotEmail = email;
+            closeForgotModal();
+            document.getElementById('verifyModal').classList.add('flex');
+            document.getElementById('verifyModal').classList.remove('hidden');
+            document.getElementById('verify-code').value = '';
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('verifyModal').classList.add('hidden');
+            document.getElementById('verifyModal').classList.remove('flex');
+            document.getElementById('verify-error').classList.add('hidden');
+        }
+
+        function showResetModal() {
+            closeVerifyModal();
+            document.getElementById('resetModal').classList.add('flex');
+            document.getElementById('resetModal').classList.remove('hidden');
+            document.getElementById('reset-password').value = '';
+            document.getElementById('reset-pwd-strength-bar').classList.add('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+            document.getElementById('resetModal').classList.remove('flex');
+            document.getElementById('reset-error').classList.add('hidden');
+            document.getElementById('reset-success').classList.add('hidden');
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('forgot-email').value;
+            const errEl = document.getElementById('forgot-error');
+            const succEl = document.getElementById('forgot-success');
+            errEl.classList.add('hidden');
+            succEl.classList.add('hidden');
+
+            if (!email) {
+                errEl.textContent = 'Ingresa tu correo electrónico';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Error al enviar código';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                succEl.classList.remove('hidden');
+                setTimeout(() => showVerifyModal(email), 1500);
+            } catch(e) {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleVerifyCode() {
+            const code = document.getElementById('verify-code').value;
+            const errEl = document.getElementById('verify-error');
+            errEl.classList.add('hidden');
+
+            if (!code || code.length !== 6) {
+                errEl.textContent = 'Ingresa el código de 6 dígitos';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/verify-code', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: forgotEmail, code})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Código inválido';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                showResetModal();
+            } catch(e) {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleResetPassword() {
+            const newPassword = document.getElementById('reset-password').value;
+            const errEl = document.getElementById('reset-error');
+            const succEl = document.getElementById('reset-success');
+            errEl.classList.add('hidden');
+            succEl.classList.add('hidden');
+
+            if (!newPassword) {
+                errEl.textContent = 'Ingresa tu nueva contraseña';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: forgotEmail, code: document.getElementById('verify-code').value, new_password: newPassword})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Error al cambiar contraseña';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                succEl.classList.remove('hidden');
+                setTimeout(() => {
+                    closeResetModal();
+                    openModal('login');
+                }, 2000);
+            } catch(e) {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function checkResetPasswordStrength(password) {
+            const bar = document.getElementById('reset-pwd-strength-bar');
+            const fill = document.getElementById('reset-pwd-strength-fill');
+            const label = document.getElementById('reset-pwd-strength-label');
+            const reqLength = document.getElementById('reset-req-length');
+            const reqUpper = document.getElementById('reset-req-upper');
+            const reqLower = document.getElementById('reset-req-lower');
+            const reqNumber = document.getElementById('reset-req-number');
+
+            if (!password) {
+                bar.classList.add('hidden');
+                return;
+            }
+
+            bar.classList.remove('hidden');
+
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            reqLength.innerHTML = hasLength ? '✓ Mínimo 8 caracteres' : '✗ Mínimo 8 caracteres';
+            reqLength.style.color = hasLength ? '#10b981' : '';
+            reqUpper.innerHTML = hasUpper ? '✓ Al menos 1 mayúscula' : '✗ Al menos 1 mayúscula';
+            reqUpper.style.color = hasUpper ? '#10b981' : '';
+            reqLower.innerHTML = hasLower ? '✓ Al menos 1 minúscula' : '✗ Al menos 1 minúscula';
+            reqLower.style.color = hasLower ? '#10b981' : '';
+            reqNumber.innerHTML = hasNumber ? '✓ Al menos 1 número' : '✗ Al menos 1 número';
+            reqNumber.style.color = hasNumber ? '#10b981' : '';
+
+            const strength = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+            const percentage = (strength / 4) * 100;
+            fill.style.width = percentage + '%';
+
+            if (strength <= 1) {
+                fill.style.background = '#ef4444';
+                label.textContent = 'Débil';
+                label.style.color = '#ef4444';
+            } else if (strength <= 2) {
+                fill.style.background = '#f97316';
+                label.textContent = 'Media';
+                label.style.color = '#f97316';
+            } else if (strength <= 3) {
+                fill.style.background = '#eab308';
+                label.textContent = 'Buena';
+                label.style.color = '#eab308';
+            } else {
+                fill.style.background = '#10b981';
+                label.textContent = 'Fuerte';
+                label.style.color = '#10b981';
+            }
+        }
         function switchTab(tab) {
             document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
             document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
@@ -527,7 +849,11 @@
                 localStorage.setItem('user', JSON.stringify(data.user));
                 succEl.classList.remove('hidden');
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
-                setTimeout(() => window.location.href = redirectUrl, 1000);
+                setTimeout(() => {
+                    document.getElementById('login-email').value = '';
+                    document.getElementById('login-password').value = '';
+                    window.location.href = redirectUrl;
+                }, 1000);
             } catch { errEl.classList.remove('hidden'); }
         }
 
@@ -600,7 +926,13 @@
                 localStorage.setItem('user', JSON.stringify(data.user));
                 succEl.classList.remove('hidden');
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
-                setTimeout(() => window.location.href = redirectUrl, 1000);
+                setTimeout(() => {
+                    document.getElementById('reg-name').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-password').value = '';
+                    document.getElementById('pwd-strength-bar').classList.add('hidden');
+                    window.location.href = redirectUrl;
+                }, 1000);
             } catch { errEl.classList.remove('hidden'); }
         }
 

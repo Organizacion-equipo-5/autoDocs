@@ -2,8 +2,14 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from services.db import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
+import random
+import string
+import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -77,3 +83,166 @@ def update_me():
     db.users.update_one({"_id": user_id}, {"$set": update})
     updated_user = db.users.find_one({"_id": user_id}, {"password": 0})
     return jsonify({"message": "Profile updated", "user": updated_user}), 200
+
+def generate_reset_code():
+    return ''.join(random.choices(string.digits, k=6))
+
+def send_reset_email(email, code):
+    try:
+        sender_email = "al222310566@gmail.com"
+        sender_password = "pnpkyptpbzbhgwgq"
+
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = email
+        message["Subject"] = "Código de recuperación de contraseña - AutoDocs AI"
+
+        body = f"""
+        <html>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0f1418; color: #dee3e8; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+                <div style="background: rgba(27,32,36,0.6); backdrop-filter: blur(16px); border: 1px solid rgba(123,208,255,0.1); border-radius: 16px; padding: 40px; box-shadow: 0 0 40px rgba(123,208,255,0.1);">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="width: 60px; height: 60px; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(56,189,248,0.15);">
+                            <span style="font-size: 32px;">📧</span>
+                        </div>
+                        <h1 style="color: #39b2f8; font-size: 28px; font-weight: 700; margin: 0 0 10px 0; text-shadow: 0 0 12px rgba(56,189,248,0.4);">AutoDocs AI</h1>
+                        <p style="color: #bdc8d1; font-size: 14px; margin: 0;">Recuperación de contraseña</p>
+                    </div>
+
+                    <p style="color: #dee3e8; font-size: 16px; margin-bottom: 20px;">Hola,</p>
+                    <p style="color: #bdc8d1; font-size: 15px; margin-bottom: 20px;">Has solicitado recuperar tu contraseña en AutoDocs AI. Tu código de recuperación es:</p>
+
+                    <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+                        <span style="font-size: 48px; font-weight: 700; color: #39b2f8; letter-spacing: 8px; font-family: 'Courier New', monospace; text-shadow: 0 0 20px rgba(56,189,248,0.3);">{code}</span>
+                    </div>
+
+                    <div style="background: rgba(255,176,171,0.1); border: 1px solid rgba(255,176,171,0.2); border-radius: 8px; padding: 15px; margin: 20px 0;">
+                        <p style="color: #ffb4ab; font-size: 14px; margin: 0; font-weight: 500;">⚠️ Este código expirará en 15 minutos.</p>
+                    </div>
+
+                    <p style="color: #bdc8d1; font-size: 15px; margin-bottom: 20px;">Si no solicitaste este cambio, ignora este correo por seguridad.</p>
+
+                    <div style="border-top: 1px solid rgba(123,208,255,0.1); padding-top: 20px; margin-top: 30px; text-align: center;">
+                        <p style="color: #bdc8d1; font-size: 14px; margin: 0;">Saludos,</p>
+                        <p style="color: #39b2f8; font-size: 16px; font-weight: 600; margin: 5px 0 0 0;">El equipo de AutoDocs AI</p>
+                    </div>
+                </div>
+
+                <p style="text-align: center; color: #64748b; font-size: 12px; margin-top: 30px;">
+                    Este es un correo automático, por favor no respondas.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        message.attach(MIMEText(body, "html"))
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, message.as_string())
+        server.quit()
+
+        print(f"[Email] Código enviado a {email}: {code}")
+        return True
+    except Exception as e:
+        print(f"[Email Error] Error enviando correo: {e}")
+        return False
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    db = get_db()
+    user = db.users.find_one({"email": email})
+
+    if not user:
+        return jsonify({"error": "Email not found"}), 404
+
+    code = generate_reset_code()
+    expires_at = datetime.utcnow() + timedelta(minutes=15)
+
+    db.password_reset_codes.delete_one({"email": email})
+    db.password_reset_codes.insert_one({
+        "email": email,
+        "code": code,
+        "expires_at": expires_at.isoformat(),
+        "created_at": datetime.utcnow().isoformat()
+    })
+
+    # Enviar correo
+    email_sent = send_reset_email(email, code)
+
+    if email_sent:
+        return jsonify({"message": "Reset code sent to email"}), 200
+    else:
+        # Si falla el envío de correo, aún guardamos el código para desarrollo
+        print(f"[Password Reset] Code for {email}: {code} (expires at {expires_at})")
+        return jsonify({"message": "Reset code sent to email"}), 200
+
+@auth_bp.route('/verify-code', methods=['POST'])
+def verify_code():
+    data = request.get_json()
+    email = data.get('email')
+    code = data.get('code')
+
+    if not email or not code:
+        return jsonify({"error": "Email and code are required"}), 400
+
+    db = get_db()
+    reset_record = db.password_reset_codes.find_one({"email": email, "code": code})
+
+    if not reset_record:
+        return jsonify({"error": "Invalid code"}), 400
+
+    expires_at = datetime.fromisoformat(reset_record['expires_at'])
+    if datetime.utcnow() > expires_at:
+        db.password_reset_codes.delete_one({"email": email})
+        return jsonify({"error": "Code expired"}), 400
+
+    return jsonify({"message": "Code verified"}), 200
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        code = data.get('code')
+        new_password = data.get('new_password')
+
+        if not email or not code or not new_password:
+            return jsonify({"error": "Email, code, and new password are required"}), 400
+
+        if len(new_password) < 8 or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password) or not re.search(r'[0-9]', new_password):
+            return jsonify({"error": "Password must be at least 8 characters with uppercase, lowercase, and number"}), 400
+
+        db = get_db()
+        reset_record = db.password_reset_codes.find_one({"email": email, "code": code})
+
+        if not reset_record:
+            return jsonify({"error": "Invalid code"}), 400
+
+        expires_at = datetime.fromisoformat(reset_record['expires_at'])
+        if datetime.utcnow() > expires_at:
+            db.password_reset_codes.delete_one({"email": email})
+            return jsonify({"error": "Code expired"}), 400
+
+        user = db.users.find_one({"email": email})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        db.users.update_one({"email": email}, {"$set": {"password": generate_password_hash(new_password)}})
+        db.password_reset_codes.delete_one({"email": email})
+
+        return jsonify({"message": "Password reset successfully"}), 200
+    except Exception as e:
+        print(f"[Reset Password Error] {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500

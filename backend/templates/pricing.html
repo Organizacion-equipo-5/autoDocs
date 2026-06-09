@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="es">
+<html lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,71 +13,256 @@
             theme: {
                 extend: {
                     colors: {
-                        "secondary": "#818cf8", "primary": "#38bdf8",
-                        "surface-container-high": "#e2e8f0", "surface-variant": "#cbd5e1",
-                        "secondary-container": "#e0e7ff", "on-surface-variant": "#334155",
-                        "outline-variant": "#94a3b8", "on-surface": "#0f172a",
-                        "background": "#f1f5f9", "primary-container": "#e0f2fe",
-                        "surface-bright": "#ffffff", "surface-container-lowest": "#ffffff",
-                        "error": "#ba1a1a", "on-primary": "#ffffff", "outline": "#64748b",
-                        "surface-container-low": "#f8fafc", "surface": "#f1f5f9",
-                        "on-secondary": "#ffffff", "inverse-surface": "#1e293b"
+                        "background": "var(--color-background)",
+                        "surface": "var(--color-surface)",
+                        "surface-container": "var(--color-surface-container)",
+                        "surface-container-high": "var(--color-surface-container-high)",
+                        "on-surface": "var(--color-on-surface)",
+                        "on-surface-variant": "var(--color-on-surface-variant)",
+                        "primary": "var(--color-primary)",
+                        "secondary": "var(--color-secondary)",
+                        "outline-variant": "var(--color-outline-variant)",
+                        "error": "var(--color-error)",
+                        "green-accent": "var(--color-green-accent)",
+                        "tertiary": "var(--color-tertiary)",
                     },
-                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
-                    fontFamily: { "body-md": ["Geist"], "headline-lg": ["Geist"], "display-lg": ["Geist"], "code-md": ["JetBrains Mono"] }
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
                 },
             },
         }
     </script>
     <style>
-        body { background: #f1f5f9; overflow-x: hidden; min-height: 100vh; color: #0f172a; }
-        html.dark body { background: #0f1418; color: #e2e8f0; }
-        html.dark .glass { background: rgba(15,20,24,0.7); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        html.dark .glass-hover:hover { border-color: rgba(56,189,248,0.4); box-shadow: 0 12px 30px rgba(56,189,248,0.2); }
-        html.dark .text-on-surface { color: #f1f5f9 !important; }
-        html.dark .text-on-surface-variant { color: #94a3b8 !important; }
-        html.dark .text-on-surface-variant\/60 { color: #64748b !important; }
-        html.dark .text-primary { color: #38bdf8 !important; }
-        html.dark .border-outline-variant\/20 { border-color: rgba(148,163,184,0.2) !important; }
-        html.dark .border-outline-variant\/30 { border-color: rgba(148,163,184,0.3) !important; }
-        html.dark .border-primary\/30 { border-color: rgba(56,189,248,0.3) !important; }
-        html.dark .bg-primary\/15 { background: rgba(56,189,248,0.15) !important; }
-        html.dark .bg-primary\/5 { background: rgba(56,189,248,0.05) !important; }
-        html.dark .modal-bg { background: rgba(15,20,24,0.95) !important; }
-        #particle-canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
-        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: border-color .4s, box-shadow .4s; }
-        .glass-hover:hover { border-color: rgba(56,189,248,0.3); box-shadow: 0 12px 30px rgba(56,189,248,0.12); }
-        .glow-cyan { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
-        .stagger-in { opacity:0; transform:translateY(20px); animation: fadeInUp .8s cubic-bezier(.22,1,.36,1) forwards; }
-        @keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
-        ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius:10px; }
-        .plan-featured { border-color: rgba(56,189,248,0.4) !important; box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 12px 40px rgba(56,189,248,0.1); }
-        html.dark .plan-featured { border-color: rgba(56,189,248,0.5) !important; }
+        /* ====== TEMA OSCURO (por defecto) ====== */
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;
+            --color-surface: rgba(27,32,36,0.4);
+            --color-surface-container: #1b2024;
+            --color-surface-container-high: #252b2e;
+            --color-on-surface: #dee3e8;
+            --color-on-surface-variant: #bdc8d1;
+            --color-primary: #39b2f8;
+            --color-secondary: #c0c1ff;
+            --color-outline-variant: #3e484f;
+            --color-error: #ffb4ab;
+            --color-green-accent: #10b981;
+            --color-tertiary: #ffc176;
+            --glass-border: rgba(123,208,255,0.1);
+            --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --glass-hover-border: rgba(123,208,255,0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --particle-color-1: rgba(142,213,255,0.4);
+            --particle-color-2: rgba(192,193,255,0.2);
+            --particle-line: rgba(142,213,255,0.12);
+        }
+
+        /* ====== TEMA CLARO ====== */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;
+            --color-surface: rgba(255,255,255,0.7);
+            --color-surface-container: #ffffff;
+            --color-surface-container-high: #e2e8f0;
+            --color-on-surface: #0f172a;
+            --color-on-surface-variant: #334155;
+            --color-primary: #38bdf8;
+            --color-secondary: #818cf8;
+            --color-outline-variant: #cbd5e1;
+            --color-error: #ba1a1a;
+            --color-green-accent: #10b981;
+            --color-tertiary: #7c5800;
+            --glass-border: rgba(0,0,0,0.04);
+            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            --glass-hover-border: rgba(56,189,248,0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            --particle-color-1: rgba(56,189,248,0.25);
+            --particle-color-2: rgba(129,140,248,0.2);
+            --particle-line: rgba(56,189,248,0.12);
+        }
+
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: border-color 0.4s, box-shadow 0.4s;
+        }
+
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+        }
+
+        .glow-cyan {
+            text-shadow: 0 0 12px rgba(56,189,248,0.4);
+        }
+
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56,189,248,0.3);
+            border-radius: 10px;
+        }
+
+        .plan-featured {
+            border-color: rgba(56,189,248,0.4) !important;
+            box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 12px 40px rgba(56,189,248,0.1);
+        }
 
         /* Modal */
-        #payment-modal { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-        #payment-modal.open { display:flex; }
-        @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-        .modal-anim { animation: modalIn .25s ease; }
+        #payment-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        #payment-modal.open {
+            display: flex;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-anim {
+            animation: modalIn 0.25s ease;
+        }
 
         /* Tarjeta animada */
-        .card-preview { background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 14px; padding: 20px 24px; color:#fff; font-family: 'JetBrains Mono', monospace; position:relative; overflow:hidden; }
-        .card-preview::before { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.1); }
-        .card-preview::after { content:''; position:absolute; bottom:-40px; left:-20px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.07); }
+        .card-preview {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border-radius: 14px;
+            padding: 20px 24px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-preview::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .card-preview::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: -20px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+        }
 
         /* Input estilo glass */
-        .card-input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius:8px; color: inherit; padding: 10px 14px; font-size:0.875rem; width:100%; outline:none; transition: border-color .2s; }
-        html.light .card-input { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #0f172a; }
-        .card-input:focus { border-color: rgba(56,189,248,0.6); }
-        .card-input::placeholder { color: #94a3b8; }
+        .card-input {
+            background: rgba(27,32,36,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 10px 14px;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        body[data-theme="light"] .card-input {
+            background: rgba(255,255,255,0.9);
+            border-color: rgba(0,0,0,0.1);
+            color: #0f172a;
+        }
+
+        .card-input:focus {
+            border-color: rgba(56,189,248,0.6);
+        }
+
+        .card-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        body[data-theme="light"] .card-input::placeholder {
+            color: rgba(0,0,0,0.4);
+        }
 
         /* Success state */
-        @keyframes checkIn { from { transform: scale(0); } to { transform: scale(1); } }
-        .check-anim { animation: checkIn .4s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes checkIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .check-anim {
+            animation: checkIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
     </style>
-</head>
-<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+<body data-theme="dark" class="font-body-md selection:bg-primary/20 selection:text-on-surface">
 <canvas id="particle-canvas"></canvas>
 <div class="flex min-h-screen w-full relative z-10">
 
@@ -89,9 +274,13 @@
             </div>
         </div>
         <nav class="flex-1 flex flex-col gap-8">
-            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/pricing">
+            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform cursor-pointer" onclick="window.location.href='/?#pricing'">
                 <span class="material-symbols-outlined text-primary text-2xl glow-cyan">workspace_premium</span>
                 <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Planes</span>
+            </a>
+            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/perfil">
+                <span class="material-symbols-outlined text-on-surface-variant hover:text-primary text-2xl transition-colors">person</span>
+                <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Perfil</span>
             </a>
         </nav>
         <div class="mt-auto">
@@ -119,7 +308,7 @@
         </header>
 
         <!-- Plan actual -->
-        <div class="stagger-in" style="animation-delay:.2s;">
+        <div id="plans" class="stagger-in" style="animation-delay:.2s;">
             <div class="glass rounded-3xl p-5 border border-outline-variant/20 flex items-center gap-4">
                 <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
                 <div>
@@ -147,7 +336,6 @@
                 <ul class="flex flex-col gap-3 flex-1 text-sm">
                     <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>3 proyectos</li>
                     <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
-                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Exportar PDF</li>
                     <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Mejoras con IA</li>
                     <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
                 </ul>
@@ -162,7 +350,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Pro</p>
                     <div class="flex items-end gap-1">
-                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$9.99</span>
+                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$350</span>
                         <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
                     </div>
                     <p class="text-on-surface-variant/60 text-sm mt-2">Para desarrolladores y equipos.</p>
@@ -185,7 +373,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-3">Enterprise</p>
                     <div class="flex items-end gap-1">
-                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$29.99</span>
+                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$850</span>
                         <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
                     </div>
                     <p class="text-on-surface-variant/60 text-sm mt-2">Equipos grandes, acceso ilimitado.</p>
@@ -299,14 +487,24 @@
     let selectedPlan = 'pro';
     const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
 
+    // Scroll a sección
+    function scrollToSection(sectionId) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
     // Tema
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? 'dark_mode' : 'light_mode';
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
     document.getElementById('themeButton').addEventListener('click', () => {
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        document.getElementById('themeIcon').textContent = isDark ? 'dark_mode' : 'light_mode';
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        document.getElementById('themeIcon').textContent = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
     });
 
     // Cargar usuario
@@ -503,14 +701,27 @@
     for (let i = 0; i < 40; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3, size:Math.random()*2+.5, opacity:Math.random()*.4+.1 });
     function animateParticles() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
-        const isDark = document.documentElement.classList.contains('dark');
+        const style = getComputedStyle(document.body);
+        const color1 = style.getPropertyValue('--particle-color-1').trim();
+        const color2 = style.getPropertyValue('--particle-color-2').trim();
+        const lineColor = style.getPropertyValue('--particle-line').trim();
         particles.forEach(p => {
             p.x+=p.vx; p.y+=p.vy;
             if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
             if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+            ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
             ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-            ctx.fillStyle = isDark ? `rgba(56,189,248,${p.opacity})` : `rgba(56,189,248,${p.opacity*.5})`;
             ctx.fill();
+            particles.forEach(p2 => {
+                const d = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (d < 120) {
+                    ctx.strokeStyle = lineColor;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
         });
         requestAnimationFrame(animateParticles);
     }
