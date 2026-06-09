@@ -169,48 +169,54 @@
     <canvas id="particle-canvas"></canvas>
 
     <!-- ══════════════ SUGGESTION MODAL ══════════════ -->
-    <div id="suggestion-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
-        <div class="modal-box modal-anim">
-            <div class="modal-header">
-                <div>
-                    <div class="modal-title" id="modal-title-text">Sugerencia de Docstring</div>
-                    <div class="modal-subtitle" id="modal-fn-label">cargando...</div>
-                </div>
-                <button class="modal-close" onclick="closeModal()" title="Cerrar">✕</button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                <div class="modal-loading" id="modal-loading">
-                    <div class="modal-spinner"></div>
+    <div id="suggestion-modal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="modal-title-text" onclick="if(event.target===this)closeModal()">
+        <div class="glass p-8 rounded-3xl w-full max-w-lg modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1" id="modal-title-text">Sugerencia de Docstring</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" id="modal-fn-label">cargando...</p>
+            <div id="modal-body">
+                <div class="modal-loading" id="modal-loading" class="flex flex-col items-center gap-3 py-8 text-on-surface-variant/60 text-sm">
+                    <div class="modal-spinner w-8 h-8 border-3 border-solid border-primary/20 border-t-primary rounded-full animate-spin"></div>
                     <span>Generando sugerencia con IA...</span>
                 </div>
                 <div id="modal-content" style="display:none;">
-                    <p class="suggestion-label">Copia este docstring en tu código:</p>
-                    <div class="suggestion-code" id="modal-code"></div>
+                    <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-2">Copia este docstring en tu código:</p>
+                    <div class="suggestion-code bg-surface-container border border-outline-variant/20 rounded-xl p-4 text-on-surface font-code-md text-sm leading-relaxed overflow-x-auto whitespace-pre" id="modal-code"></div>
                     <div class="flex gap-2 mt-4">
-                        <button class="copy-btn" id="copy-btn" onclick="copySuggestion()">
-                            <span></span> Copiar al portapapeles
+                        <button class="copy-btn flex-1 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95 flex items-center justify-center gap-2" id="copy-btn" onclick="copySuggestion()">
+                            <span class="material-symbols-outlined text-base">content_copy</span> Copiar al portapapeles
                         </button>
                     </div>
-                    <p class="text-xs text-on-surface-variant/50 mt-4 font-code-md">Agrega este bloque justo después de la línea <code style="background:rgba(56,189,248,0.08);padding:1px 5px;border-radius:3px;">def ...</code> o <code style="background:rgba(56,189,248,0.08);padding:1px 5px;border-radius:3px;">class ...</code> correspondiente.</p>
+                    <p class="text-xs text-on-surface-variant/50 mt-4 font-code-md">Agrega este bloque justo después de la línea <code class="bg-primary/10 px-2 py-1 rounded text-primary">def ...</code> o <code class="bg-primary/10 px-2 py-1 rounded text-primary">class ...</code> correspondiente.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ══════════════ PDF LOADING MODAL ══════════════ -->
-    <div id="pdf-loading-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center">
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)] flex flex-col items-center gap-6">
-            <div class="modal-spinner" style="width:48px;height:48px;border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
-            <p class="text-center font-semibold text-on-surface text-lg">Generando PDF, por favor espere...</p>
+    <div id="pdf-loading-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 bg-background/60 backdrop-blur-md hidden items-center justify-center">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/30 shadow-[0_0_60px_var(--color-primary)] bg-background/40">
+            <button onclick="closePdfLoadingModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Generando PDF</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Por favor espere mientras generamos el documento...</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-center text-on-surface-variant/60 text-sm">Procesando documentación...</p>
+            </div>
         </div>
     </div>
 
     <!-- ══════════════ PDF SUCCESS MODAL ══════════════ -->
-    <div id="pdf-success-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center">
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)] flex flex-col items-center gap-6">
-            <span class="material-symbols-outlined text-6xl text-green-500">check_circle</span>
-            <p class="text-center font-semibold text-on-surface text-lg">El archivo PDF se descargó correctamente.</p>
-            <button onclick="closePdfSuccessModal()" class="px-6 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95">
+    <div id="pdf-success-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 bg-background/60 backdrop-blur-md hidden items-center justify-center">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/30 shadow-[0_0_60px_var(--color-primary)] bg-background/40">
+            <button onclick="closePdfSuccessModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">¡PDF Generado!</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">El archivo PDF se descargó correctamente.</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <span class="material-symbols-outlined text-6xl text-green-500">check_circle</span>
+                <p class="text-center text-on-surface-variant/60 text-sm">Tu documentación está lista para usar.</p>
+            </div>
+            <button onclick="closePdfSuccessModal()" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95">
                 Cerrar
             </button>
         </div>

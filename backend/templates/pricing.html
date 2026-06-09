@@ -396,22 +396,14 @@
 </div>
 
 <!-- ===== MODAL DE PAGO ===== -->
-<div id="payment-modal" onclick="closeModalOutside(event)">
-    <div class="glass rounded-3xl border border-outline-variant/20 w-full max-w-md mx-4 modal-anim overflow-hidden" id="modal-box">
+<div id="payment-modal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="closeModalOutside(event)">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]" id="modal-box" onclick="event.stopPropagation()">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+        <h3 class="text-2xl font-bold text-on-surface mb-1">Suscribirse a plan</h3>
+        <p class="text-on-surface-variant/60 text-sm mb-6">Completa el pago para activar tu plan</p>
 
         <!-- Estado: formulario -->
         <div id="modal-form-state">
-            <div class="p-7 border-b border-outline-variant/20 flex items-center justify-between">
-                <div>
-                    <p class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold">Suscribirse a</p>
-                    <p class="text-on-surface font-bold text-xl" id="modal-plan-name">Pro</p>
-                </div>
-                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full glass glass-hover border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined text-base">close</span>
-                </button>
-            </div>
-
-            <div class="p-7 flex flex-col gap-5">
                 <!-- Tarjeta visual -->
                 <div class="card-preview">
                     <div class="text-xs opacity-60 mb-4 tracking-widest">AUTODOCS AI</div>

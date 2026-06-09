@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from typing import Optional
+from typing import Optional, List
 
 
 class AIEnhancer:
@@ -12,63 +12,99 @@ class AIEnhancer:
     """
 
     def __init__(self):
-        self.api_key = os.getenv('GROQ_API_KEY')
+        # Soporte para múltiples API keys
+        api_keys_str = os.getenv('GROQ_API_KEY', '')
+        print(f"[AI] GROQ_API_KEY encontrada: {bool(api_keys_str)}")
+        if api_keys_str:
+            # Separar por comas si hay múltiples keys
+            self.api_keys = [key.strip() for key in api_keys_str.split(',') if key.strip()]
+            print(f"[AI] Total de API keys cargadas: {len(self.api_keys)}")
+        else:
+            self.api_keys = []
+            print("[AI] WARNING: No se encontró GROQ_API_KEY")
+        
+        self.current_key_index = 0
         self.API_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+    def get_api_key(self) -> Optional[str]:
+        """Obtiene la API key actual con rotación."""
+        if not self.api_keys:
+            return None
+        
+        key = self.api_keys[self.current_key_index]
+        # Rotar a la siguiente key para la siguiente llamada
+        self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+        return key
 
     def is_available(self) -> bool:
         """Verifica si la API de Gemini está configurada y disponible."""
-        return bool(self.api_key)
+        return bool(self.api_keys)
 
     def _call_ai(self, system_prompt: str, user_prompt: str, max_tokens: int = 400):
         if not self.is_available():
+            print("[AI] GROQ_API_KEY no está configurada")
             return None
 
-        payload = {
-            "model": "llama-3.3-70b-versatile",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
-            ],
-            "max_tokens": max_tokens,
-            "temperature": 0.7
-        }
+        # Intentar con cada API key disponible hasta que una funcione
+        for attempt in range(len(self.api_keys)):
+            api_key = self.get_api_key()
+            
+            payload = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt
+                    }
+                ],
+                "max_tokens": max_tokens,
+                "temperature": 0.7
+            }
 
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}",
-            "User-Agent": "AutoDocs/1.0"
-        }
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+                "User-Agent": "AutoDocs/1.0"
+            }
 
-        try:
-            response = requests.post(
-                self.API_URL,
-                json=payload,
-                headers=headers,
-                timeout=30,
-                verify=True
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-                return (
-                    result.get("choices", [{}])[0]
-                    .get("message", {})
-                    .get("content", "")
-                    .strip()
+            try:
+                response = requests.post(
+                    self.API_URL,
+                    json=payload,
+                    headers=headers,
+                    timeout=30,
+                    verify=True
                 )
-            else:
-                print(f"[AI] HTTP Error: {response.status_code} - {response.text[:300]}")
 
-        except Exception as e:
-            print(f"[AI] Error calling AI: {e}")
-            # No lanzar excepción, permitir que el sistema continúe sin IA
+                if response.status_code == 200:
+                    result = response.json()
+                    content = (
+                        result.get("choices", [{}])[0]
+                        .get("message", {})
+                        .get("content", "")
+                        .strip()
+                    )
+                    if content:
+                        print(f"[AI] Llamada exitosa con API key #{attempt + 1}")
+                        return content
+                else:
+                    print(f"[AI] HTTP Error con API key #{attempt + 1}: {response.status_code} - {response.text[:200]}")
+                    # Si es error de autenticación, intentar con la siguiente key
+                    if response.status_code in [401, 403]:
+                        continue
+                    # Si es otro error, retornar None
+                    return None
 
+            except Exception as e:
+                print(f"[AI] Error llamando a la API con key #{attempt + 1}: {e}")
+                # Si es error de conexión, intentar con la siguiente key
+                continue
+
+        print("[AI] Todas las API keys fallaron")
         return None
 
     def enhance_function_description(self, function: dict, context: str = "") -> str:
@@ -272,16 +308,16 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
             f"con {len(analysis_results.get('functions', []))} funciones"
         )
 
-        # Mejorar funciones (limitar a 20 para no exceder cuotas)
-        for func in analysis_results.get('functions', [])[:20]:
+        # Mejorar funciones (limitar a 5 para reducir consumo de tokens)
+        for func in analysis_results.get('functions', [])[:5]:
             func['ai_description'] = self.enhance_function_description(func, context)
 
-        # Mejorar clases (limitar a 15)
-        for cls in analysis_results.get('classes', [])[:15]:
+        # Mejorar clases (limitar a 3)
+        for cls in analysis_results.get('classes', [])[:3]:
             cls['ai_description'] = self.enhance_class_description(cls, context)
 
-        # Mejorar endpoints (limitar a 15)
-        for ep in analysis_results.get('endpoints', [])[:15]:
+        # Mejorar endpoints (limitar a 3)
+        for ep in analysis_results.get('endpoints', [])[:3]:
             ep['ai_description'] = self.enhance_endpoint_description(ep, context)
 
         # Generar insights de arquitectura
@@ -303,7 +339,9 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         Returns:
             Diccionario con patrones minados del código
         """
+        print("[AI] Iniciando mine_code_patterns...")
         if not self.is_available():
+            print("[AI] ERROR: AI Enhancer no está disponible (sin API keys)")
             return {
                 "frequent_patterns": [],
                 "complexity_clusters": [],
@@ -311,9 +349,12 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
                 "insights": "Minería de patrones no disponible - configura GROQ_API_KEY"
             }
 
+        print("[AI] AI Enhancer está disponible, procediendo con minería de patrones...")
         functions = analysis_results.get("functions", [])
         classes = analysis_results.get("classes", [])
         structure = analysis_results.get("structure", [])
+
+        print(f"[AI] Funciones: {len(functions)}, Clases: {len(classes)}, Estructura: {len(structure)}")
 
         # Extraer información para análisis
         function_names = [f["name"] for f in functions]

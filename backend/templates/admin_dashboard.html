@@ -235,33 +235,37 @@
   </main>
 
   <!-- MODAL USUARIO -->
-  <div id="userModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-all" onclick="if(event.target===this) closeUserModal()">
-    <div class="glass rounded-2xl p-6 w-full max-w-md modal-anim">
-      <h3 class="text-xl font-bold mb-4" id="userModalTitle">Agregar Usuario</h3>
+  <div id="userModal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="if(event.target===this) closeUserModal()">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+      <button onclick="closeUserModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+      <h3 class="text-2xl font-bold text-on-surface mb-1" id="userModalTitle">Agregar Usuario</h3>
+      <p class="text-on-surface-variant/60 text-sm mb-6">Administra los usuarios del sistema</p>
       <input type="hidden" id="userId">
-      <div class="mb-3"><label class="block text-xs uppercase tracking-wider mb-1">Nombre</label><input id="userName" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2 focus:border-primary outline-none"></div>
-      <div class="mb-3"><label class="block text-xs uppercase tracking-wider mb-1">Email</label><input id="userEmail" type="email" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2 focus:border-primary outline-none"></div>
-      <div class="mb-3"><label class="block text-xs uppercase tracking-wider mb-1">Contraseña (solo para nuevo)</label><input id="userPassword" type="password" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2 focus:border-primary outline-none"></div>
-      <div class="mb-4"><label class="block text-xs uppercase tracking-wider mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre</label><input id="userName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Email</label><input id="userEmail" type="email" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña (solo para nuevo)</label><input id="userPassword" type="password" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
       <div class="flex gap-3 justify-end">
-        <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant">Cancelar</button>
-        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl">Guardar</button>
+        <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
+        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all">Guardar</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL PROYECTO -->
-  <div id="projectModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden" onclick="if(event.target===this) closeProjectModal()">
-    <div class="glass rounded-2xl p-6 w-full max-w-md modal-anim">
-      <h3 class="text-xl font-bold mb-4" id="projectModalTitle">Agregar Proyecto</h3>
+  <div id="projectModal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="if(event.target===this) closeProjectModal()">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+      <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+      <h3 class="text-2xl font-bold text-on-surface mb-1" id="projectModalTitle">Agregar Proyecto</h3>
+      <p class="text-on-surface-variant/60 text-sm mb-6">Administra los proyectos del sistema</p>
       <input type="hidden" id="projectId">
-      <div class="mb-3"><label class="block text-xs uppercase mb-1">Nombre del proyecto</label><input id="projectName" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"></div>
-      <div class="mb-3"><label class="block text-xs uppercase mb-1">Propietario (email)</label><input id="projectOwner" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"></div>
-      <div class="mb-3"><label class="block text-xs uppercase mb-1">Lenguaje</label><input id="projectLanguage" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2" value="Python"></div>
-      <div class="mb-4"><label class="block text-xs uppercase mb-1">Estado</label><select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/30 rounded-xl p-2"><option value="pending">Pendiente</option><option value="completed">Completado</option><option value="error">Error</option></select></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label><input id="projectName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Propietario (email)</label><input id="projectOwner" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Lenguaje</label><input id="projectLanguage" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" value="Python"></div>
+      <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Estado</label><select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="pending">Pendiente</option><option value="completed">Completado</option><option value="error">Error</option></select></div>
       <div class="flex gap-3 justify-end">
-        <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant">Cancelar</button>
-        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl">Guardar</button>
+        <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
+        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all">Guardar</button>
       </div>
     </div>
   </div>

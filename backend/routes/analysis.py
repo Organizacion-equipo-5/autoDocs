@@ -174,16 +174,20 @@ def get_status(project_id):
 @jwt_required()
 def suggest_docstring():
     """
-    Endpoint para generar sugerencias de docstrings usando la API de Anthropic.
-    Evita problemas de CORS al hacer la petición desde el backend.
+    Endpoint para generar sugerencias de docstrings usando la API de Groq.
+    Usa la clase AIEnhancer para manejar múltiples API keys.
     """
     try:
+        from services.ai_enhancer import AIEnhancer
+        
         data = request.json
         name = data.get('name', '')
         file = data.get('file', '')
         params = data.get('params', '')
         kind = data.get('kind', 'function')
         lang = data.get('lang', 'Python')
+        
+        ai = AIEnhancer()
         
         if kind == 'class':
             prompt = f"""Genera SOLO el docstring para esta clase en {lang}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
@@ -216,25 +220,15 @@ Formato esperado (Python):
         Descripción del valor retornado.
     \"\"\""""
         
-        # Hacer la petición a la API de Anthropic desde el backend
-        response = requests.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={
-                'Content-Type': 'application/json',
-                'x-api-key': 'sk-ant-api03-...'  # Debería configurarse como variable de entorno
-            },
-            json={
-                'model': 'claude-sonnet-4-20250514',
-                'max_tokens': 1000,
-                'messages': [{'role': 'user', 'content': prompt}]
-            },
-            timeout=30
+        # Usar AIEnhancer para generar la sugerencia
+        suggestion = ai._call_ai(
+            "Eres un experto en generar documentación de código. Genera docstrings claros y concisos.",
+            prompt,
+            max_tokens=500
         )
         
-        if response.status_code == 200:
-            data = response.json()
-            text = ''.join([b.get('text', '') for b in data.get('content', [])]).strip()
-            return jsonify({'suggestion': text}), 200
+        if suggestion:
+            return jsonify({'suggestion': suggestion}), 200
         else:
             # Si falla la API, devolver un template básico
             if kind == 'class':

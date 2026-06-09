@@ -595,72 +595,58 @@
         }
     </style>
 
-    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
-        <div id="uploadModalInner" class="modal-anim relative w-full max-w-md mx-4">
-
-            <!-- Cierre -->
-            <button onclick="closeUploadModal()" class="modal-close-btn absolute top-4 right-4" aria-label="Cerrar">
-                <span class="material-symbols-outlined text-2xl">close</span>
-            </button>
-
-            <!-- Encabezado -->
-            <div class="flex items-center gap-3 mb-1">
-                <div class="modal-icon-box">
-                    <span class="material-symbols-outlined text-xl" style="color:var(--modal-primary)">upload_file</span>
-                </div>
-                <h3 id="modal-title-grad" class="text-2xl font-bold">Nuevo proyecto</h3>
-            </div>
-            <p class="modal-subtitle text-sm mb-6 ml-12">Sube un archivo ZIP o TAR.GZ con tu proyecto</p>
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Sube un archivo ZIP o TAR.GZ con tu proyecto</p>
 
             <!-- Nombre -->
             <div class="mb-4">
-                <label class="modal-label block text-xs uppercase tracking-widest font-bold mb-1.5">Nombre del proyecto</label>
-                <input type="text" id="proj-name" class="modal-input" placeholder="Mi Proyecto Flask" />
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
+                <input type="text" id="proj-name" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="Mi Proyecto Flask" />
             </div>
 
             <!-- Descripción -->
             <div class="mb-4">
-                <label class="modal-label block text-xs uppercase tracking-widest font-bold mb-1.5">
-                    Descripción <span style="opacity:0.45">(opcional)</span>
-                </label>
-                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripción del proyecto" />
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-45">(opcional)</span></label>
+                <input type="text" id="proj-desc" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="Breve descripción del proyecto" />
             </div>
 
             <!-- Zona de subida -->
-            <div id="upload-zone" class="mb-4"
+            <div id="upload-zone" class="mb-4 border-2 border-dashed border-outline-variant/30 bg-surface-container/50 rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
                 onclick="document.getElementById('file-input').click()"
-                ondragover="event.preventDefault();this.style.borderColor='var(--modal-zone-hover-border)';this.style.background='var(--modal-zone-hover-bg)'"
+                ondragover="event.preventDefault();this.style.borderColor='var(--color-primary)';this.style.background='var(--color-primary/5)'"
                 ondragleave="this.style.borderColor='';this.style.background=''"
                 ondrop="event.preventDefault();onFileSelect({target:{files:event.dataTransfer.files}})">
                 <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
-                <span class="material-symbols-outlined text-4xl block mb-2" style="color:var(--modal-primary)">cloud_upload</span>
-                <p class="text-sm modal-subtitle">
-                    <strong style="color:var(--modal-primary)">Haz clic para seleccionar</strong> o arrastra aquí
+                <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
+                <p class="text-sm text-on-surface-variant/60">
+                    <strong class="text-primary">Haz clic para seleccionar</strong> o arrastra aquí
                 </p>
-                <p class="text-xs mt-1" style="color:var(--modal-placeholder)">ZIP, TAR.GZ, .py, .js — máx. 50 MB</p>
+                <p class="text-xs mt-1 text-on-surface-variant/40">ZIP, TAR.GZ, .py, .js — máx. 50 MB</p>
             </div>
-            <div id="file-name" class="file-name-badge mb-4 hidden"></div>
+            <div id="file-name" class="hidden mb-4 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
 
             <!-- Separador -->
             <div class="flex items-center gap-3 my-4">
-                <div class="flex-1 h-px modal-divider"></div>
-                <span class="text-xs uppercase tracking-widest" style="color:var(--modal-placeholder)">o</span>
-                <div class="flex-1 h-px modal-divider"></div>
+                <div class="flex-1 h-px bg-outline-variant/20"></div>
+                <span class="text-xs uppercase tracking-widest text-on-surface-variant/40">o</span>
+                <div class="flex-1 h-px bg-outline-variant/20"></div>
             </div>
 
             <!-- GitHub URL -->
             <div class="mb-6">
-                <label class="modal-label block text-xs uppercase tracking-widest font-bold mb-1.5">
-                    <span class="material-symbols-outlined text-[14px] align-middle mr-1" style="color:var(--modal-primary)">code</span>
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
+                    <span class="material-symbols-outlined text-[14px] align-middle mr-1 text-primary">code</span>
                     Ingresa URL de GitHub
                 </label>
-                <input type="url" id="proj-github" class="modal-input" placeholder="https://github.com/usuario/repositorio" />
+                <input type="url" id="proj-github" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="https://github.com/usuario/repositorio" />
             </div>
 
             <!-- Botón -->
             <button onclick="createProject()" id="modal-submit-btn"
-                class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
-                style="background:linear-gradient(135deg,#38bdf8,#818cf8);color:var(--modal-btn-color);box-shadow:0 4px 20px rgba(56,189,248,0.28);">
+                class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
                 Crear y analizar
                 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
             </button>
@@ -669,47 +655,31 @@
 
     <!-- Loading Modal -->
     <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="loadingModal">
-        <div class="glass p-10 rounded-3xl text-center modal-anim border border-outline-variant/20 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
-            <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin mx-auto mb-6"></div>
-            <p class="text-xl font-semibold text-on-surface">Analizando proyecto...</p>
-            <p class="text-on-surface-variant/50 text-sm mt-2">Procesando código y generando documentación</p>
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Analizando proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Procesando código y generando documentación</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-center text-on-surface-variant/60 text-sm">Esto puede tomar unos segundos...</p>
+            </div>
         </div>
     </div>
 
     <!-- Limit Modal -->
     <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="limitModal">
-        <div class="glass p-8 rounded-3xl max-w-lg w-full mx-4 modal-anim border border-outline-variant/20 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center mx-auto mb-4">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeLimitModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Límite alcanzado</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Has alcanzado el límite de proyectos para tu plan actual.</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center">
                     <span class="material-symbols-outlined text-error text-3xl">block</span>
                 </div>
-                <h3 class="text-2xl font-bold text-on-surface mb-2">Límite alcanzado</h3>
-                <p id="limitMessage" class="text-on-surface-variant/70">Has alcanzado el límite de proyectos para tu plan actual.</p>
+                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm">Actualiza tu plan para crear más proyectos.</p>
             </div>
-            <div class="space-y-3 mb-6">
-                <div class="glass rounded-xl p-4 border border-outline-variant/20">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-semibold text-on-surface">Plan Pro</span>
-                        <span class="text-primary font-bold">$9.99/mes</span>
-                    </div>
-                    <p class="text-sm text-on-surface-variant/60">20 proyectos, 100 análisis/mes, PDF + IA</p>
-                </div>
-                <div class="glass rounded-xl p-4 border border-outline-variant/20">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-semibold text-on-surface">Plan Enterprise</span>
-                        <span class="text-secondary font-bold">$29.99/mes</span>
-                    </div>
-                    <p class="text-sm text-on-surface-variant/60">Proyectos ilimitados, análisis ilimitados</p>
-                </div>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="closeLimitModal()" class="flex-1 py-3 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all font-medium">
-                    Cerrar
-                </button>
-                <button onclick="location.href='/pricing'" class="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/80 transition-all">
-                    Ver planes
-                </button>
-            </div>
+            <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95">
+                Ver planes
+            </button>
         </div>
     </div>
 
