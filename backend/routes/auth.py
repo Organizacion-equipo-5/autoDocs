@@ -157,7 +157,7 @@ def send_reset_email(email, code):
 @auth_bp.route('/forgot-password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
-    email = data.get('email')
+    email = data.get('email', '').strip().lower()
 
     if not email:
         return jsonify({"error": "Email is required"}), 400
@@ -171,13 +171,22 @@ def forgot_password():
     code = generate_reset_code()
     expires_at = datetime.utcnow() + timedelta(minutes=15)
 
+    # Asegurar que la colección existe
+    if 'password_reset_codes' not in db.list_collection_names():
+        print("[Password Reset] Creando colección password_reset_codes")
+        db.create_collection('password_reset_codes')
+
     db.password_reset_codes.delete_one({"email": email})
-    db.password_reset_codes.insert_one({
+    reset_record = {
         "email": email,
         "code": code,
         "expires_at": expires_at.isoformat(),
         "created_at": datetime.utcnow().isoformat()
-    })
+    }
+    db.password_reset_codes.insert_one(reset_record)
+
+    print(f"[Password Reset] Código guardado para {email}: {code}")
+    print(f"[Password Reset] Registro: {reset_record}")
 
     # Enviar correo
     email_sent = send_reset_email(email, code)
@@ -192,16 +201,27 @@ def forgot_password():
 @auth_bp.route('/verify-code', methods=['POST'])
 def verify_code():
     data = request.get_json()
-    email = data.get('email')
-    code = data.get('code')
+    email = data.get('email', '').strip().lower()
+    code = str(data.get('code', '')).strip()
 
     if not email or not code:
         return jsonify({"error": "Email and code are required"}), 400
 
     db = get_db()
-    reset_record = db.password_reset_codes.find_one({"email": email, "code": code})
+
+    print(f"[Verify Code] Email recibido: {email}")
+    print(f"[Verify Code] Código recibido: {repr(code)}")
+
+    reset_record = db.password_reset_codes.find_one({"email": email})
+
+    print(f"[Verify Code] Registro encontrado: {reset_record}")
 
     if not reset_record:
+        return jsonify({"error": "No reset code found for this email"}), 400
+
+    if str(reset_record.get("code", "")).strip() != code:
+        print(f"[Verify Code] Código guardado: {repr(reset_record.get('code'))}")
+        print(f"[Verify Code] Código recibido: {repr(code)}")
         return jsonify({"error": "Invalid code"}), 400
 
     expires_at = datetime.fromisoformat(reset_record['expires_at'])
@@ -215,8 +235,8 @@ def verify_code():
 def reset_password():
     try:
         data = request.get_json()
-        email = data.get('email')
-        code = data.get('code')
+        email = data.get('email', '').strip().lower()
+        code = str(data.get('code', '')).strip()
         new_password = data.get('new_password')
 
         if not email or not code or not new_password:
