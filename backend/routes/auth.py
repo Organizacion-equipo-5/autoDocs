@@ -139,11 +139,14 @@ def send_reset_email(email, code):
 
         message.attach(MIMEText(body, "html"))
 
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, message.as_string())
-        server.quit()
+        
+
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, email, message.as_string())
 
         print(f"[Email] Código enviado a {email}: {code}")
         return True

@@ -40,18 +40,3 @@ except Exception as e:
     print(f"❌ ERROR")
     print(f"{type(e).__name__}")
     print(f"{e}")
-            {
-                "role": "user",
-                "content": "Responde únicamente: AutoDocs funcionando"
-            }
-        ]
-    )
-
-    print("\n✅ CONEXIÓN EXITOSA")
-    print("Respuesta:")
-    print(response.choices[0].message.content)
-
-except Exception as e:
-    print("\n❌ ERROR")
-    print(type(e).__name__)
-    print(e)
