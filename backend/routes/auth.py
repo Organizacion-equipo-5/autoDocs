@@ -8,6 +8,10 @@ import random
 import string
 import re
 import smtplib
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -89,8 +93,16 @@ def generate_reset_code():
 
 def send_reset_email(email, code):
     try:
-        sender_email = "al222310566@gmail.com"
-        sender_password = "pnpkyptpbzbhgwgq"
+        sender_email = os.getenv("EMAIL_USER", "").strip()
+
+        smtp_host = os.getenv("SMTP_HOST", "").strip()
+        smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        smtp_user = os.getenv("SMTP_USER", "").strip()
+        smtp_password = os.getenv("SMTP_PASSWORD", "").strip()
+
+        print(f"[SMTP] HOST: {smtp_host}")
+        print(f"[SMTP] USER: {smtp_user}")
+        print(f"[SMTP] FROM: {sender_email}")
 
         message = MIMEMultipart()
         message["From"] = sender_email
@@ -98,61 +110,66 @@ def send_reset_email(email, code):
         message["Subject"] = "Código de recuperación de contraseña - AutoDocs AI"
 
         body = f"""
-        <html>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0f1418; color: #dee3e8; line-height: 1.6;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-                <div style="background: rgba(27,32,36,0.6); backdrop-filter: blur(16px); border: 1px solid rgba(123,208,255,0.1); border-radius: 16px; padding: 40px; box-shadow: 0 0 40px rgba(123,208,255,0.1);">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <div style="width: 60px; height: 60px; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(56,189,248,0.15);">
-                            <span style="font-size: 32px;">📧</span>
-                        </div>
-                        <h1 style="color: #39b2f8; font-size: 28px; font-weight: 700; margin: 0 0 10px 0; text-shadow: 0 0 12px rgba(56,189,248,0.4);">AutoDocs AI</h1>
-                        <p style="color: #bdc8d1; font-size: 14px; margin: 0;">Recuperación de contraseña</p>
-                    </div>
-
-                    <p style="color: #dee3e8; font-size: 16px; margin-bottom: 20px;">Hola,</p>
-                    <p style="color: #bdc8d1; font-size: 15px; margin-bottom: 20px;">Has solicitado recuperar tu contraseña en AutoDocs AI. Tu código de recuperación es:</p>
-
-                    <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
-                        <span style="font-size: 48px; font-weight: 700; color: #39b2f8; letter-spacing: 8px; font-family: 'Courier New', monospace; text-shadow: 0 0 20px rgba(56,189,248,0.3);">{code}</span>
-                    </div>
-
-                    <div style="background: rgba(255,176,171,0.1); border: 1px solid rgba(255,176,171,0.2); border-radius: 8px; padding: 15px; margin: 20px 0;">
-                        <p style="color: #ffb4ab; font-size: 14px; margin: 0; font-weight: 500;">⚠️ Este código expirará en 15 minutos.</p>
-                    </div>
-
-                    <p style="color: #bdc8d1; font-size: 15px; margin-bottom: 20px;">Si no solicitaste este cambio, ignora este correo por seguridad.</p>
-
-                    <div style="border-top: 1px solid rgba(123,208,255,0.1); padding-top: 20px; margin-top: 30px; text-align: center;">
-                        <p style="color: #bdc8d1; font-size: 14px; margin: 0;">Saludos,</p>
-                        <p style="color: #39b2f8; font-size: 16px; font-weight: 600; margin: 5px 0 0 0;">El equipo de AutoDocs AI</p>
-                    </div>
-                </div>
-
-                <p style="text-align: center; color: #64748b; font-size: 12px; margin-top: 30px;">
-                    Este es un correo automático, por favor no respondas.
-                </p>
+<html>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #0f1418; color: #dee3e8;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: rgba(27,32,36,0.9); border: 1px solid rgba(123,208,255,0.2); border-radius: 16px; padding: 40px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 40px;">📧</div>
+                <h1 style="color: #39b2f8; margin-bottom: 5px;">AutoDocs AI</h1>
+                <p style="color: #bdc8d1;">Recuperación de contraseña</p>
             </div>
-        </body>
-        </html>
-        """
+
+            <p>Hola,</p>
+            <p style="color: #bdc8d1;">Has solicitado recuperar tu contraseña en AutoDocs AI. Tu código de recuperación es:</p>
+
+            <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+                <span style="font-size: 48px; font-weight: bold; color: #39b2f8; letter-spacing: 8px; font-family: Courier New, monospace;">
+                    {code}
+                </span>
+            </div>
+
+            <div style="background: rgba(255,176,171,0.1); border: 1px solid rgba(255,176,171,0.2); border-radius: 8px; padding: 15px; margin: 20px 0;">
+                <p style="color: #ffb4ab; margin: 0; font-weight: bold;">⚠️ Este código expirará en 15 minutos.</p>
+            </div>
+
+            <p style="color: #bdc8d1;">Si no solicitaste este cambio, ignora este correo por seguridad.</p>
+
+            <div style="border-top: 1px solid rgba(123,208,255,0.1); padding-top: 20px; margin-top: 30px; text-align: center;">
+                <p style="color: #bdc8d1; margin: 0;">Saludos,</p>
+                <p style="color: #39b2f8; font-weight: bold; margin: 5px 0 0 0;">El equipo de AutoDocs AI</p>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: #64748b; font-size: 12px; margin-top: 30px;">
+            Este es un correo automático, por favor no respondas.
+        </p>
+    </div>
+</body>
+</html>
+"""
 
         message.attach(MIMEText(body, "html"))
 
-        # Agregar timeout para evitar que se cuelgue
-        import socket
-        socket.setdefaulttimeout(10)  # 10 segundos de timeout
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
 
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, message.as_string())
-        server.quit()
+            server.login(smtp_user, smtp_password)
 
-        print(f"[Email] Código enviado a {email}: {code}")
+            server.sendmail(
+                sender_email,
+                email,
+                message.as_string()
+            )
+
+        print(f"[Email] Código enviado desde {sender_email} hacia {email}")
+
         return True
+
     except Exception as e:
-        print(f"[Email Error] Error enviando correo: {e}")
+        print(f"[Email Error] {repr(e)}")
         return False
 
 @auth_bp.route('/forgot-password', methods=['POST'])
