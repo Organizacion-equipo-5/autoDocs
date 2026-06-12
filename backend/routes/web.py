@@ -19,6 +19,10 @@ def dashboard():
 def perfil():
     return render_template('perfil.html')
 
+@web_bp.route('/database-analysis')
+def database_analysis():
+    return render_template('database_analysis.html')
+
 @web_bp.route('/projects')
 def projects():
     return render_template('projects.html')

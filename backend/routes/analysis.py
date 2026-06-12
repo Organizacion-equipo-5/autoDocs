@@ -8,6 +8,7 @@ from services.ai_enhancer import AIEnhancer
 from datetime import datetime
 import threading
 import requests
+import re
 
 analysis_bp = Blueprint('analysis', __name__)
 
@@ -311,3 +312,331 @@ def get_etl_diagram():
         return jsonify({"diagram": diagram}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@analysis_bp.route('/database/analyze-sql', methods=['POST'])
+@jwt_required()
+def analyze_sql_database():
+    sql_file = request.files.get('file')
+    if not sql_file or not sql_file.filename.lower().endswith('.sql'):
+        return jsonify({"error": "Debes subir un archivo .sql válido."}), 400
+
+    try:
+        raw_sql = sql_file.read().decode('utf-8', errors='replace')
+    except Exception as e:
+        return jsonify({"error": f"Error leyendo el archivo: {str(e)}"}), 400
+
+    analysis = generate_sql_analysis(raw_sql)
+    return jsonify(analysis), 200
+
+
+@analysis_bp.route('/database/download-pdf', methods=['POST'])
+@jwt_required()
+def download_database_pdf():
+    data = request.json
+    if not data or not data.get('analysis'):
+        return jsonify({"error": "No analysis data provided"}), 400
+    
+    try:
+        from services.doc_generator import DocGenerator
+        from io import BytesIO
+        from weasyprint import HTML, CSS
+        from datetime import datetime
+        
+        analysis = data.get('analysis', {})
+        tables = analysis.get('tables', [])
+        suggestions = analysis.get('suggestions', [])
+        er_diagram = analysis.get('er_diagram', '')
+        
+        # Generar HTML del PDF
+        html_content = generate_database_pdf_html(tables, suggestions, er_diagram)
+        
+        # Convertir HTML a PDF con WeasyPrint
+        pdf_bytes = HTML(string=html_content).write_pdf()
+        
+        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+        filename = f'database_analysis_{timestamp}.pdf'
+        
+        return pdf_bytes, 200, {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': f'attachment; filename="{filename}"'
+        }
+    except Exception as e:
+        print(f"[PDF Error] {str(e)}")
+        return jsonify({"error": f"Error generando PDF: {str(e)}"}), 500
+
+
+def generate_database_pdf_html(tables, suggestions, er_diagram):
+    """Genera HTML profesional para el PDF del análisis de BD."""
+    from datetime import datetime
+    
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+    
+    suggestions_html = '\n'.join(f'<li>{s}</li>' for s in suggestions)
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Análisis de Base de Datos</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                color: #333;
+                line-height: 1.6;
+                margin: 0;
+                padding: 20px;
+            }}
+            .header {{
+                border-bottom: 3px solid #38bdf8;
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }}
+            .header h1 {{
+                margin: 0;
+                color: #0f172a;
+                font-size: 32px;
+            }}
+            .timestamp {{
+                color: #666;
+                font-size: 12px;
+                margin-top: 10px;
+            }}
+            .section {{
+                margin-bottom: 30px;
+                page-break-inside: avoid;
+            }}
+            .section h2 {{
+                border-left: 4px solid #38bdf8;
+                padding-left: 10px;
+                color: #0f172a;
+                margin-top: 20px;
+            }}
+            .section h3 {{
+                color: #334155;
+                margin-top: 15px;
+            }}
+            ul {{
+                padding-left: 20px;
+            }}
+            li {{
+                margin-bottom: 8px;
+                color: #555;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin: 15px 0;
+            }}
+            th, td {{
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+            }}
+            th {{
+                background-color: #38bdf8;
+                color: white;
+                font-weight: bold;
+            }}
+            tr:nth-child(even) {{
+                background-color: #f9f9f9;
+            }}
+            .diagram {{
+                text-align: center;
+                margin: 20px 0;
+                page-break-inside: avoid;
+            }}
+            .diagram img {{
+                max-width: 100%;
+                height: auto;
+                border: 1px solid #ddd;
+                padding: 10px;
+                background-color: #fff;
+            }}
+            .footer {{
+                margin-top: 40px;
+                border-top: 1px solid #ddd;
+                padding-top: 10px;
+                color: #999;
+                font-size: 12px;
+                text-align: center;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Análisis de Base de Datos</h1>
+            <p class="timestamp">Generado: {timestamp}</p>
+        </div>
+
+        <div class="section">
+            <h2>Resumen</h2>
+            <p>Se detectaron <strong>{len(tables)}</strong> tabla(s) en el archivo SQL analizado.</p>
+            <p>Este informe contiene un análisis detallado de la estructura, recomendaciones de optimización y un diagrama entidad-relación.</p>
+        </div>
+
+        <div class="section">
+            <h2>Diagrama Entidad-Relación (E-R)</h2>
+            <div class="diagram">
+                {er_diagram if er_diagram else '<p style="color: #999;">No se pudo generar el diagrama E-R.</p>'}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Tablas Detectadas</h2>
+            <p>Total de tablas: <strong>{len(tables)}</strong></p>
+            <ul>
+                {''.join(f'<li><code>{table}</code></li>' for table in tables)}
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Recomendaciones y Observaciones</h2>
+            <ul>
+                {suggestions_html}
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>AutoDocs AI - Análisis automático de bases de datos</p>
+        </div>
+    </body>
+    </html>
+    """
+    return html
+
+
+def generate_sql_analysis(sql_text):
+    suggestions = []
+    tables = []
+    table_columns = {}
+    foreign_keys = {}
+    
+    content = sql_text
+    # Buscar todas las tablas CREATE TABLE
+    matches = re.findall(r'create\s+table\s+[`"\[]?(\w+)[`"\]]?\s*\((.*?)\)\s*(?:;|$)', content, flags=re.S | re.I)
+
+    if not matches:
+        suggestions.append('No se detectaron sentencias CREATE TABLE. Verifica que el archivo sea un esquema SQL válido.')
+    else:
+        tables = [name for name, _ in matches]
+        suggestions.append(f'Se detectaron {len(tables)} tabla(s) en el archivo.')
+
+        lower_content = content.lower()
+        has_index = bool(re.search(r'create\s+(?:unique\s+)?index\s+', lower_content))
+
+        for table_name, body in matches:
+            # Extraer columnas
+            columns = []
+            for line in body.split(','):
+                line = line.strip()
+                if line and not line.upper().startswith(('PRIMARY', 'FOREIGN', 'UNIQUE', 'INDEX', 'KEY', 'CONSTRAINT')):
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        col_name = parts[0].strip('`"[]')
+                        col_type = parts[1]
+                        columns.append({'name': col_name, 'type': col_type})
+            
+            table_columns[table_name] = columns
+            
+            lower_body = body.lower()
+            if 'primary key' not in lower_body:
+                suggestions.append(f'La tabla `{table_name}` no define una clave primaria. Agrega `PRIMARY KEY` para mejorar integridad y rendimiento.')
+
+            fk_columns = sorted(set(re.findall(r'(\w+_id)\b', body, flags=re.I)))
+            if fk_columns and 'foreign key' not in lower_body:
+                suggestions.append(f'Tabla `{table_name}` tiene columnas que parecen llaves foráneas ({", ".join(fk_columns)}) sin FOREIGN KEY declarado.')
+
+            if re.search(r'varchar\s*(?!\()', body, flags=re.I):
+                suggestions.append(f'Tabla `{table_name}` contiene columnas VARCHAR sin tamaño definido. Usa `VARCHAR(255)` o un tamaño específico.')
+
+            for col_name, col_type in re.findall(r'(\w+)\s+(text|blob|longtext|mediumtext|tinytext)\b', body, flags=re.I):
+                suggestions.append(f'La columna `{col_name}` en `{table_name}` usa `{col_type}`. Si no necesitas texto libre ilimitado, considera tipos más ajustados.')
+
+            if not has_index and 'foreign key' not in lower_body:
+                suggestions.append(f'No se detectan índices explícitos para `{table_name}`. Agrega índices a columnas de búsqueda frecuentes o a las relaciones.')
+            
+            # Extraer relaciones foráneas
+            fk_matches = re.findall(r'foreign\s+key\s*\(\s*(\w+)\s*\)\s*references\s+(\w+)', body, flags=re.I)
+            for fk_col, ref_table in fk_matches:
+                foreign_keys[table_name] = {'column': fk_col, 'references': ref_table}
+
+    # Generar diagrama E-R en PlantUML
+    er_diagram_code = generate_er_diagram_plantuml(tables, table_columns, foreign_keys)
+    er_diagram_html = generate_er_diagram_image(er_diagram_code)
+
+    summary = 'Análisis completado exitosamente.'
+    return {
+        'summary': summary,
+        'tables': tables,
+        'suggestions': suggestions,
+        'er_diagram': er_diagram_html,
+        'er_diagram_code': er_diagram_code
+    }
+
+
+def generate_er_diagram_plantuml(tables, table_columns, foreign_keys):
+    """Genera código PlantUML para diagrama E-R."""
+    plantuml_code = "@startuml database\n"
+    plantuml_code += "!theme plain\n"
+    plantuml_code += "skinparam backgroundColor #f1f5f9\n"
+    plantuml_code += "skinparam rectangle {\n"
+    plantuml_code += "  BackgroundColor #38bdf8\n"
+    plantuml_code += "  BorderColor #0f172a\n"
+    plantuml_code += "  FontColor #0f1418\n"
+    plantuml_code += "}\n\n"
+
+    # Definir entidades
+    for table in tables:
+        columns = table_columns.get(table, [])
+        plantuml_code += f"entity \"{table}\" {{\n"
+        for col in columns[:8]:  # Límitar a 8 columnas por tabla
+            plantuml_code += f"  {col['name']}: {col['type']}\n"
+        if len(columns) > 8:
+            plantuml_code += f"  ... ({len(columns) - 8} more columns)\n"
+        plantuml_code += "}\n\n"
+
+    # Definir relaciones
+    for table, fk_info in foreign_keys.items():
+        ref_table = fk_info.get('references')
+        if ref_table in tables:
+            plantuml_code += f"{table} }--|| {ref_table}\n"
+
+    plantuml_code += "@enduml\n"
+    return plantuml_code
+
+
+def generate_er_diagram_image(plantuml_code):
+    """Genera imagen del diagrama E-R usando PlantUML."""
+    try:
+        from services.doc_generator import DocGenerator
+        doc_gen = DocGenerator({})
+        
+        # Intentar usar el servidor remoto de PlantUML
+        from pathlib import Path
+        import tempfile
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.puml', delete=False) as f:
+            f.write(plantuml_code)
+            temp_path = Path(f.name)
+        
+        try:
+            # Usar el método _fetch_plantuml_image del DocGenerator
+            output_file = temp_path.with_suffix('.png')
+            result_path = doc_gen._fetch_plantuml_image(plantuml_code, output_file)
+            
+            if result_path and result_path.exists():
+                data_uri = doc_gen._image_to_data_uri(result_path)
+                if data_uri:
+                    return f'<img src="{data_uri}" alt="Diagrama E-R" />'
+                result_path.unlink(missing_ok=True)
+        except Exception as e:
+            print(f"[ER Diagram] Error: {e}")
+        finally:
+            temp_path.unlink(missing_ok=True)
+        
+        # Fallback: mostrar el código PlantUML
+        return f'<pre style="background:#f0f0f0; padding:10px; border-radius:4px; font-size:12px; overflow:auto;">{plantuml_code}</pre>'
+    except Exception as e:
+        print(f"[ER Diagram] Fallback error: {e}")
+        return '<p style="color: #999;">No se pudo generar el diagrama E-R.</p>'

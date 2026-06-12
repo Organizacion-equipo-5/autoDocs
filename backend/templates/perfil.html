@@ -234,6 +234,7 @@
                 </span>
               </div>
 
+
               <div class="w-full mt-5 pt-5 border-t border-divider">
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-variant-70 flex items-center gap-1">
@@ -475,6 +476,27 @@
       } catch {
         document.getElementById('errorMessage').textContent = 'Error al cargar perfil.';
         errorEl.classList.remove('hidden');
+      }
+    }
+
+    async function goToDatabaseAnalysis() {
+      const messageBox = document.getElementById('dbPlanMessage');
+      const messageText = document.getElementById('dbPlanText');
+      messageBox.classList.add('hidden');
+      try {
+        const res = await fetch('/api/payments/my-plan', { headers: authHeaders() });
+        if (!res.ok) throw new Error('No autorizado');
+        const data = await res.json();
+        const plan = data.plan || 'free';
+        if (plan === 'free') {
+          messageText.textContent = 'Necesitas actualizar tu plan para usar el analizador de base de datos.';
+          messageBox.classList.remove('hidden');
+          return;
+        }
+        window.location.href = '/database-analysis';
+      } catch (error) {
+        messageText.textContent = 'No se pudo verificar tu plan. Intenta de nuevo.';
+        messageBox.classList.remove('hidden');
       }
     }
 
