@@ -76,6 +76,12 @@
 
     html { scroll-behavior: smooth; }
 
+/* Asegurar que los campos de formulario muestren el texto y el caret correctamente en todos los temas */
+input, textarea, select, .input-field, .glass input, input[type="text"], input[type="email"], input[type="url"], input[type="password"] {
+  color: var(--text) !important;
+  caret-color: var(--accent) !important;
+}
+
     body {
       background: var(--bg);
       color: var(--text);

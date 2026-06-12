@@ -324,6 +324,9 @@
                   <div class="relative">
                     <input id="profilePassword" type="password" class="input-field pl-9" placeholder="••••••••" />
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-variant-50 text-[18px]">key</span>
+                    <button type="button" onclick="togglePassword('profilePassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-variant-50 hover:text-primary transition-colors">
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
                   </div>
                   <p class="text-[11px] text-variant-50 mt-1">Mínimo 6 caracteres, déjala vacía si no deseas cambiarla</p>
                 </div>
@@ -334,6 +337,9 @@
                   <div class="relative">
                     <input id="profilePasswordConfirm" type="password" class="input-field pl-9" placeholder="••••••••" />
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-variant-50 text-[18px]">password</span>
+                    <button type="button" onclick="togglePassword('profilePasswordConfirm', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-variant-50 hover:text-primary transition-colors">
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -444,7 +450,8 @@
             pro: '20 proyectos, 100 análisis/mes, PDF + IA',
             enterprise: 'Proyectos ilimitados, análisis ilimitados'
           };
-          const planPrices = { free: '$0', pro: '$9.99', enterprise: '$29.99' };
+          // Prices should match pricing page
+          const planPrices = { free: '$0', pro: '$350', enterprise: '$850' };
           const projectLimits = { free: 3, pro: 20, enterprise: -1 };
 
           document.getElementById('currentPlanName').textContent = planNames[planData.plan] || planData.plan;
@@ -556,6 +563,19 @@
         isSaving          = false;
         saveBtn.innerHTML = originalBtnText;
         saveBtn.disabled  = false;
+      }
+    }
+
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const icon = button.querySelector('.material-symbols-outlined');
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        if (icon) icon.textContent = 'visibility';
       }
     }
 

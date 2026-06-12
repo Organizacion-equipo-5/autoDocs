@@ -204,6 +204,14 @@
             will-change: transform, opacity;
         }
 
+        /* Asegurar que los botones dentro de la tarjeta sean clicables y visibles */
+        .card-interaction { position: relative; overflow: visible; }
+        .card-interaction > button { position: relative; z-index: 30; background: transparent; border: none; }
+        .card-interaction > button .material-symbols-outlined { pointer-events: none; }
+        /* Suavizar un poco la sombra de las tarjetas para no interferir visualmente */
+        .glass:hover { box-shadow: 0 8px 20px rgba(56,189,248,0.08); }
+        html.dark .card-interaction > button { background: rgba(255,255,255,0.02); }
+
         .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.3);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
@@ -385,7 +393,7 @@
                             ${p.status === 'completed' ? `<span>Calidad <strong style="color:${qColor}">${q}/100</strong></span>` : ''}
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase border ${statusClass}">${labels[p.status] || p.status}</span>
-                        <button class="text-on-surface-variant/40 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors" onclick="deleteProject(event,'${p._id}')">
+                        <button class="text-on-surface-variant/40 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors project-delete-btn" style="position:relative; z-index:30;" onclick="deleteProject(event,'${p._id}')">
                             <span class="material-symbols-outlined text-xl">delete</span>
                         </button>
                     </div>
@@ -399,6 +407,30 @@
         async function deleteProject(e, id) {
             e.stopPropagation();
             if (!confirm('¿Eliminar este proyecto?')) return;
+
+            // Animación suave de colapso antes de recargar la lista
+            const btn = e.target.closest('button') || e.target;
+            const cardWrapper = btn ? btn.closest('.tilt-card') : null;
+            if (cardWrapper) {
+                const el = cardWrapper;
+                el.style.overflow = 'hidden';
+                const startH = el.offsetHeight + 'px';
+                el.style.height = startH;
+                el.style.transition = 'height 300ms ease, opacity 300ms ease, margin 300ms ease, padding 300ms ease';
+                requestAnimationFrame(() => {
+                    el.style.height = '0px';
+                    el.style.opacity = '0';
+                    el.style.margin = '0';
+                    el.style.padding = '0';
+                });
+                try {
+                    await fetch(`/api/projects/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                } catch (e) { /* ignore */ }
+                setTimeout(() => loadProjects(), 350);
+                return;
+            }
+
+            // Fallback simple
             await fetch(`/api/projects/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             loadProjects();
         }
@@ -490,10 +522,12 @@
                     const y = e.clientY - rect.top;
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
-                    const rotateX = (y - centerY) / 80;
-                    const rotateY = (centerX - x) / 80;
+                    // Reduce rotation intensity (larger divisor = subtler tilt)
+                    const rotateX = (y - centerY) / 200;
+                    const rotateY = (centerX - x) / 200;
                     const target = card.querySelector('.card-interaction');
-                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+                    // Slight, subtle scale on hover
+                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.005, 1.005, 1.005)`;
                 });
                 card.addEventListener('mouseleave', () => {
                     const target = card.querySelector('.card-interaction');

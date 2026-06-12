@@ -570,7 +570,8 @@
             });
             return;
         }
-        document.getElementById('modal-plan-name').textContent = planNames[plan];
+        const modalPlanNameEl = document.getElementById('modal-plan-name');
+        if (modalPlanNameEl) modalPlanNameEl.textContent = planNames[plan];
         document.getElementById('modal-form-state').classList.remove('hidden');
         document.getElementById('modal-success-state').classList.add('hidden');
         // Reset campos
@@ -630,7 +631,8 @@
 
         const btn = document.getElementById('pay-btn');
         btn.disabled = true;
-        document.getElementById('pay-btn-text').textContent = 'Procesando…';
+        const payBtnText = document.getElementById('pay-btn-text');
+        if (payBtnText) payBtnText.textContent = 'Procesando…';
 
         // Simular delay de procesamiento
         await new Promise(r => setTimeout(r, 1800));
@@ -656,7 +658,7 @@
                 errEl.textContent = data.error || 'Error al procesar el pago.';
                 errEl.classList.remove('hidden');
                 btn.disabled = false;
-                document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                if (document.getElementById('pay-btn-text')) document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
                 return;
             }
 
@@ -669,7 +671,7 @@
             errEl.textContent = 'Error de conexión. Intenta de nuevo.';
             errEl.classList.remove('hidden');
             btn.disabled = false;
-            document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                if (document.getElementById('pay-btn-text')) document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
         }
     }
 

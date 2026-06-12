@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>medc — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+  .doc-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; }
+  .doc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .doc-header .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat .val { font-size: 1.8rem; font-weight: 800; color: var(--white); }
+  .stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .quality-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #f59e0b; margin-top: 1rem; }
+  h1 { font-size: 1.8rem; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  h2 { font-size: 1.4rem; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }
+  h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 1rem; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  p { margin: 0.75rem 0; }
+  code { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.15); padding: 0.15rem 0.45rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+  pre { background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; border: none; padding: 0; color: #a8d8f0; font-size: 0.85rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .report-table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }
+  .report-table thead tr { background: rgba(56,189,248,0.08); }
+  .report-table th, .report-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); }
+  .report-table th { color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .report-table td { color: var(--text); }
+  th { background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  blockquote { border-left: 3px solid var(--accent3); padding: 0.75rem 1rem; background: rgba(52,211,153,0.05); border-radius: 0 8px 8px 0; margin: 1rem 0; color: var(--accent3); font-style: italic; }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc ol { padding-left: 1.5rem; }
+  .toc li { margin: 0.4rem 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .doc-footer { margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; }
+  /* Page numbers for print/PDF export */
+  @media print {
+    @page { margin: 2cm; @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; } }
+    .doc-header { page-break-after: avoid; }
+    .toc { page-break-after: always; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .diagram-section { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <h1><span class="material-icons">description</span> medc</h1>
+    <div class="subtitle">Documentación Técnica Profesional · Generado 09/06/2026 21:46 UTC</div>
+    <div class="quality-badge">Score de Calidad: 68/100</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">12</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">27</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">7</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">3</div><div class="lbl">Endpoints</div></div>
+    </div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ol>
+      <li><a href="#sec1">Resumen del Proyecto</a></li>
+      <li><a href="#sec2">Arquitectura y Diseño</a></li>
+      <li><a href="#sec3">Documentación de API</a></li>
+      <li><a href="#sec4">Clases y Objetos</a></li>
+      <li><a href="#sec5">Funciones</a></li>
+      <li><a href="#sec6">Modelos de Datos</a></li>
+      <li><a href="#sec7">Guía de Despliegue</a></li>
+      <li><a href="#sec8">Reporte de Calidad</a></li>
+    </ol>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-06-09 21:45 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>Python</strong> y cuenta con
+12 archivos fuente, 27 funciones, 7 clases y
+3 endpoints de API documentados. El score de calidad del código es
+<strong>68/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YAML</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>11 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>27</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>68/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>0 / 27</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 7</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3>2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── (raíz)/
+├── controllers/
+├── entorno/
+├── models/
+├── repository/
+├── services/
+</code></pre>
+<h3>2.2 Distribución por Capas</h3>
+<ul>
+<li><strong><code>(raíz)/</code></strong> — 5 archivos [.env(1), .gitignore(1), .yml(1), .py(1), .txt(1)]</li>
+<li><strong><code>controllers/</code></strong> — 2 archivos [.py(2)]</li>
+<li><strong><code>entorno/</code></strong> — 2 archivos [.py(2)]</li>
+<li><strong><code>models/</code></strong> — 2 archivos [.py(2)]</li>
+<li><strong><code>repository/</code></strong> — 2 archivos [.py(2)]</li>
+<li><strong><code>services/</code></strong> — 2 archivos [.py(2)]</li>
+</ul>
+<h3>2.3 Distribución de Lenguajes</h3>
+<ul>
+<li>Python: 11 archivos (92%)</li>
+<li>YAML: 1 archivos (8%)</li>
+</ul>
+<h3>2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3>2.5 Diagrama de Casos de Uso</h3>
+<h3>2.6 Diagrama de Clases</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<blockquote>
+<p>⚠️ <strong>Clases con información incompleta:</strong> Las siguientes clases aparecen sin métodos ni atributos documentados: <code>Config</code>. Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.</p>
+</blockquote>
+<h3>2.7 Patrones Detectados</h3>
+<ul>
+<li><strong>API REST</strong>: 3 endpoints detectados (Flask)</li>
+</ul>
+<h3>2.8 Insights de Arquitectura (IA)</h3>
+<p><strong>Análisis del Proyecto</strong></p>
+<ul>
+<li><strong>Patrones arquitectónicos probables</strong>: Monolito, debido a la relativamente baja cantidad de endpoints y clases.</li>
+<li><strong>Buenas prácticas detectadas</strong>: Uso de Python como lenguaje principal y YAML para configuración.</li>
+<li><strong>Áreas de mejora sugeridas</strong>: Aumentar la modularidad y separación de concerns para mejorar la mantenibilidad.</li>
+<li><strong>Complejidad del proyecto</strong>: Baja-Moderada, con 27 funciones y 7 clases.</li>
+<li><strong>Recomendaciones de escalabilidad</strong>: Considerar la implementación de un patrón de arquitectura más escalable como Microservicios si el proyecto crece en complejidad o tamaño. También, considerar el uso de frameworks como Flask o Django para mejorar la estructura y el manejo de endpoints.</li>
+</ul>
+<hr />
+<h2 id="sec6">3. Documentación Técnica de Código</h2>
+<h3>3.1 Guía de Configuración del Entorno de Desarrollo</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Crear entorno virtual (recomendado para Python)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores locales
+
+# 5. Ejecutar en modo desarrollo
+python app.py  # o npm run dev
+</code></pre>
+<h3>3.2 Documentación de API</h3>
+<p>Total de endpoints detectados: <strong>3</strong></p>
+<h4>Módulo: <code>controllers\AuthController.py</code></h4>
+<h5>[POST] <code>POST /register</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>controllers\AuthController.py</code></li>
+</ul>
+<blockquote>
+<p><strong>Descripción del endpoint de registro</strong></p>
+</blockquote>
+<p><strong>Propósito:</strong> El propósito de este endpoint es permitir a los usuarios crear una cuenta en un sistema o aplicación. Piensa en ello como cuando te registras en una tienda en línea o en una red social.</p>
+<p><strong>Funcionalidad:</strong> Cuando se utiliza este endpoint, se envía una solicitud al servidor para crear una nueva cuenta de usuario. El servidor entonces verifica la información proporcionada y crea la cuenta si todo está correcto.</p>
+<p><strong>Información necesaria:</strong> Para que este endpoint funcione, necesitas proporcionar algunos datos básicos, como:
+* Un nombre de usuario (o correo electrónico)
+* Una contraseña segura
+* Posiblemente otros datos personales, como nombre y apellido</p>
+<p><strong>Resultado:</strong> Si la solicitud es exitosa, el servidor devuelve un mensaje que indica que la cuenta ha sido creada con éxito. Esto puede incluir un código de confirmación o un enlace para activar la cuenta.</p>
+<p><strong>Uso en la vida real:</strong> En la vida real, este endpoint se utiliza en situaciones como:
+* Crear una cuenta en una tienda en línea para hacer compras
+* Registrarse en una red social para conectarse con amigos y familiares
+* Crear una cuenta en un servicio de streaming para acceder a contenido exclusivo
+* Registrarse en un foro o comunidad en línea para participar en discusiones y compartir ideas</p>
+<p>En resumen, este endpoint es</p>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /register/&lt;int:id&gt;</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>controllers\AuthController.py</code></li>
+</ul>
+<blockquote>
+<p><strong>Descripción del Endpoint</strong></p>
+</blockquote>
+<p><strong>Propósito:</strong> El propósito de este endpoint es obtener información sobre un registro específico. Imagina que tienes una base de datos con muchos registros, y necesitas encontrar uno en particular.</p>
+<p><strong>Funcionalidad:</strong> Este endpoint se utiliza para recuperar información sobre un registro que ya existe en la base de datos. Es como buscar un libro en una biblioteca, pero en lugar de buscar por título o autor, buscas por un número de identificación único (el "id").</p>
+<p><strong>Información necesaria:</strong> Para que este endpoint funcione, necesitas proporcionar el número de identificación único del registro que deseas obtener. Este número se conoce como "id" y se incluye en la dirección web del endpoint (la "ruta").</p>
+<p><strong>Resultado:</strong> Cuando se llama a este endpoint, devuelve la información asociada con el registro que tiene el id proporcionado. Es como recibir el libro que buscas en la biblioteca, con toda la información que contiene.</p>
+<p><strong>Uso en la vida real:</strong> En la vida real, este tipo de endpoint se utiliza en aplicaciones web para recuperar información sobre un usuario, un producto o un servicio. Por ejemplo:</p>
+<ul>
+<li>En un sitio web de compras en línea, podrías utilizar este endpoint para obtener la información de un producto específico, como su descripción, precio y características.</li>
+<li>En una aplicación de redes sociales, podrías utilizar este endpoint para obtener la información de un usuario específico</li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /login</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>controllers\AuthController.py</code></li>
+</ul>
+<blockquote>
+<p><strong>Descripción del Endpoint de API: /login</strong></p>
+</blockquote>
+<h3>1. Propósito del Endpoint</h3>
+<p>El propósito de este endpoint es permitir a los usuarios acceder a un sistema o aplicación de manera segura. En otras palabras, es como una puerta de entrada que verifica quién eres y si tienes permiso para entrar.</p>
+<h3>2. Funcionalidad</h3>
+<p>Cuando se utiliza este endpoint, envía una solicitud al servidor para verificar las credenciales de acceso (como nombre de usuario y contraseña). Luego, el servidor comprueba si las credenciales son correctas y, si lo son, permite al usuario acceder al sistema o aplicación.</p>
+<h3>3. Información Necesaria</h3>
+<p>Para que este endpoint funcione, se necesita proporcionar dos piezas de información básica:</p>
+<ul>
+<li>Un nombre de usuario (como un correo electrónico o un nombre de cuenta)</li>
+<li>Una contraseña (una serie de caracteres secretos que solo el usuario conoce)</li>
+</ul>
+<p>Estos datos se envían al servidor para que pueda verificar si son correctos.</p>
+<h3>4. Resultado</h3>
+<p>Si las credenciales son correctas, el servidor devuelve un mensaje de éxito, que puede incluir un token o una clave de acceso que permite al usuario acceder a la aplicación o sistema de manera segura. Si las credenciales son incorrectas, el servidor devuelve un mensaje de error, indicando que no se pudo acceder.</p>
+<h3>5. Uso en</h3>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h3>3.3 Estado de Comentarios y Docstrings</h3>
+<p><strong>Total de funciones:</strong> 27</p>
+<ul>
+<li><strong>[OK] Documentadas:</strong> 0 (0%)</li>
+<li><strong>[X] Sin documentar:</strong> 27 (100%)</li>
+</ul>
+<p><strong>Visualización de documentación:</strong></p>
+<pre><code class="language-text">[░░░░░░░░░░░░░░░░░░░░]
+0% documentado
+</code></pre>
+<p><strong>Funciones que requieren documentación:</strong></p>
+<ul>
+<li><code>create_app()</code> en <code>app.py</code></li>
+<li><code>register()</code> en <code>controllers\AuthController.py</code></li>
+<li><code>get_user_by_id(id)</code> en <code>controllers\AuthController.py</code></li>
+<li><code>login()</code> en <code>controllers\AuthController.py</code></li>
+<li><code>to_dict(self)</code> en <code>models\alumnos.py</code></li>
+<li>... y 22 más</li>
+</ul>
+<h3>3.4 Planes de Prueba (Testing)</h3>
+<p>No se detectaron pruebas automatizadas. Se recomienda implementar:</p>
+<pre><code class="language-python"># Ejemplo de estructura de tests recomendada
+import pytest
+
+class TestEndpoints:
+    def test_get_returns_200(self, client):
+        response = client.get('/api/endpoint')
+        assert response.status_code == 200
+
+    def test_post_creates_resource(self, client):
+        data = {'name': 'test'}
+        response = client.post('/api/endpoint', json=data)
+        assert response.status_code == 201
+
+    def test_unauthorized_returns_401(self, client):
+        response = client.get('/api/protected')
+        assert response.status_code == 401
+</code></pre>
+<p><strong>Escenarios de prueba recomendados:</strong></p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Escenario</th>
+<th>Tipo</th>
+<th>Prioridad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST /register — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>POST /register — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>GET /register/<int:id> — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>GET /register/<int:id> — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>POST /login — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>POST /login — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec7">4. Documentación de Clases</h2>
+<p>Total: <strong>7 clases</strong></p>
+<h3><code>Config</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>entorno\config.py</code></li>
+<li><strong>Línea:</strong> 6</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Introducción a la Clase Config</strong></p>
+</blockquote>
+<p>La clase Config es una parte fundamental en un proyecto de programación en Python. A continuación, te explicaré de manera sencilla qué es, qué representa, qué puede hacer y por qué es importante.</p>
+<p><strong>1. Propósito de la clase</strong></p>
+<p>Imagina que estás organizando una fiesta y necesitas tener todo en orden. La clase Config es como un cuaderno de notas donde se almacenan las instrucciones y configuraciones básicas para que todo funcione correctamente en el proyecto. Su propósito es almacenar y proporcionar información importante para que el proyecto se ejecute de manera efectiva.</p>
+<p><strong>2. Qué representa esta clase en el sistema</strong></p>
+<p>La clase Config se puede comparar con un panel de control en un aeropuerto. Al igual que el panel de control muestra la información necesaria para que los pilotos y el personal del aeropuerto puedan tomar decisiones informadas, la clase Config proporciona la información necesaria para que el proyecto se ejecute de manera correcta. En este caso, el panel de control es la clase Config, y la información que muestra es la configuración del proyecto.</p>
+<p><strong>3. Qué puede hacer esta clase</strong></p>
+<p>La clase Config puede hacer varias cosas, como:</p>
+<ul>
+<li>Almacenar información importante sobre el proyecto, como la ubicación de los archivos y las conexiones a bases de datos.</li>
+<li>Proporcionar acceso a</li>
+</ul>
+<hr />
+<h3><code>Alumno</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models\alumnos.py</code></li>
+<li><strong>Línea:</strong> 4</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 1</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Clase Alumno: Una forma de organizar información sobre estudiantes</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong> La clase Alumno es como un contenedor donde se almacena información sobre cada estudiante en un sistema. Su propósito es ayudar a mantener organizada y accesible la información sobre los alumnos.</p>
+<p><strong>2. Qué representa esta clase:</strong> Imagina un archivo de estudiantes en una escuela. Cada archivo tiene el nombre del estudiante, su edad, su curso, etc. La clase Alumno es como uno de esos archivos, pero en lugar de ser físico, es digital y se encuentra dentro del sistema.</p>
+<p><strong>3. Qué puede hacer esta clase:</strong> La clase Alumno puede almacenar y proporcionar información sobre cada estudiante, como su nombre, edad, curso, etc. También tiene una función especial llamada "to_dict" que permite convertir la información del estudiante en un formato fácil de entender y compartir.</p>
+<p><strong>4. Para qué se usa en la vida real:</strong> En la vida real, esta clase se podría usar en un sistema de gestión escolar para almacenar y mantener actualizada la información de los estudiantes. Por ejemplo, un profesor podría usar el sistema para ver la lista de estudiantes en su clase, o un administrador podría usarlo para generar informes sobre el desempeño de los estudiantes.</p>
+<p><strong>5. Importancia de esta clase en el sistema:</strong> La clase Alumno es importante porque permite al</p>
+<p><strong>Métodos:</strong></p>
+<ul>
+<li><code>to_dict()</code></li>
+</ul>
+<hr />
+<h3><code>User</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models\user.py</code></li>
+<li><strong>Línea:</strong> 4</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 3</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Introducción a la Clase User</strong></p>
+</blockquote>
+<p>La Clase User es un componente fundamental en nuestro proyecto de Python. En términos simples, su propósito es representar a un usuario dentro del sistema. Piensa en ella como una tarjeta de identificación que almacena información sobre una persona que utiliza nuestro sistema.</p>
+<p><strong>Representación en el sistema</strong></p>
+<p>Imagina que estás en un hotel y necesitas registrarte para obtener una habitación. La recepción te pide tu nombre, dirección, correo electrónico y una forma de identificación. De manera similar, la Clase User es como una tarjeta de registro para los usuarios de nuestro sistema. Almacena información básica sobre cada usuario, como su nombre, correo electrónico y contraseña.</p>
+<p><strong>Funcionalidades principales</strong></p>
+<p>La Clase User puede hacer varias cosas importantes:</p>
+<ul>
+<li><strong>Establecer una contraseña</strong>: Es como crear una combinación para una caja fuerte. La Clase User te permite establecer una contraseña segura para tu cuenta.</li>
+<li><strong>Verificar la contraseña</strong>: Es como intentar abrir la caja fuerte con la combinación correcta. La Clase User puede verificar si la contraseña que ingresaste es la correcta.</li>
+<li><strong>Convertir información a un formato legible</strong>: Es como tomar la información de tu tarjeta de identificación y ponerla en un papel para que sea fácil de leer. La Clase User puede tomar la información del usuario y convertirla en un</li>
+</ul>
+<p><strong>Métodos:</strong></p>
+<ul>
+<li><code>set_password()</code></li>
+<li><code>check_password()</code></li>
+<li><code>to_dict()</code></li>
+</ul>
+<hr />
+<h3><code>AlumnoRepository</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>repository\AlumnoRepository.py</code></li>
+<li><strong>Línea:</strong> 5</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 6</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Descripción de la clase AlumnoRepository</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong>
+La clase AlumnoRepository es como un administrador de información de estudiantes. Su función principal es ayudar a gestionar y organizar la información de los alumnos de manera eficiente.</p>
+<p><strong>2. Representación en el sistema:</strong>
+Imagina un archivo grande donde se almacena toda la información de los estudiantes. La clase AlumnoRepository es como un bibliotecario que se encarga de ordenar, buscar y actualizar la información de los estudiantes en ese archivo. De esta manera, es fácil encontrar y gestionar la información de cada alumno.</p>
+<p><strong>3. Funcionalidades principales:</strong>
+La clase AlumnoRepository puede hacer varias cosas útiles:
+ * Crear nuevos registros de estudiantes (create)
+ * Mostrar todos los registros de estudiantes (get_all)
+ * Buscar un estudiante específico por su ID o matrícula (find_by_id, find_by_matricula)
+ * Mostrar los registros de estudiantes dentro de un rango de fechas específico (get_by_fecha_range)
+ * Eliminar un registro de estudiante (delete)
+Estas funcionalidades permiten que la información de los estudiantes sea gestionada de manera efectiva y organizada.</p>
+<p><strong>4. Uso en la vida real:</strong>
+En la vida real, una clase como AlumnoRepository se puede utilizar en sistemas de gestión de escuelas, universidades o institutos. Por</p>
+<p><strong>Métodos:</strong></p>
+<ul>
+<li><code>create()</code></li>
+<li><code>get_all()</code></li>
+<li><code>find_by_id()</code></li>
+<li><code>find_by_matricula()</code></li>
+<li><code>get_by_fecha_range()</code></li>
+<li><code>delete()</code></li>
+</ul>
+<hr />
+<h3><code>UserRepository</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>repository\userRepository.py</code></li>
+<li><strong>Línea:</strong> 4</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 4</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Introducción a la clase UserRepository</strong></p>
+</blockquote>
+<p>La clase UserRepository es una parte fundamental de un sistema de gestión de usuarios. Imagina que estás en una biblioteca y necesitas encontrar un libro específico. La biblioteca tiene un catálogo que te permite buscar libros por título, autor o tema. De manera similar, la clase UserRepository es como un catálogo de usuarios que te permite buscar y gestionar información de los usuarios en un sistema.</p>
+<p><strong>Propósito de la clase</strong></p>
+<p>El propósito de la clase UserRepository es almacenar y gestionar la información de los usuarios en un sistema. Esto incluye crear nuevos usuarios, buscar usuarios existentes y recuperar información sobre ellos.</p>
+<p><strong>Qué representa esta clase en el sistema</strong></p>
+<p>La clase UserRepository representa un "almacén" de información de usuarios. Al igual que un archivo en una oficina, donde se guardan documentos importantes, la clase UserRepository almacena la información de los usuarios de manera organizada y segura.</p>
+<p><strong>Qué puede hacer esta clase</strong></p>
+<p>La clase UserRepository puede realizar las siguientes funciones:</p>
+<ul>
+<li>Crear nuevos usuarios (create): es como agregar un nuevo libro a la biblioteca.</li>
+<li>Buscar un usuario por su ID (find_user_by_id): es como buscar un libro por su número de catálogo.</li>
+<li>Buscar un usuario por su nombre de usuario (find_by_user): es como buscar un libro por su título.</li>
+<li>Buscar un usuario por su correo electrónico (find_by_email):</li>
+</ul>
+<p><strong>Métodos:</strong></p>
+<ul>
+<li><code>create()</code></li>
+<li><code>find_user_by_id()</code></li>
+<li><code>find_by_user()</code></li>
+<li><code>find_by_email()</code></li>
+</ul>
+<hr />
+<h3><code>AlumnoService</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>services\alumnoService.py</code></li>
+<li><strong>Línea:</strong> 5</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 6</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Introducción a la Clase AlumnoService</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong>
+La clase AlumnoService es como un asistente que ayuda a gestionar información sobre alumnos en un sistema. Su propósito es simplificar y organizar las tareas relacionadas con la información de los alumnos, como crear, leer, actualizar y eliminar registros.</p>
+<p><strong>2. Representación en el sistema:</strong>
+Imagina un archivo de estudiantes en una escuela. Esta clase es como el administrador de ese archivo, responsable de mantener actualizada y organizada la información de cada estudiante. Al igual que un bibliotecario que ayuda a encontrar libros, esta clase ayuda a encontrar y gestionar la información de los alumnos de manera eficiente.</p>
+<p><strong>3. Funcionalidades principales:</strong>
+La clase AlumnoService puede hacer varias cosas:
+- <strong>Crear un nuevo registro de alumno:</strong> Es como agregar un nuevo estudiante al archivo de la escuela.
+- <strong>Ver todos los registros de alumnos:</strong> Es como revisar todo el archivo de estudiantes para ver quiénes están registrados.
+- <strong>Buscar un alumno específico:</strong> Es como encontrar un estudiante en particular en el archivo.
+- <strong>Actualizar la información de un alumno:</strong> Es como corregir o actualizar los detalles de un estudiante en el archivo.
+- <strong>Eliminar un registro de alumno:</strong> Es como retirar el registro de un estudiante que ya no está en la escuela.
+- **Buscar alumnos</p>
+<p><strong>Métodos:</strong></p>
+<ul>
+<li><code>create()</code></li>
+<li><code>get_all()</code></li>
+<li><code>get_by_id()</code></li>
+<li><code>update()</code></li>
+<li><code>delete()</code></li>
+<li><code>get_by_fecha_range()</code></li>
+</ul>
+<hr />
+<h3><code>authService</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>services\authService.py</code></li>
+<li><strong>Línea:</strong> 4</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 3</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Descripción de la clase authService</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong>
+La clase authService es como un guardián de seguridad que ayuda a proteger el acceso a un sistema o aplicación. Su objetivo es asegurarse de que solo las personas autorizadas puedan entrar y utilizar los recursos del sistema.</p>
+<p><strong>2. Representación en el sistema:</strong>
+Imagina un edificio con un portero que controla quién puede entrar y salir. La clase authService es como ese portero, que verifica la identidad de las personas que intentan acceder al sistema y decide si pueden entrar o no.</p>
+<p><strong>3. Funcionalidades principales:</strong>
+La clase authService puede hacer tres cosas importantes:</p>
+<ul>
+<li><strong>Registro</strong>: Es como darle una tarjeta de identificación a alguien que quiere unirse al sistema. La clase authService crea un nuevo perfil para esa persona y la agrega al sistema.</li>
+<li><strong>Búsqueda por ID</strong>: Es como buscar a alguien en una lista de miembros. La clase authService encuentra a una persona en el sistema por su ID único.</li>
+<li><strong>Iniciar sesión</strong>: Es como verificar la identidad de alguien que quiere entrar al sistema. La clase authService comprueba si la persona tiene permiso para acceder al sistema y le da acceso si todo está en orden.</li>
+</ul>
+<p><strong>4. Uso en la vida real:</strong>
+En la vida real, esta clase se utiliza en sitios web y aplicaciones que requieren que los usuarios se registren</p>
+<p><strong>Métodos:</strong></p>
+<ul>
+<li><code>register()</code></li>
+<li><code>find_by_id()</code></li>
+<li><code>login()</code></li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec8">5. Documentación de Funciones</h2>
+<p>Total: <strong>27 funciones</strong></p>
+<h3>Módulo: <code>app.py</code></h3>
+<p><strong><code>create_app</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "create_app" sirve para crear una aplicación básica. Necesita saber qué tipo de aplicación se quiere crear. Produce una estructura de aplicación lista para usarse. En la vida real, se usa para iniciar nuevos proyectos de software. Es importante porque establece la base para el desarrollo de la aplicación, permitiendo a los programadores enfocarse en agregar funcionalidades y características.</p>
+</blockquote>
+<hr />
+<h3>Módulo: <code>controllers\AuthController.py</code></h3>
+<p><strong><code>register</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "register" permite a los usuarios crear una cuenta en un sistema. Necesita información básica como nombre, correo electrónico y contraseña. Una vez ingresada la información, crea una cuenta nueva y almacena los datos de forma segura. En la vida real, se utiliza para registrarse en sitios web, aplicaciones o plataformas en línea. Es fundamental en el sistema, ya que permite a los usuarios acceder a servicios y características exclusivas. En resumen, "register" es como completar un formulario para unirse a una comunidad en línea, y su función es crucial para la seguridad y privacidad de los usuarios.</p>
+</blockquote>
+<p><strong><code>get_user_by_id</code></strong></p>
+<ul>
+<li>Parámetros: <code>id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "get_user_by_id" busca encontrar un usuario específico en el sistema. Para funcionar, necesita saber el "id" del usuario que estás buscando. El resultado es la información del usuario encontrado. En la vida real, se usa para recuperar datos de un usuario específico, como en un sitio web de compras donde se necesita mostrar la información del perfil de un usuario. Esta función es importante en el sistema porque permite acceso rápido y seguro a la información de los usuarios, lo que es fundamental para la seguridad y la funcionalidad del sitio.</p>
+</blockquote>
+<p><strong><code>login</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "login" permite a los usuarios acceder a un sistema. </p>
+</blockquote>
+<p>Necesita saber el nombre de usuario y la contraseña para funcionar. </p>
+<p>Una vez que ingresa esta información, la función verifica si es correcta y devuelve un resultado que indica si el acceso fue concedido o no. </p>
+<p>En la vida real, se usa en sitios web y aplicaciones para que las personas puedan acceder a sus cuentas de manera segura. </p>
+<p>Es fundamental en el sistema porque garantiza que solo las personas autorizadas puedan acceder a la información y los recursos.</p>
+<hr />
+<h3>Módulo: <code>models\alumnos.py</code></h3>
+<p><strong><code>to_dict</code></strong></p>
+<ul>
+<li>Parámetros: <code>self</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "to_dict" convierte información en un formato fácil de entender. Necesita acceso a los datos de un alumno para funcionar. Produce un resultado que es como un resumen de la información del alumno. Se usa en situaciones donde se necesita mostrar o compartir información de manera clara, como en informes o bases de datos. En la vida real, es como tomar una tarjeta de presentación y poner toda la información en una hoja de papel para que sea fácil de leer. Esta función es importante en el sistema porque ayuda a que la información sea más accesible y fácil de usar.</p>
+</blockquote>
+<hr />
+<h3>Módulo: <code>models\user.py</code></h3>
+<p><strong><code>set_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>self, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función <code>set_password</code> cambia la contraseña de un usuario. Necesita saber la nueva contraseña que se quiere establecer. Al ejecutarla, actualiza la contraseña del usuario. En la vida real, se usa cuando alguien quiere cambiar su contraseña en un sitio web o aplicación. Esta función es importante porque ayuda a mantener la seguridad de la cuenta del usuario, permitiéndole cambiar su contraseña cuando lo necesite.</p>
+</blockquote>
+<p><strong><code>check_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>self, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "check_password" verifica si una contraseña es correcta. </p>
+</blockquote>
+<p>Necesita saber la contraseña que se quiere comprobar. </p>
+<p>Devuelve un resultado que indica si la contraseña es válida o no. </p>
+<p>En la vida real, se usa cuando intentas acceder a una cuenta en línea, como un sitio web o una aplicación. </p>
+<p>Es importante porque ayuda a mantener seguras tus cuentas y protege tu información personal.</p>
+<p><strong><code>to_dict</code></strong></p>
+<ul>
+<li>Parámetros: <code>self</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "to_dict" convierte información de un usuario en un formato fácil de entender. Necesita la información del usuario para funcionar. Produce un resultado que es una especie de lista con los datos del usuario. Se utiliza en situaciones reales como cuando se necesita mostrar información de un usuario de manera clara. Es importante en el sistema porque permite que la información del usuario sea fácilmente accesible y usable. En resumen, ayuda a organizar y mostrar la información de los usuarios de manera sencilla y útil.</p>
+</blockquote>
+<hr />
+<h3>Módulo: <code>repository\AlumnoRepository.py</code></h3>
+<p><strong><code>create</code></strong></p>
+<ul>
+<li>Parámetros: <code>nombre, apellido_paterno, apellido_materno, matricula, correo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "create" sirve para registrar un nuevo alumno en el sistema. Necesita saber el nombre, apellidos, matrícula y correo electrónico del alumno. Al ingresar estos datos, la función crea un nuevo registro en la base de datos. En la vida real, se utiliza para inscribir a nuevos estudiantes en una institución educativa. Es importante porque permite mantener un registro actualizado de los alumnos y facilita la gestión de la información estudiantil. Esta función es fundamental en el sistema para garantizar que todos los alumnos estén registrados y puedan acceder a los servicios y recursos educativos.</p>
+</blockquote>
+<p><strong><code>get_all</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función <code>get_all</code> sirve para obtener toda la información de un conjunto de datos. Necesita acceso a un archivo o base de datos para funcionar. Produce una lista con todos los registros encontrados. Se utiliza en situaciones como obtener todos los alumnos de una escuela o todos los productos de un catálogo. En el sistema, esta función es importante porque permite recuperar y mostrar información de manera rápida y eficiente.</p>
+</blockquote>
+<p><strong><code>find_by_id</code></strong></p>
+<ul>
+<li>Parámetros: <code>id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "find_by_id" busca un alumno específico en una base de datos. 
+Necesita un "id" (una especie de nombre único) para encontrarlo.
+Devuelve la información del alumno encontrado.
+Se usa en situaciones reales como buscar un estudiante en un sistema escolar.
+Es importante porque permite acceder a información específica de manera rápida y precisa.</p>
+</blockquote>
+<p><strong><code>find_by_matricula</code></strong></p>
+<ul>
+<li>Parámetros: <code>matricula</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "find_by_matricula" busca a un alumno por su matrícula. </p>
+</blockquote>
+<p>Necesita la matrícula del alumno para funcionar. 
+Devuelve la información del alumno encontrado. </p>
+<p>Se utiliza en escuelas y universidades para localizar a estudiantes. 
+Es importante en el sistema porque permite acceder rápidamente a la información de un alumno.</p>
+<p><strong><code>get_by_fecha_range</code></strong></p>
+<ul>
+<li>Parámetros: <code>fecha_inicio, fecha_fin</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "get_by_fecha_range" busca información dentro de un rango de fechas. </p>
+</blockquote>
+<p>Necesita saber cuándo empezar y cuándo terminar la búsqueda. </p>
+<p>Te da como resultado los datos encontrados entre esas fechas. </p>
+<p>Se usa para encontrar registros de eventos, como asistencias a clases o pedidos en un negocio, dentro de un período específico. </p>
+<p>Es importante porque ayuda a organizar y analizar datos por fecha, facilitando la toma de decisiones.</p>
+<p><strong><code>delete</code></strong></p>
+<ul>
+<li>Parámetros: <code>alumno</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "delete" elimina un alumno de la base de datos. </p>
+</blockquote>
+<p>Necesita saber quién es el alumno que se va a eliminar. </p>
+<p>Una vez eliminado, el alumno ya no estará en la lista. </p>
+<p>Se usa en la vida real para actualizar listas de estudiantes en escuelas o universidades. </p>
+<p>Es importante porque ayuda a mantener la información actualizada y precisa, permitiendo una mejor gestión de los alumnos.</p>
+<hr />
+<h3>Módulo: <code>repository\userRepository.py</code></h3>
+<p><strong><code>create</code></strong></p>
+<ul>
+<li>Parámetros: <code>email, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "create" sirve para registrar un nuevo usuario en el sistema. Necesita saber el correo electrónico y la contraseña del usuario. Una vez que se proporcionan estos datos, crea un nuevo usuario en la base de datos. En la vida real, se usa para que las personas se registren en una plataforma o sitio web. Es importante porque permite a los usuarios acceder a servicios y funcionalidades exclusivas. En resumen, esta función es fundamental para el sistema, ya que permite la creación de nuevos usuarios y les da acceso a los servicios disponibles.</p>
+</blockquote>
+<p><strong><code>find_user_by_id</code></strong></p>
+<ul>
+<li>Parámetros: <code>id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "find_user_by_id" busca un usuario en el sistema según su identificador único. Para funcionar, necesita saber el identificador del usuario que se busca. Luego, devuelve la información del usuario encontrado. En la vida real, se usa para recuperar datos de un usuario en particular, como en un sistema de gestión de clientes. Esta función es importante porque permite acceder a la información de un usuario de manera precisa y eficiente, lo que es fundamental para la gestión de datos en el sistema. Ayuda a mantener la información organizada y facilita la recuperación de datos cuando se necesita.</p>
+</blockquote>
+<p><strong><code>find_by_user</code></strong></p>
+<ul>
+<li>Parámetros: <code>email</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "find_by_user" busca un usuario en el sistema. Para funcionar, necesita saber el correo electrónico del usuario. Luego, encuentra y devuelve la información de ese usuario. En la vida real, se usa para identificar a un usuario específico en una base de datos, como cuando necesitas ver los datos de un cliente en una plataforma en línea. Esta función es importante porque permite al sistema reconocer y recuperar información de usuarios de manera precisa y rápida, lo que es esencial para la gestión de usuarios en aplicaciones y sitios web.</p>
+</blockquote>
+<p><strong><code>find_by_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>email</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "find_by_email" busca un usuario en el sistema por su dirección de correo electrónico. Para funcionar, necesita saber la dirección de correo electrónico del usuario. Luego, encuentra y devuelve la información del usuario asociada a ese correo electrónico. En la vida real, se utiliza para recuperar la cuenta de un usuario olvidada o para verificar si un correo electrónico ya está registrado. Esta función es importante en el sistema porque permite identificar y recuperar información de usuarios de manera rápida y precisa, lo que es fundamental para la seguridad y la eficiencia del sistema.</p>
+</blockquote>
+<hr />
+<h3>Módulo: <code>services\alumnoService.py</code></h3>
+<p><strong><code>create</code></strong></p>
+<ul>
+<li>Parámetros: <code>data</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "create" es una herramienta que ayuda a agregar información nueva a un sistema. Para funcionar, necesita recibir datos, como nombres o descripciones. Una vez que recibe estos datos, crea un nuevo registro en el sistema. En la vida real, se utiliza para agregar nuevos alumnos a una base de datos escolar. Esta función es importante porque permite mantener actualizada la información del sistema y facilita la gestión de datos. En resumen, su propósito es agregar información nueva de manera eficiente y precisa.</p>
+</blockquote>
+<p><strong><code>get_all</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "get_all" busca obtener información completa de algo. Necesita saber qué tipo de datos quiere obtener. Produce una lista con todos los datos solicitados. Se usa para recopilar información de estudiantes en un sistema educativo. Es importante porque permite acceder a todos los datos de los estudiantes de manera rápida y eficiente.</p>
+</blockquote>
+<p><strong><code>get_by_id</code></strong></p>
+<ul>
+<li>Parámetros: <code>id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>update</code></strong></p>
+<ul>
+<li>Parámetros: <code>id, data</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>delete</code></strong></p>
+<ul>
+<li>Parámetros: <code>id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>get_by_fecha_range</code></strong></p>
+<ul>
+<li>Parámetros: <code>fecha_inicio, fecha_fin</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>services\authService.py</code></h3>
+<p><strong><code>register</code></strong></p>
+<ul>
+<li>Parámetros: <code>email, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>find_by_id</code></strong></p>
+<ul>
+<li>Parámetros: <code>id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>login</code></strong></p>
+<ul>
+<li>Parámetros: <code>email, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec9">6. Modelos de Datos</h2>
+<p>No se detectaron clases con nombres de modelo explícitos.</p>
+<h3>Esquema General Inferido</h3>
+<p>Basado en el análisis del código, las entidades principales son:</p>
+<ul>
+<li><strong>By Id</strong></li>
+<li><strong>All</strong></li>
+<li><strong>By User</strong></li>
+<li><strong>App</strong></li>
+<li><strong>By Matricula</strong></li>
+<li><strong>By Fecha Range</strong></li>
+<li><strong>By Email</strong></li>
+<li><strong>User By Id</strong></li>
+</ul>
+<hr />
+<h2 id="sec10">7. Guía de Despliegue y Mantenimiento</h2>
+<h3>7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: Python</li>
+<li><strong>Archivos detectados</strong>: 12</li>
+</ul>
+<h3>7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+pip install -r requirements.txt
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+python app.py
+</code></pre>
+<h3>7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM python:3.12-slim
+
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+EXPOSE 8000
+CMD [&quot;python app.py&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3>7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3>7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3>7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-06-09
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec11">8. Reporte de Calidad del Código</h2>
+<h3>8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 68/100 (Bueno [YELLOW])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 0/27 (0%)
+- Clases documentadas: 0/7</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 1.85
+- Complejidad máxima: 7
+- Funciones con alta complejidad (&gt;10): 0</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: ↓ Baja
+</code></pre>
+<h3>8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<p>No hay funciones con complejidad &gt; 10. [OK]</p>
+<h3>8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 27 funciones sin documentar</li>
+<li>Resolver 1 errores de análisis detectados</li>
+</ul>
+<h3>8.4 Errores de Análisis</h3>
+<ul>
+<li><code>uploads\400c4772-fe33-45fe-b3c9-63e9683fb7b4\api_examen\controllers\AlumnoController.py</code>: invalid decimal literal (<unknown>, line 180)</li>
+</ul>
+<hr />
+<h2 id="sec12">9. Análisis de Datos del Proyecto</h2>
+<h3>9.1 Tipos y Fuentes de Datos Detectados</h3>
+<p><strong>Datos Estructurados:</strong> 0 archivos</p>
+<p><strong>Datos Semi-estructurados:</strong> 0 archivos</p>
+<p><strong>Datos No Estructurados:</strong> 0 archivos</p>
+<h3>9.2 Esquema de Data Warehouse Inferido</h3>
+<p>No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.</p>
+<h3>9.3 Reporte de Calidad de Datos</h3>
+<p><strong>Problemas Detectados en el Código:</strong></p>
+<ul>
+<li><strong>Funciones sin documentar:</strong> 27</li>
+<li><code>create_app</code> en <code>app.py</code></li>
+<li><code>register</code> en <code>controllers\AuthController.py</code></li>
+<li><code>get_user_by_id</code> en <code>controllers\AuthController.py</code></li>
+<li><code>login</code> en <code>controllers\AuthController.py</code></li>
+<li><code>to_dict</code> en <code>models\alumnos.py</code></li>
+<li>
+<p>... y 22 más</p>
+</li>
+<li>
+<p><strong>Problemas de naming conventions:</strong> 1</p>
+</li>
+<li><code>authService</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+</ul>
+<h3>9.4 Minería de Datos Aplicada al Código</h3>
+<p>La minería de datos no está disponible. Configura GROQ_API_KEY para habilitar esta función.</p>
+<h3>9.5 Pipeline ETL Utilizado</h3>
+<p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Fases del Pipeline:</strong></p>
+<ul>
+<li><strong>Extract:</strong> Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales</li>
+<li><strong>Transform:</strong> Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones</li>
+<li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
+</ul>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-06-09 21:45 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">medc</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">12</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">7</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">27</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">3</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#f59e0b">68/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">09/06/2026 21:46 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>
