@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — AutoDocs AI</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <style>
+    /* ====== TEMA OSCURO (por defecto) ====== */
+    :root, body[data-theme="dark"] {
+      --color-background: #0f1418;
+      --color-surface: rgba(27,32,36,0.4);
+      --color-surface-container: #1b2024;
+      --color-surface-container-high: #252b2e;
+      --color-on-surface: #dee3e8;
+      --color-on-surface-variant: #bdc8d1;
+      --color-primary: #8ed5ff;
+      --color-secondary: #c0c1ff;
+      --color-outline-variant: #3e484f;
+      --color-error: #ffb4ab;
+      --color-green-accent: #10b981;
+      --color-tertiary: #ffc176;
+      --glass-border: rgba(123,208,255,0.1);
+      --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+      --glass-hover-border: rgba(123,208,255,0.3);
+      --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+      --particle-color-1: rgba(142,213,255,0.4);
+      --particle-color-2: rgba(192,193,255,0.2);
+      --particle-line: rgba(142,213,255,0.12);
+    }
+    body[data-theme="light"] {
+      --color-background: #f1f5f9;
+      --color-surface: rgba(255,255,255,0.7);
+      --color-surface-container: #ffffff;
+      --color-surface-container-high: #e2e8f0;
+      --color-on-surface: #0f172a;
+      --color-on-surface-variant: #334155;
+      --color-primary: #38bdf8;
+      --color-secondary: #818cf8;
+      --color-outline-variant: #cbd5e1;
+      --color-error: #ba1a1a;
+      --color-green-accent: #10b981;
+      --color-tertiary: #7c5800;
+      --glass-border: rgba(0,0,0,0.04);
+      --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      --glass-hover-border: rgba(56,189,248,0.3);
+      --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+      --particle-color-1: rgba(56,189,248,0.25);
+      --particle-color-2: rgba(129,140,248,0.2);
+      --particle-line: rgba(56,189,248,0.12);
+    }
+    body {
+      background: var(--color-background);
+      color: var(--color-on-surface);
+      font-family: 'Geist', sans-serif;
+      transition: background 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+    #particle-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .glass {
+      background: var(--color-surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    .glass-hover:hover {
+      border-color: var(--glass-hover-border);
+      box-shadow: var(--glass-hover-shadow);
+    }
+    .glass input,
+    .glass select,
+    .glass textarea {
+      color: #0f1418;
+    }
+    .sidebar {
+      background: var(--color-surface-container);
+      backdrop-filter: blur(8px);
+      border-right: 1px solid var(--glass-border);
+    }
+    .btn-primary {
+      background: var(--color-primary);
+      color: #0f1418;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: scale(0.98);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+    .badge.completed { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .badge.pending { background: rgba(136,146,176,0.2); color: var(--color-on-surface-variant); border: 1px solid rgba(136,146,176,0.2); }
+    .badge.error { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .modal-anim { animation: fadeDown 0.2s ease; }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .action-icon {
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      border-radius: 0.375rem;
+    }
+    .action-icon:hover { background: var(--color-outline-variant); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+  </style>
+</head>
+<body data-theme="dark">
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Sidebar -->
+  <aside class="sidebar fixed left-0 top-0 bottom-0 w-72 p-5 flex flex-col z-20">
+    <div class="flex items-center gap-2 font-mono text-xl font-bold mb-8">
+      <span class="material-symbols-outlined text-primary">terminal</span>
+      Auto<span class="text-primary">Docs</span> AI
+    </div>
+    <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mb-3">Principal</div>
+
+    <a href="/perfil" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all">Perfil</a>
+    <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-xl text-primary bg-primary/10 transition-all"> Admin</a>
+
+    <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mt-6 mb-3">Gestión</div>
+    <a href="/admin/users" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all"> Usuarios</a>
+    <a href="/admin/projects" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all"> Proyectos</a>
+    <div class="flex-1"></div>
+    <a href="/perfil" class="glass p-3 rounded-2xl mt-4 block hover:no-underline">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background" id="user-avatar">A</div>
+        <div>
+          <div class="font-bold text-sm" id="user-name">Administrador</div>
+          <div class="text-xs text-on-surface-variant/70" id="user-role">Admin</div>
+        </div>
+      </div>
+    </a>
+    <button onclick="logout()" class="mt-4 flex items-center gap-2 justify-center w-full py-2 rounded-xl border border-outline-variant text-sm text-on-surface-variant hover:text-error transition-all">Cerrar sesión</button>
+  </aside>
+
+  <!-- Main content -->
+  <main class="ml-72 p-8 relative z-10">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-4xl font-extrabold tracking-tight">Panel de Administrador</h1>
+        <p class="text-on-surface-variant/60">Supervisión total de usuarios, proyectos y análisis</p>
+      </div>
+      <div class="flex gap-3">
+        <button id="themeButton" class="glass p-2 rounded-full w-10 h-10 flex items-center justify-center">
+          <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Usuarios registrados</span><span class="material-symbols-outlined text-primary/40">group</span></div><div class="text-3xl font-bold mt-2" id="stat-users">0</div></div>
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Proyectos totales</span><span class="material-symbols-outlined text-primary/40">folder</span></div><div class="text-3xl font-bold mt-2" id="stat-projects">0</div></div>
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Completados</span><span class="material-symbols-outlined text-green-accent/40">check_circle</span></div><div class="text-3xl font-bold mt-2" id="stat-completed">0</div></div>
+      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Calidad media</span><span class="material-symbols-outlined text-tertiary/40">star</span></div><div class="text-3xl font-bold mt-2" id="stat-quality">0</div></div>
+    </div>
+
+    <!-- Análisis rápido -->
+    <div class="glass rounded-2xl p-6 mb-10">
+      <h2 class="text-xl font-bold mb-4">Análisis de documentación</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div><div class="text-on-surface-variant/60 text-sm">Documentos</div><div class="text-2xl font-bold" id="doc-count">0</div></div>
+        <div><div class="text-on-surface-variant/60 text-sm">Palabras clave</div><div class="text-2xl font-bold" id="keyword-count">0</div></div>
+        <div><div class="text-on-surface-variant/60 text-sm">Términos técnicos</div><div class="text-2xl font-bold" id="technical-count">0</div></div>
+        <div><div class="text-on-surface-variant/60 text-sm">Coincidencias</div><div class="text-2xl font-bold" id="matching-count">0</div></div>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
+    </div>
+
+    <!-- Tabla de Usuarios con CRUD -->
+    <div id="users-section" class="mb-12">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold"> Usuarios</h2>
+        <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo usuario</button>
+      </div>
+      <div class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="border-b border-outline-variant/30 bg-surface-container/30">
+              <tr class="text-on-surface-variant/70 text-sm">
+                <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Plan</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Proyectos con CRUD básico -->
+    <div id="projects-section">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold"> Proyectos recientes</h2>
+        <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto</button>
+      </div>
+      <div class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="border-b border-outline-variant/30">
+              <tr class="text-on-surface-variant/70 text-sm">
+                <th class="p-4">Nombre</th><th class="p-4">Propietario</th><th class="p-4">Lenguaje</th><th class="p-4">Estado</th><th class="p-4">Score</th><th class="p-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="projects-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL USUARIO -->
+  <div id="userModal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="if(event.target===this) closeUserModal()">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+      <button onclick="closeUserModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+      <h3 class="text-2xl font-bold text-on-surface mb-1" id="userModalTitle">Agregar Usuario</h3>
+      <p class="text-on-surface-variant/60 text-sm mb-6">Administra los usuarios del sistema</p>
+      <input type="hidden" id="userId">
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre</label><input id="userName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Email</label><input id="userEmail" type="email" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña (solo para nuevo)</label><input id="userPassword" type="password" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
+        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PROYECTO -->
+  <div id="projectModal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="if(event.target===this) closeProjectModal()">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+      <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+      <h3 class="text-2xl font-bold text-on-surface mb-1" id="projectModalTitle">Agregar Proyecto</h3>
+      <p class="text-on-surface-variant/60 text-sm mb-6">Administra los proyectos del sistema</p>
+      <input type="hidden" id="projectId">
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label><input id="projectName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Propietario (email)</label><input id="projectOwner" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Lenguaje</label><input id="projectLanguage" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" value="Python"></div>
+      <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Estado</label><select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="pending">Pendiente</option><option value="completed">Completado</option><option value="error">Error</option></select></div>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
+        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.role !== 'admin') window.location.href = '/dashboard';
+    document.getElementById('user-name').innerText = user.name || 'Admin';
+    document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
+
+    function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+
+    // Carga datos iniciales
+    async function loadStats() {
+      // Verificar autenticación y rol antes de cargar
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!token || user.role !== 'admin') {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/overview', { headers: authHeaders() });
+        if (!res.ok) {
+          console.error('Error loading stats:', res.status, res.statusText);
+          const errorData = await res.json().catch(() => ({}));
+          console.error('Error data:', errorData);
+          if (res.status === 403) {
+            alert('No tienes permisos de administrador. Redirigiendo al dashboard...');
+            window.location.href = '/dashboard';
+            return;
+          }
+          throw new Error();
+        }
+        const data = await res.json();
+        console.log('Admin stats data:', data);
+
+        if (!data.stats) {
+          console.error('No stats in response:', data);
+          return;
+        }
+
+        document.getElementById('stat-users').innerText = data.stats.total_users || 0;
+        document.getElementById('stat-projects').innerText = data.stats.total_projects || 0;
+        document.getElementById('stat-completed').innerText = data.stats.completed_projects || 0;
+        document.getElementById('stat-quality').innerText = data.stats.average_quality_score || 0;
+        document.getElementById('doc-count').innerText = data.data_analysis?.document_count || 0;
+        document.getElementById('keyword-count').innerText = data.data_analysis?.keywords?.length || 0;
+        document.getElementById('technical-count').innerText = data.data_analysis?.technical_terms?.length || 0;
+        document.getElementById('matching-count').innerText = data.data_analysis?.matching_terms?.length || 0;
+        const kwContainer = document.getElementById('keywords-list');
+        if (data.data_analysis?.keywords) {
+          kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        alert('Error al cargar estadísticas. Verifica la consola para más detalles.');
+      }
+    }
+
+    async function loadUsers() {
+      // Verificar autenticación y rol antes de cargar
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!token || user.role !== 'admin') {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      const res = await fetch('/api/admin/users', { headers: authHeaders() });
+      if (!res.ok) return;
+      const users = await res.json();
+      const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
+      const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
+      document.getElementById('users-table').innerHTML = users.map(u => `
+        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+          <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
+          <td class="p-4"><span class="badge ${planColors[u.plan] || 'pending'}">${planNames[u.plan] || u.plan || 'Gratuito'}</span></td>
+          <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
+          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadProjects() {
+      // Verificar autenticación y rol antes de cargar
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!token || user.role !== 'admin') {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      const res = await fetch('/api/admin/projects', { headers: authHeaders() });
+      if (!res.ok) return;
+      const projects = await res.json();
+      document.getElementById('projects-table').innerHTML = projects.map(p => `
+        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+          <td class="p-4">${escapeHtml(p.name)}</td><td class="p-4">${escapeHtml(p.owner)}</td><td class="p-4">${p.language}</td>
+          <td class="p-4"><span class="badge ${p.status}">${p.status === 'completed' ? 'Completado' : p.status === 'error' ? 'Error' : 'Pendiente'}</span></td>
+          <td class="p-4">${p.quality_score || '—'}</td>
+          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editProject('${p._id}','${escapeHtml(p.name)}','${escapeHtml(p.owner)}','${p.language}','${p.status}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteProject('${p._id}')">delete</span></div></td>
+        </tr>
+      `).join('');
+    }
+
+    // CRUD Usuarios
+    function openUserModal(edit = false) { document.getElementById('userModal').classList.remove('hidden'); if(!edit) { document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; document.getElementById('userId').value = ''; document.getElementById('userName').value = ''; document.getElementById('userEmail').value = ''; document.getElementById('userPassword').value = ''; document.getElementById('userRole').value = 'user'; } }
+    function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+    window.editUser = (id, name, email, role) => {
+      document.getElementById('userModalTitle').innerText = 'Editar Usuario';
+      document.getElementById('userId').value = id;
+      document.getElementById('userName').value = name;
+      document.getElementById('userEmail').value = email;
+      document.getElementById('userPassword').value = '';
+      document.getElementById('userRole').value = role;
+      openUserModal(true);
+    };
+    async function saveUser() {
+      const id = document.getElementById('userId').value;
+      const name = document.getElementById('userName').value;
+      const email = document.getElementById('userEmail').value;
+      const password = document.getElementById('userPassword').value;
+      const role = document.getElementById('userRole').value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
+      const body = { name, email, role };
+      if (password) body.password = password;
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+      if (res.ok) { closeUserModal(); loadUsers(); loadStats(); }
+      else alert('Error al guardar usuario');
+    }
+    window.deleteUser = async (id) => {
+      if(confirm('¿Eliminar usuario permanentemente?')) {
+        const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if(res.ok) { loadUsers(); loadStats(); }
+      }
+    };
+
+    // CRUD Proyectos
+    function openProjectModal() { document.getElementById('projectModal').classList.remove('hidden'); document.getElementById('projectId').value = ''; document.getElementById('projectName').value = ''; document.getElementById('projectOwner').value = ''; document.getElementById('projectLanguage').value = 'Python'; document.getElementById('projectStatus').value = 'pending'; document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; }
+    function closeProjectModal() { document.getElementById('projectModal').classList.add('hidden'); }
+    window.editProject = (id, name, owner, lang, status) => {
+      document.getElementById('projectModalTitle').innerText = 'Editar Proyecto';
+      document.getElementById('projectId').value = id;
+      document.getElementById('projectName').value = name;
+      document.getElementById('projectOwner').value = owner;
+      document.getElementById('projectLanguage').value = lang;
+      document.getElementById('projectStatus').value = status;
+      document.getElementById('projectModal').classList.remove('hidden');
+    };
+    async function saveProject() {
+      const id = document.getElementById('projectId').value;
+      const name = document.getElementById('projectName').value;
+      const owner = document.getElementById('projectOwner').value;
+      const language = document.getElementById('projectLanguage').value;
+      const status = document.getElementById('projectStatus').value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/admin/projects/${id}` : '/api/admin/projects';
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify({ name, owner, language, status }) });
+      if (res.ok) { closeProjectModal(); loadProjects(); loadStats(); }
+      else alert('Error guardando proyecto');
+    }
+    window.deleteProject = async (id) => {
+      if(confirm('¿Eliminar este proyecto?')) {
+        const res = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if(res.ok) loadProjects();
+      }
+    };
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function logout() { localStorage.clear(); window.location.href = '/'; }
+
+    // Tema claro/oscuro con persistencia
+    const themeBtn = document.getElementById('themeButton');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    function applyTheme(theme) { document.body.setAttribute('data-theme', theme); themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode'; localStorage.setItem('theme', theme); }
+    applyTheme(savedTheme);
+    themeBtn?.addEventListener('click', () => { const cur = document.body.getAttribute('data-theme'); applyTheme(cur === 'light' ? 'dark' : 'light'); });
+
+    // Partículas (igual que index)
+    const canvas = document.getElementById('particle-canvas');
+    let ctx = canvas.getContext('2d');
+    let particles = [], mouse = { x: null, y: null };
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    class Particle { constructor() { this.reset(); } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; } update() { this.x += this.vx; this.y += this.vy; if (mouse.x) { let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy); if (d < 150) { let angle = Math.atan2(dy, dx), force = (150 - d) / 150; this.x -= Math.cos(angle) * force * 1.2; this.y -= Math.sin(angle) * force * 1.2; } } if (this.x < 0) this.x = canvas.width; if (this.x > canvas.width) this.x = 0; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; } draw() { const style = getComputedStyle(document.body); const c1 = style.getPropertyValue('--particle-color-1').trim(); const c2 = style.getPropertyValue('--particle-color-2').trim(); ctx.fillStyle = Math.random() > 0.7 ? c1 : c2; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); particles.forEach(p => { if (Math.hypot(this.x - p.x, this.y - p.y) < 100) { ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(p.x, p.y); ctx.strokeStyle = style.getPropertyValue('--particle-line').trim(); ctx.stroke(); } }); } }
+    function initParticles() { particles = []; for (let i = 0; i < 70; i++) particles.push(new Particle()); }
+    function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+    resizeCanvas(); initParticles(); animate();
+
+    // Cargar todo
+    loadStats(); loadUsers(); loadProjects();
+  </script>
+</body>
+</html>

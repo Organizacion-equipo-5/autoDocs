@@ -1,0 +1,15 @@
+flask==3.0.3
+flask-cors==4.0.1
+flask-jwt-extended==4.6.0
+flask-socketio==5.3.6
+pymongo==4.7.3
+werkzeug==3.0.3
+python-dotenv==1.0.1
+weasyprint==62.3
+reportlab==4.1.0
+gunicorn==22.0.0
+openai==1.12.0
+markdown==3.4.4
+requests==2.31.0
+groq==0.11.0
+python-dotenv==1.0.1

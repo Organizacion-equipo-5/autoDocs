@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediTrack - Sistema de Medicamentos Inteligente</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loader"></div>
+            <p>Cargando MediTrack...</p>
+        </div>
+
+        <!-- Login / Register Page -->
+        <div id="login-page" class="page-container hidden">
+            <div class="login-wrapper">
+                <div class="login-card">
+                    <div class="login-header">
+                        <span class="material-icons app-logo-icon">medication</span>
+                        <h1>MediTrack</h1>
+                        <p>Sistema de Medicamentos Inteligente</p>
+                    </div>
+
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" id="tab-login" onclick="UI.switchAuthTab('login')">
+                            <span class="material-icons">login</span> Iniciar Sesion
+                        </button>
+                        <button class="auth-tab" id="tab-register" onclick="UI.switchAuthTab('register')">
+                            <span class="material-icons">person_add</span> Registrarse
+                        </button>
+                    </div>
+
+                    <!-- Formulario Login -->
+                    <form id="login-form" class="login-form auth-panel" data-panel="login">
+                        <div class="form-group">
+                            <label for="email"><span class="material-icons form-icon">email</span> Correo Electronico</label>
+                            <input type="email" id="email" name="email" placeholder="tu_correo@ejemplo.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password"><span class="material-icons form-icon">lock</span> Contrasena</label>
+                            <div class="input-password-wrapper">
+                                <input type="password" id="password" name="password" placeholder="Tu contrasena" required>
+                                <button type="button" class="toggle-password" onclick="UI.togglePassword('password', this)">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span class="material-icons">login</span> Iniciar Sesion
+                        </button>
+                    </form>
+
+                    <!-- Formulario Registro -->
+                    <form id="register-form" class="login-form auth-panel hidden" data-panel="register">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reg-nombre"><span class="material-icons form-icon">badge</span> Nombre</label>
+                                <input type="text" id="reg-nombre" placeholder="Tu nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-apellido"><span class="material-icons form-icon">badge</span> Apellido</label>
+                                <input type="text" id="reg-apellido" placeholder="Tu apellido" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-email"><span class="material-icons form-icon">email</span> Correo Electronico</label>
+                            <input type="email" id="reg-email" placeholder="tu_correo@ejemplo.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-telefono"><span class="material-icons form-icon">phone</span> Telefono (opcional)</label>
+                            <input type="tel" id="reg-telefono" placeholder="+52 000 000 0000">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-rol"><span class="material-icons form-icon">group</span> Rol</label>
+                            <select id="reg-rol" required>
+                                <option value="adulto">Adulto (Paciente)</option>
+                                <option value="familiar">Familiar / Cuidador</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password"><span class="material-icons form-icon">lock</span> Contrasena</label>
+                            <div class="input-password-wrapper">
+                                <input type="password" id="reg-password" placeholder="Min. 8 caracteres, letra y numero" required>
+                                <button type="button" class="toggle-password" onclick="UI.togglePassword('reg-password', this)">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password2"><span class="material-icons form-icon">lock_reset</span> Confirmar Contrasena</label>
+                            <div class="input-password-wrapper">
+                                <input type="password" id="reg-password2" placeholder="Repite tu contrasena" required>
+                                <button type="button" class="toggle-password" onclick="UI.togglePassword('reg-password2', this)">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span class="material-icons">person_add</span> Crear Cuenta
+                        </button>
+                    </form>
+
+                    <div id="login-error" class="alert alert-error hidden"></div>
+                    <div id="register-error" class="alert alert-error hidden"></div>
+                    <div id="register-success" class="alert alert-success hidden"></div>
+
+                    <div class="login-footer">
+                        <p class="demo-info">
+                            <span class="material-icons" style="font-size:14px;vertical-align:middle;">info</span>
+                            <strong>Credenciales de Prueba:</strong><br>
+                            Admin: admin@meditrack.com / Admin123<br>
+                            Usuario: roberto@test.com / Test1234
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="main-app hidden">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span class="material-icons sidebar-logo-icon">medication</span>
+                    <h2>MediTrack</h2>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                        <span class="material-icons">dashboard</span> Dashboard
+                    </a>
+                    <a href="#medications" class="nav-link" data-page="medications">
+                        <span class="material-icons">medication</span> Medicinas
+                    </a>
+                    <a href="#users" class="nav-link nav-admin-only hidden" data-page="users">
+                        <span class="material-icons">group</span> Usuarios
+                    </a>
+                    <a href="#logs" class="nav-link" data-page="logs">
+                        <span class="material-icons">assignment</span> Registro
+                    </a>
+                    <a href="#notifications" class="nav-link" data-page="notifications">
+                        <span class="material-icons">notifications</span> Notificaciones
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <span class="material-icons">account_circle</span>
+                        </div>
+                        <div>
+                            <div id="user-name" class="user-name">Usuario</div>
+                            <div id="user-role" class="user-role">Rol</div>
+                        </div>
+                    </div>
+                    <button id="logout-btn" class="btn btn-secondary btn-block">
+                        <span class="material-icons">logout</span> Cerrar Sesion
+                    </button>
+                </div>
+            </aside>
+
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle"><span class="material-icons">menu</span></button>
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <input type="search" id="search-input" class="search-input" placeholder="Buscar...">
+                    <div class="notification-bell">
+                        <button id="notif-btn" class="notification-btn">
+                            <span class="material-icons">notifications</span>
+                            <span id="notif-count" class="notification-badge hidden">0</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <!-- Dashboard -->
+                <div id="dashboard-page" class="page hidden">
+                    <div class="page-header">
+                        <h2>Bienvenido a MediTrack</h2>
+                        <p>Panel de control del sistema de medicamentos</p>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><span class="material-icons">group</span></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="stat-users">0</div>
+                                <div class="stat-label">Usuarios</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><span class="material-icons">medication</span></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="stat-medications">0</div>
+                                <div class="stat-label">Medicinas</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--success"><span class="material-icons">check_circle</span></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="stat-completed">0</div>
+                                <div class="stat-label">Tomas Completadas Hoy</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--warning"><span class="material-icons">schedule</span></div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="stat-pending">0</div>
+                                <div class="stat-label">Pendientes</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recent-section">
+                        <h3>Proximas Tomas de Medicinas</h3>
+                        <div id="upcoming-medications" class="medication-list">
+                            <p class="empty-state">Cargando medicinas programadas...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medications -->
+                <div id="medications-page" class="page hidden">
+                    <div class="page-header">
+                        <h2>Gestion de Medicinas</h2>
+                        <button id="add-medication-btn" class="btn btn-primary">
+                            <span class="material-icons">add</span> Agregar Medicina
+                        </button>
+                    </div>
+                    <div id="medications-container" class="medications-container">
+                        <p class="empty-state">Cargando medicinas...</p>
+                    </div>
+                    <div id="medication-modal" class="modal hidden">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 id="modal-title">Agregar Medicina</h3>
+                                <button class="modal-close"><span class="material-icons">close</span></button>
+                            </div>
+                            <form id="medication-form" class="form">
+                                <div class="form-group">
+                                    <label for="med-name">Nombre de la Medicina</label>
+                                    <input type="text" id="med-name" required>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="med-form">Forma</label>
+                                        <select id="med-form" required>
+                                            <option value="">Selecciona forma</option>
+                                            <option value="tableta">Tableta</option>
+                                            <option value="capsula">Capsula</option>
+                                            <option value="jarabe">Jarabe</option>
+                                            <option value="inyeccion">Inyeccion</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="med-dose">Dosis</label>
+                                        <input type="text" id="med-dose" placeholder="ej: 500mg" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="med-frequency">Frecuencia</label>
+                                    <select id="med-frequency" required>
+                                        <option value="">Selecciona frecuencia</option>
+                                        <option value="cada_hora">Cada hora</option>
+                                        <option value="cada_2h">Cada 2 horas</option>
+                                        <option value="cada_4h">Cada 4 horas</option>
+                                        <option value="cada_6h">Cada 6 horas</option>
+                                        <option value="cada_12h">Cada 12 horas</option>
+                                        <option value="cada_24h">Cada 24 horas</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="med-schedule">Horarios de Toma (ej: 08:00, 14:00, 20:00)</label>
+                                    <input type="text" id="med-schedule" placeholder="08:00, 14:00, 20:00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="med-notes">Notas/Indicaciones</label>
+                                    <textarea id="med-notes" rows="3" placeholder="Instrucciones especiales..."></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="material-icons">save</span> Guardar Medicina
+                                    </button>
+                                    <button type="button" class="btn btn-secondary modal-close-btn">
+                                        <span class="material-icons">cancel</span> Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users (solo admin) -->
+                <div id="users-page" class="page hidden">
+                    <div class="page-header">
+                        <h2><span class="material-icons" style="vertical-align:middle;margin-right:6px;">admin_panel_settings</span>Gestion de Usuarios</h2>
+                        <button id="add-user-btn" class="btn btn-primary">
+                            <span class="material-icons">person_add</span> Agregar Usuario
+                        </button>
+                    </div>
+                    <div id="users-container" class="users-container">
+                        <p class="empty-state">Cargando usuarios...</p>
+                    </div>
+                    <!-- Modal usuario -->
+                    <div id="user-modal" class="modal hidden">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 id="user-modal-title">Agregar Usuario</h3>
+                                <button class="modal-close user-modal-close"><span class="material-icons">close</span></button>
+                            </div>
+                            <form id="user-form" class="form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="user-nombre">Nombre</label>
+                                        <input type="text" id="user-nombre" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="user-apellido">Apellido</label>
+                                        <input type="text" id="user-apellido" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-email">Correo Electronico</label>
+                                    <input type="email" id="user-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-telefono">Telefono (opcional)</label>
+                                    <input type="tel" id="user-telefono" placeholder="+52 000 000 0000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-rol">Rol</label>
+                                    <select id="user-rol" required>
+                                        <option value="adulto">Adulto (Paciente)</option>
+                                        <option value="familiar">Familiar / Cuidador</option>
+                                        <option value="medico">Medico</option>
+                                        <option value="admin">Administrador</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="user-password-group">
+                                    <label for="user-password">Contrasena <small class="text-muted">(dejar vacio para no cambiar)</small></label>
+                                    <div class="input-password-wrapper">
+                                        <input type="password" id="user-password" placeholder="Min. 8 caracteres, letra y numero">
+                                        <button type="button" class="toggle-password" onclick="UI.togglePassword('user-password', this)">
+                                            <span class="material-icons">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="user-activo" checked>
+                                        <span>Usuario Activo</span>
+                                    </label>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="material-icons">save</span> Guardar Usuario
+                                    </button>
+                                    <button type="button" class="btn btn-secondary user-modal-close-btn">
+                                        <span class="material-icons">cancel</span> Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs -->
+                <div id="logs-page" class="page hidden">
+                    <div class="page-header">
+                        <h2>Registro de Tomas</h2>
+                    </div>
+                    <div class="logs-filters">
+                        <input type="date" id="log-date-filter" class="form-control">
+                        <select id="log-status-filter" class="form-control">
+                            <option value="">Todos los estados</option>
+                            <option value="tomado">Tomado</option>
+                            <option value="omitido">Omitido</option>
+                            <option value="pendiente">Pendiente</option>
+                        </select>
+                    </div>
+                    <div id="logs-container" class="logs-container">
+                        <p class="empty-state">Cargando registro...</p>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div id="notifications-page" class="page hidden">
+                    <div class="page-header">
+                        <h2>Notificaciones</h2>
+                    </div>
+                    <div id="notifications-container" class="notifications-container">
+                        <p class="empty-state">No hay notificaciones</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

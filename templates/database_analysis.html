@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis de Base de Datos — AutoDocs AI</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- PDF generation libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#38bdf8",
+            "secondary": "#818cf8",
+            "on-surface": "#0f172a",
+            "on-surface-variant": "#334155",
+            "surface-container": "#ffffff",
+            "outline-variant": "#94a3b8",
+            "error": "#ba1a1a",
+            "background": "#f1f5f9"
+          },
+          fontFamily: {
+            "body-md": ["Geist"],
+            "display-lg": ["Geist"],
+            "code-md": ["JetBrains Mono"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-family: 'Geist', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .glass {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .input-field {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 1rem;
+      padding: 0.85rem 1rem;
+      color: #0f172a;
+      transition: all 0.2s;
+      font-family: 'Geist', sans-serif;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56,189,248,0.2);
+    }
+    .input-field::placeholder { color: rgba(100,116,139,0.5); }
+    .input-field[readonly] { opacity: 0.65; cursor: default; }
+    .btn-primary {
+      background: #38bdf8;
+      color: #0f1418;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.07);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(56,189,248,0.35);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0f172a 0%, #38bdf8 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .danger-card {
+      background: rgba(186,26,26,0.08);
+      border: 1px solid rgba(186,26,26,0.2);
+      color: #ba1a1a;
+    }
+    .success-card {
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      color: #0f766e;
+    }
+    html.dark body {
+      background: #0f1418;
+      color: #dee3e8;
+    }
+    html.dark .glass {
+      background: rgba(15,20,24,0.72);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+    }
+    html.dark .input-field {
+      background: #1b2024;
+      border-color: #3e484f;
+      color: #dee3e8;
+    }
+    html.dark .input-field::placeholder { color: rgba(189,200,209,0.4); }
+    html.dark .input-field:focus {
+      border-color: #8ed5ff;
+      box-shadow: 0 0 0 3px rgba(142,213,255,0.18);
+    }
+    html.dark .btn-primary { background: #8ed5ff; }
+    html.dark .section-title {
+      background: linear-gradient(135deg, #dee3e8 0%, #8ed5ff 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+    .text-variant-custom { color: #334155; }
+    .text-variant-70 { color: rgba(51,65,85,0.7); }
+    .text-variant-50 { color: rgba(51,65,85,0.5); }
+    .border-divider { border-color: rgba(148,163,184,0.35); }
+    html.dark .text-variant-custom { color: #94a3b8 !important; }
+    html.dark .text-variant-70 { color: #94a3b8 !important; }
+    html.dark .text-variant-50 { color: #64748b !important; }
+    html.dark .border-divider { border-color: rgba(148,163,184,0.25) !important; }
+    /* PDF hidden container for rendering */
+    #pdfExportContainer {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 1100px;
+      background: white;
+      font-family: 'Geist', sans-serif;
+      padding: 40px;
+      color: #0f172a;
+      z-index: -100;
+    }
+    #pdfExportContainer h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    #pdfExportContainer h2 { font-size: 22px; font-weight: 700; margin-top: 24px; margin-bottom: 12px; border-left: 5px solid #38bdf8; padding-left: 15px; }
+    #pdfExportContainer h3 { font-size: 18px; font-weight: 600; margin-top: 16px; margin-bottom: 8px; color: #1e293b; }
+    #pdfExportContainer table { width: 100%; border-collapse: collapse; margin: 12px 0; background: #f8fafc; border-radius: 12px; overflow: hidden; }
+    #pdfExportContainer th { background: #e2e8f0; padding: 8px 12px; text-align: left; font-weight: 700; }
+    #pdfExportContainer td { border: 1px solid #cbd5e1; padding: 8px 12px; }
+    #pdfExportContainer .er-diagram-box { background: #f1f5f9; padding: 16px; border-radius: 16px; margin: 16px 0; border: 1px solid #cbd5e1; overflow-x: auto; }
+    #pdfExportContainer .suggestion-badge { background: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 20px; display: inline-block; margin: 4px; font-size: 13px; }
+    #pdfExportContainer .relationship-item { background: #eff6ff; padding: 6px 12px; border-radius: 12px; margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen p-6 md:p-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+        <div>
+          <div class="flex items-center gap-2 text-sm text-variant-70 mb-1">
+            <span class="material-symbols-outlined text-[18px]" style="color:#38bdf8">storage</span>
+            <span>Visor de base de datos</span>
+          </div>
+          <h1 class="section-title">Análisis de Base de Datos</h1>
+          <p class="text-variant-70 text-sm max-w-lg mt-1">Sube un archivo <strong>.sql</strong> para recibir recomendaciones de estructura, índices y calidad.</p>
+        </div>
+        <a href="/dashboard" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-divider text-variant-custom hover:text-primary transition-all duration-200 glass text-sm font-medium">
+          <span class="material-symbols-outlined text-lg">arrow_back</span>
+          Volver al dashboard
+        </a>
+      </div>
+
+      <div class="grid lg:grid-cols-[1.4fr_0.8fr] gap-6">
+        <div class="glass rounded-3xl p-6 md:p-8">
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-divider">
+              <span class="material-symbols-outlined text-2xl" style="color:#38bdf8">analytics</span>
+              <div>
+                <h2 class="text-xl font-bold tracking-tight text-on-surface-custom">Cargar SQL</h2>
+                <p class="text-variant-70 text-sm">Sube el archivo de tu esquema y recibe sugerencias prácticas.</p>
+              </div>
+            </div>
+
+            <div id="planBanner" class="glass rounded-2xl p-4 danger-card hidden items-center gap-3 text-sm"></div>
+
+            <div class="grid gap-4">
+              <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">file_upload</span> Archivo .sql
+              </label>
+              <input id="dbFileInput" type="file" accept=".sql" class="input-field" />
+              <button id="uploadSqlButton" onclick="submitSqlFile()" class="btn-primary px-6 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg">
+                <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                Analizar archivo
+              </button>
+              <div id="uploadMessage" class="text-sm text-error hidden"></div>
+            </div>
+
+            <div id="analysisResults" class="space-y-6 hidden">
+              <div class="glass rounded-2xl p-5 border border-divider">
+                <h3 class="font-bold text-lg mb-3">Resumen</h3>
+                <p id="analysisSummary" class="text-variant-70 text-sm"></p>
+              </div>
+
+              <!-- Sección de sugerencias (ER diagram removido de UI, solo se incluye en PDF) -->
+              <div class="glass rounded-2xl p-5 border border-divider">
+                <h3 class="font-bold text-lg mb-3">Sugerencias</h3>
+                <ul id="analysisSuggestions" class="list-disc list-inside text-variant-70 text-sm space-y-2"></ul>
+              </div>
+
+              <div class="flex gap-3 pt-4 border-t border-divider">
+                <button id="downloadPdfBtn" onclick="downloadAnalysisPdf()" class="btn-primary px-6 py-3 rounded-2xl text-sm flex items-center gap-2 shadow-lg">
+                  <span class="material-symbols-outlined text-[18px]">download</span>
+                  Descargar análisis (PDF)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-6 md:p-8">
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-divider">
+              <span class="material-symbols-outlined text-2xl" style="color:#38bdf8">workspace_premium</span>
+              <div>
+                <h2 class="text-xl font-bold tracking-tight text-on-surface-custom">Estado del plan</h2>
+                <p class="text-variant-70 text-sm">Solo usuarios Pro y Enterprise pueden ejecutar el análisis.</p>
+              </div>
+            </div>
+            <div class="glass rounded-3xl p-5 border border-divider bg-surface-container">
+              <p class="text-sm uppercase tracking-[0.3em] text-on-surface-variant/60 mb-3">Plan actual</p>
+              <p id="activePlanLabel" class="text-2xl font-bold text-on-surface-custom">Cargando...</p>
+            </div>
+            <div class="glass rounded-3xl p-5 border border-divider bg-surface-container">
+              <h3 class="font-bold text-lg mb-3">Cómo funciona</h3>
+              <ul class="text-variant-70 text-sm space-y-3 list-disc list-inside">
+                <li>Encuentra tablas sin clave primaria.</li>
+                <li>Detecta columnas que parecen llaves foráneas sin constraints.</li>
+                <li>Revisa uso de TEXT/BLOB y VARCHAR sin tamaño.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor oculto para renderizar PDF -->
+  <div id="pdfExportContainer"></div>
+
+  <script>
+    const themeButton = document.getElementById('themeButton');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.classList.add(savedTheme === 'dark' ? 'dark' : 'light');
+    document.body.setAttribute('data-theme', savedTheme);
+
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${token}` };
+    }
+
+    // Variables globales
+    window.currentAnalysis = null;       // Respuesta del servidor (summary, suggestions, er_diagram)
+    window.uploadedSqlText = null;       // Texto crudo del archivo SQL para análisis detallado
+
+    async function initDatabaseAnalysis() {
+      const banner = document.getElementById('planBanner');
+      const planLabel = document.getElementById('activePlanLabel');
+      const uploadBtn = document.getElementById('uploadSqlButton');
+      const fileInput = document.getElementById('dbFileInput');
+      try {
+        const res = await fetch('/api/payments/my-plan', { headers: authHeaders() });
+        if (!res.ok) throw new Error('No autorizado');
+        const data = await res.json();
+        const plan = data.plan || 'free';
+        const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+        planLabel.textContent = planNames[plan] || plan;
+        if (plan === 'free') {
+          banner.classList.remove('hidden');
+          banner.innerHTML = '<span class="material-symbols-outlined text-base">lock</span>Tu plan actual no permite usar esta herramienta. <a href="/pricing" class="font-bold text-primary">Actualiza tu plan</a> para continuar.';
+          uploadBtn.disabled = true;
+          fileInput.disabled = true;
+        } else {
+          banner.classList.add('hidden');
+          uploadBtn.disabled = false;
+          fileInput.disabled = false;
+        }
+      } catch (error) {
+        banner.classList.remove('hidden');
+        banner.innerHTML = '<span class="material-symbols-outlined text-base">error</span>No se pudo verificar tu plan. Recarga la página e intenta de nuevo.';
+      }
+    }
+
+    function showUploadMessage(message) {
+      const messageEl = document.getElementById('uploadMessage');
+      messageEl.textContent = message;
+      messageEl.classList.remove('hidden');
+    }
+
+    function hideUploadMessage() {
+      const messageEl = document.getElementById('uploadMessage');
+      messageEl.textContent = '';
+      messageEl.classList.add('hidden');
+    }
+
+    // Parseo SQL para extraer tablas, columnas, PK y FK (análisis detallado para PDF)
+    function parseSqlToTables(sqlText) {
+      const tables = {};
+      // Eliminar comentarios multilínea y simples
+      let cleaned = sqlText.replace(/\/\*[\s\S]*?\*\//g, '').replace(/--.*$/gm, '');
+      const createRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\(([^;]+)\)/gmi;
+      let match;
+      while ((match = createRegex.exec(cleaned)) !== null) {
+        const tableName = match[1];
+        const body = match[2];
+        const columns = [];
+        let primaryKeys = [];
+        const foreignKeys = [];
+        // Dividir por coma pero respetando paréntesis
+        const lines = body.split(/,(?![^(]*\))/);
+        for (let line of lines) {
+          line = line.trim();
+          if (!line) continue;
+          // CONSTRAINT PRIMARY KEY
+          const pkMatch = line.match(/PRIMARY\s+KEY\s*\(([^)]+)\)/i);
+          if (pkMatch) {
+            const keys = pkMatch[1].split(',').map(k => k.trim().replace(/`/g, ''));
+            primaryKeys.push(...keys);
+            continue;
+          }
+          // PRIMARY KEY a nivel columna
+          const colPkMatch = line.match(/^(\w+)\s+.+\s+PRIMARY\s+KEY/i);
+          if (colPkMatch) {
+            primaryKeys.push(colPkMatch[1]);
+          }
+          // FOREIGN KEY
+          const fkMatch = line.match(/FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(\w+)\s*\(([^)]+)\)/i);
+          if (fkMatch) {
+            const colRef = fkMatch[1].trim().replace(/`/g, '');
+            const refTable = fkMatch[2];
+            const refCol = fkMatch[3].trim().replace(/`/g, '');
+            foreignKeys.push({ column: colRef, references: { table: refTable, column: refCol } });
+            continue;
+          }
+          // Column definition normal
+          const colDefMatch = line.match(/^(\w+)\s+([^,\s]+)/);
+          if (colDefMatch && !line.toUpperCase().includes('CONSTRAINT')) {
+            const colName = colDefMatch[1];
+            const dataType = colDefMatch[2];
+            const isNullable = !line.toUpperCase().includes('NOT NULL');
+            columns.push({ name: colName, type: dataType, nullable: isNullable });
+          }
+        }
+        tables[tableName] = { columns, primaryKeys, foreignKeys, rawBody: body };
+      }
+      return tables;
+    }
+
+    // Construir HTML mejorado y estético para PDF: estructura al inicio + sugerencias en viñetas
+    function buildPdfContent(analysis, sqlText) {
+      const parsedTables = sqlText ? parseSqlToTables(sqlText) : {};
+      const timestamp = new Date().toLocaleString();
+      let tablesHtml = '';
+      let relationshipsHtml = '';
+      let totalTables = Object.keys(parsedTables).length;
+      let totalRelations = 0;
+      const relationshipList = [];
+
+      // Generar HTML para cada tabla (entidad) con diseño de tarjeta moderno
+      for (const [tableName, info] of Object.entries(parsedTables)) {
+        const pkStr = info.primaryKeys.length ? info.primaryKeys.join(', ') : '⚠️ Ninguna PK definida';
+        const pkBadge = info.primaryKeys.length ? '<span style="background:#38bdf8; color:#0f172a; padding:2px 8px; border-radius:20px; font-size:12px; font-weight:600;">🔑 PK</span>' : '<span style="background:#f97316; color:white; padding:2px 8px; border-radius:20px; font-size:12px;">❌ Sin PK</span>';
+        
+        tablesHtml += `
+          <div style="margin-bottom: 28px; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: #ffffff; border: 1px solid #e2e8f0;">
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-weight: 800; font-size: 20px; letter-spacing: -0.3px;">📄 ${tableName}</div>
+              <div>${pkBadge}</div>
+            </div>
+            <div style="padding: 16px 20px;">
+              <div style="margin-bottom: 16px; background: #f8fafc; padding: 10px 12px; border-radius: 14px; font-family: monospace; font-size: 13px;">
+                <strong>🔐 Clave(s) primaria(s):</strong> ${pkStr}
+              </div>
+              <table style="width:100%; border-collapse: collapse; border-radius: 16px; overflow: hidden; font-size: 13px;">
+                <thead>
+                  <tr style="background: #eef2ff; border-bottom: 1px solid #cbd5e1;">
+                    <th style="text-align: left; padding: 10px 12px; font-weight: 700;">Columna</th>
+                    <th style="text-align: left; padding: 10px 12px; font-weight: 700;">Tipo</th>
+                    <th style="text-align: left; padding: 10px 12px; font-weight: 700;">Nullable</th>
+                    <th style="text-align: left; padding: 10px 12px; font-weight: 700;">Relación FK</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+        for (const col of info.columns) {
+          let isForeignKey = '—';
+          let fkStyle = '';
+          const fkRef = info.foreignKeys.find(fk => fk.column === col.name);
+          if (fkRef) {
+            isForeignKey = `🔗 → ${fkRef.references.table}.${fkRef.references.column}`;
+            fkStyle = 'background: #ecfdf5;';
+          }
+          tablesHtml += `<tr style="border-bottom: 1px solid #e2e8f0; ${fkStyle}">
+            <td style="padding: 8px 12px; font-weight: 500;">${col.name}</td>
+            <td style="padding: 8px 12px;"><code style="background:#f1f5f9; padding:2px 6px; border-radius:8px;">${col.type}</code></td>
+            <td style="padding: 8px 12px;">${col.nullable ? '✅ SÍ' : '❌ NO'}</td>
+            <td style="padding: 8px 12px;">${isForeignKey}</td>
+          </tr>`;
+        }
+        tablesHtml += `</tbody></table>`;
+        
+        if (info.foreignKeys.length) {
+          tablesHtml += `<div style="margin-top: 14px; background: #eff6ff; padding: 10px 14px; border-radius: 14px;">
+            <strong style="display: flex; gap: 6px; align-items: center;"><span style="font-size:16px;">🔗</span> Restricciones FOREIGN KEY:</strong>
+            <ul style="margin: 8px 0 0 20px; list-style-type: circle;">`;
+          info.foreignKeys.forEach(fk => {
+            tablesHtml += `<li style="margin: 4px 0;">${fk.column} → <strong>${fk.references.table}</strong>.${fk.references.column}</li>`;
+            relationshipList.push(`${tableName}.${fk.column} referencia a ${fk.references.table}.${fk.references.column}`);
+            totalRelations++;
+          });
+          tablesHtml += `</ul></div>`;
+        }
+        tablesHtml += `</div></div>`;
+      }
+
+      // Sección de relaciones consolidadas
+      if (relationshipList.length) {
+        relationshipsHtml = `
+          <div style="background: #fefce8; border-left: 4px solid #eab308; padding: 16px 20px; border-radius: 20px; margin: 20px 0;">
+            <h3 style="margin:0 0 12px 0; font-size: 18px; font-weight: 700; display: flex; gap: 8px;">🔁 Relaciones detectadas (${totalRelations})</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${relationshipList.map(rel => `<div style="background: #ffffff; padding: 8px 14px; border-radius: 40px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #fde68a;">📌 ${rel}</div>`).join('')}
+            </div>
+          </div>`;
+      } else if (totalTables > 0) {
+        relationshipsHtml = `<div style="background: #f1f5f9; border-radius: 20px; padding: 14px 18px; margin: 20px 0; color: #475569;"><span style="font-weight:600;">ℹ️</span> No se detectaron claves foráneas explícitas en las definiciones CREATE TABLE.</div>`;
+      } else {
+        relationshipsHtml = '';
+      }
+
+      // Sugerencias con viñetas estéticas y mejor legibilidad
+      let suggestionsHtml = '';
+      if (analysis && analysis.suggestions && analysis.suggestions.length) {
+        suggestionsHtml = `<ul style="margin: 16px 0 0 0; list-style: none; padding-left: 0;">` +
+          analysis.suggestions.map(s => `<li style="margin: 12px 0; display: flex; align-items: flex-start; gap: 12px;"><span style="background: #38bdf8; color: #0f172a; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 30px; font-weight: bold; font-size: 14px;">✨</span><span style="flex:1; line-height: 1.4;">${s}</span></li>`).join('') +
+        `</ul>`;
+      } else {
+        suggestionsHtml = '<p style="color: #64748b;">No se generaron sugerencias automáticas para este esquema.</p>';
+      }
+
+      // ER diagram del servidor (se muestra después de las sugerencias)
+      let erDiagramHtml = '';
+      if (analysis && analysis.er_diagram) {
+        erDiagramHtml = `
+          <div style="background: #f8fafc; border-radius: 24px; padding: 20px; margin: 28px 0 0 0; border: 1px solid #e2e8f0;">
+            <h3 style="margin:0 0 12px 0; font-size: 18px; font-weight: 700; display: flex; gap: 8px;">📐 Diagrama Entidad-Relación (generado por IA)</h3>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; background: #ffffff; padding: 16px; border-radius: 16px; overflow-x: auto; white-space: pre-wrap;">${analysis.er_diagram}</div>
+          </div>`;
+      } else {
+        erDiagramHtml = `<div style="background: #f1f5f9; border-radius: 20px; padding: 16px; margin-top: 24px;"><p>⚠️ No se pudo generar el diagrama E-R automático. Se incluye el análisis estructural detallado.</p></div>`;
+      }
+
+      // Resumen ejecutivo con métricas
+      const tablesWithPkCount = Object.values(parsedTables).filter(t => t.primaryKeys.length > 0).length;
+      const tablesWithoutPk = totalTables - tablesWithPkCount;
+
+      return `
+        <div style="font-family: 'Geist', 'Segoe UI', system-ui, sans-serif; max-width: 1000px; margin: 0 auto; background: white; color: #0f172a;">
+          <!-- Header -->
+          <div style="text-align: center; margin-bottom: 32px; border-bottom: 3px solid #38bdf8; padding-bottom: 24px;">
+            <h1 style="font-size: 34px; font-weight: 800; background: linear-gradient(135deg, #0f172a, #38bdf8); background-clip: text; -webkit-background-clip: text; color: transparent; margin: 0 0 8px 0;">🗄️ Análisis de Base de Datos</h1>
+            <p style="color: #334155; margin: 0;">AutoDocs AI · Reporte profesional de esquema SQL</p>
+            <p style="color: #64748b; font-size: 13px; margin-top: 8px;">${timestamp}</p>
+          </div>
+
+          <!-- Resumen ejecutivo -->
+          <div style="background: linear-gradient(120deg, #f0f9ff 0%, #eef2ff 100%); border-radius: 28px; padding: 20px 24px; margin-bottom: 32px;">
+            <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700;"> Resumen del análisis</h2>
+            <p style="font-size: 15px; line-height: 1.5;">${analysis?.summary || 'No se obtuvo un resumen automático.'}</p>
+            <div style="display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap;">
+              <div style="background: white; border-radius: 40px; padding: 6px 16px;"><strong> Tablas:</strong> ${totalTables}</div>
+              <div style="background: white; border-radius: 40px; padding: 6px 16px;"><strong> Relaciones FK:</strong> ${totalRelations}</div>
+              <div style="background: white; border-radius: 40px; padding: 6px 16px;"><strong> Tablas con PK:</strong> ${tablesWithPkCount}/${totalTables}</div>
+              ${tablesWithoutPk > 0 ? `<div style="background: #fee2e2; border-radius: 40px; padding: 6px 16px;"><strong> Sin PK:</strong> ${tablesWithoutPk}</div>` : ''}
+            </div>
+          </div>
+
+          <!-- ESTRUCTURA DE LA BASE DE DATOS (ENTIDADES, LLAVES, RELACIONES) al inicio -->
+          <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 24px; font-weight: 700; border-left: 5px solid #38bdf8; padding-left: 18px; margin: 0 0 20px 0;"> Estructura de la base de datos</h2>
+            <div style="color: #1e293b;">
+              ${totalTables ? tablesHtml : '<div style="background: #fef2f2; padding: 24px; border-radius: 24px; text-align: center;"> No se encontraron sentencias CREATE TABLE en el script SQL. Verifica el archivo.</div>'}
+            </div>
+            ${relationshipsHtml}
+          </div>
+
+          <!-- SUGERENCIAS con viñetas elegantes -->
+          <div style="margin: 28px 0 24px 0;">
+            <h2 style="font-size: 24px; font-weight: 700; border-left: 5px solid #f59e0b; padding-left: 18px; margin: 0 0 12px 0;"> Recomendaciones & Mejoras</h2>
+            <div style="background: #fffbeb; border-radius: 24px; padding: 20px 24px;">
+              ${suggestionsHtml}
+            </div>
+          </div>
+
+          <!-- Diagrama ER (si existe) -->
+          <div style="margin-top: 20px;">
+            ${erDiagramHtml}
+          </div>
+
+          <!-- Footer -->
+          <div style="font-size: 11px; text-align: center; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 32px;">
+            Documento generado por AutoDocs AI · Análisis automatizado de esquemas SQL · Calidad y buenas prácticas
+          </div>
+        </div>
+      `;
+    }
+
+    // PDF descarga con html2canvas + jspdf (multipágina)
+    async function downloadAnalysisPdf() {
+      if (!window.currentAnalysis && !window.uploadedSqlText) {
+        alert('No hay análisis disponible. Carga un archivo .sql primero.');
+        return;
+      }
+      if (!window.uploadedSqlText) {
+        alert('El contenido SQL no está disponible. Vuelve a subir el archivo.');
+        return;
+      }
+
+      const downloadBtn = document.getElementById('downloadPdfBtn');
+      const originalText = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">hourglass_empty</span> Generando PDF...';
+      downloadBtn.disabled = true;
+
+      try {
+        const pdfHtmlContent = buildPdfContent(window.currentAnalysis, window.uploadedSqlText);
+        const container = document.getElementById('pdfExportContainer');
+        container.innerHTML = pdfHtmlContent;
+        container.style.display = 'block';
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style.left = '-9999px';
+
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+        const element = container;
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          logging: false,
+          useCORS: false,
+          backgroundColor: '#ffffff'
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        let pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        const imgWidth = 210; // mm A4 width
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        let heightLeft = imgHeight - pageHeight;
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        pdf.save(`database_analysis_${new Date().toISOString().slice(0,19)}.pdf`);
+        container.innerHTML = '';
+        container.style.display = 'none';
+      } catch (error) {
+        console.error('Error en generación de PDF:', error);
+        alert('Error al generar el PDF: ' + error.message);
+      } finally {
+        downloadBtn.innerHTML = originalText;
+        downloadBtn.disabled = false;
+        const container = document.getElementById('pdfExportContainer');
+        container.innerHTML = '';
+        container.style.display = 'none';
+      }
+    }
+
+    function displayAnalysis(result) {
+      const container = document.getElementById('analysisResults');
+      const summary = document.getElementById('analysisSummary');
+      const suggestions = document.getElementById('analysisSuggestions');
+      
+      summary.textContent = result.summary || 'No se obtuvo un resumen válido del análisis.';
+      suggestions.innerHTML = '';
+      
+      if (result.suggestions && result.suggestions.length) {
+        result.suggestions.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          suggestions.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = 'No se encontraron recomendaciones automáticas en este archivo.';
+        suggestions.appendChild(li);
+      }
+
+      window.currentAnalysis = result;
+      container.classList.remove('hidden');
+    }
+
+    async function submitSqlFile() {
+      hideUploadMessage();
+      const fileInput = document.getElementById('dbFileInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        showUploadMessage('Selecciona un archivo .sql antes de analizar.');
+        return;
+      }
+      if (!file.name.toLowerCase().endsWith('.sql')) {
+        showUploadMessage('El archivo debe tener extensión .sql.');
+        return;
+      }
+
+      try {
+        const fileContent = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = e => reject(e);
+          reader.readAsText(file, 'utf-8');
+        });
+        window.uploadedSqlText = fileContent;
+      } catch (err) {
+        showUploadMessage('No se pudo leer el archivo SQL. Intenta nuevamente.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/analysis/database/analyze-sql', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showUploadMessage(data.error || 'Error al analizar el archivo.');
+          return;
+        }
+        displayAnalysis(data);
+      } catch (error) {
+        console.error('Error subiendo archivo:', error);
+        showUploadMessage('No se pudo procesar el archivo. Intenta nuevamente.');
+      }
+    }
+
+    initDatabaseAnalysis();
+  </script>
+</body>
+</html>

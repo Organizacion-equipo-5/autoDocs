@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#001f2b",
+                        "tertiary-container": "#ffdbb7",
+                        "surface-tint": "#38bdf8",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#07006c",
+                        "secondary": "#818cf8",
+                        "primary": "#38bdf8",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary-container": "#613b00",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-variant": "#cbd5e1",
+                        "secondary-container": "#e0e7ff",
+                        "on-surface-variant": "#334155",
+                        "primary-fixed": "#bae6fd",
+                        "surface-container-highest": "#e2e8f0",
+                        "surface-dim": "#cbd5e1",
+                        "outline-variant": "#94a3b8",
+                        "on-surface": "#0f172a",
+                        "on-secondary-container": "#1e1b4b",
+                        "secondary-fixed": "#e0e7ff",
+                        "tertiary": "#7c5800",
+                        "primary-fixed-dim": "#7dd3fc",
+                        "background": "#f1f5f9",
+                        "primary-container": "#e0f2fe",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "surface-bright": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001e2c",
+                        "inverse-on-surface": "#eef2f5",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7d2fe",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#004c69",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "inverse-primary": "#7dd3fc",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-primary": "#ffffff",
+                        "outline": "#64748b",
+                        "surface-container-low": "#f8fafc",
+                        "surface": "#f1f5f9",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#1e293b"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: #f1f5f9;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: #0f172a;
+        }
+
+        /* Tema oscuro */
+        html.dark body {
+            background: #0f1418;
+            color: #e2e8f0;
+        }
+
+        html.dark .glass {
+            background: rgba(15, 20, 24, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        html.dark .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
+        }
+
+        html.dark .quality-bar {
+            background: #1e293b;
+        }
+
+        /* Mejorar legibilidad de textos en modo oscuro */
+        html.dark .text-on-surface {
+            color: #f1f5f9 !important;
+        }
+
+        html.dark .text-on-surface-variant {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/60 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/70 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/50 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/40 {
+            color: #475569 !important;
+        }
+
+        html.dark .text-primary {
+            color: #38bdf8 !important;
+        }
+
+        html.dark .text-primary\/80 {
+            color: #7dd3fc !important;
+        }
+
+        html.dark .text-secondary {
+            color: #818cf8 !important;
+        }
+
+        html.dark .border-outline-variant\/20 {
+            border-color: rgba(148, 163, 184, 0.2) !important;
+        }
+
+        html.dark .border-outline-variant\/30 {
+            border-color: rgba(148, 163, 184, 0.3) !important;
+        }
+
+        html.dark .border-primary\/30 {
+            border-color: rgba(56, 189, 248, 0.3) !important;
+        }
+
+        html.dark .border-primary\/40 {
+            border-color: rgba(56, 189, 248, 0.4) !important;
+        }
+
+        html.dark .bg-primary\/15 {
+            background: rgba(56, 189, 248, 0.15) !important;
+        }
+
+        html.dark .bg-primary\/5 {
+            background: rgba(56, 189, 248, 0.05) !important;
+        }
+
+        html.dark .bg-surface-container\/50 {
+            background: rgba(30, 41, 59, 0.5) !important;
+        }
+
+        html.dark .bg-gray-100 {
+            background: #1e293b !important;
+        }
+
+        html.dark .text-gray-600 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        html.dark .border-green-200 {
+            border-color: #166534 !important;
+        }
+
+        html.dark .text-green-700 {
+            color: #4ade80 !important;
+        }
+
+        html.dark .bg-green-100 {
+            background: #14532d !important;
+        }
+
+        html.dark .border-yellow-200 {
+            border-color: #854d0e !important;
+        }
+
+        html.dark .text-yellow-700 {
+            color: #fbbf24 !important;
+        }
+
+        html.dark .bg-yellow-100 {
+            background: #713f12 !important;
+        }
+
+        html.dark .border-red-200 {
+            border-color: #991b1b !important;
+        }
+
+        html.dark .text-red-700 {
+            color: #f87171 !important;
+        }
+
+        html.dark .bg-red-100 {
+            background: #7f1d1d !important;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transform: translate3d(0, 0, 0);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out;
+            will-change: transform, opacity;
+        }
+
+        .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+        }
+
+        .glow-cyan {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .glow-violet {
+            text-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
+        }
+
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(20px) translate3d(0,0,0);
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in, .animate-float, .glass-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+        }
+
+        .progress-ring { transform: rotate(-90deg); }
+
+        .tilt-card {
+            perspective: 1000px;
+        }
+
+        .quality-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+        }
+        .quality-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #10b981, #38bdf8);
+            transition: width 1s ease;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-anim { animation: fadeDown 0.2s ease; }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    <canvas id="particle-canvas"></canvas>
+    <div class="flex min-h-screen w-full relative z-10">
+        <!-- Sidebar -->
+        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
+            <div class="mb-12">
+                <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                </div>
+            </div>
+            <nav class="flex-1 flex flex-col gap-8">
+                <!-- Dashboard -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
+                    <span class="material-symbols-outlined text-primary text-2xl group-hover:glow-cyan">dashboard</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Dashboard
+                    </span>
+                </a>
+                <!-- Proyectos -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Proyectos
+                    </span>
+                </a>
+                <!-- Análisis de Base de Datos -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/database-analysis">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">storage</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Análisis BD
+                    </span>
+                </a>
+                <!-- Nuevo proyecto -->
+                <button class="group relative flex items-center justify-center hover:scale-110 transition-transform bg-transparent border-none cursor-pointer" onclick="openUploadModal()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">upload</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Nuevo proyecto
+                    </span>
+                </button>
+                <!-- Configuración -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="#">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">settings</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Configuración
+                    </span>
+                </a>
+                <!-- Cerrar sesión -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Cerrar sesión
+                    </span>
+                </a>
+            </nav>
+            <div class="mt-auto">
+                <a href="/perfil" class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative inline-flex">
+                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
+                    </span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
+                <div>
+                    <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="greeting">Bienvenido de vuelta</p>
+                </div>
+                <div class="flex gap-4">
+                    <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                    <button onclick="openUploadModal()" class="px-6 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all active:scale-95 hover:bg-primary/5">
+                        <span class="material-symbols-outlined text-xl">upload</span>
+                        Nuevo Proyecto
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats and Quick Panel -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                <!-- Left: Stats Cards -->
+                <div class="xl:col-span-4 flex flex-col gap-8">
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.2s;">
+                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Proyectos</span>
+                                <span class="material-symbols-outlined text-primary">description</span>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-6xl font-bold glow-cyan tracking-tighter text-on-surface" id="stat-projects">0</div>
+                                <div class="text-on-surface-variant text-xs font-bold mb-2">Totales creados</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.3s;">
+                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Completados</span>
+                                <span class="material-symbols-outlined text-green-500">check_circle</span>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-6xl font-bold glow-cyan tracking-tighter text-on-surface" id="stat-completed">0</div>
+                                <div class="text-green-500 text-xs font-bold mb-2 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">trending_up</span> <span id="stat-completed-percent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.4s;">
+                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Funciones</span>
+                                <span class="material-symbols-outlined text-secondary">functions</span>
+                            </div>
+                            <div class="text-5xl font-bold mb-4 text-on-surface" id="stat-functions">0</div>
+                            <div class="text-xs text-on-surface-variant/50">Detectadas en total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Quick Stats & Progress -->
+                <div class="xl:col-span-8 flex flex-col gap-10">
+                    <div class="tilt-card stagger-in" style="animation-delay: 0.5s;">
+                        <div class="glass rounded-3xl overflow-hidden glass-hover flex flex-col lg:flex-row items-center gap-8 p-8 card-interaction">
+                            <div class="relative w-24 h-24">
+                                <svg class="progress-ring w-24 h-24">
+                                    <circle class="text-surface-variant/30 stroke-current" cx="48" cy="48" fill="transparent" r="40" stroke-width="8"></circle>
+                                    <circle id="progress-circle" class="text-primary stroke-current" cx="48" cy="48" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke-width="8" style="filter: drop-shadow(0 0 8px rgba(56,189,248,0.6))"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center font-bold text-xl text-on-surface" id="progress-percent">0%</div>
+                            </div>
+                            <div>
+                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold block mb-1">Tasa de completitud</span>
+                                <div class="text-2xl font-semibold text-on-surface" id="progress-label">Sin proyectos</div>
+                                <div class="text-[10px] text-on-surface-variant/40 mt-1">Proyectos finalizados sobre el total</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-in" style="animation-delay: 0.6s;">
+                        <div class="glass p-6 rounded-2xl flex items-center gap-6 border-l-4 border-secondary hover:border-l-8 transition-all glass-hover group">
+                            <div class="text-4xl font-bold glow-violet group-hover:scale-110 transition-transform text-on-surface" id="stat-endpoints">0</div>
+                            <div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Endpoints</div>
+                                <div class="text-secondary text-sm">API documentadas</div>
+                            </div>
+                        </div>
+                        <div class="glass p-6 rounded-2xl flex items-center gap-6 border-l-4 border-primary hover:border-l-8 transition-all glass-hover group">
+                            <div class="text-4xl font-bold glow-cyan group-hover:scale-110 transition-transform text-on-surface" id="stat-active-projects">0</div>
+                            <div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Activos</div>
+                                <div class="text-primary text-sm">En análisis o pendientes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Projects (Cards Grid) -->
+            <section class="stagger-in mt-4" style="animation-delay: 0.7s;">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-bold tracking-tight text-on-surface">Proyectos Recientes</h2>
+                    <a class="text-primary text-xs uppercase tracking-widest font-bold hover:underline underline-offset-8 transition-all" href="/projects">Explorar Todo</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="projects-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Upload Modal — respeta tema claro/oscuro -->
+    <style>
+        /* Variables del modal según tema */
+        #uploadModal        { background: var(--modal-overlay-bg); backdrop-filter: blur(18px); }
+        #uploadModalInner   {
+            background:    var(--modal-bg);
+            backdrop-filter: blur(24px);
+            border:        1px solid var(--modal-border);
+            box-shadow:    var(--modal-shadow);
+            border-radius: 1.75rem;
+            padding:       2rem;
+        }
+        .modal-input {
+            width: 100%;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            background:  var(--modal-input-bg);
+            border:      1px solid var(--modal-input-border);
+            color:       var(--modal-text);
+            transition:  border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            font-family: 'Geist', sans-serif;
+        }
+        .modal-input::placeholder { color: var(--modal-placeholder); }
+        .modal-input:focus {
+            border-color: var(--modal-input-focus);
+            box-shadow:   0 0 0 3px var(--modal-input-ring);
+        }
+        #upload-zone {
+            border:     2px dashed var(--modal-zone-border);
+            background: var(--modal-zone-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        #upload-zone:hover {
+            border-color: var(--modal-zone-hover-border);
+            background:   var(--modal-zone-hover-bg);
+        }
+        .modal-divider { background: var(--modal-divider); }
+        .modal-label   { color: var(--modal-label); }
+        .modal-subtitle { color: var(--modal-subtitle); }
+        .modal-close-btn { color: var(--modal-close); background: transparent; border: none; cursor: pointer; transition: color 0.2s; }
+        .modal-close-btn:hover { color: var(--modal-primary); }
+        .modal-icon-box {
+            background: var(--modal-icon-bg);
+            border: 1px solid var(--modal-icon-border);
+            border-radius: 0.75rem;
+            width: 2.25rem; height: 2.25rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        #file-name-badge {
+            color: var(--modal-primary);
+            background: var(--modal-file-bg);
+            border: 1px solid var(--modal-file-border);
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Tema oscuro (html.dark) */
+        html.dark {
+            --modal-overlay-bg:    rgba(15,20,24,0.78);
+            --modal-bg:            rgba(27,32,36,0.82);
+            --modal-border:        rgba(56,189,248,0.18);
+            --modal-shadow:        0 0 60px rgba(56,189,248,0.15), 0 8px 40px rgba(0,0,0,0.55);
+            --modal-text:          #dee3e8;
+            --modal-placeholder:   rgba(189,200,209,0.35);
+            --modal-label:         rgba(148,163,184,0.85);
+            --modal-subtitle:      rgba(148,163,184,0.6);
+            --modal-close:         rgba(148,163,184,0.55);
+            --modal-primary:       #38bdf8;
+            --modal-input-bg:      #1b2024;
+            --modal-input-border:  rgba(62,72,79,0.9);
+            --modal-input-focus:   rgba(56,189,248,0.65);
+            --modal-input-ring:    rgba(56,189,248,0.14);
+            --modal-zone-border:   rgba(62,72,79,0.9);
+            --modal-zone-bg:       rgba(27,32,36,0.5);
+            --modal-zone-hover-border: rgba(56,189,248,0.65);
+            --modal-zone-hover-bg:     rgba(56,189,248,0.05);
+            --modal-divider:       rgba(62,72,79,0.7);
+            --modal-icon-bg:       rgba(56,189,248,0.1);
+            --modal-icon-border:   rgba(56,189,248,0.28);
+            --modal-file-bg:       rgba(56,189,248,0.08);
+            --modal-file-border:   rgba(56,189,248,0.22);
+            --modal-title-from:    #f1f5f9;
+            --modal-title-to:      #38bdf8;
+            --modal-btn-color:     #0f1418;
+        }
+        /* Tema claro (html.light o default) */
+        html:not(.dark) {
+            --modal-overlay-bg:    rgba(241,245,249,0.82);
+            --modal-bg:            rgba(255,255,255,0.88);
+            --modal-border:        rgba(56,189,248,0.3);
+            --modal-shadow:        0 0 60px rgba(56,189,248,0.12), 0 8px 32px rgba(0,0,0,0.1);
+            --modal-text:          #0f172a;
+            --modal-placeholder:   rgba(100,116,139,0.45);
+            --modal-label:         rgba(51,65,85,0.8);
+            --modal-subtitle:      rgba(51,65,85,0.55);
+            --modal-close:         rgba(100,116,139,0.6);
+            --modal-primary:       #0ea5e9;
+            --modal-input-bg:      #f8fafc;
+            --modal-input-border:  rgba(148,163,184,0.6);
+            --modal-input-focus:   rgba(14,165,233,0.6);
+            --modal-input-ring:    rgba(14,165,233,0.14);
+            --modal-zone-border:   rgba(148,163,184,0.55);
+            --modal-zone-bg:       rgba(248,250,252,0.7);
+            --modal-zone-hover-border: rgba(14,165,233,0.6);
+            --modal-zone-hover-bg:     rgba(14,165,233,0.04);
+            --modal-divider:       rgba(148,163,184,0.4);
+            --modal-icon-bg:       rgba(14,165,233,0.1);
+            --modal-icon-border:   rgba(14,165,233,0.3);
+            --modal-file-bg:       rgba(14,165,233,0.07);
+            --modal-file-border:   rgba(14,165,233,0.25);
+            --modal-title-from:    #0f172a;
+            --modal-title-to:      #0ea5e9;
+            --modal-btn-color:     #ffffff;
+        }
+    </style>
+
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Sube un archivo ZIP o TAR.GZ con tu proyecto</p>
+
+            <!-- Nombre -->
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
+                <input type="text" id="proj-name" class="modal-input w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="Mi Proyecto Flask" />
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-45">(opcional)</span></label>
+                <input type="text" id="proj-desc" class="modal-input w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="Breve descripción del proyecto" />
+            </div>
+
+            <!-- Zona de subida -->
+            <div id="upload-zone" class="mb-4 border-2 border-dashed border-outline-variant/30 bg-surface-container/50 rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
+                onclick="document.getElementById('file-input').click()"
+                ondragover="event.preventDefault();this.style.borderColor='var(--color-primary)';this.style.background='var(--color-primary/5)'"
+                ondragleave="this.style.borderColor='';this.style.background=''"
+                ondrop="event.preventDefault();onFileSelect({target:{files:event.dataTransfer.files}})">
+                <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
+                <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
+                <p class="text-sm text-on-surface-variant/60">
+                    <strong class="text-primary">Haz clic para seleccionar</strong> o arrastra aquí
+                </p>
+                <p class="text-xs mt-1 text-on-surface-variant/40">ZIP, TAR.GZ, .py, .js — máx. 50 MB</p>
+            </div>
+            <div id="file-name" class="hidden mb-4 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
+
+            <!-- Separador -->
+            <div class="flex items-center gap-3 my-4">
+                <div class="flex-1 h-px bg-outline-variant/20"></div>
+                <span class="text-xs uppercase tracking-widest text-on-surface-variant/40">o</span>
+                <div class="flex-1 h-px bg-outline-variant/20"></div>
+            </div>
+
+            <!-- GitHub URL -->
+            <div class="mb-6">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
+                    <span class="material-symbols-outlined text-[14px] align-middle mr-1 text-primary">code</span>
+                    Ingresa URL de GitHub
+                </label>
+                <input type="url" id="proj-github" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="https://github.com/usuario/repositorio" />
+            </div>
+
+            <!-- Botón -->
+            <button onclick="createProject()" id="modal-submit-btn"
+                class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
+                Crear y analizar
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="loadingModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Analizando proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Procesando código y generando documentación</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-center text-on-surface-variant/60 text-sm">Esto puede tomar unos segundos...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Limit Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="limitModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+            <button onclick="closeLimitModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Límite alcanzado</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Has alcanzado el límite de proyectos para tu plan actual.</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-error text-3xl">block</span>
+                </div>
+                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm">Actualiza tu plan para crear más proyectos.</p>
+            </div>
+            <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95">
+                Ver planes
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== LÓGICA ORIGINAL DEL DASHBOARD ====================
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/';
+
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            document.getElementById('sidebar-user-name').textContent = user.name;
+            document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
+            document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
+            document.getElementById('greeting').textContent = `Bienvenido, ${user.name}`;
+        }
+
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
+
+        async function loadProjects() {
+            try {
+                const res = await fetch('/api/projects/', { headers: authHeaders() });
+                if (!res.ok) return;
+                const projects = await res.json();
+                renderStats(projects);
+                renderProjects(projects);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderStats(projects) {
+            console.log('Rendering stats for projects:', projects);
+
+            const statProjects = document.getElementById('stat-projects');
+            const statCompleted = document.getElementById('stat-completed');
+            const statFunctions = document.getElementById('stat-functions');
+            const statEndpoints = document.getElementById('stat-endpoints');
+            const statActiveProjects = document.getElementById('stat-active-projects');
+            const progressPercent = document.getElementById('progress-percent');
+            const statCompletedPercent = document.getElementById('stat-completed-percent');
+            const progressCircle = document.getElementById('progress-circle');
+            const progressLabel = document.getElementById('progress-label');
+
+            if (statProjects) statProjects.textContent = projects.length;
+            const completed = projects.filter(p => p.status === 'completed').length;
+            if (statCompleted) statCompleted.textContent = completed;
+            const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
+            if (statFunctions) statFunctions.textContent = totalFuncs;
+            const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
+            if (statEndpoints) statEndpoints.textContent = totalEp;
+            const active = projects.filter(p => p.status !== 'completed').length;
+            if (statActiveProjects) statActiveProjects.textContent = active;
+
+            const percent = projects.length ? Math.round((completed / projects.length) * 100) : 0;
+            if (progressPercent) progressPercent.textContent = percent + '%';
+            if (statCompletedPercent) statCompletedPercent.textContent = percent + '%';
+            if (progressCircle) {
+                const circumference = 251.2;
+                const offset = circumference - (percent / 100) * circumference;
+                progressCircle.setAttribute('stroke-dashoffset', offset);
+            }
+            if (progressLabel) {
+                progressLabel.textContent =
+                    projects.length === 0 ? 'Sin proyectos' : completed === projects.length ? 'Todo completado' : `${completed} de ${projects.length} completados`;
+            }
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('projects-grid');
+            if (!projects.length) {
+                grid.innerHTML = `<div class="col-span-full glass p-12 rounded-3xl text-center text-on-surface-variant/50">
+                    <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
+                    <p class="text-lg font-semibold">Sin proyectos aún</p>
+                    <p class="text-sm">Sube tu primer proyecto para comenzar a generar documentación automática.</p>
+                </div>`;
+                return;
+            }
+            const statusMap = {
+                completed: { class: 'bg-green-100 text-green-700 border-green-200', label: 'Completado' },
+                analyzing: { class: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: 'Analizando' },
+                pending: { class: 'bg-gray-100 text-gray-600 border-gray-200', label: 'Pendiente' },
+                error: { class: 'bg-red-100 text-red-700 border-red-200', label: 'Error' }
+            };
+            grid.innerHTML = projects.map(p => {
+                const st = statusMap[p.status] || statusMap.pending;
+                const lang = p.language || 'Desconocido';
+                const q = p.stats?.quality_score || 0;
+                const color = q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444';
+                return `<div class="tilt-card">
+                    <div class="glass rounded-2xl p-6 glass-hover card-interaction cursor-pointer transition-all hover:shadow-md h-full" onclick="window.location.href='/analysis/${p._id}'">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                                    <span class="material-symbols-outlined text-xl">${p.status === 'completed' ? 'check_circle' : p.status === 'analyzing' ? 'sync' : 'pending'}</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-on-surface">${p.name}</h3>
+                                    <p class="text-xs text-on-surface-variant/60 font-mono">${lang}</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 ${st.class} text-[10px] font-bold uppercase rounded-full border">${st.label}</span>
+                        </div>
+                        ${p.status === 'completed' ? `
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs text-on-surface-variant">Calidad:</span>
+                            <span class="text-xs font-bold" style="color:${color}">${q}/100</span>
+                            <div class="flex-1 h-2 bg-surface-variant/30 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" style="width:${q}%;background:${color}"></div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="flex justify-between text-xs text-on-surface-variant/70 border-t border-outline-variant/10 pt-4 mt-4">
+                            <span>Archivos <strong class="text-on-surface">${p.stats?.files || 0}</strong></span>
+                            <span>Funciones <strong class="text-on-surface">${p.stats?.functions || 0}</strong></span>
+                            <span>Endpoints <strong class="text-on-surface">${p.stats?.endpoints || 0}</strong></span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            // Activar tilt sobre las nuevas tarjetas
+            initTilt();
+        }
+
+        function openUploadModal() { document.getElementById('uploadModal').classList.add('flex'); document.getElementById('uploadModal').classList.remove('hidden'); }
+        function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); document.getElementById('uploadModal').classList.remove('flex'); }
+        document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
+
+        let selectedFile = null;
+        function onFileSelect(e) {
+            selectedFile = e.target.files[0];
+            const el = document.getElementById('file-name');
+            el.textContent = '📦 ' + selectedFile.name;
+            el.classList.remove('hidden');
+        }
+
+        async function createProject() {
+            const name = document.getElementById('proj-name').value || 'Nuevo Proyecto';
+            const desc = document.getElementById('proj-desc').value;
+            const github = document.getElementById('proj-github').value;
+            const fd = new FormData();
+            fd.append('name', name);
+            fd.append('description', desc);
+            fd.append('github_url', github);
+            if (selectedFile) fd.append('file', selectedFile);
+            try {
+                const res = await fetch('/api/projects/', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: fd
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    closeUploadModal();
+                    const modal = document.getElementById('loadingModal');
+                    modal.classList.add('flex');
+                    modal.classList.remove('hidden');
+                    await fetch(`/api/analysis/${data.id}/start`, { method: 'POST', headers: authHeaders() });
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    loadProjects();
+                } else {
+                    // Verificar si es error por límite de proyectos
+                    if (data.error && data.error.includes('límite') && data.error.includes('plan')) {
+                        showLimitModal(data.error);
+                    } else {
+                        alert(data.error || 'Error al crear proyecto');
+                    }
+                }
+            } catch(e) { alert('Error al crear proyecto'); }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        function showLimitModal(message) {
+            const modal = document.getElementById('limitModal');
+            document.getElementById('limitMessage').textContent = message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLimitModal() {
+            const modal = document.getElementById('limitModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // ==================== PARTÍCULAS Y TILT SUAVE ====================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+        const particleCount = 80;
+        const repulsionRadius = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(129, 140, 248, 0.2)';
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < repulsionRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (repulsionRadius - distance) / repulsionRadius;
+                        this.x -= Math.cos(angle) * force * 2;
+                        this.y -= Math.sin(angle) * force * 2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    const d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - d/120)})`;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        function initTilt() {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                // Evitar múltiples listeners
+                if (card.hasTilt) return;
+                card.hasTilt = true;
+                card.addEventListener('mousemove', (e) => {
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 40;
+                    const rotateY = (centerX - x) / 40;
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animate();
+            initTilt();
+            loadProjects();
+            setInterval(loadProjects, 8000);
+        });
+    </script>
+    <script src="/static/theme.js"></script>
+    <script>
+        // Actualiza el gradiente del título del modal según el tema activo
+        function updateModalTitleGradient() {
+            const el = document.getElementById('modal-title-grad');
+            if (!el) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            const from = isDark ? '#f1f5f9' : '#0f172a';
+            const to   = isDark ? '#38bdf8' : '#0ea5e9';
+            el.style.background = `linear-gradient(135deg, ${from} 0%, ${to} 100%)`;
+            el.style.webkitBackgroundClip = 'text';
+            el.style.backgroundClip = 'text';
+            el.style.webkitTextFillColor = 'transparent';
+        }
+        // Aplicar al cargar y al cambiar tema
+        updateModalTitleGradient();
+        document.getElementById('themeButton')?.addEventListener('click', () => {
+            setTimeout(updateModalTitleGradient, 50);
+        });
+    </script>
+</body>
+</html>

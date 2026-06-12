@@ -1,0 +1,11 @@
+{
+  "name": "autodocs-ai-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend helper packages for AutoDocs AI export conversion.",
+  "dependencies": {
+    "remark": "^14.0.2",
+    "remark-gfm": "^3.0.1",
+    "remark-html": "^15.0.1"
+  }
+}
