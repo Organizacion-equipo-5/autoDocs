@@ -949,20 +949,20 @@ python app.py  # o npm run dev
                 out += f"- ... y {len(unstructured) - 10} más\n"
 
         # 9.2 Esquema de Data Warehouse inferido
-        out += "\n### 9.2 Esquema de Data Warehouse Inferido\n\n"
-        star_schema = self._generate_star_schema()
-        snowflake_schema = self._generate_snowflake_schema()
+        # out += "\n### 9.2 Esquema de Data Warehouse Inferido\n\n"
+        # star_schema = self._generate_star_schema()
+        # snowflake_schema = self._generate_snowflake_schema()
 
-        if star_schema:
-            out += "**Diagrama Estrella (Star Schema):**\n\n"
-            out += star_schema
-            out += "\nEl esquema estrella es adecuado para consultas analíticas rápidas, con una tabla de hechos central conectada a tablas de dimensión.\n\n"
-        elif snowflake_schema:
-            out += "**Diagrama Copo de Nieve (Snowflake Schema):**\n\n"
-            out += snowflake_schema
-            out += "\nEl esquema copo de nieve normaliza las dimensiones para reducir redundancia, a costa de consultas más complejas.\n\n"
-        else:
-            out += "No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.\n\n"
+        # if star_schema:
+        #     out += "**Diagrama Estrella (Star Schema):**\n\n"
+        #     out += star_schema
+        #     out += "\nEl esquema estrella es adecuado para consultas analíticas rápidas, con una tabla de hechos central conectada a tablas de dimensión.\n\n"
+        # elif snowflake_schema:
+        #     out += "**Diagrama Copo de Nieve (Snowflake Schema):**\n\n"
+        #     out += snowflake_schema
+        #     out += "\nEl esquema copo de nieve normaliza las dimensiones para reducir redundancia, a costa de consultas más complejas.\n\n"
+        # else:
+        #     out += "No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.\n\n"
 
         # 9.3 Reporte de limpieza de datos
         out += "### 9.3 Reporte de Calidad de Datos\n\n"
@@ -1016,9 +1016,10 @@ python app.py  # o npm run dev
             out += "\n**Clustering por Complejidad:**\n\n"
             if complexity_clusters:
                 for cluster in complexity_clusters:
-                    out += f"- **{cluster.get('cluster', 'N/A')}**: {cluster.get('count', 0)} funciones "
+                    out += f"- **{cluster.get('cluster', 'N/A')}**: {cluster.get('count', 0)} funciones"
                     out += f"(complejidad promedio: {cluster.get('avg_complexity', 0)})\n"
-            else:
+                    
+            else: 
                 out += "- No se pudo realizar el clustering por complejidad.\n"
 
             out += "\n**Clustering por Funcionalidad:**\n\n"
