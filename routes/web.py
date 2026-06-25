@@ -27,6 +27,10 @@ def database_analysis():
 def projects():
     return render_template('projects.html')
 
+@web_bp.route('/analytics')
+def analytics():
+    return render_template('analytics.html')
+
 @web_bp.route('/admin')
 def admin():
     return render_template('admin_dashboard.html')

@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import requests
 from typing import Optional, List
 
@@ -325,6 +326,86 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
 
         print("[AI] Documentación mejorada exitosamente con Gemini")
         return analysis_results
+
+    def enhance_database_analysis(self, raw_sql: str, metadata: dict) -> str:
+        """Genera un resumen de análisis de base de datos usando Groq."""
+        if not self.is_available():
+            return "Resumen de IA no disponible - configura GROQ_API_KEY en el archivo .env"
+
+        prompt = f"""Analiza este esquema SQL y genera un informe técnico en español que incluya:
+- Un resumen del propósito del esquema.
+- Identificación de tipos de fuentes de datos: estructurados, semi-estructurados y no estructurados.
+- Si el esquema sugiere un modelo de Data Warehouse, indica si es tipo estrella o copo de nieve.
+- Recomendaciones breves de modelado de datos y minería de datos.
+
+Esquema SQL:
+{raw_sql}
+
+Metadatos:
+Tablas: {metadata['tables']}
+Datos estructurados: {metadata['data_sources']['structured']}
+Datos semi-estructurados: {metadata['data_sources']['semi_structured']}
+Datos no estructurados: {metadata['data_sources']['unstructured']}
+Esquema de Data Warehouse sugerido: {metadata['warehouse_schema']['type']}
+Descripción de esquema: {metadata['warehouse_schema']['description']}
+
+Responde en formato de párrafo corto y técnico, usando lenguaje claro y profesional. No devuelvas JSON."""
+
+        result = self._call_ai(
+            "Eres un experto en análisis de bases de datos y minería de datos. Genera un informe técnico y claro para un equipo de datos.",
+            prompt,
+            max_tokens=450
+        )
+        return result or "Resumen de IA no disponible - no se recibió respuesta de Groq."
+
+    def enhance_database_report_sections(self, sections: dict) -> dict:
+        """Mejora la redacción de las secciones del informe de base de datos usando Groq."""
+        if not self.is_available():
+            return {}
+
+        prompt = f"""Mejora la redacción de este informe de análisis SQL en español.
+Mantén el significado técnico exacto, pero redacta de forma clara, profesional y coherente.
+No inventes tablas, columnas ni relaciones que no estén en los datos de entrada.
+
+Datos de entrada:
+Resumen: {sections.get('summary', '')}
+Tablas detectadas: {sections.get('tables', [])}
+Preparación de datos: {sections.get('data_preparation', [])}
+Minería de datos: {sections.get('data_mining_insights', [])}
+Recomendaciones: {sections.get('suggestions', [])}
+Descripción de Data Warehouse: {sections.get('warehouse_description', '')}
+
+Responde SOLO con JSON válido con esta estructura:
+{{
+  "summary": "texto del resumen mejorado",
+  "data_preparation": ["item 1", "item 2"],
+  "data_mining_insights": ["item 1", "item 2"],
+  "suggestions": ["item 1", "item 2"],
+  "warehouse_description": "texto mejorado"
+}}"""
+
+        result = self._call_ai(
+            "Eres un experto en bases de datos y redacción técnica. "
+            "Devuelves únicamente JSON válido, sin markdown ni texto adicional.",
+            prompt,
+            max_tokens=900
+        )
+        if not result:
+            return {}
+
+        cleaned = result.strip()
+        if cleaned.startswith('```'):
+            cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned)
+            cleaned = re.sub(r'\s*```$', '', cleaned)
+
+        try:
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, dict):
+                return parsed
+        except json.JSONDecodeError as e:
+            print(f"[AI DB Sections] JSON inválido: {e}")
+
+        return {}
 
     def mine_code_patterns(self, analysis_results: dict) -> dict:
         """

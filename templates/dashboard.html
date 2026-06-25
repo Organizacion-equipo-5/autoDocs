@@ -304,6 +304,7 @@
         }
         .modal-anim { animation: fadeDown 0.2s ease; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
     <canvas id="particle-canvas"></canvas>
@@ -328,6 +329,13 @@
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
                         Proyectos
+                    </span>
+                </a>
+                <!-- Analytics -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/analytics">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">analytics</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        Analytics
                     </span>
                 </a>
                 <!-- Análisis de Base de Datos -->
@@ -751,6 +759,174 @@
             if (progressLabel) {
                 progressLabel.textContent =
                     projects.length === 0 ? 'Sin proyectos' : completed === projects.length ? 'Todo completado' : `${completed} de ${projects.length} completados`;
+            }
+
+        }
+
+        function _unused_renderCharts_moved_to_analytics(projects) {
+            if (typeof Chart === 'undefined') return;
+
+            const isDark = document.documentElement.classList.contains('dark') ||
+                           document.body.getAttribute('data-theme') === 'dark' ||
+                           !document.documentElement.classList.contains('light');
+            const textColor  = isDark ? '#dee3e8' : '#1e293b';
+            const gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+            const palette    = ['#8ed5ff','#c0c1ff','#10b981','#ffc176','#ff8fab','#a8dadc','#cdb4db'];
+
+            Chart.defaults.color      = textColor;
+            Chart.defaults.borderColor = gridColor;
+            Chart.defaults.font.family = "'Geist', sans-serif";
+
+            // ── 1. Proyectos por mes (line) ──────────────────────────
+            const monthMap = {};
+            projects.forEach(p => {
+                const ca = p.created_at || '';
+                if (ca.length >= 7) {
+                    const key = ca.substring(0, 7);
+                    monthMap[key] = (monthMap[key] || 0) + 1;
+                }
+            });
+            const sortedMonths = Object.keys(monthMap).sort().slice(-12);
+            const monthLabels  = sortedMonths.map(m => {
+                const [y, mo] = m.split('-');
+                return new Date(+y, +mo - 1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
+            });
+            const monthValues = sortedMonths.map(m => monthMap[m]);
+
+            const ctxM = document.getElementById('user-chart-monthly')?.getContext('2d');
+            if (ctxM) {
+                if (window._uc_monthly) window._uc_monthly.destroy();
+                window._uc_monthly = new Chart(ctxM, {
+                    type: 'line',
+                    data: {
+                        labels: monthLabels.length ? monthLabels : ['Sin datos'],
+                        datasets: [{
+                            label: 'Proyectos',
+                            data: monthValues.length ? monthValues : [0],
+                            borderColor: '#8ed5ff',
+                            backgroundColor: 'rgba(142,213,255,0.12)',
+                            borderWidth: 2.5,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#8ed5ff',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1, precision: 0 }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // ── 2. Lenguajes (doughnut) ──────────────────────────────
+            const langMap = {};
+            projects.forEach(p => {
+                const lang = (p.language && p.language !== 'unknown') ? p.language : 'Otro';
+                langMap[lang] = (langMap[lang] || 0) + 1;
+            });
+            const langLabels = Object.keys(langMap);
+            const langValues = Object.values(langMap);
+
+            const ctxL = document.getElementById('user-chart-langs')?.getContext('2d');
+            if (ctxL) {
+                if (window._uc_langs) window._uc_langs.destroy();
+                window._uc_langs = new Chart(ctxL, {
+                    type: 'doughnut',
+                    data: {
+                        labels: langLabels.length ? langLabels : ['Sin datos'],
+                        datasets: [{
+                            data: langValues.length ? langValues : [1],
+                            backgroundColor: palette,
+                            borderWidth: 2,
+                            borderColor: isDark ? '#1b2024' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: textColor, padding: 10, font: { size: 11 } } },
+                            tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                        },
+                        cutout: '58%'
+                    }
+                });
+            }
+
+            // ── 3. Calidad por proyecto (horizontal bar) ─────────────
+            const completedProjects = projects.filter(p => p.status === 'completed' && p.stats?.quality_score);
+            const qLabels = completedProjects.map(p => p.name.length > 18 ? p.name.substring(0,16)+'…' : p.name);
+            const qValues = completedProjects.map(p => p.stats.quality_score || 0);
+            const qColors = qValues.map(v => v >= 70 ? '#10b981' : v >= 40 ? '#ffc176' : '#ff8fab');
+
+            const ctxQ = document.getElementById('user-chart-quality')?.getContext('2d');
+            if (ctxQ) {
+                if (window._uc_quality) window._uc_quality.destroy();
+                const dynHeight = Math.max(180, qLabels.length * 36);
+                ctxQ.canvas.parentElement.style.height = dynHeight + 'px';
+                window._uc_quality = new Chart(ctxQ, {
+                    type: 'bar',
+                    data: {
+                        labels: qLabels.length ? qLabels : ['Sin proyectos completados'],
+                        datasets: [{
+                            label: 'Calidad',
+                            data: qValues.length ? qValues : [0],
+                            backgroundColor: qColors.length ? qColors : ['#8ed5ff'],
+                            borderRadius: 5,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => ` Calidad: ${ctx.parsed.x}/100` } }
+                        },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor }, min: 0, max: 100 },
+                            y: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+
+            // ── 4. Estado de proyectos (pie) ─────────────────────────
+            const statusCounts = { Completado: 0, Pendiente: 0, Analizando: 0, Error: 0 };
+            projects.forEach(p => {
+                if (p.status === 'completed')  statusCounts['Completado']++;
+                else if (p.status === 'pending')   statusCounts['Pendiente']++;
+                else if (p.status === 'analyzing') statusCounts['Analizando']++;
+                else if (p.status === 'error')     statusCounts['Error']++;
+            });
+            const stLabels = Object.keys(statusCounts).filter(k => statusCounts[k] > 0);
+            const stValues = stLabels.map(k => statusCounts[k]);
+            const stColors = { Completado: '#10b981', Pendiente: '#8ed5ff', Analizando: '#ffc176', Error: '#ff8fab' };
+
+            const ctxS = document.getElementById('user-chart-status')?.getContext('2d');
+            if (ctxS) {
+                if (window._uc_status) window._uc_status.destroy();
+                window._uc_status = new Chart(ctxS, {
+                    type: 'pie',
+                    data: {
+                        labels: stLabels.length ? stLabels : ['Sin datos'],
+                        datasets: [{
+                            data: stValues.length ? stValues : [1],
+                            backgroundColor: stLabels.map(k => stColors[k] || '#8ed5ff'),
+                            borderWidth: 2,
+                            borderColor: isDark ? '#1b2024' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: textColor, padding: 8, font: { size: 11 } } }
+                        }
+                    }
+                });
             }
         }
 

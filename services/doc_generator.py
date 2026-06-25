@@ -997,38 +997,172 @@ python app.py  # o npm run dev
 
         # 9.4 Minería de datos aplicada al código
         out += "\n### 9.4 Minería de Datos Aplicada al Código\n\n"
+        out += "_Análisis automático realizado sobre las funciones y clases extraídas del proyecto._\n\n"
 
+        fns_mining  = self.r.get("functions", [])
+        cls_mining  = self.r.get("classes", [])
+
+        # ── A) Funciones de alta complejidad ──────────────────────────────────
+        out += "#### A) Funciones de Alta Complejidad Ciclomática\n\n"
+        high_cx = sorted(
+            [f for f in fns_mining if f.get("complexity", 1) > 5],
+            key=lambda f: f.get("complexity", 1),
+            reverse=True
+        )
+        medium_cx = [f for f in fns_mining if 3 < f.get("complexity", 1) <= 5]
+        low_cx    = [f for f in fns_mining if f.get("complexity", 1) <= 3]
+
+        out += f"| Nivel | Umbral | Cantidad | Descripción |\n"
+        out += f"|---|---|---|---|\n"
+        out += f"| 🔴 Alta | > 5 | {len(high_cx)} | Requieren refactorización urgente |\n"
+        out += f"| 🟡 Media | 4–5 | {len(medium_cx)} | Candidatas a simplificación |\n"
+        out += f"| 🟢 Baja | ≤ 3 | {len(low_cx)} | Complejidad aceptable |\n\n"
+
+        if high_cx:
+            out += "**Funciones de alta complejidad — detalle y recomendaciones:**\n\n"
+            for fn in high_cx[:15]:
+                cx    = fn.get("complexity", 1)
+                name  = fn.get("name", "?")
+                file  = fn.get("file", "?")
+                line  = fn.get("line", "?")
+                async_tag = " `[async]`" if fn.get("is_async") else ""
+                doc_tag   = " `[sin docstring]`" if not fn.get("docstring") else ""
+                out += f"- **`{name}`**{async_tag}{doc_tag}\n"
+                out += f"  - 📁 Archivo: `{file}` — línea {line}\n"
+                out += f"  - 📊 Complejidad ciclomática: **{cx}**\n"
+                if cx > 15:
+                    out += f"  - 💡 Sugerencia: Complejidad crítica ({cx}). Divide esta función en al menos {cx // 5} funciones más pequeñas con responsabilidad única. Cada rama lógica (if/for/while) debería ser su propio método.\n"
+                elif cx > 10:
+                    out += f"  - 💡 Sugerencia: Complejidad alta ({cx}). Extrae las ramas condicionales a funciones auxiliares privadas y considera el patrón de «guardas tempranas» (early return) para reducir el anidamiento.\n"
+                else:
+                    out += f"  - 💡 Sugerencia: Complejidad moderada-alta ({cx}). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.\n"
+                out += "\n"
+        else:
+            out += "> ✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.\n\n"
+
+        # ── B) Funciones sin documentar ────────────────────────────────────────
+        out += "#### B) Funciones Sin Documentación\n\n"
+        undoc = [f for f in fns_mining if not f.get("docstring")]
+        doc   = [f for f in fns_mining if f.get("docstring")]
+        doc_pct = round(len(doc) / max(len(fns_mining), 1) * 100)
+
+        out += f"**{len(undoc)} de {len(fns_mining)} funciones** carecen de docstring ({100 - doc_pct}%).\n\n"
+        if undoc:
+            out += "| Función | Archivo | Línea | Complejidad |\n"
+            out += "|---|---|---|---|\n"
+            for fn in undoc[:20]:
+                out += f"| `{fn.get('name','?')}` | `{fn.get('file','?')}` | {fn.get('line','?')} | {fn.get('complexity',1)} |\n"
+            if len(undoc) > 20:
+                out += f"\n_... y {len(undoc) - 20} funciones más sin documentar._\n"
+            out += "\n💡 **Sugerencia:** Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.\n\n"
+
+        # ── C) Detección de funciones similares (posibles duplicados) ──────────
+        out += "#### C) Detección de Funciones con Nombres Similares (Posibles Duplicados)\n\n"
+        out += "_Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse._\n\n"
+
+        # Agrupar funciones por nombre base (quitar prefijos comunes)
+        from collections import defaultdict
+        import re as _re
+
+        name_groups = defaultdict(list)
+        for fn in fns_mining:
+            raw_name = fn.get("name", "")
+            # Normalizar: quitar prefijos de módulo típicos (get_, set_, create_, update_, delete_, handle_, _)
+            base = _re.sub(
+                r'^(get_|set_|create_|update_|delete_|handle_|fetch_|save_|load_|build_|make_|check_|validate_|process_|send_|render_|init_|setup_|on_|_)+',
+                '', raw_name.lower()
+            )
+            # También agrupar si el nombre termina igual tras quitar prefijo de módulo
+            # por ejemplo user_edit y admin_edit → ambos tienen "edit" como raíz
+            # Tomamos los últimos 2 tokens del nombre separados por _
+            parts = raw_name.lower().split("_")
+            suffix_key = "_".join(parts[-2:]) if len(parts) >= 2 else raw_name.lower()
+            name_groups[suffix_key].append(fn)
+
+        # Filtrar solo grupos con 2+ funciones en archivos distintos, excluyendo nombres genéricos
+        generic_names = {
+            "__init__", "__str__", "__repr__", "__eq__", "__hash__", "index",
+            "get", "set", "run", "main", "test", "setup", "teardown", "helper",
+            "handle", "handler", "create", "update", "delete", "save", "load",
+        }
+        duplicates_found = []
+        for suffix, group in name_groups.items():
+            if suffix in generic_names or len(suffix) <= 2:
+                continue
+            files_in_group = list({fn.get("file", "") for fn in group})
+            if len(files_in_group) >= 2:
+                duplicates_found.append((suffix, group, files_in_group))
+
+        # Ordenar por cantidad de archivos afectados (mayor primero)
+        duplicates_found.sort(key=lambda x: len(x[2]), reverse=True)
+
+        if duplicates_found:
+            out += f"Se detectaron **{len(duplicates_found)} grupos de funciones con nombres similares** repartidas en distintos archivos:\n\n"
+            for suffix, group, files_in_group in duplicates_found[:20]:
+                out += f"**Patrón: `*_{suffix}` / `{suffix}_*`** — aparece en {len(files_in_group)} archivos distintos\n\n"
+                out += "| Función | Archivo | Línea | Complejidad |\n"
+                out += "|---|---|---|---|\n"
+                for fn in group:
+                    out += f"| `{fn.get('name','?')}` | `{fn.get('file','?')}` | {fn.get('line','?')} | {fn.get('complexity',1)} |\n"
+
+                # Generar sugerencia específica con los nombres reales
+                fn_names = [f"`{fn.get('name','?')}`" for fn in group]
+                fn_files = list({fn.get('file','?') for fn in group})
+                if len(fn_names) == 2:
+                    out += f"\n💡 **Sugerencia:** Las funciones {fn_names[0]} y {fn_names[1]} realizan operaciones similares (`{suffix}`) en módulos distintos. "
+                    out += f"Considera crear una función compartida en un módulo utilitario (por ejemplo `utils/{suffix}.py` o `helpers/common.py`) "
+                    out += f"que reciba el contexto como parámetro, y llamarla desde ambos archivos ({', '.join([f'`{f}`' for f in fn_files])}).\n\n"
+                else:
+                    out += f"\n💡 **Sugerencia:** Las {len(fn_names)} funciones {', '.join(fn_names[:4])}{'...' if len(fn_names) > 4 else ''} comparten el patrón `{suffix}` en distintos módulos. "
+                    out += f"Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.\n\n"
+                out += "---\n\n"
+        else:
+            out += "> ✅ No se detectaron funciones con nombres similares en archivos distintos.\n\n"
+
+        # ── D) Clustering por archivo (módulos sobrecargados) ──────────────────
+        out += "#### D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones\n\n"
+        file_fn_count = defaultdict(list)
+        for fn in fns_mining:
+            file_fn_count[fn.get("file", "?")].append(fn)
+
+        sorted_files = sorted(file_fn_count.items(), key=lambda x: len(x[1]), reverse=True)
+        out += "| Archivo | Funciones | Complejidad Promedio | Documentadas | Estado |\n"
+        out += "|---|---|---|---|---|\n"
+        for fname, funcs in sorted_files[:15]:
+            avg_cx   = round(sum(f.get("complexity", 1) for f in funcs) / max(len(funcs), 1), 1)
+            doc_cnt  = sum(1 for f in funcs if f.get("docstring"))
+            doc_pct_f = round(doc_cnt / max(len(funcs), 1) * 100)
+            if len(funcs) > 20 or avg_cx > 8:
+                status = "🔴 Sobrecargado"
+            elif len(funcs) > 10 or avg_cx > 5:
+                status = "🟡 Revisar"
+            else:
+                status = "🟢 OK"
+            out += f"| `{fname}` | {len(funcs)} | {avg_cx} | {doc_pct_f}% | {status} |\n"
+
+        out += "\n"
+        for fname, funcs in sorted_files[:5]:
+            if len(funcs) > 10:
+                out += f"💡 **`{fname}`** tiene {len(funcs)} funciones. "
+                out += f"Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).\n"
+        out += "\n"
+
+        # ── E) Patrones de código detectados (mining_results externo si existe) ─
         mining_results = self.r.get("mining_results", {})
         if mining_results:
             frequent_patterns = mining_results.get("frequent_patterns", [])
-            complexity_clusters = mining_results.get("complexity_clusters", [])
-            function_clusters = mining_results.get("function_clusters", [])
-
-            out += "**Patrones Frecuentes Detectados:**\n\n"
             if frequent_patterns:
+                out += "#### E) Patrones Frecuentes Adicionales (Análisis IA)\n\n"
                 for pattern in frequent_patterns:
-                    out += f"- **{pattern.get('pattern', 'N/A')}**: {pattern.get('frequency', 0)} ocurrencias\n"
+                    out += f"- **{pattern.get('pattern', 'N/A')}**: {pattern.get('frequency', 0)} ocurrencias"
+                    if pattern.get('file'):
+                        out += f" — 📁 `{pattern['file']}`"
+                        if pattern.get('line'):
+                            out += f" línea {pattern['line']}"
+                    out += "\n"
                     if pattern.get('examples'):
                         out += f"  - Ejemplos: {pattern['examples']}\n"
-            else:
-                out += "- No se detectaron patrones frecuentes significativos.\n"
-
-            out += "\n**Clustering por Complejidad:**\n\n"
-            if complexity_clusters:
-                for cluster in complexity_clusters:
-                    out += f"- **{cluster.get('cluster', 'N/A')}**: {cluster.get('count', 0)} funciones "
-                    out += f"(complejidad promedio: {cluster.get('avg_complexity', 0)})\n"
-            else:
-                out += "- No se pudo realizar el clustering por complejidad.\n"
-
-            out += "\n**Clustering por Funcionalidad:**\n\n"
-            if function_clusters:
-                for cluster in function_clusters[:10]:
-                    out += f"- **{cluster.get('cluster', 'N/A')}**: {cluster.get('count', 0)} archivos\n"
-            else:
-                out += "- No se pudo realizar el clustering por funcionalidad.\n"
-        else:
-            out += "La minería de datos no está disponible. Configura GROQ_API_KEY para habilitar esta función.\n\n"
+                out += "\n"
 
         # 9.5 Diagrama del Pipeline ETL
         out += "### 9.5 Pipeline ETL Utilizado\n\n"

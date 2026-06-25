@@ -128,6 +128,7 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body data-theme="dark">
   <canvas id="particle-canvas"></canvas>
@@ -181,7 +182,31 @@
       <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Calidad media</span><span class="material-symbols-outlined text-tertiary/40">star</span></div><div class="text-3xl font-bold mt-2" id="stat-quality">0</div></div>
     </div>
 
-    <!-- Análisis rápido -->
+    <!-- Gráficas de Machine Learning / Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+      <!-- Gráfica: Lenguajes más usados -->
+      <div class="glass rounded-2xl p-6">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary/60">code</span>
+          Lenguajes más usados
+        </h2>
+        <div style="position:relative;height:260px;">
+          <canvas id="chart-languages"></canvas>
+        </div>
+      </div>
+      <!-- Gráfica: Proyectos por mes -->
+      <div class="glass rounded-2xl p-6">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary/60">bar_chart</span>
+          Proyectos por mes
+        </h2>
+        <div style="position:relative;height:260px;">
+          <canvas id="chart-monthly"></canvas>
+        </div>
+      </div>
+    </div>
+
+
     <div class="glass rounded-2xl p-6 mb-10">
       <h2 class="text-xl font-bold mb-4">Análisis de documentación</h2>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -323,6 +348,102 @@
         if (data.data_analysis?.keywords) {
           kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
         }
+
+        // ─── Gráficas ───────────────────────────────────────────────
+        const isDark = document.body.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#dee3e8' : '#0f172a';
+        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+        const palette = ['#8ed5ff','#c0c1ff','#10b981','#ffc176','#ff8fab','#a8dadc','#cdb4db','#ffcf77'];
+
+        Chart.defaults.color = textColor;
+        Chart.defaults.borderColor = gridColor;
+        Chart.defaults.font.family = "'Geist', sans-serif";
+
+        // Obtener proyectos reales para las gráficas (fuente de verdad)
+        let allProjects = [];
+        try {
+          const projRes = await fetch('/api/admin/projects', { headers: authHeaders() });
+          if (projRes.ok) allProjects = await projRes.json();
+        } catch(e) { console.warn('No se pudieron cargar proyectos para gráficas', e); }
+
+        // ── 1. Lenguajes más usados (Doughnut) ──
+        const langMap = {};
+        allProjects.forEach(p => {
+          const lang = (p.language && p.language !== 'unknown' && p.language !== 'Unknown') ? p.language : 'Otro';
+          langMap[lang] = (langMap[lang] || 0) + 1;
+        });
+        // Fallback: usar language_distribution del overview si no hay proyectos
+        if (!allProjects.length && data.stats.language_distribution) {
+          Object.assign(langMap, data.stats.language_distribution);
+        }
+        const langLabels = Object.keys(langMap);
+        const langValues = Object.values(langMap);
+        const ctxLang = document.getElementById('chart-languages').getContext('2d');
+        if (window._chartLang) window._chartLang.destroy();
+        window._chartLang = new Chart(ctxLang, {
+          type: 'doughnut',
+          data: {
+            labels: langLabels.length ? langLabels : ['Sin datos'],
+            datasets: [{
+              data: langValues.length ? langValues : [1],
+              backgroundColor: palette,
+              borderWidth: 2,
+              borderColor: isDark ? '#1b2024' : '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { color: textColor, padding: 14, font: { size: 13 } } },
+              tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} proyecto${ctx.parsed !== 1 ? 's' : ''}` } }
+            },
+            cutout: '60%'
+          }
+        });
+
+        // ── 2. Proyectos por mes (Bar) ──
+        const monthMap = {};
+        allProjects.forEach(p => {
+          const ca = p.created_at || '';
+          if (ca && ca.length >= 7) {
+            const key = ca.substring(0, 7); // "YYYY-MM"
+            monthMap[key] = (monthMap[key] || 0) + 1;
+          }
+        });
+        // Fallback
+        if (!allProjects.length && data.stats.projects_per_month) {
+          Object.assign(monthMap, data.stats.projects_per_month);
+        }
+        const sortedMonths = Object.keys(monthMap).sort().slice(-12);
+        const monthLabels = sortedMonths.map(m => {
+          const [y, mo] = m.split('-');
+          return new Date(+y, +mo - 1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
+        });
+        const monthValues = sortedMonths.map(m => monthMap[m]);
+        const ctxMonth = document.getElementById('chart-monthly').getContext('2d');
+        if (window._chartMonth) window._chartMonth.destroy();
+        window._chartMonth = new Chart(ctxMonth, {
+          type: 'bar',
+          data: {
+            labels: monthLabels.length ? monthLabels : ['Sin datos'],
+            datasets: [{
+              label: 'Proyectos',
+              data: monthValues.length ? monthValues : [0],
+              backgroundColor: 'rgba(142,213,255,0.55)',
+              borderColor: '#8ed5ff',
+              borderWidth: 2,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: textColor } },
+              y: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1, precision: 0 }, beginAtZero: true }
+            }
+          }
+        });
       } catch (error) {
         console.error('Error loading stats:', error);
         alert('Error al cargar estadísticas. Verifica la consola para más detalles.');

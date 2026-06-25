@@ -24,7 +24,6 @@ def run_analysis_async(project_id, project_path, db):
     5. Actualiza el estado del proyecto a "completed" o "error".
     """
     try:
-        # Intentar resolver y normalizar la ruta del proyecto
         from pathlib import Path
         p = None
         if project_path:
@@ -33,7 +32,6 @@ def run_analysis_async(project_id, project_path, db):
             except Exception:
                 p = Path(project_path)
 
-        # Fallback: buscar en carpeta uploads/<project_id> si la ruta no existe
         if not p or not p.exists():
             candidate = Path('uploads') / str(project_id)
             if (candidate / 'src').exists():
@@ -46,14 +44,11 @@ def run_analysis_async(project_id, project_path, db):
 
         project_path = str(p)
 
-        # Marca el proyecto como en proceso de análisis.
         db.projects.update_one({"_id": project_id}, {"$set": {"status": "analyzing"}})
 
-        # Analiza el proyecto y extrae métricas y estructura.
         analyzer = ProjectAnalyzer(project_path)
         results = analyzer.analyze()
 
-        # Ejecuta minería de datos y mejora documentación con IA si está disponible.
         mining_results = {}
         try:
             ai_enhancer = AIEnhancer()
@@ -74,7 +69,6 @@ def run_analysis_async(project_id, project_path, db):
         except Exception as e:
             print(f"[DEBUG] AI Enhancer initialization failed: {e}")
 
-        # Convierte esos resultados en documentación técnica.
         documentation = ""
         try:
             doc_gen = DocGenerator(results)
@@ -82,7 +76,6 @@ def run_analysis_async(project_id, project_path, db):
         except Exception as e:
             print(f"[DEBUG] DocGenerator failed: {e}")
 
-        # Guarda resultados y documentación en la colección de análisis.
         db.analysis_results.replace_one(
             {"project_id": project_id},
             {
@@ -94,7 +87,6 @@ def run_analysis_async(project_id, project_path, db):
             upsert=True
         )
 
-        # Actualiza el estado del proyecto con estadísticas finales.
         db.projects.update_one({"_id": project_id}, {
             "$set": {
                 "status": "completed",
@@ -110,96 +102,107 @@ def run_analysis_async(project_id, project_path, db):
             }
         })
     except Exception as e:
-        # Guardar traceback completo para diagnóstico
         import traceback
         tb = traceback.format_exc()
         err_info = {"status": "error", "error_message": str(e), "error_trace": tb}
         try:
             db.projects.update_one({"_id": project_id}, {"$set": err_info})
         except Exception:
-            # Si actualizar el proyecto falla, intentar insertar en analysis_results
             pass
         try:
             db.analysis_results.replace_one(
                 {"project_id": project_id},
-                {"project_id": project_id, "results": {}, "documentation": "", "error": err_info, "created_at": datetime.utcnow().isoformat()},
+                {
+                    "project_id": project_id,
+                    "results": {},
+                    "documentation": "",
+                    "error": err_info,
+                    "created_at": datetime.utcnow().isoformat()
+                },
                 upsert=True
             )
         except Exception:
             pass
+
 
 @analysis_bp.route('/<project_id>/start', methods=['POST'])
 @jwt_required()
 def start_analysis(project_id):
     user_id = get_jwt_identity()
     db = get_db()
-    
+
     project = db.projects.find_one({"_id": project_id, "user_id": user_id})
     if not project:
         return jsonify({"error": "Project not found"}), 404
 
-    # Verificar límite de análisis según el plan del usuario
     try:
-        # Cargar definición de planes (import local para evitar ciclos)
         from routes.payments import PLANS
         user = db.users.find_one({"_id": user_id}) or {}
         plan_key = user.get('plan', 'free')
         analyses_limit = PLANS.get(plan_key, {}).get('analyses_per_month', -1)
 
         if analyses_limit != -1:
-            # Calcular inicio del mes en formato ISO (coincide con el formato guardado)
             now = datetime.utcnow()
             start_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat()
-
-            # Obtener ids de proyectos del usuario
             project_ids = [p['_id'] for p in db.projects.find({"user_id": user_id}, {"_id": 1})]
-
-            # Contar análisis realizados en el mes actual para los proyectos del usuario
             current_analyses = 0
             if project_ids:
                 current_analyses = db.analysis_results.count_documents({
                     "project_id": {"$in": project_ids},
                     "created_at": {"$gte": start_month}
                 })
-
             if current_analyses >= analyses_limit:
-                return jsonify({"error": f"Has alcanzado el límite de análisis para tu plan ({plan_key}). Límite mensual: {analyses_limit}."}), 400
+                return jsonify({
+                    "error": f"Has alcanzado el límite de análisis para tu plan ({plan_key}). Límite mensual: {analyses_limit}."
+                }), 400
     except Exception:
-        # En caso de error al verificar límites, continuar y permitir el análisis (no bloquear por fallo del check)
         pass
 
     project_path = project.get('file_path', '')
     thread = threading.Thread(target=run_analysis_async, args=(project_id, project_path, db))
     thread.daemon = True
     thread.start()
-    
+
     return jsonify({"message": "Analysis started", "project_id": project_id}), 202
+
 
 @analysis_bp.route('/<project_id>/results', methods=['GET'])
 @jwt_required()
 def get_results(project_id):
     user_id = get_jwt_identity()
     db = get_db()
-    
+
     project = db.projects.find_one({"_id": project_id, "user_id": user_id})
     if not project:
         return jsonify({"error": "Project not found"}), 404
-    
+
     result = db.analysis_results.find_one({"project_id": project_id})
     if not result:
         return jsonify({"status": project.get("status", "pending"), "results": None}), 200
-    
-    return jsonify({"status": "completed", "results": result['results'], "documentation": result['documentation']}), 200
+
+    return jsonify({
+        "status": "completed",
+        "results": result['results'],
+        "documentation": result['documentation']
+    }), 200
+
 
 @analysis_bp.route('/<project_id>/status', methods=['GET'])
 @jwt_required()
 def get_status(project_id):
     user_id = get_jwt_identity()
     db = get_db()
-    project = db.projects.find_one({"_id": project_id, "user_id": user_id}, {"status": 1, "error_message": 1})
+    project = db.projects.find_one(
+        {"_id": project_id, "user_id": user_id},
+        {"status": 1, "error_message": 1}
+    )
     if not project:
         return jsonify({"error": "Project not found"}), 404
-    return jsonify({"status": project.get("status", "pending"), "error": project.get("error_message")}), 200
+    return jsonify({
+        "status": project.get("status", "pending"),
+        "error": project.get("error_message")
+    }), 200
+
 
 @analysis_bp.route('/suggest-docstring', methods=['POST'])
 @jwt_required()
@@ -210,16 +213,16 @@ def suggest_docstring():
     """
     try:
         from services.ai_enhancer import AIEnhancer
-        
+
         data = request.json
         name = data.get('name', '')
         file = data.get('file', '')
         params = data.get('params', '')
         kind = data.get('kind', 'function')
         lang = data.get('lang', 'Python')
-        
+
         ai = AIEnhancer()
-        
+
         if kind == 'class':
             prompt = f"""Genera SOLO el docstring para esta clase en {lang}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
 
@@ -250,35 +253,32 @@ Formato esperado (Python):
     Returns:
         Descripción del valor retornado.
     \"\"\""""
-        
-        # Usar AIEnhancer para generar la sugerencia
+
         suggestion = ai._call_ai(
             "Eres un experto en generar documentación de código. Genera docstrings claros y concisos.",
             prompt,
             max_tokens=500
         )
-        
+
         if suggestion:
             return jsonify({'suggestion': suggestion}), 200
         else:
-            # Si falla la API, devolver un template básico
             if kind == 'class':
                 fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
             else:
-                fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n{(params or "").split(",") if params else ""}\n\n    Returns:\n        Describe el valor de retorno.\n    """'
+                fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
             return jsonify({'suggestion': fallback}), 200
 
     except Exception as e:
-        # En caso de error, devolver un template básico
-        data = request.json
+        data = request.json or {}
         kind = data.get('kind', 'function')
         name = data.get('name', '')
-        params = data.get('params', '')
         if kind == 'class':
             fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
         else:
-            fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n{(params or "").split(",") if params else ""}\n\n    Returns:\n        Describe el valor de retorno.\n    """'
+            fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
         return jsonify({'suggestion': fallback}), 200
+
 
 @analysis_bp.route('/etl', methods=['POST'])
 @jwt_required()
@@ -294,7 +294,7 @@ def run_etl_pipeline():
             "project_id": "opcional para uploads"
         },
         "transform": {
-            "rules": []  # opcional
+            "rules": []
         },
         "load": {
             "target": "html|pdf|json|mongodb",
@@ -304,44 +304,34 @@ def run_etl_pipeline():
     """
     try:
         config = request.json
-
         if not config:
             return jsonify({"error": "No configuration provided"}), 400
-
-        # Validar configuración
         if "extract" not in config or "load" not in config:
             return jsonify({"error": "Missing extract or load configuration"}), 400
 
-        # Crear y ejecutar pipeline
         pipeline = ETLPipeline()
         result = pipeline.run_pipeline(config)
 
         if result.get("success"):
-            return jsonify({
-                "message": "ETL pipeline completed successfully",
-                "result": result
-            }), 200
+            return jsonify({"message": "ETL pipeline completed successfully", "result": result}), 200
         else:
-            return jsonify({
-                "error": "ETL pipeline failed",
-                "result": result
-            }), 500
+            return jsonify({"error": "ETL pipeline failed", "result": result}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @analysis_bp.route('/etl/diagram', methods=['GET'])
 @jwt_required()
 def get_etl_diagram():
-    """
-    Retorna el diagrama PlantUML del pipeline ETL.
-    """
+    """Retorna el diagrama PlantUML del pipeline ETL."""
     try:
         pipeline = ETLPipeline()
         diagram = pipeline.get_pipeline_diagram()
         return jsonify({"diagram": diagram}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @analysis_bp.route('/database/analyze-sql', methods=['POST'])
 @jwt_required()
@@ -365,27 +355,19 @@ def download_database_pdf():
     data = request.json
     if not data or not data.get('analysis'):
         return jsonify({"error": "No analysis data provided"}), 400
-    
+
     try:
         from services.doc_generator import DocGenerator
         from io import BytesIO
         from weasyprint import HTML, CSS
         from datetime import datetime
-        
+
         analysis = data.get('analysis', {})
-        tables = analysis.get('tables', [])
-        suggestions = analysis.get('suggestions', [])
-        er_diagram = analysis.get('er_diagram', '')
-        
-        # Generar HTML del PDF
-        html_content = generate_database_pdf_html(tables, suggestions, er_diagram)
-        
-        # Convertir HTML a PDF con WeasyPrint
+        html_content = generate_database_pdf_html(analysis)
         pdf_bytes = HTML(string=html_content).write_pdf()
-        
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         filename = f'database_analysis_{timestamp}.pdf'
-        
+
         return pdf_bytes, 200, {
             'Content-Type': 'application/pdf',
             'Content-Disposition': f'attachment; filename="{filename}"'
@@ -395,14 +377,60 @@ def download_database_pdf():
         return jsonify({"error": f"Error generando PDF: {str(e)}"}), 500
 
 
-def generate_database_pdf_html(tables, suggestions, er_diagram):
+def generate_database_pdf_html(analysis):
     """Genera HTML profesional para el PDF del análisis de BD."""
     from datetime import datetime
-    
+
     timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
-    
+    tables = analysis.get('tables', [])
+    stats = analysis.get('stats', {})
+    table_columns = analysis.get('table_columns', {})
+    suggestions = analysis.get('suggestions', [])
+    er_diagram = analysis.get('er_diagram', '')
+    data_sources = analysis.get('data_sources', {})
+    structured = data_sources.get('structured', [])
+    semi_structured = data_sources.get('semi_structured', [])
+    unstructured = data_sources.get('unstructured', [])
+    warehouse_schema = analysis.get('warehouse_schema', {})
+    ai_summary = analysis.get('ai_summary', '')
+    snowflake_diagram = analysis.get('snowflake_diagram', '')
+    preparation_items = analysis.get('data_preparation', [])
+    mining_items = analysis.get('data_mining_insights', [])
+
     suggestions_html = '\n'.join(f'<li>{s}</li>' for s in suggestions)
-    
+    preparation_html = (
+        '<ul>' + ''.join(f'<li>{item}</li>' for item in preparation_items) + '</ul>'
+        if preparation_items
+        else '<p>No se encontraron recomendaciones de preparación de datos.</p>'
+    )
+    mining_html = (
+        '<ul>' + ''.join(f'<li>{item}</li>' for item in mining_items) + '</ul>'
+        if mining_items
+        else '<p>No se detectaron insights de minería de datos.</p>'
+    )
+
+    tables_structure_html = ''
+    for table_name in tables:
+        columns = table_columns.get(table_name, [])
+        if not columns:
+            tables_structure_html += f'<p><code>{table_name}</code></p>'
+            continue
+        rows = ''.join(
+            f'<tr><td>{col["name"]}</td><td>{col["type"]}</td></tr>'
+            for col in columns
+        )
+        tables_structure_html += f'''
+        <h3>{table_name}</h3>
+        <table>
+            <thead><tr><th>Columna</th><th>Tipo</th></tr></thead>
+            <tbody>{rows}</tbody>
+        </table>'''
+
+    total_tables = stats.get('total_tables', len(tables))
+    fk_relations = stats.get('fk_relations', len(analysis.get('foreign_keys', {})))
+    tables_with_pk = stats.get('tables_with_pk', 0)
+    summary_text = analysis.get('summary', 'Análisis completado exitosamente.')
+
     html = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -410,87 +438,22 @@ def generate_database_pdf_html(tables, suggestions, er_diagram):
         <meta charset="UTF-8">
         <title>Análisis de Base de Datos</title>
         <style>
-            body {{
-                font-family: Arial, sans-serif;
-                color: #333;
-                line-height: 1.6;
-                margin: 0;
-                padding: 20px;
-            }}
-            .header {{
-                border-bottom: 3px solid #38bdf8;
-                padding-bottom: 20px;
-                margin-bottom: 30px;
-            }}
-            .header h1 {{
-                margin: 0;
-                color: #0f172a;
-                font-size: 32px;
-            }}
-            .timestamp {{
-                color: #666;
-                font-size: 12px;
-                margin-top: 10px;
-            }}
-            .section {{
-                margin-bottom: 30px;
-                page-break-inside: avoid;
-            }}
-            .section h2 {{
-                border-left: 4px solid #38bdf8;
-                padding-left: 10px;
-                color: #0f172a;
-                margin-top: 20px;
-            }}
-            .section h3 {{
-                color: #334155;
-                margin-top: 15px;
-            }}
-            ul {{
-                padding-left: 20px;
-            }}
-            li {{
-                margin-bottom: 8px;
-                color: #555;
-            }}
-            table {{
-                width: 100%;
-                border-collapse: collapse;
-                margin: 15px 0;
-            }}
-            th, td {{
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-            }}
-            th {{
-                background-color: #38bdf8;
-                color: white;
-                font-weight: bold;
-            }}
-            tr:nth-child(even) {{
-                background-color: #f9f9f9;
-            }}
-            .diagram {{
-                text-align: center;
-                margin: 20px 0;
-                page-break-inside: avoid;
-            }}
-            .diagram img {{
-                max-width: 100%;
-                height: auto;
-                border: 1px solid #ddd;
-                padding: 10px;
-                background-color: #fff;
-            }}
-            .footer {{
-                margin-top: 40px;
-                border-top: 1px solid #ddd;
-                padding-top: 10px;
-                color: #999;
-                font-size: 12px;
-                text-align: center;
-            }}
+            body {{ font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 20px; }}
+            .header {{ border-bottom: 3px solid #38bdf8; padding-bottom: 20px; margin-bottom: 30px; }}
+            .header h1 {{ margin: 0; color: #0f172a; font-size: 32px; }}
+            .timestamp {{ color: #666; font-size: 12px; margin-top: 10px; }}
+            .section {{ margin-bottom: 30px; page-break-inside: avoid; }}
+            .section h2 {{ border-left: 4px solid #38bdf8; padding-left: 10px; color: #0f172a; margin-top: 20px; }}
+            .section h3 {{ color: #334155; margin-top: 15px; }}
+            ul {{ padding-left: 20px; }}
+            li {{ margin-bottom: 8px; color: #555; }}
+            table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+            th, td {{ border: 1px solid #ddd; padding: 10px; text-align: left; }}
+            th {{ background-color: #38bdf8; color: white; font-weight: bold; }}
+            tr:nth-child(even) {{ background-color: #f9f9f9; }}
+            .diagram {{ text-align: center; margin: 20px 0; page-break-inside: avoid; }}
+            .diagram img {{ max-width: 100%; height: auto; border: 1px solid #ddd; padding: 10px; background-color: #fff; }}
+            .footer {{ margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; color: #999; font-size: 12px; text-align: center; }}
         </style>
     </head>
     <body>
@@ -501,30 +464,58 @@ def generate_database_pdf_html(tables, suggestions, er_diagram):
 
         <div class="section">
             <h2>Resumen</h2>
-            <p>Se detectaron <strong>{len(tables)}</strong> tabla(s) en el archivo SQL analizado.</p>
-            <p>Este informe contiene un análisis detallado de la estructura, recomendaciones de optimización y un diagrama entidad-relación.</p>
+            <p>{summary_text}</p>
+            <p><strong>Tablas:</strong> {total_tables} · <strong>Relaciones FK:</strong> {fk_relations} · <strong>Con PK:</strong> {tables_with_pk}/{total_tables or 1}</p>
         </div>
 
         <div class="section">
             <h2>Diagrama Entidad-Relación (E-R)</h2>
             <div class="diagram">
-                {er_diagram if er_diagram else '<p style="color: #999;">No se pudo generar el diagrama E-R.</p>'}
+                {er_diagram if er_diagram else '<p style="color:#999;">No se pudo generar el diagrama E-R.</p>'}
             </div>
         </div>
 
         <div class="section">
             <h2>Tablas Detectadas</h2>
-            <p>Total de tablas: <strong>{len(tables)}</strong></p>
-            <ul>
-                {''.join(f'<li><code>{table}</code></li>' for table in tables)}
-            </ul>
+            <p>Total de tablas: <strong>{total_tables}</strong></p>
+            {tables_structure_html if tables_structure_html else '<p>No se encontraron tablas.</p>'}
+        </div>
+
+        <div class="section">
+            <h2>Fuentes y Tipos de Datos</h2>
+            <p><strong>Datos Estructurados:</strong> {len(structured)} objetos</p>
+            {''.join(f'<li>{item}</li>' for item in structured) if structured else '<p>No se detectaron tablas estructuradas.</p>'}
+            <p><strong>Datos Semi-estructurados:</strong> {len(semi_structured)} campos</p>
+            {''.join(f'<li>{item}</li>' for item in semi_structured) if semi_structured else '<p>No se detectaron campos semi-estructurados.</p>'}
+            <p><strong>Datos No Estructurados:</strong> {len(unstructured)} elementos</p>
+            {''.join(f'<li>{item}</li>' for item in unstructured) if unstructured else '<p>No se detectaron datos no estructurados.</p>'}
+        </div>
+
+        <div class="section">
+            <h2>Preparación de datos</h2>
+            {preparation_html}
+        </div>
+
+        <div class="section">
+            <h2>Minería de datos</h2>
+            {mining_html}
+        </div>
+
+        <div class="section">
+            <h2>Esquema de Data Warehouse</h2>
+            <p><strong>Tipo:</strong> {warehouse_schema.get('type', 'N/A')}</p>
+            <p>{warehouse_schema.get('description', '')}</p>
+            {snowflake_diagram if snowflake_diagram else '<p>No se pudo generar un diagrama de esquema tipo copo de nieve.</p>'}
+        </div>
+
+        <div class="section">
+            <h2>Resumen IA</h2>
+            <p>{ai_summary or 'No se generó resumen de IA. Configura GROQ_API_KEY en .env si quieres habilitarlo.'}</p>
         </div>
 
         <div class="section">
             <h2>Recomendaciones y Observaciones</h2>
-            <ul>
-                {suggestions_html}
-            </ul>
+            <ul>{suggestions_html}</ul>
         </div>
 
         <div class="footer">
@@ -536,15 +527,75 @@ def generate_database_pdf_html(tables, suggestions, er_diagram):
     return html
 
 
+def extract_create_tables(sql_text):
+    """Extrae sentencias CREATE TABLE respetando paréntesis anidados."""
+    cleaned = re.sub(r'/\*[\s\S]*?\*/', '', sql_text)
+    cleaned = re.sub(r'--[^\n]*', '', cleaned)
+    pattern = re.compile(
+        r'create\s+table\s+(?:if\s+not\s+exists\s+)?'
+        r'(?:[`"\[]?(?:\w+\.)?[`"\]]?\.)?[`"\[]?(\w+)[`"\]]?\s*\(',
+        re.I
+    )
+    tables = []
+    pos = 0
+    while True:
+        match = pattern.search(cleaned, pos)
+        if not match:
+            break
+        table_name = match.group(1)
+        start_body = match.end() - 1
+        depth = 0
+        end_body = None
+        for i in range(start_body, len(cleaned)):
+            char = cleaned[i]
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                depth -= 1
+                if depth == 0:
+                    end_body = i
+                    break
+        if end_body is None:
+            break
+        body = cleaned[start_body + 1:end_body]
+        tables.append((table_name, body))
+        pos = end_body + 1
+    return tables
+
+
+def _split_sql_column_definitions(body):
+    """Divide definiciones de columnas respetando paréntesis anidados."""
+    parts = []
+    current = []
+    depth = 0
+    for char in body:
+        if char == '(':
+            depth += 1
+        elif char == ')':
+            depth -= 1
+        if char == ',' and depth == 0:
+            part = ''.join(current).strip()
+            if part:
+                parts.append(part)
+            current = []
+            continue
+        current.append(char)
+    part = ''.join(current).strip()
+    if part:
+        parts.append(part)
+    return parts
+
 def generate_sql_analysis(sql_text):
     suggestions = []
     tables = []
     table_columns = {}
     foreign_keys = {}
-    
+    table_pk_status = {}
+    table_primary_keys = {}
+
     content = sql_text
-    # Buscar todas las tablas CREATE TABLE
-    matches = re.findall(r'create\s+table\s+[`"\[]?(\w+)[`"\]]?\s*\((.*?)\)\s*(?:;|$)', content, flags=re.S | re.I)
+    matches = extract_create_tables(content)
+    has_index = bool(re.search(r'create\s+(?:unique\s+)?index\s+', content, flags=re.I))
 
     if not matches:
         suggestions.append('No se detectaron sentencias CREATE TABLE. Verifica que el archivo sea un esquema SQL válido.')
@@ -552,56 +603,271 @@ def generate_sql_analysis(sql_text):
         tables = [name for name, _ in matches]
         suggestions.append(f'Se detectaron {len(tables)} tabla(s) en el archivo.')
 
-        lower_content = content.lower()
-        has_index = bool(re.search(r'create\s+(?:unique\s+)?index\s+', lower_content))
-
         for table_name, body in matches:
-            # Extraer columnas
             columns = []
-            for line in body.split(','):
+            primary_keys = []
+            table_foreign_keys = []
+
+            for line in _split_sql_column_definitions(body):
                 line = line.strip()
-                if line and not line.upper().startswith(('PRIMARY', 'FOREIGN', 'UNIQUE', 'INDEX', 'KEY', 'CONSTRAINT')):
-                    parts = line.split()
-                    if len(parts) >= 2:
-                        col_name = parts[0].strip('`"[]')
-                        col_type = parts[1]
-                        columns.append({'name': col_name, 'type': col_type})
-            
+                if not line:
+                    continue
+
+                pk_inline = re.search(
+                    r'^[`"\[]?(\w+)[`"\]]?\s+.+\bprimary\s+key\b',
+                    line,
+                    flags=re.I
+                )
+                if pk_inline:
+                    primary_keys.append(pk_inline.group(1))
+
+                pk_match = re.search(r'primary\s+key\s*\(([^)]+)\)', line, flags=re.I)
+                if pk_match:
+                    for key in pk_match.group(1).split(','):
+                        key_name = key.strip().strip('`"[]')
+                        if key_name:
+                            primary_keys.append(key_name)
+                    continue
+
+                fk_match = re.search(
+                    r'foreign\s+key\s*\(\s*[`"\[]?(\w+)[`"\]]?\s*\)\s*references\s+[`"\[]?(\w+)[`"\]]?\s*\(\s*[`"\[]?(\w+)[`"\]]?\s*\)',
+                    line,
+                    flags=re.I
+                )
+                if fk_match:
+                    fk_info = {
+                        'column': fk_match.group(1),
+                        'references': fk_match.group(2),
+                        'ref_column': fk_match.group(3),
+                    }
+                    table_foreign_keys.append(fk_info)
+                    foreign_keys[table_name] = fk_info
+                    continue
+
+                upper_line = line.upper()
+                if upper_line.startswith(('PRIMARY', 'FOREIGN', 'UNIQUE', 'INDEX', 'KEY', 'CONSTRAINT')):
+                    continue
+
+                parts = line.split()
+                if len(parts) >= 2:
+                    col_name = parts[0].strip('`"[]')
+                    col_type = parts[1]
+                    nullable = 'NOT NULL' not in upper_line
+                    columns.append({
+                        'name': col_name,
+                        'type': col_type,
+                        'nullable': nullable,
+                    })
+
             table_columns[table_name] = columns
-            
-            lower_body = body.lower()
-            if 'primary key' not in lower_body:
-                suggestions.append(f'La tabla `{table_name}` no define una clave primaria. Agrega `PRIMARY KEY` para mejorar integridad y rendimiento.')
+            primary_keys = list(dict.fromkeys(primary_keys))
+            table_primary_keys[table_name] = primary_keys
+            table_pk_status[table_name] = bool(primary_keys) or 'primary key' in body.lower()
+
+            if not table_pk_status[table_name]:
+                suggestions.append(
+                    f'La tabla `{table_name}` no define una clave primaria. '
+                    f'Agrega `PRIMARY KEY` para mejorar integridad y rendimiento.'
+                )
 
             fk_columns = sorted(set(re.findall(r'(\w+_id)\b', body, flags=re.I)))
+            lower_body = body.lower()
             if fk_columns and 'foreign key' not in lower_body:
-                suggestions.append(f'Tabla `{table_name}` tiene columnas que parecen llaves foráneas ({", ".join(fk_columns)}) sin FOREIGN KEY declarado.')
+                suggestions.append(
+                    f'Tabla `{table_name}` tiene columnas que parecen llaves foráneas '
+                    f'({", ".join(fk_columns)}) sin FOREIGN KEY declarado.'
+                )
 
             if re.search(r'varchar\s*(?!\()', body, flags=re.I):
-                suggestions.append(f'Tabla `{table_name}` contiene columnas VARCHAR sin tamaño definido. Usa `VARCHAR(255)` o un tamaño específico.')
+                suggestions.append(
+                    f'Tabla `{table_name}` contiene columnas VARCHAR sin tamaño definido. '
+                    f'Usa `VARCHAR(255)` o un tamaño específico.'
+                )
 
-            for col_name, col_type in re.findall(r'(\w+)\s+(text|blob|longtext|mediumtext|tinytext)\b', body, flags=re.I):
-                suggestions.append(f'La columna `{col_name}` en `{table_name}` usa `{col_type}`. Si no necesitas texto libre ilimitado, considera tipos más ajustados.')
+            for col_name, col_type in re.findall(
+                r'(\w+)\s+(text|blob|longtext|mediumtext|tinytext)\b', body, flags=re.I
+            ):
+                suggestions.append(
+                    f'La columna `{col_name}` en `{table_name}` usa `{col_type}`. '
+                    f'Si no necesitas texto libre ilimitado, considera tipos más ajustados.'
+                )
 
             if not has_index and 'foreign key' not in lower_body:
-                suggestions.append(f'No se detectan índices explícitos para `{table_name}`. Agrega índices a columnas de búsqueda frecuentes o a las relaciones.')
-            
-            # Extraer relaciones foráneas
-            fk_matches = re.findall(r'foreign\s+key\s*\(\s*(\w+)\s*\)\s*references\s+(\w+)', body, flags=re.I)
-            for fk_col, ref_table in fk_matches:
-                foreign_keys[table_name] = {'column': fk_col, 'references': ref_table}
+                suggestions.append(
+                    f'No se detectan índices explícitos para `{table_name}`. '
+                    f'Agrega índices a columnas de búsqueda frecuentes o a las relaciones.'
+                )
 
-    # Generar diagrama E-R en PlantUML
+    # Clasificar tipos de datos
+    structured = [f'Tabla `{table}`' for table in tables]
+    semi_structured = []
+    unstructured = []
+    text_columns = []
+    json_columns = []
+
+    for table_name, cols in table_columns.items():
+        for c in cols:
+            col_type = c['type'].lower()
+            label = f'Campo `{c["name"]}` en `{table_name}` ({c["type"]})'
+            if any(k in col_type for k in ['json', 'jsonb', 'xml', 'hstore', 'array']):
+                semi_structured.append(label)
+                json_columns.append(label)
+            elif any(k in col_type for k in ['text', 'blob', 'longtext', 'mediumtext', 'tinytext']):
+                if label not in semi_structured:
+                    semi_structured.append(label)
+                text_columns.append(label)
+            else:
+                structured.append(label)
+
+    # Detectar esquema de Data Warehouse
+    schema_type = 'estructura simple'
+    warehouse_description = 'No se detectó un esquema de Data Warehouse evidente.'
+    if len(tables) >= 3 and foreign_keys:
+        foreign_refs = [fk_info.get('references') for fk_info in foreign_keys.values() if fk_info.get('references')]
+        if len(tables) >= 5 or any(ref in tables for ref in foreign_refs):
+            schema_type = 'snowflake'
+            warehouse_description = (
+                'El esquema del modelo de datos sugiere un enfoque tipo copo de nieve, '
+                'con tablas de dimensión normalizadas alrededor de una tabla de hechos.'
+            )
+        else:
+            schema_type = 'star'
+            warehouse_description = (
+                'El esquema del modelo de datos se presta a un diseño tipo estrella, '
+                'con una tabla de hechos central y tablas de dimensión conectadas.'
+            )
+
+    tables_without_pk = [t for t, has_pk in table_pk_status.items() if not has_pk]
+    data_preparation = []
+    if tables_without_pk:
+        data_preparation.append(f'Define claves primarias para las tablas: {", ".join(tables_without_pk)}.')
+    if json_columns:
+        data_preparation.append(
+            'Normaliza los datos semi-estructurados (JSON/ARRAY/XML) en tablas relacionales '
+            'para facilitar consultas y análisis de BI.'
+        )
+    if text_columns:
+        data_preparation.append(
+            'Estandariza y limpia campos de texto libre (TEXT/BLOB) antes de aplicar minería de datos o NLP.'
+        )
+    if not has_index:
+        data_preparation.append(
+            'Agrega índices a columnas de búsqueda frecuentes y claves foráneas para mejorar el rendimiento de consultas.'
+        )
+    data_preparation.append(
+        'Verifica la consistencia de nombres de columnas y la calidad de datos con '
+        'limpieza de valores nulos/duplicados antes del modelado.'
+    )
+
+    data_mining_insights = []
+    if schema_type in ['star', 'snowflake']:
+        data_mining_insights.append(
+            f'El esquema se alinea con un modelo de Data Warehouse tipo {schema_type}. '
+            f'Es adecuado para análisis OLAP y minería de datos.'
+        )
+    if json_columns:
+        data_mining_insights.append(
+            'El esquema incluye datos semi-estructurados; considera extraer atributos clave y '
+            'normalizarlos para facilitar agrupaciones y agregaciones.'
+        )
+    if text_columns:
+        data_mining_insights.append(
+            'Hay columnas de texto libre que pueden ser valiosas para minería de texto, '
+            'extracción de tópicos y análisis de sentimiento.'
+        )
+    if not tables_without_pk:
+        data_mining_insights.append(
+            'Las tablas cuentan con claves primarias definidas, lo cual ayuda a mantener '
+            'integridad referencial y soporte para modelos dimensionales.'
+        )
+    if not data_mining_insights:
+        data_mining_insights.append(
+            'No se detectaron señales fuertes de minería de datos específica, '
+            'pero el esquema es útil para un análisis estructural básico.'
+        )
+
     er_diagram_code = generate_er_diagram_plantuml(tables, table_columns, foreign_keys)
-    er_diagram_html = generate_er_diagram_image(er_diagram_code)
+    er_diagram_html = generate_er_diagram_image(er_diagram_code) if er_diagram_code else ''
+    snowflake_diagram_code = generate_snowflake_plantuml(tables, table_columns, foreign_keys)
+    snowflake_diagram_html = generate_er_diagram_image(snowflake_diagram_code) if snowflake_diagram_code else ''
 
-    summary = 'Análisis completado exitosamente.'
+    ai_summary = ''
+    summary_text = 'Análisis completado exitosamente.'
+    if tables:
+        fk_count = len(foreign_keys)
+        pk_count = sum(1 for has_pk in table_pk_status.values() if has_pk)
+        summary_text = (
+            f'Análisis completado exitosamente. Se detectaron {len(tables)} tabla(s), '
+            f'{fk_count} relación(es) FK y {pk_count}/{len(tables)} tabla(s) con clave primaria.'
+        )
+
+    try:
+        ai_enhancer = AIEnhancer()
+        ai_summary = ai_enhancer.enhance_database_analysis(sql_text, {
+            'tables': tables,
+            'table_columns': table_columns,
+            'foreign_keys': foreign_keys,
+            'data_sources': {
+                'structured': structured,
+                'semi_structured': semi_structured,
+                'unstructured': unstructured,
+            },
+            'warehouse_schema': {
+                'type': schema_type,
+                'description': warehouse_description
+            }
+        })
+
+        enhanced_sections = ai_enhancer.enhance_database_report_sections({
+            'summary': summary_text,
+            'data_preparation': data_preparation,
+            'data_mining_insights': data_mining_insights,
+            'suggestions': suggestions,
+            'warehouse_description': warehouse_description,
+            'tables': tables,
+        })
+        if enhanced_sections:
+            summary_text = enhanced_sections.get('summary', summary_text)
+            data_preparation = enhanced_sections.get('data_preparation', data_preparation)
+            data_mining_insights = enhanced_sections.get('data_mining_insights', data_mining_insights)
+            suggestions = enhanced_sections.get('suggestions', suggestions)
+            warehouse_description = enhanced_sections.get(
+                'warehouse_description', warehouse_description
+            )
+    except Exception as e:
+        print(f"[AI DB Summary] {e}")
+        if not ai_summary:
+            ai_summary = 'Resumen de IA no disponible. Verifica que GROQ_API_KEY esté configurada en .env.'
+
     return {
-        'summary': summary,
+        'summary': summary_text,
         'tables': tables,
+        'table_columns': table_columns,
+        'table_pk_status': table_pk_status,
+        'table_primary_keys': table_primary_keys,
+        'foreign_keys': foreign_keys,
+        'stats': {
+            'total_tables': len(tables),
+            'fk_relations': len(foreign_keys),
+            'tables_with_pk': sum(1 for has_pk in table_pk_status.values() if has_pk),
+        },
         'suggestions': suggestions,
         'er_diagram': er_diagram_html,
-        'er_diagram_code': er_diagram_code
+        'er_diagram_code': er_diagram_code,
+        'snowflake_diagram': snowflake_diagram_html,
+        'data_sources': {
+            'structured': structured,
+            'semi_structured': semi_structured,
+            'unstructured': unstructured,
+        },
+        'warehouse_schema': {
+            'type': schema_type,
+            'description': warehouse_description,
+            'diagram_code': snowflake_diagram_code,
+        },
+        'data_preparation': data_preparation,
+        'data_mining_insights': data_mining_insights,
+        'ai_summary': ai_summary,
     }
 
 
@@ -616,21 +882,54 @@ def generate_er_diagram_plantuml(tables, table_columns, foreign_keys):
     plantuml_code += "  FontColor #0f1418\n"
     plantuml_code += "}\n\n"
 
-    # Definir entidades
     for table in tables:
         columns = table_columns.get(table, [])
-        plantuml_code += f"entity \"{table}\" {{\n"
-        for col in columns[:8]:  # Límitar a 8 columnas por tabla
-            plantuml_code += f"  {col['name']}: {col['type']}\n"
+        plantuml_code += f'entity "{table}" {{\n'
+        for col in columns[:8]:
+            plantuml_code += f'  {col["name"]}: {col["type"]}\n'
         if len(columns) > 8:
-            plantuml_code += f"  ... ({len(columns) - 8} more columns)\n"
+            plantuml_code += f'  ... ({len(columns) - 8} more columns)\n'
         plantuml_code += "}\n\n"
 
-    # Definir relaciones
     for table, fk_info in foreign_keys.items():
         ref_table = fk_info.get('references')
         if ref_table in tables:
-            plantuml_code += f"{table} }}--|| {ref_table}\n"
+            plantuml_code += f'{table} }}--|| {ref_table}\n'
+
+    plantuml_code += "@enduml\n"
+    return plantuml_code
+
+
+def generate_snowflake_plantuml(tables, table_columns, foreign_keys):
+    """Genera código PlantUML para un esquema tipo Snowflake."""
+    if not tables or not foreign_keys:
+        return ''
+
+    reference_counts = {}
+    for table in foreign_keys:
+        reference_counts[table] = reference_counts.get(table, 0) + 1
+    fact_table = max(reference_counts, key=reference_counts.get) if reference_counts else tables[0]
+    dimension_tables = [t for t in tables if t != fact_table]
+
+    plantuml_code = "@startuml\n"
+    plantuml_code += "skinparam backgroundColor #f1f5f9\n"
+    plantuml_code += "skinparam rectangle {\n  BackgroundColor #ffffff\n  BorderColor #0f172a\n  FontColor #0f1418\n}\n\n"
+    plantuml_code += f'entity "{fact_table}" as fact <<Fact Table>> {{\n  **Fact Table**\n}}\n\n'
+
+    for idx, dim in enumerate(dimension_tables[:8], start=1):
+        plantuml_code += f'entity "{dim}" as dim{idx} <<Dimension>> {{\n  **Dimension**\n}}\n\n'
+        plantuml_code += f'fact }}--|| dim{idx} : FK\n'
+
+    dim_refs = {
+        table: fk_info.get('references')
+        for table, fk_info in foreign_keys.items()
+        if table in dimension_tables
+    }
+    for idx, (dim_table, parent) in enumerate(dim_refs.items(), start=1):
+        if parent in dimension_tables:
+            plantuml_code += f'entity "{dim_table}_sub" as subdim{idx} <<Sub-Dimension>> {{\n  **Sub-Dimension**\n}}\n\n'
+            parent_idx = dimension_tables.index(parent) + 1
+            plantuml_code += f'subdim{idx} }}--|| dim{parent_idx} : FK\n'
 
     plantuml_code += "@enduml\n"
     return plantuml_code
@@ -640,33 +939,32 @@ def generate_er_diagram_image(plantuml_code):
     """Genera imagen del diagrama E-R usando PlantUML."""
     try:
         from services.doc_generator import DocGenerator
-        doc_gen = DocGenerator({})
-        
-        # Intentar usar el servidor remoto de PlantUML
         from pathlib import Path
         import tempfile
-        
+
+        doc_gen = DocGenerator({})
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.puml', delete=False) as f:
             f.write(plantuml_code)
             temp_path = Path(f.name)
-        
+
         try:
-            # Usar el método _fetch_plantuml_image del DocGenerator
             output_file = temp_path.with_suffix('.png')
             result_path = doc_gen._fetch_plantuml_image(plantuml_code, output_file)
-            
             if result_path and result_path.exists():
                 data_uri = doc_gen._image_to_data_uri(result_path)
                 if data_uri:
-                    return f'<img src="{data_uri}" alt="Diagrama E-R" />'
+                    return f'<img src="{data_uri}" alt="Diagrama E-R" style="max-width:100%;height:auto;" />'
                 result_path.unlink(missing_ok=True)
         except Exception as e:
             print(f"[ER Diagram] Error: {e}")
         finally:
             temp_path.unlink(missing_ok=True)
-        
-        # Fallback: mostrar el código PlantUML
-        return f'<pre style="background:#f0f0f0; padding:10px; border-radius:4px; font-size:12px; overflow:auto;">{plantuml_code}</pre>'
+
+        return (
+            f'<pre style="background:#f0f0f0;padding:10px;border-radius:4px;'
+            f'font-size:12px;overflow:auto;">{plantuml_code}</pre>'
+        )
     except Exception as e:
         print(f"[ER Diagram] Fallback error: {e}")
-        return '<p style="color: #999;">No se pudo generar el diagrama E-R.</p>'
+        return '<p style="color:#999;">No se pudo generar el diagrama E-R.</p>'
