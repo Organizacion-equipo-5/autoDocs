@@ -345,6 +345,18 @@
                         Análisis BD
                     </span>
                 </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/ml-predictions">
+    <span class="material-symbols-outlined text-violet-400 text-2xl group-hover:glow-violet transition-colors">
+        scatter_plot
+    </span>
+
+    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 
+                 text-xs font-medium opacity-0 group-hover:opacity-100 
+                 transition-opacity whitespace-nowrap z-50 
+                 text-violet-400 pointer-events-none">
+        Predicciones ML
+    </span>
+</a>
                 <!-- Nuevo proyecto -->
                 <button class="group relative flex items-center justify-center hover:scale-110 transition-transform bg-transparent border-none cursor-pointer" onclick="openUploadModal()">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">upload</span>
@@ -385,7 +397,12 @@
                     <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
                     <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="greeting">Bienvenido de vuelta</p>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex gap-4 items-center">
+                    <div id="plan-indicator" class="glass px-4 py-2.5 rounded-xl flex items-center gap-2 border border-outline-variant/20">
+                        <span class="material-symbols-outlined text-primary text-sm">workspace_premium</span>
+                        <span class="text-sm font-semibold text-on-surface" id="plan-name">Free</span>
+                        <span class="text-xs text-on-surface-variant/60" id="project-count">0/3</span>
+                    </div>
                     <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
                         <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
                     </button>
@@ -711,6 +728,14 @@
             document.getElementById('greeting').textContent = `Bienvenido, ${user.name}`;
         }
 
+        // Actualizar indicador de plan
+        const planName = document.getElementById('plan-name');
+        const projectCount = document.getElementById('project-count');
+        if (planName && user.plan) {
+            const planDisplay = user.plan === 'free' ? 'Free' : user.plan === 'pro' ? 'Pro' : user.plan === 'enterprise' ? 'Enterprise' : 'Free';
+            planName.textContent = planDisplay;
+        }
+
         function authHeaders() {
             return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
         }
@@ -718,11 +743,31 @@
         async function loadProjects() {
             try {
                 const res = await fetch('/api/projects/', { headers: authHeaders() });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    console.error('Error loading projects:', res.status, res.statusText);
+                    return;
+                }
                 const projects = await res.json();
+                console.log('Projects loaded:', projects);
                 renderStats(projects);
                 renderProjects(projects);
-            } catch(e) { console.error(e); }
+                
+                // Actualizar contadorProjects en el indicador de plan
+                const projectCountEl = document.getElementById('project-count');
+                if (projectCountEl && user.plan) {
+                    const limits = { 'free': 3, 'pro': 20, 'enterprise': -1 };
+                    const limit = limits[user.plan] || 3;
+                    const count = projects.length;
+                    projectCountEl.textContent = limit === -1 ? `${count}/∞` : `${count}/${limit}`;
+                    
+                    // Si está cerca del límite, cambiar color
+                    if (limit !== -1 && count >= limit) {
+                        projectCountEl.classList.add('text-error');
+                    }
+                }
+            } catch(e) {
+                console.error('Error in loadProjects:', e);
+            }
         }
 
         function renderStats(projects) {

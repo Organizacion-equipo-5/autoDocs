@@ -10,10 +10,22 @@ projects_bp = Blueprint('projects', __name__)
 @projects_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_projects():
-    user_id = get_jwt_identity()
-    db = get_db()
-    projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
-    return jsonify(projects), 200
+    try:
+        user_id = get_jwt_identity()
+        print(f"[DEBUG] get_projects - user_id: {user_id}")
+        db = get_db()
+        projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
+        print(f"[DEBUG] get_projects - found {len(projects)} projects")
+        # Convertir _id a string para evitar problemas de serialización
+        for p in projects:
+            if '_id' in p:
+                p['_id'] = str(p['_id'])
+        return jsonify(projects), 200
+    except Exception as e:
+        print(f"[ERROR] get_projects - Exception: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 @projects_bp.route('/', methods=['POST'])
 @jwt_required()

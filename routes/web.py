@@ -54,3 +54,7 @@ def analysis(project_id):
 @web_bp.route('/docs/<project_id>')
 def docs(project_id):
     return render_template('docs.html', project_id=project_id)
+
+@web_bp.route('/ml-predictions')
+def ml_predictions():
+    return render_template('ml_predictions.html')
