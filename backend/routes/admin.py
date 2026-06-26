@@ -314,6 +314,25 @@ def admin_overview():
 
         average_quality = round(sum(quality_scores) / max(len(quality_scores), 1), 1) if quality_scores else 0
 
+        # Distribución de lenguajes
+        language_distribution = {}
+        for p in projects:
+            lang = p.get('language') or 'Unknown'
+            language_distribution[lang] = language_distribution.get(lang, 0) + 1
+
+        # Proyectos creados por mes (últimos 12 meses)
+        from collections import defaultdict
+        projects_per_month = defaultdict(int)
+        for p in projects:
+            created_at = p.get('created_at', '')
+            if created_at:
+                try:
+                    month_key = str(created_at)[:7]  # "YYYY-MM"
+                    projects_per_month[month_key] += 1
+                except Exception:
+                    pass
+        projects_per_month = dict(sorted(projects_per_month.items())[-12:])
+
         print(f"[Admin Overview] Stats de proyectos calculadas: completados={completed_projects}, calidad={average_quality}")
 
         # Calcular análisis de documentación
@@ -378,7 +397,8 @@ def admin_overview():
                 "pending_projects": pending_projects,
                 "errored_projects": errored_projects,
                 "average_quality_score": average_quality,
-                "language_distribution": {},
+                "language_distribution": language_distribution,
+                "projects_per_month": projects_per_month,
                 "total_documents": len(analyses)
             },
             "users": [

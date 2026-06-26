@@ -5,6 +5,7 @@ from services.analyzer import ProjectAnalyzer
 from services.doc_generator import DocGenerator
 from services.etl_pipeline import ETLPipeline
 from services.ai_enhancer import AIEnhancer
+from services.ml_analyzer import run_ml_analysis
 from datetime import datetime
 import threading
 import requests
@@ -279,6 +280,30 @@ Formato esperado (Python):
             fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
         return jsonify({'suggestion': fallback}), 200
 
+@analysis_bp.route('/<project_id>/predictions', methods=['GET'])
+@jwt_required()
+def get_predictions(project_id):
+    """
+    Ejecuta los modelos de ML sobre los resultados ya analizados
+    del proyecto y devuelve regresiones + matriz de confusión.
+    """
+    user_id = get_jwt_identity()
+    db = get_db()
+ 
+    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
+    if not project:
+        return jsonify({"error": "Proyecto no encontrado"}), 404
+ 
+    result = db.analysis_results.find_one({"project_id": project_id})
+    if not result:
+        return jsonify({"error": "El proyecto aún no tiene resultados de análisis"}), 404
+ 
+    try:
+        from services.ml_analyzer import run_ml_analysis
+        ml_results = run_ml_analysis(result["results"])
+        return jsonify({"status": "ok", "predictions": ml_results}), 200
+    except Exception as e:
+        return jsonify({"error": f"Error en análisis ML: {str(e)}"}), 500
 
 @analysis_bp.route('/etl', methods=['POST'])
 @jwt_required()

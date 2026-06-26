@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#818cf8",
+                        "primary": "#38bdf8",
+                        "surface-container-high": "#e2e8f0",
+                        "surface-variant": "#cbd5e1",
+                        "on-surface-variant": "#334155",
+                        "outline-variant": "#94a3b8",
+                        "on-surface": "#0f172a",
+                        "tertiary": "#7c5800",
+                        "background": "#f1f5f9",
+                        "error": "#ba1a1a",
+                        "surface-container": "#ffffff",
+                        "outline": "#64748b",
+                        "surface": "#f1f5f9",
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: #f1f5f9;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: #0f172a;
+        }
+        html.dark body { background: #0f1418; color: #e2e8f0; }
+
+        html.dark .glass {
+            background: rgba(15, 20, 24, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        html.dark .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
+        }
+        html.dark .text-on-surface        { color: #f1f5f9 !important; }
+        html.dark .text-on-surface-variant { color: #94a3b8 !important; }
+        html.dark .text-primary            { color: #38bdf8 !important; }
+        html.dark .text-secondary          { color: #818cf8 !important; }
+        html.dark .border-outline-variant\/20 { border-color: rgba(148,163,184,0.2) !important; }
+        html.dark .border-primary\/30      { border-color: rgba(56,189,248,0.3) !important; }
+        html.dark .bg-primary\/15          { background: rgba(56,189,248,0.15) !important; }
+
+        #particle-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+        .glass {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        .glass-hover:hover {
+            border-color: rgba(56,189,248,0.3);
+            box-shadow: 0 12px 30px rgba(56,189,248,0.12);
+        }
+        .glow-cyan  { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
+        .stagger-in {
+            opacity: 0; transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        @keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
+
+        /* KPI cards */
+        .kpi-card {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .kpi-value {
+            font-size: 2.5rem; font-weight: 800; line-height: 1;
+            text-shadow: 0 0 12px rgba(56,189,248,0.3);
+        }
+        .kpi-label {
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+        }
+
+        /* Insight pill */
+        .insight {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 999px;
+            font-size: 0.7rem; font-weight: 600;
+        }
+        .insight-good  { background: rgba(16,185,129,0.12); color: #10b981; }
+        .insight-warn  { background: rgba(251,191,36,0.12);  color: #f59e0b; }
+        .insight-info  { background: rgba(56,189,248,0.12);  color: #38bdf8; }
+    </style>
+</head>
+<body class="font-body-md">
+    <canvas id="particle-canvas"></canvas>
+    <div class="flex min-h-screen w-full relative z-10">
+
+        <!-- Sidebar (idéntico al dashboard) -->
+        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay:0.1s;">
+            <div class="mb-12">
+                <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                </div>
+            </div>
+            <nav class="flex-1 flex flex-col gap-8">
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">dashboard</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Dashboard</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Proyectos</span>
+                </a>
+                <!-- Analytics (activo) -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/analytics">
+                    <span class="material-symbols-outlined text-primary text-2xl">analytics</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Analytics</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/database-analysis">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">storage</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Análisis BD</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Salir</span>
+                </a>
+            </nav>
+            <div class="mt-auto">
+                <a href="/perfil" class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer inline-flex">
+                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+
+            <!-- Header -->
+            <header class="flex justify-between items-center stagger-in" style="animation-delay:0.15s;">
+                <div>
+                    <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">Analytics</h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="greeting">Resumen de tus proyectos</p>
+                </div>
+                <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                    <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                </button>
+            </header>
+
+            <!-- KPI row -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-5 stagger-in" style="animation-delay:0.2s;" id="kpi-row">
+                <div class="glass rounded-3xl p-6 glass-hover kpi-card">
+                    <span class="material-symbols-outlined text-primary/60 mb-1">folder</span>
+                    <div class="kpi-value text-on-surface" id="kpi-total">—</div>
+                    <div class="kpi-label text-on-surface-variant">Proyectos totales</div>
+                </div>
+                <div class="glass rounded-3xl p-6 glass-hover kpi-card">
+                    <span class="material-symbols-outlined text-green-500/70 mb-1">check_circle</span>
+                    <div class="kpi-value text-on-surface" id="kpi-completed">—</div>
+                    <div class="kpi-label text-on-surface-variant">Completados</div>
+                </div>
+                <div class="glass rounded-3xl p-6 glass-hover kpi-card">
+                    <span class="material-symbols-outlined text-secondary/70 mb-1">star</span>
+                    <div class="kpi-value text-on-surface" id="kpi-quality">—</div>
+                    <div class="kpi-label text-on-surface-variant">Calidad promedio</div>
+                </div>
+                <div class="glass rounded-3xl p-6 glass-hover kpi-card">
+                    <span class="material-symbols-outlined text-primary/60 mb-1">functions</span>
+                    <div class="kpi-value text-on-surface" id="kpi-functions">—</div>
+                    <div class="kpi-label text-on-surface-variant">Funciones totales</div>
+                </div>
+            </div>
+
+            <!-- Row 1: Progreso de calidad (línea) + Estado (pie) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:0.3s;">
+
+                <!-- Progreso de calidad a lo largo del tiempo -->
+                <div class="lg:col-span-2 glass rounded-3xl p-7 glass-hover">
+                    <div class="flex items-start justify-between mb-1">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="material-symbols-outlined text-primary/70 text-lg">trending_up</span>
+                                <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Progreso de calidad</span>
+                            </div>
+                            <p class="text-on-surface-variant/50 text-xs">Score de cada proyecto completado en orden cronológico</p>
+                        </div>
+                        <div id="quality-trend-badge" class="insight insight-info hidden">
+                            <span class="material-symbols-outlined text-xs">arrow_upward</span>
+                            <span id="quality-trend-text"></span>
+                        </div>
+                    </div>
+                    <div style="position:relative;height:230px;margin-top:16px;">
+                        <canvas id="chart-quality-trend"></canvas>
+                    </div>
+                    <p id="quality-insight" class="text-xs text-on-surface-variant/50 mt-3 text-center"></p>
+                </div>
+
+                <!-- Estado de proyectos -->
+                <div class="glass rounded-3xl p-7 glass-hover">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="material-symbols-outlined text-secondary/70 text-lg">donut_small</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Estado general</span>
+                    </div>
+                    <p class="text-on-surface-variant/50 text-xs mb-4">Distribución actual de tus proyectos</p>
+                    <div style="position:relative;height:200px;">
+                        <canvas id="chart-status"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Calidad por proyecto (horizontal bar) + Lenguajes (doughnut) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:0.4s;">
+
+                <!-- Calidad por proyecto -->
+                <div class="lg:col-span-2 glass rounded-3xl p-7 glass-hover">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="material-symbols-outlined text-green-500/70 text-lg">bar_chart</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Calidad por proyecto</span>
+                    </div>
+                    <p class="text-on-surface-variant/50 text-xs mb-4">Verde ≥ 70 · Amarillo ≥ 40 · Rojo &lt; 40</p>
+                    <div id="quality-chart-wrap" style="position:relative;height:200px;overflow:hidden;">
+                        <canvas id="chart-quality-per-project"></canvas>
+                    </div>
+                    <p id="no-completed" class="text-center text-on-surface-variant/40 text-sm mt-4 hidden">Aún no tienes proyectos completados</p>
+                </div>
+
+                <!-- Lenguajes -->
+                <div class="glass rounded-3xl p-7 glass-hover">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="material-symbols-outlined text-primary/70 text-lg">code</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Lenguajes usados</span>
+                    </div>
+                    <p class="text-on-surface-variant/50 text-xs mb-4">Distribución en tus proyectos</p>
+                    <div style="position:relative;height:200px;">
+                        <canvas id="chart-langs"></canvas>
+                    </div>
+                    <p id="best-lang" class="text-xs text-center mt-3 text-on-surface-variant/50"></p>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div id="loading-state" class="fixed inset-0 flex items-center justify-center z-50 bg-background/80 backdrop-blur-sm" style="display:none!important;">
+                <div class="glass rounded-2xl p-8 flex flex-col items-center gap-4">
+                    <span class="material-symbols-outlined text-primary text-4xl animate-spin">refresh</span>
+                    <p class="text-on-surface-variant text-sm">Cargando analytics…</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ── Auth ───────────────────────────────────────────────────────
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/';
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
+            document.getElementById('greeting').textContent = `Hola, ${user.name}`;
+        }
+        function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+        function logout() { localStorage.clear(); }
+
+        // ── Theme helpers ──────────────────────────────────────────────
+        function isDark() {
+            return document.documentElement.classList.contains('dark');
+        }
+        function chartColors() {
+            const dark = isDark();
+            return {
+                text:    dark ? '#dee3e8' : '#1e293b',
+                grid:    dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+                palette: ['#8ed5ff','#c0c1ff','#10b981','#ffc176','#ff8fab','#a8dadc','#cdb4db'],
+            };
+        }
+
+        // ── Load & render ──────────────────────────────────────────────
+        async function load() {
+            const res = await fetch('/api/projects/', { headers: authHeaders() });
+            if (!res.ok) return;
+            const projects = await res.json();
+            renderKPIs(projects);
+            renderCharts(projects);
+        }
+
+        function renderKPIs(projects) {
+            const completed = projects.filter(p => p.status === 'completed');
+            const scores = completed.map(p => p.stats?.quality_score || 0).filter(s => s > 0);
+            const avgQ = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0) / scores.length) : 0;
+            const totalFuncs = projects.reduce((s,p) => s + (p.stats?.functions || 0), 0);
+
+            document.getElementById('kpi-total').textContent     = projects.length;
+            document.getElementById('kpi-completed').textContent = completed.length;
+            document.getElementById('kpi-quality').textContent   = avgQ ? avgQ + '/100' : '—';
+            document.getElementById('kpi-functions').textContent = totalFuncs || '—';
+        }
+
+        function renderCharts(projects) {
+            Chart.defaults.font.family = "'Geist', sans-serif";
+            const { text, grid, palette } = chartColors();
+            Chart.defaults.color       = text;
+            Chart.defaults.borderColor = grid;
+
+            const completed = projects
+                .filter(p => p.status === 'completed')
+                .sort((a,b) => (a.created_at||'').localeCompare(b.created_at||''));
+
+            // ── 1. Progreso de calidad (line) ──────────────────────────
+            const trendLabels = completed.map(p => p.name.length > 14 ? p.name.slice(0,12)+'…' : p.name);
+            const trendValues = completed.map(p => p.stats?.quality_score || 0);
+
+            // Calcular tendencia (primer vs último)
+            if (trendValues.length >= 2) {
+                const diff = trendValues[trendValues.length-1] - trendValues[0];
+                const badge = document.getElementById('quality-trend-badge');
+                const badgeText = document.getElementById('quality-trend-text');
+                badge.classList.remove('hidden');
+                if (diff > 0) {
+                    badge.className = 'insight insight-good';
+                    badge.querySelector('.material-symbols-outlined').textContent = 'arrow_upward';
+                    badgeText.textContent = `+${diff.toFixed(0)} pts`;
+                } else if (diff < 0) {
+                    badge.className = 'insight insight-warn';
+                    badge.querySelector('.material-symbols-outlined').textContent = 'arrow_downward';
+                    badgeText.textContent = `${diff.toFixed(0)} pts`;
+                } else {
+                    badge.className = 'insight insight-info';
+                    badge.querySelector('.material-symbols-outlined').textContent = 'remove';
+                    badgeText.textContent = 'Sin cambio';
+                }
+                const best = Math.max(...trendValues);
+                const bestName = completed[trendValues.indexOf(best)]?.name || '';
+                document.getElementById('quality-insight').textContent =
+                    `Mejor proyecto: ${bestName} (${best}/100)`;
+            }
+
+            const ctxT = document.getElementById('chart-quality-trend').getContext('2d');
+            if (window._c_trend) window._c_trend.destroy();
+            window._c_trend = new Chart(ctxT, {
+                type: 'line',
+                data: {
+                    labels: trendLabels.length ? trendLabels : ['Sin datos'],
+                    datasets: [{
+                        label: 'Calidad',
+                        data: trendValues.length ? trendValues : [0],
+                        borderColor: '#8ed5ff',
+                        backgroundColor: ctx => {
+                            const g = ctx.chart.ctx.createLinearGradient(0,0,0,230);
+                            g.addColorStop(0,'rgba(142,213,255,0.25)');
+                            g.addColorStop(1,'rgba(142,213,255,0.01)');
+                            return g;
+                        },
+                        borderWidth: 2.5,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: trendValues.map(v => v>=70?'#10b981':v>=40?'#ffc176':'#ff8fab'),
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ` Calidad: ${ctx.parsed.y}/100` } }
+                    },
+                    scales: {
+                        x: { grid: { color: grid }, ticks: { color: text, font: { size: 11 } } },
+                        y: { grid: { color: grid }, ticks: { color: text }, min: 0, max: 100,
+                             title: { display: true, text: 'Score', color: text, font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // ── 2. Estado (pie) ────────────────────────────────────────
+            const statusMap = { Completado:0, Pendiente:0, Analizando:0, Error:0 };
+            projects.forEach(p => {
+                if      (p.status==='completed')  statusMap['Completado']++;
+                else if (p.status==='pending')    statusMap['Pendiente']++;
+                else if (p.status==='analyzing')  statusMap['Analizando']++;
+                else if (p.status==='error')      statusMap['Error']++;
+            });
+            const stLabels = Object.keys(statusMap).filter(k=>statusMap[k]>0);
+            const stValues = stLabels.map(k=>statusMap[k]);
+            const stColors = { Completado:'#10b981', Pendiente:'#8ed5ff', Analizando:'#ffc176', Error:'#ff8fab' };
+
+            const ctxS = document.getElementById('chart-status').getContext('2d');
+            if (window._c_status) window._c_status.destroy();
+            window._c_status = new Chart(ctxS, {
+                type: 'pie',
+                data: {
+                    labels: stLabels.length ? stLabels : ['Sin datos'],
+                    datasets: [{ data: stValues.length ? stValues : [1],
+                        backgroundColor: stLabels.map(k=>stColors[k]||'#8ed5ff'),
+                        borderWidth: 2,
+                        borderColor: isDark() ? '#1b2024' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: text, padding: 8, font: { size: 11 } } } }
+                }
+            });
+
+            // ── 3. Calidad por proyecto (horizontal bar) ───────────────
+            const qLabels = completed.map(p => p.name.length>18 ? p.name.slice(0,16)+'…' : p.name);
+            const qValues = completed.map(p => p.stats?.quality_score || 0);
+            const qColors = qValues.map(v => v>=70?'rgba(16,185,129,0.75)':v>=40?'rgba(255,193,118,0.75)':'rgba(255,143,171,0.75)');
+
+            const wrap = document.getElementById('quality-chart-wrap');
+            const noCmp = document.getElementById('no-completed');
+            if (!completed.length) {
+                wrap.style.display = 'none';
+                noCmp.classList.remove('hidden');
+            } else {
+                wrap.style.display = 'block';
+                noCmp.classList.add('hidden');
+                const dynH = Math.max(200, qLabels.length * 38);
+                wrap.style.height = dynH + 'px';
+                const ctxQ = document.getElementById('chart-quality-per-project').getContext('2d');
+                if (window._c_quality) window._c_quality.destroy();
+                window._c_quality = new Chart(ctxQ, {
+                    type: 'bar',
+                    data: {
+                        labels: qLabels,
+                        datasets: [{ label: 'Calidad', data: qValues,
+                            backgroundColor: qColors, borderRadius: 6, borderWidth: 0 }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}/100` } }
+                        },
+                        scales: {
+                            x: { grid: { color: grid }, ticks: { color: text }, min: 0, max: 100 },
+                            y: { grid: { display: false }, ticks: { color: text, font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+
+            // ── 4. Lenguajes (doughnut) ────────────────────────────────
+            const langMap = {};
+            projects.forEach(p => {
+                const l = (p.language && p.language!=='unknown') ? p.language : 'Otro';
+                langMap[l] = (langMap[l]||0)+1;
+            });
+            const lLabels = Object.keys(langMap);
+            const lValues = Object.values(langMap);
+
+            // Insight: lenguaje más usado
+            if (lLabels.length) {
+                const maxIdx = lValues.indexOf(Math.max(...lValues));
+                document.getElementById('best-lang').textContent =
+                    `Más usado: ${lLabels[maxIdx]} (${lValues[maxIdx]} proyecto${lValues[maxIdx]!==1?'s':''})`;
+            }
+
+            const ctxL = document.getElementById('chart-langs').getContext('2d');
+            if (window._c_langs) window._c_langs.destroy();
+            window._c_langs = new Chart(ctxL, {
+                type: 'doughnut',
+                data: {
+                    labels: lLabels.length ? lLabels : ['Sin datos'],
+                    datasets: [{ data: lValues.length ? lValues : [1],
+                        backgroundColor: palette,
+                        borderWidth: 2,
+                        borderColor: isDark() ? '#1b2024' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: text, padding: 8, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} proyecto${ctx.parsed!==1?'s':''}` } }
+                    },
+                    cutout: '58%'
+                }
+            });
+        }
+
+        // ── Particles (igual que dashboard) ───────────────────────────
+        const canvas = document.getElementById('particle-canvas');
+        let ctx2 = canvas.getContext('2d');
+        let particles = [];
+        let mouse = {};
+        function initCanvas() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = Array.from({length:60}, () => ({
+                x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+                size: Math.random()*2+0.5,
+                vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3
+            }));
+        }
+        function animateParticles() {
+            ctx2.clearRect(0,0,canvas.width,canvas.height);
+            const dark = isDark();
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (mouse.x) {
+                    const dx=mouse.x-p.x, dy=mouse.y-p.y, d=Math.hypot(dx,dy);
+                    if(d<150){const a=Math.atan2(dy,dx),f=(150-d)/150;p.x-=Math.cos(a)*f*1.2;p.y-=Math.sin(a)*f*1.2;}
+                }
+                if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+                if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+                ctx2.fillStyle = dark ? 'rgba(142,213,255,0.35)' : 'rgba(56,189,248,0.2)';
+                ctx2.beginPath(); ctx2.arc(p.x,p.y,p.size,0,Math.PI*2); ctx2.fill();
+                particles.forEach(q => {
+                    if(Math.hypot(p.x-q.x,p.y-q.y)<100){
+                        ctx2.beginPath(); ctx2.moveTo(p.x,p.y); ctx2.lineTo(q.x,q.y);
+                        ctx2.strokeStyle = dark ? 'rgba(142,213,255,0.08)' : 'rgba(56,189,248,0.06)';
+                        ctx2.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', e => { mouse.x=e.x; mouse.y=e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animateParticles();
+            load();
+        });
+    </script>
+    <script src="/static/theme.js"></script>
+</body>
+</html>
