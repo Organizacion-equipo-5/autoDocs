@@ -206,6 +206,28 @@ def admin_list_projects():
     ]), 200
 
 
+@admin_bp.route('/pca', methods=['GET'])
+@jwt_required()
+@admin_required
+def admin_pca_analysis():
+    db = get_db()
+    analyses = list(db.analysis_results.find({}, {"project_id": 1, "results": 1}))
+    if not analyses:
+        return jsonify({"error": "No hay resultados de análisis disponibles para PCA."}), 404
+
+    project_map = {
+        project['_id']: project.get('name', 'Desconocido')
+        for project in db.projects.find({}, {"_id": 1, "name": 1})
+    }
+
+    try:
+        from services.ml_analyzer import pca_analysis
+        pca_result = pca_analysis(analyses, project_map=project_map, n_components=2)
+        return jsonify({"status": "ok", "pca": pca_result}), 200
+    except Exception as e:
+        return jsonify({"error": f"Error al calcular PCA: {str(e)}"}), 500
+
+
 @admin_bp.route('/projects', methods=['POST'])
 @jwt_required()
 @admin_required

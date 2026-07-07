@@ -7,6 +7,32 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: 'var(--color-background)',
+            surface: 'var(--color-surface)',
+            'surface-container': 'var(--color-surface-container)',
+            'surface-container-high': 'var(--color-surface-container-high)',
+            'on-surface': 'var(--color-on-surface)',
+            'on-surface-variant': 'var(--color-on-surface-variant)',
+            primary: 'var(--color-primary)',
+            secondary: 'var(--color-secondary)',
+            'outline-variant': 'var(--color-outline-variant)',
+            error: 'var(--color-error)',
+            'green-accent': 'var(--color-green-accent)',
+            tertiary: 'var(--color-tertiary)',
+          },
+          fontFamily: {
+            body: ['Geist', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
   <style>
     /* ====== TEMA OSCURO (por defecto) ====== */
     :root, body[data-theme="dark"] {
@@ -70,11 +96,12 @@
       backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
-      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
     }
     .glass-hover:hover {
       border-color: var(--glass-hover-border);
       box-shadow: var(--glass-hover-shadow);
+      transform: translateY(-2px);
     }
     .glass input,
     .glass select,
@@ -85,6 +112,30 @@
       background: var(--color-surface-container);
       backdrop-filter: blur(8px);
       border-right: 1px solid var(--glass-border);
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.75rem;
+      color: var(--color-on-surface-variant);
+      transition: all 0.15s;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .nav-link:hover {
+      color: var(--color-primary);
+      background: rgba(142,213,255,0.08);
+    }
+    .nav-link.active {
+      color: var(--color-primary);
+      background: rgba(142,213,255,0.12);
+      font-weight: 700;
+    }
+    .nav-link .material-symbols-outlined {
+      font-size: 20px;
     }
     .btn-primary {
       background: var(--color-primary);
@@ -114,6 +165,17 @@
       from { opacity: 0; transform: translateY(-15px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .stagger-in {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .stagger-in, .glass-hover { animation: none !important; transition: none !important; transform: none !important; opacity: 1 !important; }
+    }
     .action-icon {
       cursor: pointer;
       transition: all 0.15s;
@@ -122,146 +184,299 @@
       justify-content: center;
       padding: 0.25rem;
       border-radius: 0.375rem;
+      color: var(--color-on-surface-variant);
     }
-    .action-icon:hover { background: var(--color-outline-variant); }
+    .action-icon:hover { background: var(--color-outline-variant); color: var(--color-primary); }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title .material-symbols-outlined {
+      color: var(--color-primary);
+      font-size: 22px;
+    }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+
+    /* ====== SIDEBAR ESTILO "USUARIOS" (hover-expand) ====== */
+    .sidebar-shell {
+      width: 72px;
+      transition: width 0.3s ease;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    @media (min-width: 1024px) {
+      .sidebar-shell:hover { width: 240px; }
+      .sidebar-shell:hover .nav-label,
+      .sidebar-shell:hover .nav-badge,
+      .sidebar-shell:hover .sidebar-user-info,
+      .sidebar-shell:hover .sidebar-brand-label { opacity: 1; }
+    }
+    .nav-label, .nav-badge, .sidebar-user-info, .sidebar-brand-label {
+      opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      padding: 0 8px;
+    }
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      color: var(--color-on-surface-variant);
+      text-decoration: none;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      font-weight: 500;
+      position: relative;
+      width: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+    }
+    .sidebar-nav-item:hover {
+      background: rgba(142,213,255,0.08);
+      color: var(--color-primary);
+    }
+    .sidebar-nav-item.active {
+      background: rgba(142,213,255,0.12);
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+    .sidebar-nav-item .material-symbols-outlined {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .sidebar-nav-item .nav-badge {
+      margin-left: auto;
+      font-size: 0.6rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(142,213,255,0.15);
+      color: var(--color-primary);
+      font-weight: 700;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body data-theme="dark">
   <canvas id="particle-canvas"></canvas>
 
-  <!-- Sidebar -->
-  <aside class="sidebar fixed left-0 top-0 bottom-0 w-72 p-5 flex flex-col z-20">
-    <div class="flex items-center gap-2 font-mono text-xl font-bold mb-8">
-      <span class="material-symbols-outlined text-primary">terminal</span>
-      Auto<span class="text-primary">Docs</span> AI
-    </div>
-    <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mb-3">Principal</div>
-
-    <a href="/perfil" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all">Perfil</a>
-    <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-xl text-primary bg-primary/10 transition-all"> Admin</a>
-
-    <div class="text-xs uppercase tracking-wider text-on-surface-variant/50 mt-6 mb-3">Gestión</div>
-    <a href="/admin/users" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all"> Usuarios</a>
-    <a href="/admin/projects" class="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:text-primary transition-all"> Proyectos</a>
-    <div class="flex-1"></div>
-    <a href="/perfil" class="glass p-3 rounded-2xl mt-4 block hover:no-underline">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background" id="user-avatar">A</div>
-        <div>
-          <div class="font-bold text-sm" id="user-name">Administrador</div>
-          <div class="text-xs text-on-surface-variant/70" id="user-role">Admin</div>
+  <div class="flex min-h-screen w-full relative z-10">
+    <!-- Sidebar (estilo hover-expand, igual que el dashboard de usuario) -->
+    <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
+      <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
+        <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
         </div>
+        <span class="sidebar-brand-label font-mono text-lg font-bold">Auto<span class="text-primary">Docs</span></span>
       </div>
-    </a>
-    <button onclick="logout()" class="mt-4 flex items-center gap-2 justify-center w-full py-2 rounded-xl border border-outline-variant text-sm text-on-surface-variant hover:text-error transition-all">Cerrar sesión</button>
-  </aside>
 
-  <!-- Main content -->
-  <main class="ml-72 p-8 relative z-10">
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-4xl font-extrabold tracking-tight">Panel de Administrador</h1>
-        <p class="text-on-surface-variant/60">Supervisión total de usuarios, proyectos y análisis</p>
-      </div>
-      <div class="flex gap-3">
-        <button id="themeButton" class="glass p-2 rounded-full w-10 h-10 flex items-center justify-center">
-          <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+      <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
+        <div class="sidebar-nav">
+          <!-- <a href="/perfil" class="sidebar-nav-item">
+            <span class="material-symbols-outlined">person</span>
+            <span class="nav-label">Perfil</span>
+          </a> -->
+          <button onclick="showView('resumen')" id="nav-resumen" class="sidebar-nav-item active">
+            <span class="material-symbols-outlined">shield_person</span>
+            <span class="nav-label">Admin</span>
+          </button>
+          <a href="/admin/users" class="sidebar-nav-item">
+            <span class="material-symbols-outlined">group</span>
+            <span class="nav-label">Usuarios</span>
+            <span class="nav-badge" id="sidebar-user-count">0</span>
+          </a>
+          <a href="/admin/projects" class="sidebar-nav-item">
+            <span class="material-symbols-outlined">folder_open</span>
+            <span class="nav-label">Proyectos</span>
+            <span class="nav-badge" id="sidebar-project-count">0</span>
+          </a>
+          <button onclick="showView('pca')" id="nav-pca" class="sidebar-nav-item">
+            <span class="material-symbols-outlined">scatter_plot</span>
+            <span class="nav-label">Análisis PCA</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+        <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background flex-shrink-0" id="user-avatar">A</div>
+          <div class="sidebar-user-info min-w-0">
+            <div class="font-bold text-sm truncate" id="user-name">Administrador</div>
+            <div class="text-xs text-on-surface-variant/70 truncate" id="user-role">Admin</div>
+          </div>
+        </a>
+        <button onclick="logout()" class="sidebar-nav-item mt-2" style="justify-content:flex-start;">
+          <span class="material-symbols-outlined">logout</span>
+          <span class="nav-label">Cerrar sesión</span>
         </button>
       </div>
-    </div>
+    </aside>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Usuarios registrados</span><span class="material-symbols-outlined text-primary/40">group</span></div><div class="text-3xl font-bold mt-2" id="stat-users">0</div></div>
-      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Proyectos totales</span><span class="material-symbols-outlined text-primary/40">folder</span></div><div class="text-3xl font-bold mt-2" id="stat-projects">0</div></div>
-      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Completados</span><span class="material-symbols-outlined text-green-accent/40">check_circle</span></div><div class="text-3xl font-bold mt-2" id="stat-completed">0</div></div>
-      <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Calidad media</span><span class="material-symbols-outlined text-tertiary/40">star</span></div><div class="text-3xl font-bold mt-2" id="stat-quality">0</div></div>
-    </div>
-
-    <!-- Gráficas de Machine Learning / Analytics -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-      <!-- Gráfica: Lenguajes más usados -->
-      <div class="glass rounded-2xl p-6">
-        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary/60">code</span>
-          Lenguajes más usados
-        </h2>
-        <div style="position:relative;height:260px;">
-          <canvas id="chart-languages"></canvas>
+    <!-- Main content -->
+    <main class="flex-1 p-8 relative z-10 overflow-x-hidden">
+      <div class="flex justify-between items-center mb-8 stagger-in" style="animation-delay:0.1s;">
+        <div>
+          <h1 class="text-4xl font-extrabold tracking-tight">Panel de Administrador</h1>
+          <p class="text-on-surface-variant/60">Supervisión total de usuarios, proyectos y análisis</p>
+        </div>
+        <div class="flex gap-3">
+          <button id="themeButton" class="glass glass-hover p-2 rounded-full w-10 h-10 flex items-center justify-center">
+            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+          </button>
         </div>
       </div>
-      <!-- Gráfica: Proyectos por mes -->
-      <div class="glass rounded-2xl p-6">
-        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary/60">bar_chart</span>
-          Proyectos por mes
-        </h2>
-        <div style="position:relative;height:260px;">
-          <canvas id="chart-monthly"></canvas>
+
+      <!-- ============ VISTA: RESUMEN ============ -->
+      <div id="view-resumen">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 stagger-in" style="animation-delay:0.15s;">
+          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Usuarios registrados</span><span class="material-symbols-outlined text-primary/60">group</span></div><div class="text-3xl font-bold mt-2" id="stat-users">0</div></div>
+          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Proyectos totales</span><span class="material-symbols-outlined text-primary/60">folder</span></div><div class="text-3xl font-bold mt-2" id="stat-projects">0</div></div>
+          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Completados</span><span class="material-symbols-outlined text-green-accent/60">check_circle</span></div><div class="text-3xl font-bold mt-2" id="stat-completed">0</div></div>
+          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Calidad media</span><span class="material-symbols-outlined text-tertiary/60">star</span></div><div class="text-3xl font-bold mt-2" id="stat-quality">0</div></div>
+        </div>
+
+        <!-- Gráficas de Machine Learning / Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10 stagger-in" style="animation-delay:0.2s;">
+          <!-- Gráfica: Lenguajes más usados -->
+          <div class="glass rounded-2xl p-6 glass-hover">
+            <h2 class="text-lg font-bold mb-4 section-title">
+              <span class="material-symbols-outlined">code</span>
+              Lenguajes más usados
+            </h2>
+            <div style="position:relative;height:260px;">
+              <canvas id="chart-languages"></canvas>
+            </div>
+          </div>
+          <!-- Gráfica: Proyectos por mes -->
+          <div class="glass rounded-2xl p-6 glass-hover">
+            <h2 class="text-lg font-bold mb-4 section-title">
+              <span class="material-symbols-outlined">bar_chart</span>
+              Proyectos por mes
+            </h2>
+            <div style="position:relative;height:260px;">
+              <canvas id="chart-monthly"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.25s;">
+          <h2 class="text-xl font-bold mb-4 section-title">
+            <span class="material-symbols-outlined">description</span>
+            Análisis de documentación
+          </h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div><div class="text-on-surface-variant/60 text-sm">Documentos</div><div class="text-2xl font-bold" id="doc-count">0</div></div>
+            <div><div class="text-on-surface-variant/60 text-sm">Palabras clave</div><div class="text-2xl font-bold" id="keyword-count">0</div></div>
+            <div><div class="text-on-surface-variant/60 text-sm">Términos técnicos</div><div class="text-2xl font-bold" id="technical-count">0</div></div>
+            <div><div class="text-on-surface-variant/60 text-sm">Coincidencias</div><div class="text-2xl font-bold" id="matching-count">0</div></div>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
+        </div>
+
+        <!-- Tabla de Usuarios con CRUD -->
+        <div id="users-section" class="mb-12 stagger-in" style="animation-delay:0.35s;">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold section-title">
+              <span class="material-symbols-outlined">group</span>
+              Usuarios
+            </h2>
+            <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo usuario</button>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="border-b border-outline-variant/30 bg-surface-container/30">
+                  <tr class="text-on-surface-variant/70 text-sm">
+                    <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Plan</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="users-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Proyectos con CRUD básico -->
+        <div id="projects-section" class="stagger-in" style="animation-delay:0.4s;">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold section-title">
+              <span class="material-symbols-outlined">folder_open</span>
+              Proyectos recientes
+            </h2>
+            <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto</button>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="border-b border-outline-variant/30">
+                  <tr class="text-on-surface-variant/70 text-sm">
+                    <th class="p-4">Nombre</th><th class="p-4">Propietario</th><th class="p-4">Lenguaje</th><th class="p-4">Estado</th><th class="p-4">Score</th><th class="p-4">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="projects-table"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-
-    <div class="glass rounded-2xl p-6 mb-10">
-      <h2 class="text-xl font-bold mb-4">Análisis de documentación</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div><div class="text-on-surface-variant/60 text-sm">Documentos</div><div class="text-2xl font-bold" id="doc-count">0</div></div>
-        <div><div class="text-on-surface-variant/60 text-sm">Palabras clave</div><div class="text-2xl font-bold" id="keyword-count">0</div></div>
-        <div><div class="text-on-surface-variant/60 text-sm">Términos técnicos</div><div class="text-2xl font-bold" id="technical-count">0</div></div>
-        <div><div class="text-on-surface-variant/60 text-sm">Coincidencias</div><div class="text-2xl font-bold" id="matching-count">0</div></div>
-      </div>
-      <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
-    </div>
-
-    <!-- Tabla de Usuarios con CRUD -->
-    <div id="users-section" class="mb-12">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold"> Usuarios</h2>
-        <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo usuario</button>
-      </div>
-      <div class="glass rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="border-b border-outline-variant/30 bg-surface-container/30">
-              <tr class="text-on-surface-variant/70 text-sm">
-                <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Plan</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="users-table"></tbody>
-          </table>
+      <!-- ============ VISTA: ANÁLISIS PCA ============ -->
+      <div id="view-pca" class="hidden">
+        <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.1s;">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold section-title">
+                <span class="material-symbols-outlined">scatter_plot</span>
+                Análisis PCA
+              </h2>
+              <p class="text-on-surface-variant/70 text-sm" id="pca-description">Proyección de los proyectos analizados en 2 componentes principales.</p>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-on-surface-variant">Varianza explicada</div>
+              <div class="text-lg font-semibold text-primary" id="pca-variance">Cargando...</div>
+            </div>
+          </div>
+          <div style="position:relative;height:320px;">
+            <canvas id="chart-pca"></canvas>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            <div class="glass rounded-2xl p-4">
+              <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">data_object</span>Origen de los valores PCA</h3>
+              <p class="text-sm text-on-surface-variant mb-3">Los puntos del PCA se generan a partir de las métricas extraídas de cada proyecto:</p>
+              <ul class="text-sm space-y-2" id="pca-metrics-list"></ul>
+            </div>
+            <div class="glass rounded-2xl p-4">
+              <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">lightbulb</span>¿Para qué ayuda?</h3>
+              <p class="text-sm text-on-surface-variant" id="pca-help-text">
+                El PCA ayuda a ver la relación entre proyectos, identificar grupos similares y entender qué proyectos se desvían en calidad o estructura.
+              </p>
+            </div>
+          </div>
+          <div class="glass rounded-2xl p-4 mt-4">
+            <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">list</span>Proyectos en el espacio PCA</h3>
+            <div id="pca-projects-list" class="grid gap-2 text-sm"></div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Tabla de Proyectos con CRUD básico -->
-    <div id="projects-section">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold"> Proyectos recientes</h2>
-        <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto</button>
-      </div>
-      <div class="glass rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="border-b border-outline-variant/30">
-              <tr class="text-on-surface-variant/70 text-sm">
-                <th class="p-4">Nombre</th><th class="p-4">Propietario</th><th class="p-4">Lenguaje</th><th class="p-4">Estado</th><th class="p-4">Score</th><th class="p-4">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="projects-table"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <!-- MODAL USUARIO -->
-  <div id="userModal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="if(event.target===this) closeUserModal()">
-    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+  <div id="userModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeUserModal()" style="background:rgba(0,0,0,0.5);">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
       <button onclick="closeUserModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
       <h3 class="text-2xl font-bold text-on-surface mb-1" id="userModalTitle">Agregar Usuario</h3>
       <p class="text-on-surface-variant/60 text-sm mb-6">Administra los usuarios del sistema</p>
@@ -272,14 +487,14 @@
       <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
       <div class="flex gap-3 justify-end">
         <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
-        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all">Guardar</button>
+        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl transition-all">Guardar</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL PROYECTO -->
-  <div id="projectModal" class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" onclick="if(event.target===this) closeProjectModal()">
-    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+  <div id="projectModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeProjectModal()" style="background:rgba(0,0,0,0.5);">
+    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
       <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
       <h3 class="text-2xl font-bold text-on-surface mb-1" id="projectModalTitle">Agregar Proyecto</h3>
       <p class="text-on-surface-variant/60 text-sm mb-6">Administra los proyectos del sistema</p>
@@ -290,7 +505,7 @@
       <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Estado</label><select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="pending">Pendiente</option><option value="completed">Completado</option><option value="error">Error</option></select></div>
       <div class="flex gap-3 justify-end">
         <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
-        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all">Guardar</button>
+        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl transition-all">Guardar</button>
       </div>
     </div>
   </div>
@@ -304,6 +519,28 @@
     document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
 
     function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+
+    // ─── Manejo de vistas (Resumen / PCA) ───────────────────────────
+    let pcaLoaded = false;
+    function showView(view) {
+      const resumen = document.getElementById('view-resumen');
+      const pca = document.getElementById('view-pca');
+      const navResumen = document.getElementById('nav-resumen');
+      const navPca = document.getElementById('nav-pca');
+
+      if (view === 'pca') {
+        resumen.classList.add('hidden');
+        pca.classList.remove('hidden');
+        navResumen.classList.remove('active');
+        navPca.classList.add('active');
+        if (!pcaLoaded) { loadPCA(); pcaLoaded = true; }
+      } else {
+        pca.classList.add('hidden');
+        resumen.classList.remove('hidden');
+        navPca.classList.remove('active');
+        navResumen.classList.add('active');
+      }
+    }
 
     // Carga datos iniciales
     async function loadStats() {
@@ -344,9 +581,11 @@
         document.getElementById('keyword-count').innerText = data.data_analysis?.keywords?.length || 0;
         document.getElementById('technical-count').innerText = data.data_analysis?.technical_terms?.length || 0;
         document.getElementById('matching-count').innerText = data.data_analysis?.matching_terms?.length || 0;
+        document.getElementById('sidebar-user-count').innerText = data.stats.total_users || 0;
+        document.getElementById('sidebar-project-count').innerText = data.stats.total_projects || 0;
         const kwContainer = document.getElementById('keywords-list');
         if (data.data_analysis?.keywords) {
-          kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:var(--color-primary/10);">${k}</span>`).join('');
+          kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:rgba(142,213,255,0.12);color:var(--color-primary);border-color:rgba(142,213,255,0.25);">${k}</span>`).join('');
         }
 
         // ─── Gráficas ───────────────────────────────────────────────
@@ -444,9 +683,112 @@
             }
           }
         });
+
+        // Si la vista PCA ya estaba activa (p.ej. recarga con tema), refrescar
+        if (pcaLoaded) await loadPCA();
       } catch (error) {
         console.error('Error loading stats:', error);
         alert('Error al cargar estadísticas. Verifica la consola para más detalles.');
+      }
+    }
+
+    async function loadPCA() {
+      try {
+        const isDark = document.body.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#dee3e8' : '#0f172a';
+        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
+        const res = await fetch('/api/admin/pca', { headers: authHeaders() });
+        if (!res.ok) {
+          console.warn('PCA no disponible:', res.status);
+          document.getElementById('pca-variance').innerText = 'No disponible';
+          return;
+        }
+        const data = await res.json();
+        if (data.status !== 'ok' || !data.pca) {
+          console.warn('PCA response invalid', data);
+          document.getElementById('pca-variance').innerText = 'No disponible';
+          return;
+        }
+
+        const pca = data.pca;
+        const varTotal = pca.explained_variance_ratio.reduce((sum, val) => sum + val, 0) * 100;
+        document.getElementById('pca-variance').innerText = `${varTotal.toFixed(1)}% varianza`; 
+        const labels = pca.project_coordinates.map(item => item.name || item.project_id);
+        const valuesX = pca.project_coordinates.map(item => item.component_1);
+        const valuesY = pca.project_coordinates.map(item => item.component_2);
+
+        const ctxPCA = document.getElementById('chart-pca').getContext('2d');
+        const metrics = [
+          'total_files', 'total_funcs', 'total_classes', 'total_endpoints',
+          'total_issues', 'total_langs', 'doc_ratio', 'async_funcs',
+          'test_funcs', 'avg_complexity', 'max_complexity', 'high_cx_funcs',
+          'quality_score', 'total_size_kb'
+        ];
+
+        document.getElementById('pca-metrics-list').innerHTML = metrics
+          .map(metric => `<li class="flex items-start gap-2"><span class="inline-flex h-2.5 w-2.5 rounded-full bg-primary mt-1"></span><span>${metric.replace(/_/g, ' ')}</span></li>`)
+          .join('');
+
+        document.getElementById('pca-help-text').innerText =
+          'El PCA usa estas métricas cuantitativas para proyectar cada proyecto en un espacio de dos dimensiones. Esto ayuda a detectar grupos de proyectos similares, distinguir los outliers y entender cómo variables como la complejidad, documentación y tamaño impactan la calidad general.';
+
+        const projectList = document.getElementById('pca-projects-list');
+        projectList.innerHTML = pca.project_coordinates.slice(0, 8).map(item =>
+          `<div class="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+             <div class="font-semibold">${item.name}</div>
+             <div class="text-xs text-on-surface-variant mt-1">Componente 1: ${item.component_1}, Componente 2: ${item.component_2}</div>
+           </div>`
+        ).join('');
+
+        if (window._chartPCA) window._chartPCA.destroy();
+        window._chartPCA = new Chart(ctxPCA, {
+          type: 'scatter',
+          data: {
+            datasets: [{
+              label: 'Proyectos',
+              data: labels.map((label, index) => ({
+                x: valuesX[index],
+                y: valuesY[index],
+                label
+              })),
+              backgroundColor: '#8ed5ff',
+              borderColor: '#38bdf8',
+              pointRadius: 6,
+              pointHoverRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label(ctx) {
+                    const item = ctx.raw;
+                    return `${item.label}: (${item.x.toFixed(2)}, ${item.y.toFixed(2)})`;
+                  }
+                }
+              },
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: 'Componente 1', color: textColor },
+                grid: { color: gridColor },
+                ticks: { color: textColor }
+              },
+              y: {
+                title: { display: true, text: 'Componente 2', color: textColor },
+                grid: { color: gridColor },
+                ticks: { color: textColor }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Error loading PCA:', err);
+        document.getElementById('pca-variance').innerText = 'Error';
       }
     }
 
@@ -497,8 +839,8 @@
     }
 
     // CRUD Usuarios
-    function openUserModal(edit = false) { document.getElementById('userModal').classList.remove('hidden'); if(!edit) { document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; document.getElementById('userId').value = ''; document.getElementById('userName').value = ''; document.getElementById('userEmail').value = ''; document.getElementById('userPassword').value = ''; document.getElementById('userRole').value = 'user'; } }
-    function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+    function openUserModal(edit = false) { document.getElementById('userModal').classList.remove('hidden'); document.getElementById('userModal').classList.add('flex'); if(!edit) { document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; document.getElementById('userId').value = ''; document.getElementById('userName').value = ''; document.getElementById('userEmail').value = ''; document.getElementById('userPassword').value = ''; document.getElementById('userRole').value = 'user'; } }
+    function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); document.getElementById('userModal').classList.remove('flex'); }
     window.editUser = (id, name, email, role) => {
       document.getElementById('userModalTitle').innerText = 'Editar Usuario';
       document.getElementById('userId').value = id;
@@ -530,8 +872,8 @@
     };
 
     // CRUD Proyectos
-    function openProjectModal() { document.getElementById('projectModal').classList.remove('hidden'); document.getElementById('projectId').value = ''; document.getElementById('projectName').value = ''; document.getElementById('projectOwner').value = ''; document.getElementById('projectLanguage').value = 'Python'; document.getElementById('projectStatus').value = 'pending'; document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; }
-    function closeProjectModal() { document.getElementById('projectModal').classList.add('hidden'); }
+    function openProjectModal() { document.getElementById('projectModal').classList.remove('hidden'); document.getElementById('projectModal').classList.add('flex'); document.getElementById('projectId').value = ''; document.getElementById('projectName').value = ''; document.getElementById('projectOwner').value = ''; document.getElementById('projectLanguage').value = 'Python'; document.getElementById('projectStatus').value = 'pending'; document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; }
+    function closeProjectModal() { document.getElementById('projectModal').classList.add('hidden'); document.getElementById('projectModal').classList.remove('flex'); }
     window.editProject = (id, name, owner, lang, status) => {
       document.getElementById('projectModalTitle').innerText = 'Editar Proyecto';
       document.getElementById('projectId').value = id;
@@ -540,6 +882,7 @@
       document.getElementById('projectLanguage').value = lang;
       document.getElementById('projectStatus').value = status;
       document.getElementById('projectModal').classList.remove('hidden');
+      document.getElementById('projectModal').classList.add('flex');
     };
     async function saveProject() {
       const id = document.getElementById('projectId').value;
@@ -569,7 +912,7 @@
     const savedTheme = localStorage.getItem('theme') || 'dark';
     function applyTheme(theme) { document.body.setAttribute('data-theme', theme); themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode'; localStorage.setItem('theme', theme); }
     applyTheme(savedTheme);
-    themeBtn?.addEventListener('click', () => { const cur = document.body.getAttribute('data-theme'); applyTheme(cur === 'light' ? 'dark' : 'light'); });
+    themeBtn?.addEventListener('click', () => { const cur = document.body.getAttribute('data-theme'); applyTheme(cur === 'light' ? 'dark' : 'light'); loadStats(); });
 
     // Partículas (igual que index)
     const canvas = document.getElementById('particle-canvas');

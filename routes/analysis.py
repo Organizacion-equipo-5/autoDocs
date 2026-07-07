@@ -301,9 +301,17 @@ def get_predictions(project_id):
     try:
         from services.ml_analyzer import run_ml_analysis
         ml_results = run_ml_analysis(result["results"])
+        print(f"[DEBUG] ML results for project {project_id}:")
+        print(f"  - regresion_simple: {ml_results.get('regresion_simple', {}).keys() if ml_results.get('regresion_simple') else 'None'}")
+        print(f"  - regresion_multiple: {ml_results.get('regresion_multiple', {}).keys() if ml_results.get('regresion_multiple') else 'None'}")
+        print(f"  - regresion_logistica: {ml_results.get('regresion_logistica', {}).keys() if ml_results.get('regresion_logistica') else 'None'}")
         return jsonify({"status": "ok", "predictions": ml_results}), 200
     except Exception as e:
-        return jsonify({"error": f"Error en análisis ML: {str(e)}"}), 500
+        import traceback
+        tb = traceback.format_exc()
+        print(f"[ERROR] ML prediction failed for project {project_id}: {str(e)}")
+        print(tb)
+        return jsonify({"error": f"Error en análisis ML: {str(e)}", "trace": tb}), 500
 
 @analysis_bp.route('/etl', methods=['POST'])
 @jwt_required()

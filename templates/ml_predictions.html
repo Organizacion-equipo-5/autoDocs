@@ -94,6 +94,15 @@
         .project-card:hover { border-color: rgba(129,140,248,0.4); background: rgba(129,140,248,0.06); }
         .project-card.selected { border-color: rgba(129,140,248,0.6); background: rgba(129,140,248,0.1); }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ── Overrides de modo oscuro para la tarjeta "Qué estamos midiendo" ── */
+        html.dark .bg-surface-container-highest { background: rgba(30,41,59,0.6) !important; }
+        html.dark .bg-cyan-100 { background: rgba(56,189,248,0.15) !important; }
+        html.dark .text-cyan-700 { color: #38bdf8 !important; }
+        html.dark .bg-violet-100 { background: rgba(129,140,248,0.18) !important; }
+        html.dark .text-violet-700 { color: #a5b4fc !important; }
+        html.dark .bg-amber-100 { background: rgba(245,158,11,0.15) !important; }
+        html.dark .text-amber-700 { color: #fbbf24 !important; }
     </style>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
@@ -245,14 +254,63 @@
 
                         <!-- ── Lineal Simple ── -->
                         <div id="tab-lineal-simple" class="pred-tab-panel p-6 flex flex-col gap-5" style="display:block;">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant" id="rl-simple-desc">Un modelo simple que usa una sola variable para estimar la calidad de la documentación.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Número de funciones y su relación con la documentación.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>El coeficiente muestra si más funciones mejoran o empeoran la calidad.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Resultado</strong><br>Predicción de calidad en porcentaje y error promedio.</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="rl-simple-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
                             <div class="rounded-lg p-3 bg-primary/5 border border-primary/15 font-mono text-sm text-primary" id="rl-simple-eq"></div>
                             <svg id="rl-simple-chart" viewBox="0 0 600 220" class="w-full rounded-lg" style="background:rgba(26,29,39,0.6);max-height:220px;"></svg>
                             <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="rl-simple-interp"></div>
+                            <!-- Métricas Info -->
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Significado de las métricas:</p>
+                                <div id="rl-simple-metrics-info" class="space-y-1"></div>
+                            </div>
+                            <!-- Sugerencias -->
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Sugerencias
+                                </p>
+                                <div id="rl-simple-suggestions" class="space-y-2"></div>
+                            </div>
                         </div>
 
                         <!-- ── Lineal Múltiple ── -->
                         <div id="tab-lineal-multiple" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant" id="rl-multiple-desc">Un modelo con varias variables que calcula el Quality Score global del proyecto.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Funciones, complejidad, issues, tests y endpoints.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>Cada coeficiente indica el impacto de cada variable.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Score predicho y tabla real vs predicho.</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="rl-multiple-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
                             <div class="flex flex-col gap-2" id="rl-multiple-coefs"></div>
                             <div class="overflow-x-auto rounded-lg border border-outline-variant/10">
@@ -267,10 +325,41 @@
                                 </table>
                             </div>
                             <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="rl-multiple-interp"></div>
+                            <!-- Métricas Info -->
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Significado de las métricas:</p>
+                                <div id="rl-multiple-metrics-info" class="space-y-1"></div>
+                            </div>
+                            <!-- Sugerencias -->
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Sugerencias
+                                </p>
+                                <div id="rl-multiple-suggestions" class="space-y-2"></div>
+                            </div>
                         </div>
 
                         <!-- ── Logística ── -->
                         <div id="tab-logistica" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant" id="rl-logistic-desc">Un modelo de clasificación que estima la probabilidad de buena documentación.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Complejidad, async, parámetros y ratio de documentación.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>Predice si el proyecto estará bien documentado o no.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Probabilidad, exactitud y matriz de confusión.</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="rl-logistic-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
                             <div class="flex flex-col gap-2">
                                 <p class="text-xs text-on-surface-variant/60 uppercase tracking-wider">Matriz de Confusión</p>
@@ -289,10 +378,41 @@
                                 </div>
                             </div>
                             <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="rl-logistic-interp"></div>
+                            <!-- Métricas Info -->
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Significado de las métricas:</p>
+                                <div id="rl-logistic-metrics-info" class="space-y-1"></div>
+                            </div>
+                            <!-- Sugerencias -->
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Sugerencias
+                                </p>
+                                <div id="rl-logistic-suggestions" class="space-y-2"></div>
+                            </div>
                         </div>
 
                         <!-- ── MAE ── -->
                         <div id="tab-mae" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant">El MAE muestra el error promedio absoluto entre las predicciones y el quality score real.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Predicciones actuales de los modelos frente al valor real.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>El MAE más bajo indica un modelo más cercano al resultado real.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Barras comparativas de error y resumen de precisión.</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="mae-summary" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
                             <div class="flex flex-col gap-3" id="mae-bars"></div>
                             <svg id="mae-chart" viewBox="0 0 600 180" class="w-full rounded-lg" style="background:rgba(26,29,39,0.6);max-height:180px;"></svg>
@@ -540,6 +660,37 @@
             document.getElementById('rl-simple-interp').textContent = d?.error || 'No disponible';
             return;
         }
+        // Mostrar descripción del modelo
+        if (d.descripcion) {
+            document.getElementById('rl-simple-desc').textContent = d.descripcion;
+        }
+        // Mostrar info de métricas
+        if (d.metricas_info) {
+            var metricsHtml = '';
+            for (var key in d.metricas_info) {
+                if (d.metricas_info.hasOwnProperty(key)) {
+                    metricsHtml += `<div><span class="font-semibold text-primary">${key}:</span> ${d.metricas_info[key]}</div>`;
+                }
+            }
+            document.getElementById('rl-simple-metrics-info').innerHTML = metricsHtml;
+        }
+        // Mostrar sugerencias
+        if (d.sugerencias && d.sugerencias.length > 0) {
+            var suggestionsHtml = '';
+            d.sugerencias.forEach(function(s) {
+                suggestionsHtml += `<div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                    <span class="text-xs">${s}</span>
+                </div>`;
+            });
+            document.getElementById('rl-simple-suggestions').innerHTML = suggestionsHtml;
+        } else {
+            document.getElementById('rl-simple-suggestions').innerHTML =
+                `<div class="flex items-start gap-2 text-on-surface-variant/60">
+                    <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                    <span class="text-xs">No hay sugerencias específicas para este modelo por ahora.</span>
+                </div>`;
+        }
         document.getElementById('rl-simple-stats').innerHTML = [
             ['R²', d.r2, '#10b981'],
             ['MAE', d.mae, '#f59e0b'],
@@ -582,6 +733,37 @@
             document.getElementById('rl-multiple-interp').textContent = d?.error || 'No disponible';
             return;
         }
+        // Mostrar descripción del modelo
+        if (d.descripcion) {
+            document.getElementById('rl-multiple-desc').textContent = d.descripcion;
+        }
+        // Mostrar info de métricas
+        if (d.metricas_info) {
+            var metricsHtml = '';
+            for (var key in d.metricas_info) {
+                if (d.metricas_info.hasOwnProperty(key)) {
+                    metricsHtml += `<div><span class="font-semibold text-primary">${key}:</span> ${d.metricas_info[key]}</div>`;
+                }
+            }
+            document.getElementById('rl-multiple-metrics-info').innerHTML = metricsHtml;
+        }
+        // Mostrar sugerencias
+        if (d.sugerencias && d.sugerencias.length > 0) {
+            var suggestionsHtml = '';
+            d.sugerencias.forEach(function(s) {
+                suggestionsHtml += `<div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                    <span class="text-xs">${s}</span>
+                </div>`;
+            });
+            document.getElementById('rl-multiple-suggestions').innerHTML = suggestionsHtml;
+        } else {
+            document.getElementById('rl-multiple-suggestions').innerHTML =
+                `<div class="flex items-start gap-2 text-on-surface-variant/60">
+                    <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                    <span class="text-xs">No hay sugerencias específicas para este modelo por ahora.</span>
+                </div>`;
+        }
         document.getElementById('rl-multiple-stats').innerHTML = [
             ['R²', d.r2, '#10b981'],
             ['MAE', d.mae, '#f59e0b'],
@@ -617,16 +799,16 @@
         document.getElementById('rl-multiple-coefs').innerHTML = coefHtml;
         var tableHtml = '';
         (d.muestra_datos || []).forEach(function(r) {
-            var diff = Math.abs(r.y_pred - r.y_real);
+            var diff = Math.abs(r.quality_pred - r.quality_real);
             var c = diff < 5 ? '#10b981' : diff < 15 ? '#f59e0b' : '#f43f5e';
             tableHtml += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
-                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r.funcs}</td>
-                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r.complejidad}</td>
-                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r.issues}</td>
-                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r.tests}</td>
-                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r.endpoints}</td>
-                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r.y_real}</td>
-                <td class="px-3 py-2 font-mono text-sm font-bold" style="color:${c}">${r.y_pred}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Funciones']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Complejidad promedio']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Issues']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Tests']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Endpoints']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['quality_real']}</td>
+                <td class="px-3 py-2 font-mono text-sm font-bold" style="color:${c}">${r['quality_pred']}</td>
             </tr>`;
         });
         document.getElementById('rl-multiple-table').innerHTML = tableHtml;
@@ -638,6 +820,43 @@
         if (!d || d.error) {
             document.getElementById('rl-logistic-interp').textContent = d?.error || 'No disponible';
             return;
+        }
+        // Mostrar descripción del modelo
+        if (d.descripcion) {
+            var descEl = document.getElementById('rl-logistic-desc');
+            if (descEl) descEl.textContent = d.descripcion;
+        }
+        // Mostrar info de métricas
+        if (d.metricas_info) {
+            var metricsHtml = '';
+            for (var key in d.metricas_info) {
+                if (d.metricas_info.hasOwnProperty(key)) {
+                    metricsHtml += `<div><span class="font-semibold text-primary">${key}:</span> ${d.metricas_info[key]}</div>`;
+                }
+            }
+            var metricsEl = document.getElementById('rl-logistic-metrics-info');
+            if (metricsEl) metricsEl.innerHTML = metricsHtml;
+        }
+        // Mostrar sugerencias
+        if (d.sugerencias && d.sugerencias.length > 0) {
+            var suggestionsHtml = '';
+            d.sugerencias.forEach(function(s) {
+                suggestionsHtml += `<div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                    <span class="text-xs">${s}</span>
+                </div>`;
+            });
+            var suggestionsEl = document.getElementById('rl-logistic-suggestions');
+            if (suggestionsEl) suggestionsEl.innerHTML = suggestionsHtml;
+        } else {
+            var suggestionsElEmpty = document.getElementById('rl-logistic-suggestions');
+            if (suggestionsElEmpty) {
+                suggestionsElEmpty.innerHTML =
+                    `<div class="flex items-start gap-2 text-on-surface-variant/60">
+                        <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                        <span class="text-xs">No hay sugerencias específicas para este modelo por ahora.</span>
+                    </div>`;
+            }
         }
         var pct = (d.prob_documentada_actual * 100).toFixed(1);
         document.getElementById('rl-logistic-stats').innerHTML = [

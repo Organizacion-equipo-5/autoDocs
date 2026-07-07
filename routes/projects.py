@@ -4,6 +4,7 @@ from services.db import get_db
 from services.file_handler import save_uploaded_project, clone_github_repo
 from datetime import datetime
 import uuid
+from pathlib import Path
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -16,7 +17,6 @@ def get_projects():
         db = get_db()
         projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
         print(f"[DEBUG] get_projects - found {len(projects)} projects")
-        # Convertir _id a string para evitar problemas de serialización
         for p in projects:
             if '_id' in p:
                 p['_id'] = str(p['_id'])
@@ -33,25 +33,20 @@ def create_project():
     user_id = get_jwt_identity()
     db = get_db()
 
-    # Obtener información del usuario
     user = db.users.find_one({"_id": user_id})
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Solo aplicar límites a usuarios normales (no admin)
     if user.get('role') == 'user':
         plan = user.get('plan', 'free')
         project_limits = {
             'free': 3,
             'pro': 20,
-            'enterprise': -1  # -1 significa ilimitado
+            'enterprise': -1
         }
         limit = project_limits.get(plan, 3)
-
-        # Contar proyectos actuales del usuario
         current_count = db.projects.count_documents({"user_id": user_id})
 
-        # Verificar límite (si no es ilimitado)
         if limit != -1 and current_count >= limit:
             plan_names = {'free': 'Gratuito', 'pro': 'Pro', 'enterprise': 'Enterprise'}
             return jsonify({
@@ -65,13 +60,11 @@ def create_project():
     project_id = str(uuid.uuid4())
     project_path = None
 
-    # Validar que se proporcione al menos archivo o URL
     has_file = 'file' in request.files and request.files['file'].filename
 
     if not has_file and not github_url:
         return jsonify({"error": "Debes proporcionar un archivo o una URL de GitHub"}), 400
 
-    # Prioridad: archivo subido > URL de GitHub
     if has_file:
         f = request.files['file']
         try:
@@ -84,12 +77,9 @@ def create_project():
         except Exception as e:
             return jsonify({"error": f"Failed to clone repository: {str(e)}"}), 400
 
-    # Normalizar y verificar la ruta devuelta por los helpers
-    from pathlib import Path
     try:
         if project_path:
             p = Path(project_path)
-            # Resolver ruta absoluta para evitar problemas con el cwd en hilos
             project_path = str(p.resolve())
             if not p.exists():
                 return jsonify({"error": "Project path does not exist after extraction/cloning"}), 500
@@ -111,11 +101,34 @@ def create_project():
             "files": 0, "functions": 0,
             "classes": 0, "endpoints": 0,
             "quality_score": 0
+        },
+        "contributors": [],
+        "contributors_stats": {
+            "total_commits": 0,
+            "unique_authors": 0
         }
     }
     db.projects.insert_one(project)
 
-    # Actualizar contador de proyectos del usuario
+    if github_url:
+        try:
+            from services.github_client import get_contributors_from_api
+            contributors_data = get_contributors_from_api(github_url)
+            
+            if contributors_data and contributors_data.get('contributors'):
+                db.projects.update_one(
+                    {"_id": project_id},
+                    {"$set": {
+                        "contributors": contributors_data.get('contributors', []),
+                        "contributors_stats": {
+                            "total_commits": contributors_data.get('total_commits', 0),
+                            "unique_authors": contributors_data.get('unique_authors', 0)
+                        }
+                    }}
+                )
+        except Exception as e:
+            print(f"[ERROR] Error obteniendo colaboradores iniciales: {e}")
+
     new_count = db.projects.count_documents({"user_id": user_id})
     db.users.update_one({"_id": user_id}, {"$set": {"projects_count": new_count}})
 
@@ -129,6 +142,10 @@ def get_project(project_id):
     project = db.projects.find_one({"_id": project_id, "user_id": user_id})
     if not project:
         return jsonify({"error": "Project not found"}), 404
+    
+    if '_id' in project:
+        project['_id'] = str(project['_id'])
+    
     return jsonify(project), 200
 
 @projects_bp.route('/<project_id>', methods=['DELETE'])
@@ -141,8 +158,117 @@ def delete_project(project_id):
         return jsonify({"error": "Project not found"}), 404
     db.analysis_results.delete_many({"project_id": project_id})
 
-    # Actualizar contador de proyectos del usuario
     new_count = db.projects.count_documents({"user_id": user_id})
     db.users.update_one({"_id": user_id}, {"$set": {"projects_count": new_count}})
 
     return jsonify({"message": "Project deleted"}), 200
+
+# ══════════════════════════════════════════════════════════
+#  ENDPOINTS PARA COLABORADORES
+# ══════════════════════════════════════════════════════════
+
+@projects_bp.route('/<project_id>/contributors', methods=['GET'])
+@jwt_required()
+def get_project_contributors(project_id):
+    """
+    Obtiene los colaboradores de un proyecto desde GitHub
+    """
+    user_id = get_jwt_identity()
+    db = get_db()
+    
+    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    
+    # Si ya tenemos colaboradores guardados, devolverlos
+    if project.get('contributors') and len(project.get('contributors', [])) > 0:
+        return jsonify({
+            "contributors": project.get('contributors', []),
+            "total_commits": project.get('contributors_stats', {}).get('total_commits', 0),
+            "unique_authors": project.get('contributors_stats', {}).get('unique_authors', 0),
+            "repo_url": project.get('github_url', ''),
+            "repo_name": project.get('name', ''),
+            "cached": True
+        }), 200
+    
+    github_url = project.get('github_url')
+    if not github_url:
+        return jsonify({
+            "contributors": [],
+            "message": "Este proyecto no tiene URL de GitHub asociada"
+        }), 200
+    
+    try:
+        from services.github_client import get_contributors_from_api
+        contributors_data = get_contributors_from_api(github_url)
+        
+        if contributors_data and contributors_data.get('contributors'):
+            db.projects.update_one(
+                {"_id": project_id},
+                {"$set": {
+                    "contributors": contributors_data.get('contributors', []),
+                    "contributors_stats": {
+                        "total_commits": contributors_data.get('total_commits', 0),
+                        "unique_authors": contributors_data.get('unique_authors', 0)
+                    }
+                }}
+            )
+        
+        return jsonify(contributors_data), 200
+    except Exception as e:
+        print(f"[ERROR] get_project_contributors: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "error": f"Error al obtener colaboradores: {str(e)}",
+            "contributors": []
+        }), 500
+
+@projects_bp.route('/<project_id>/contributors/refresh', methods=['POST'])
+@jwt_required()
+def refresh_project_contributors(project_id):
+    """
+    Refresca los colaboradores de un proyecto desde GitHub (forzar actualización)
+    """
+    user_id = get_jwt_identity()
+    db = get_db()
+    
+    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    
+    github_url = project.get('github_url')
+    if not github_url:
+        return jsonify({
+            "error": "Este proyecto no tiene URL de GitHub asociada"
+        }), 400
+    
+    try:
+        from services.github_client import get_contributors_from_api
+        contributors_data = get_contributors_from_api(github_url)
+        
+        if contributors_data:
+            db.projects.update_one(
+                {"_id": project_id},
+                {"$set": {
+                    "contributors": contributors_data.get('contributors', []),
+                    "contributors_stats": {
+                        "total_commits": contributors_data.get('total_commits', 0),
+                        "unique_authors": contributors_data.get('unique_authors', 0)
+                    }
+                }}
+            )
+        
+        return jsonify({
+            "message": "Colaboradores actualizados correctamente",
+            "contributors": contributors_data.get('contributors', []),
+            "total_commits": contributors_data.get('total_commits', 0),
+            "unique_authors": contributors_data.get('unique_authors', 0)
+        }), 200
+    except Exception as e:
+        print(f"[ERROR] refresh_project_contributors: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "error": f"Error al actualizar colaboradores: {str(e)}"
+        }), 500

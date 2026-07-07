@@ -86,7 +86,6 @@
             color: #0f172a;
         }
 
-        /* Tema oscuro */
         html.dark body {
             background: #0f1418;
             color: #e2e8f0;
@@ -103,126 +102,13 @@
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
-        html.dark .quality-bar {
-            background: #1e293b;
-        }
-
-        /* Mejorar legibilidad de textos en modo oscuro */
-        html.dark .text-on-surface {
-            color: #f1f5f9 !important;
-        }
-
-        html.dark .text-on-surface-variant {
-            color: #94a3b8 !important;
-        }
-
-        html.dark .text-on-surface-variant\/60 {
-            color: #64748b !important;
-        }
-
-        html.dark .text-on-surface-variant\/70 {
-            color: #94a3b8 !important;
-        }
-
-        html.dark .text-on-surface-variant\/50 {
-            color: #64748b !important;
-        }
-
-        html.dark .text-on-surface-variant\/40 {
-            color: #475569 !important;
-        }
-
-        html.dark .text-primary {
-            color: #38bdf8 !important;
-        }
-
-        html.dark .text-primary\/80 {
-            color: #7dd3fc !important;
-        }
-
-        html.dark .text-secondary {
-            color: #818cf8 !important;
-        }
-
-        html.dark .border-outline-variant\/20 {
-            border-color: rgba(148, 163, 184, 0.2) !important;
-        }
-
-        html.dark .border-outline-variant\/30 {
-            border-color: rgba(148, 163, 184, 0.3) !important;
-        }
-
-        html.dark .border-primary\/30 {
-            border-color: rgba(56, 189, 248, 0.3) !important;
-        }
-
-        html.dark .border-primary\/40 {
-            border-color: rgba(56, 189, 248, 0.4) !important;
-        }
-
-        html.dark .bg-primary\/15 {
-            background: rgba(56, 189, 248, 0.15) !important;
-        }
-
-        html.dark .bg-primary\/5 {
-            background: rgba(56, 189, 248, 0.05) !important;
-        }
-
-        html.dark .bg-surface-container\/50 {
-            background: rgba(30, 41, 59, 0.5) !important;
-        }
-
-        html.dark .bg-gray-100 {
-            background: #1e293b !important;
-        }
-
-        html.dark .text-gray-600 {
-            color: #94a3b8 !important;
-        }
-
-        html.dark .text-gray-700 {
-            color: #cbd5e1 !important;
-        }
-
-        html.dark .border-gray-200 {
-            border-color: #334155 !important;
-        }
-
-        html.dark .border-green-200 {
-            border-color: #166534 !important;
-        }
-
-        html.dark .text-green-700 {
-            color: #4ade80 !important;
-        }
-
-        html.dark .bg-green-100 {
-            background: #14532d !important;
-        }
-
-        html.dark .border-yellow-200 {
-            border-color: #854d0e !important;
-        }
-
-        html.dark .text-yellow-700 {
-            color: #fbbf24 !important;
-        }
-
-        html.dark .bg-yellow-100 {
-            background: #713f12 !important;
-        }
-
-        html.dark .border-red-200 {
-            border-color: #991b1b !important;
-        }
-
-        html.dark .text-red-700 {
-            color: #f87171 !important;
-        }
-
-        html.dark .bg-red-100 {
-            background: #7f1d1d !important;
-        }
+        html.dark .text-on-surface { color: #f1f5f9 !important; }
+        html.dark .text-on-surface-variant { color: #94a3b8 !important; }
+        html.dark .text-primary { color: #38bdf8 !important; }
+        html.dark .text-secondary { color: #818cf8 !important; }
+        html.dark .border-outline-variant\/20 { border-color: rgba(148, 163, 184, 0.2) !important; }
+        html.dark .bg-primary\/15 { background: rgba(56, 189, 248, 0.15) !important; }
+        html.dark .bg-primary\/5 { background: rgba(56, 189, 248, 0.05) !important; }
 
         #particle-canvas {
             position: fixed;
@@ -249,14 +135,6 @@
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
         }
 
-        .glow-cyan {
-            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-        }
-
-        .glow-violet {
-            text-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
-        }
-
         .stagger-in {
             opacity: 0;
             transform: translateY(20px) translate3d(0,0,0);
@@ -277,23 +155,7 @@
 
         .progress-ring { transform: rotate(-90deg); }
 
-        .tilt-card {
-            perspective: 1000px;
-        }
-
-        .quality-bar {
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 3px;
-            margin-top: 0.75rem;
-            overflow: hidden;
-        }
-        .quality-fill {
-            height: 100%;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #10b981, #38bdf8);
-            transition: width 1s ease;
-        }
+        .tilt-card { perspective: 1000px; }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
@@ -303,391 +165,524 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .modal-anim { animation: fadeDown 0.2s ease; }
+
+        /* Estilos mejorados para el menú lateral */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            padding: 0 8px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            position: relative;
+            width: 100%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(56, 189, 248, 0.08);
+            color: #38bdf8;
+        }
+
+        .sidebar-nav-item.active {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+        }
+
+        .sidebar-nav-item .material-symbols-outlined {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-item .nav-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-nav-item .nav-badge {
+            margin-left: auto;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            font-weight: 700;
+        }
+
+        html.dark .sidebar-nav-item {
+            color: #94a3b8;
+        }
+
+        html.dark .sidebar-nav-item:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+        }
+
+        html.dark .sidebar-nav-item.active {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+        }
+
+        /* Sidebar expandida en hover para escritorio */
+        @media (min-width: 1024px) {
+            aside {
+                width: 72px;
+                transition: width 0.3s ease;
+                overflow: hidden;
+            }
+            aside:hover {
+                width: 220px;
+            }
+            aside:hover .sidebar-nav-item .nav-label {
+                opacity: 1;
+            }
+            aside:hover .sidebar-nav-item .nav-badge {
+                opacity: 1;
+            }
+            .sidebar-nav-item .nav-label {
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+            .sidebar-nav-item .nav-badge {
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+            aside:hover .sidebar-user-info {
+                opacity: 1;
+            }
+            .sidebar-user-info {
+                opacity: 0;
+                transition: opacity 0.2s;
+                white-space: nowrap;
+            }
+        }
+
+        /* Estilos para la sección de proyectos */
+        .project-card {
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .project-card .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.6rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .project-card .status-badge.completed {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .project-card .status-badge.analyzing {
+            background: rgba(251, 191, 36, 0.12);
+            color: #f59e0b;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .project-card .status-badge.pending {
+            background: rgba(148, 163, 184, 0.12);
+            color: #64748b;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .project-card .status-badge.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .project-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .project-metrics .metric {
+            text-align: center;
+        }
+
+        .project-metrics .metric .value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .project-metrics .metric .label {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        html.dark .project-metrics .metric .value {
+            color: #f1f5f9;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            background: rgba(15, 20, 24, 0.6);
+            backdrop-filter: blur(12px);
+        }
+
+        html:not(.dark) .modal-overlay {
+            background: rgba(241, 245, 249, 0.7);
+        }
+
+        .modal-input {
+            width: 100%;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            background: var(--modal-input-bg, #f8fafc);
+            border: 1px solid var(--modal-input-border, rgba(148, 163, 184, 0.4));
+            color: var(--modal-text, #0f172a);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            font-family: 'Geist', sans-serif;
+        }
+
+        .modal-input::placeholder {
+            color: var(--modal-placeholder, rgba(100, 116, 139, 0.5));
+        }
+
+        .modal-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        html.dark .modal-input {
+            background: #1b2024;
+            border-color: rgba(62, 72, 79, 0.8);
+            color: #dee3e8;
+        }
+
+        #upload-zone {
+            border: 2px dashed rgba(148, 163, 184, 0.4);
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #upload-zone:hover {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        html.dark #upload-zone {
+            border-color: rgba(62, 72, 79, 0.8);
+            background: rgba(27, 32, 36, 0.5);
+        }
+
+        html.dark #upload-zone:hover {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.08);
+        }
+        /* ── MODAL INPUTS ── */
+.modal-input {
+    width: 100%;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    background: var(--modal-input-bg, #f8fafc);
+    border: 1px solid var(--modal-input-border, rgba(148, 163, 184, 0.4));
+    color: var(--modal-text, #0f172a);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    font-family: 'Geist', sans-serif;
+}
+.modal-input::placeholder {
+    color: var(--modal-placeholder, rgba(100, 116, 139, 0.5));
+}
+.modal-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+.modal-input[readonly] {
+    opacity: 0.65;
+    cursor: default;
+}
+
+html.dark .modal-input {
+    background: #1b2024;
+    border-color: rgba(62, 72, 79, 0.8);
+    color: #dee3e8;
+}
+html.dark .modal-input::placeholder {
+    color: rgba(189, 200, 209, 0.4);
+}
+html.dark .modal-input:focus {
+    border-color: #8ed5ff;
+    box-shadow: 0 0 0 3px rgba(142, 213, 255, 0.18);
+}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay {
+    background: rgba(15, 20, 24, 0.6);
+    backdrop-filter: blur(12px);
+}
+html:not(.dark) .modal-overlay {
+    background: rgba(241, 245, 249, 0.7);
+}
+
+/* ── PROGRESS TRACK ── */
+.progress-track {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 9999px;
+    height: 0.5rem;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    transition: width 0.6s ease;
+}
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
     <canvas id="particle-canvas"></canvas>
     <div class="flex min-h-screen w-full relative z-10">
-        <!-- Sidebar -->
-        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
-            <div class="mb-12">
+        <!-- Sidebar Mejorado -->
+        <aside class="h-screen sticky top-0 flex flex-col items-center py-6 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
+            <!-- Logo -->
+            <div class="mb-8 flex-shrink-0">
                 <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
                     <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
                 </div>
             </div>
-            <nav class="flex-1 flex flex-col gap-8">
-                <!-- Dashboard -->
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
-                    <span class="material-symbols-outlined text-primary text-2xl group-hover:glow-cyan">dashboard</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Dashboard
-                    </span>
-                </a>
-                <!-- Proyectos -->
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
-                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Proyectos
-                    </span>
-                </a>
-                <!-- Analytics -->
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/analytics">
-                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">analytics</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Analytics
-                    </span>
-                </a>
-                <!-- Análisis de Base de Datos -->
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/database-analysis">
-                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">storage</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Análisis BD
-                    </span>
-                </a>
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/ml-predictions">
-    <span class="material-symbols-outlined text-violet-400 text-2xl group-hover:glow-violet transition-colors">
-        scatter_plot
-    </span>
 
-    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 
-                 text-xs font-medium opacity-0 group-hover:opacity-100 
-                 transition-opacity whitespace-nowrap z-50 
-                 text-violet-400 pointer-events-none">
-        Predicciones ML
-    </span>
+            <!-- Navegación -->
+            <nav class="flex-1 w-full overflow-y-auto">
+                <div class="sidebar-nav">
+                    <a href="/dashboard" class="sidebar-nav-item active">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span class="nav-label">Dashboard</span>
+                    </a>
+                    <a href="/projects" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        <span class="nav-label">Proyectos</span>
+                        <span class="nav-badge" id="sidebar-project-count">0</span>
+                    </a>
+                    <a href="/analytics" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">analytics</span>
+                        <span class="nav-label">Analytics</span>
+                    </a>
+                    <a href="/database-analysis" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">storage</span>
+                        <span class="nav-label">Análisis BD</span>
+                    </a>
+                    <a href="/ml-predictions" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">scatter_plot</span>
+                        <span class="nav-label">Predicciones ML</span>
+                    </a>
+                    <button onclick="openUploadModal()" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">upload</span>
+                        <span class="nav-label">Nuevo proyecto</span>
+                    </button>
+                    <a onclick="openConfigModal()" class="sidebar-nav-item" style="cursor:pointer;">
+    <span class="material-symbols-outlined">settings</span>
+    <span class="nav-label">Configuración</span>
 </a>
-                <!-- Nuevo proyecto -->
-                <button class="group relative flex items-center justify-center hover:scale-110 transition-transform bg-transparent border-none cursor-pointer" onclick="openUploadModal()">
-                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">upload</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Nuevo proyecto
-                    </span>
-                </button>
-                <!-- Configuración -->
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="#">
-                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">settings</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Configuración
-                    </span>
-                </a>
-                <!-- Cerrar sesión -->
-                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
-                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        Cerrar sesión
-                    </span>
-                </a>
+                    <a href="/" onclick="logout()" class="sidebar-nav-item" style="margin-top:8px;border-top:1px solid rgba(148,163,184,0.1);padding-top:12px;">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="nav-label">Cerrar sesión</span>
+                    </a>
+                </div>
             </nav>
-            <div class="mt-auto">
-                <a href="/perfil" class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative inline-flex">
-                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
-                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                        <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
-                    </span>
-                </a>
-            </div>
+
+            <!-- Perfil -->
+            <!-- Perfil en sidebar -->
+<div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+    <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+        <div id="user-avatar-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm flex-shrink-0">U</div>
+        <div class="sidebar-user-info min-w-0">
+            <div class="text-sm font-semibold text-on-surface truncate" id="sidebar-user-name">Usuario</div>
+            <div class="text-xs text-primary" id="sidebar-user-plan">Plan Gratuito</div>
+        </div>
+    </a>
+</div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+        <main class="flex-1 flex flex-col p-6 lg:p-10 gap-8 overflow-y-auto overflow-x-hidden">
             <!-- Header -->
-            <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
+            <header class="flex flex-wrap items-center justify-between gap-4 stagger-in" style="animation-delay: 0.15s;">
                 <div>
-                    <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
-                    <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="greeting">Bienvenido de vuelta</p>
+                    <h1 class="text-3xl lg:text-4xl font-bold text-on-surface">
+                        Dashboard <span class="text-primary">AutoDocs</span>
+                    </h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-1 uppercase tracking-[0.2em]" id="greeting">Bienvenido de vuelta</p>
                 </div>
-                <div class="flex gap-4 items-center">
-                    <div id="plan-indicator" class="glass px-4 py-2.5 rounded-xl flex items-center gap-2 border border-outline-variant/20">
+                <div class="flex items-center gap-3">
+                    <div class="glass px-4 py-2 rounded-xl flex items-center gap-3 border border-outline-variant/20">
                         <span class="material-symbols-outlined text-primary text-sm">workspace_premium</span>
                         <span class="text-sm font-semibold text-on-surface" id="plan-name">Free</span>
                         <span class="text-xs text-on-surface-variant/60" id="project-count">0/3</span>
                     </div>
-                    <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
-                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    <button id="themeButton" class="p-2.5 glass glass-hover rounded-xl border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        <span id="themeIcon" class="material-symbols-outlined text-xl">light_mode</span>
                     </button>
-                    <button onclick="openUploadModal()" class="px-6 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all active:scale-95 hover:bg-primary/5">
-                        <span class="material-symbols-outlined text-xl">upload</span>
-                        Nuevo Proyecto
+                    <button onclick="openUploadModal()" class="px-5 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all hover:bg-primary/5">
+                        <span class="material-symbols-outlined text-lg">add</span>
+                        Nuevo
                     </button>
                 </div>
             </header>
 
-            <!-- Stats and Quick Panel -->
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
-                <!-- Left: Stats Cards -->
-                <div class="xl:col-span-4 flex flex-col gap-8">
-                    <div class="tilt-card stagger-in" style="animation-delay: 0.2s;">
-                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
-                            <div class="flex items-center justify-between mb-6">
-                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Proyectos</span>
-                                <span class="material-symbols-outlined text-primary">description</span>
-                            </div>
-                            <div class="flex items-end gap-3">
-                                <div class="text-6xl font-bold glow-cyan tracking-tighter text-on-surface" id="stat-projects">0</div>
-                                <div class="text-on-surface-variant text-xs font-bold mb-2">Totales creados</div>
-                            </div>
-                        </div>
+            <!-- Stats Cards - Layout más limpio -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-in" style="animation-delay: 0.2s;">
+                <div class="glass p-5 rounded-2xl border border-outline-variant/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Proyectos</span>
+                        <span class="material-symbols-outlined text-primary text-xl">description</span>
                     </div>
-                    <div class="tilt-card stagger-in" style="animation-delay: 0.3s;">
-                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
-                            <div class="flex items-center justify-between mb-6">
-                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Completados</span>
-                                <span class="material-symbols-outlined text-green-500">check_circle</span>
-                            </div>
-                            <div class="flex items-end gap-3">
-                                <div class="text-6xl font-bold glow-cyan tracking-tighter text-on-surface" id="stat-completed">0</div>
-                                <div class="text-green-500 text-xs font-bold mb-2 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-sm">trending_up</span> <span id="stat-completed-percent">0%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tilt-card stagger-in" style="animation-delay: 0.4s;">
-                        <div class="glass p-8 rounded-3xl glass-hover card-interaction">
-                            <div class="flex items-center justify-between mb-6">
-                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Funciones</span>
-                                <span class="material-symbols-outlined text-secondary">functions</span>
-                            </div>
-                            <div class="text-5xl font-bold mb-4 text-on-surface" id="stat-functions">0</div>
-                            <div class="text-xs text-on-surface-variant/50">Detectadas en total</div>
-                        </div>
-                    </div>
+                    <div class="text-3xl font-bold text-on-surface" id="stat-projects">0</div>
                 </div>
-
-                <!-- Right: Quick Stats & Progress -->
-                <div class="xl:col-span-8 flex flex-col gap-10">
-                    <div class="tilt-card stagger-in" style="animation-delay: 0.5s;">
-                        <div class="glass rounded-3xl overflow-hidden glass-hover flex flex-col lg:flex-row items-center gap-8 p-8 card-interaction">
-                            <div class="relative w-24 h-24">
-                                <svg class="progress-ring w-24 h-24">
-                                    <circle class="text-surface-variant/30 stroke-current" cx="48" cy="48" fill="transparent" r="40" stroke-width="8"></circle>
-                                    <circle id="progress-circle" class="text-primary stroke-current" cx="48" cy="48" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke-width="8" style="filter: drop-shadow(0 0 8px rgba(56,189,248,0.6))"></circle>
-                                </svg>
-                                <div class="absolute inset-0 flex items-center justify-center font-bold text-xl text-on-surface" id="progress-percent">0%</div>
-                            </div>
-                            <div>
-                                <span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold block mb-1">Tasa de completitud</span>
-                                <div class="text-2xl font-semibold text-on-surface" id="progress-label">Sin proyectos</div>
-                                <div class="text-[10px] text-on-surface-variant/40 mt-1">Proyectos finalizados sobre el total</div>
-                            </div>
-                        </div>
+                <div class="glass p-5 rounded-2xl border border-outline-variant/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Completados</span>
+                        <span class="material-symbols-outlined text-green-500 text-xl">check_circle</span>
                     </div>
+                    <div class="text-3xl font-bold text-on-surface" id="stat-completed">0</div>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-outline-variant/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Funciones</span>
+                        <span class="material-symbols-outlined text-secondary text-xl">functions</span>
+                    </div>
+                    <div class="text-3xl font-bold text-on-surface" id="stat-functions">0</div>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-outline-variant/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Endpoints</span>
+                        <span class="material-symbols-outlined text-primary text-xl">api</span>
+                    </div>
+                    <div class="text-3xl font-bold text-on-surface" id="stat-endpoints">0</div>
+                </div>
+            </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-in" style="animation-delay: 0.6s;">
-                        <div class="glass p-6 rounded-2xl flex items-center gap-6 border-l-4 border-secondary hover:border-l-8 transition-all glass-hover group">
-                            <div class="text-4xl font-bold glow-violet group-hover:scale-110 transition-transform text-on-surface" id="stat-endpoints">0</div>
-                            <div>
-                                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Endpoints</div>
-                                <div class="text-secondary text-sm">API documentadas</div>
-                            </div>
-                        </div>
-                        <div class="glass p-6 rounded-2xl flex items-center gap-6 border-l-4 border-primary hover:border-l-8 transition-all glass-hover group">
-                            <div class="text-4xl font-bold glow-cyan group-hover:scale-110 transition-transform text-on-surface" id="stat-active-projects">0</div>
-                            <div>
-                                <div class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Activos</div>
-                                <div class="text-primary text-sm">En análisis o pendientes</div>
-                            </div>
+            <!-- Progress Card -->
+            <div class="glass p-6 rounded-2xl border border-outline-variant/10 stagger-in" style="animation-delay: 0.25s;">
+                <div class="flex items-center gap-6">
+                    <div class="relative w-20 h-20 flex-shrink-0">
+                        <svg class="progress-ring w-20 h-20">
+                            <circle class="text-surface-variant/30 stroke-current" cx="40" cy="40" fill="transparent" r="34" stroke-width="6"></circle>
+                            <circle id="progress-circle" class="text-primary stroke-current" cx="40" cy="40" fill="transparent" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" stroke-width="6"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-bold text-lg text-on-surface" id="progress-percent">0%</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-on-surface" id="progress-label">Sin proyectos</div>
+                        <div class="text-xs text-on-surface-variant/50">Proyectos finalizados sobre el total</div>
+                        <div class="mt-2 flex items-center gap-4 text-xs">
+                            <span class="text-on-surface-variant/60">Completados: <strong id="stat-completed-small" class="text-green-500">0</strong></span>
+                            <span class="text-on-surface-variant/60">Activos: <strong id="stat-active-small" class="text-primary">0</strong></span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Projects (Cards Grid) -->
-            <section class="stagger-in mt-4" style="animation-delay: 0.7s;">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-bold tracking-tight text-on-surface">Proyectos Recientes</h2>
-                    <a class="text-primary text-xs uppercase tracking-widest font-bold hover:underline underline-offset-8 transition-all" href="/projects">Explorar Todo</a>
+            <!-- Recent Projects -->
+            <section class="stagger-in" style="animation-delay: 0.3s;">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-on-surface">Proyectos Recientes</h2>
+                    <a href="/projects" class="text-xs text-primary hover:underline font-semibold uppercase tracking-wider">Ver todos</a>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="projects-grid"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" id="projects-grid"></div>
             </section>
         </main>
     </div>
 
-    <!-- Upload Modal — respeta tema claro/oscuro -->
-    <style>
-        /* Variables del modal según tema */
-        #uploadModal        { background: var(--modal-overlay-bg); backdrop-filter: blur(18px); }
-        #uploadModalInner   {
-            background:    var(--modal-bg);
-            backdrop-filter: blur(24px);
-            border:        1px solid var(--modal-border);
-            box-shadow:    var(--modal-shadow);
-            border-radius: 1.75rem;
-            padding:       2rem;
-        }
-        .modal-input {
-            width: 100%;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            background:  var(--modal-input-bg);
-            border:      1px solid var(--modal-input-border);
-            color:       var(--modal-text);
-            transition:  border-color 0.2s, box-shadow 0.2s;
-            outline: none;
-            font-family: 'Geist', sans-serif;
-        }
-        .modal-input::placeholder { color: var(--modal-placeholder); }
-        .modal-input:focus {
-            border-color: var(--modal-input-focus);
-            box-shadow:   0 0 0 3px var(--modal-input-ring);
-        }
-        #upload-zone {
-            border:     2px dashed var(--modal-zone-border);
-            background: var(--modal-zone-bg);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
-        }
-        #upload-zone:hover {
-            border-color: var(--modal-zone-hover-border);
-            background:   var(--modal-zone-hover-bg);
-        }
-        .modal-divider { background: var(--modal-divider); }
-        .modal-label   { color: var(--modal-label); }
-        .modal-subtitle { color: var(--modal-subtitle); }
-        .modal-close-btn { color: var(--modal-close); background: transparent; border: none; cursor: pointer; transition: color 0.2s; }
-        .modal-close-btn:hover { color: var(--modal-primary); }
-        .modal-icon-box {
-            background: var(--modal-icon-bg);
-            border: 1px solid var(--modal-icon-border);
-            border-radius: 0.75rem;
-            width: 2.25rem; height: 2.25rem;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        #file-name-badge {
-            color: var(--modal-primary);
-            background: var(--modal-file-bg);
-            border: 1px solid var(--modal-file-border);
-            border-radius: 0.5rem;
-            padding: 0.4rem 0.75rem;
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        /* Tema oscuro (html.dark) */
-        html.dark {
-            --modal-overlay-bg:    rgba(15,20,24,0.78);
-            --modal-bg:            rgba(27,32,36,0.82);
-            --modal-border:        rgba(56,189,248,0.18);
-            --modal-shadow:        0 0 60px rgba(56,189,248,0.15), 0 8px 40px rgba(0,0,0,0.55);
-            --modal-text:          #dee3e8;
-            --modal-placeholder:   rgba(189,200,209,0.35);
-            --modal-label:         rgba(148,163,184,0.85);
-            --modal-subtitle:      rgba(148,163,184,0.6);
-            --modal-close:         rgba(148,163,184,0.55);
-            --modal-primary:       #38bdf8;
-            --modal-input-bg:      #1b2024;
-            --modal-input-border:  rgba(62,72,79,0.9);
-            --modal-input-focus:   rgba(56,189,248,0.65);
-            --modal-input-ring:    rgba(56,189,248,0.14);
-            --modal-zone-border:   rgba(62,72,79,0.9);
-            --modal-zone-bg:       rgba(27,32,36,0.5);
-            --modal-zone-hover-border: rgba(56,189,248,0.65);
-            --modal-zone-hover-bg:     rgba(56,189,248,0.05);
-            --modal-divider:       rgba(62,72,79,0.7);
-            --modal-icon-bg:       rgba(56,189,248,0.1);
-            --modal-icon-border:   rgba(56,189,248,0.28);
-            --modal-file-bg:       rgba(56,189,248,0.08);
-            --modal-file-border:   rgba(56,189,248,0.22);
-            --modal-title-from:    #f1f5f9;
-            --modal-title-to:      #38bdf8;
-            --modal-btn-color:     #0f1418;
-        }
-        /* Tema claro (html.light o default) */
-        html:not(.dark) {
-            --modal-overlay-bg:    rgba(241,245,249,0.82);
-            --modal-bg:            rgba(255,255,255,0.88);
-            --modal-border:        rgba(56,189,248,0.3);
-            --modal-shadow:        0 0 60px rgba(56,189,248,0.12), 0 8px 32px rgba(0,0,0,0.1);
-            --modal-text:          #0f172a;
-            --modal-placeholder:   rgba(100,116,139,0.45);
-            --modal-label:         rgba(51,65,85,0.8);
-            --modal-subtitle:      rgba(51,65,85,0.55);
-            --modal-close:         rgba(100,116,139,0.6);
-            --modal-primary:       #0ea5e9;
-            --modal-input-bg:      #f8fafc;
-            --modal-input-border:  rgba(148,163,184,0.6);
-            --modal-input-focus:   rgba(14,165,233,0.6);
-            --modal-input-ring:    rgba(14,165,233,0.14);
-            --modal-zone-border:   rgba(148,163,184,0.55);
-            --modal-zone-bg:       rgba(248,250,252,0.7);
-            --modal-zone-hover-border: rgba(14,165,233,0.6);
-            --modal-zone-hover-bg:     rgba(14,165,233,0.04);
-            --modal-divider:       rgba(148,163,184,0.4);
-            --modal-icon-bg:       rgba(14,165,233,0.1);
-            --modal-icon-border:   rgba(14,165,233,0.3);
-            --modal-file-bg:       rgba(14,165,233,0.07);
-            --modal-file-border:   rgba(14,165,233,0.25);
-            --modal-title-from:    #0f172a;
-            --modal-title-to:      #0ea5e9;
-            --modal-btn-color:     #ffffff;
-        }
-    </style>
-
-    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+    <!-- Upload Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-            <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6">Sube un archivo ZIP o TAR.GZ con tu proyecto</p>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo Proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Sube tu proyecto o clona desde GitHub</p>
 
-            <!-- Nombre -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
-                <input type="text" id="proj-name" class="modal-input w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="Mi Proyecto Flask" />
+                <input type="text" id="proj-name" class="modal-input" placeholder="Mi Proyecto" />
             </div>
 
-            <!-- Descripción -->
             <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-45">(opcional)</span></label>
-                <input type="text" id="proj-desc" class="modal-input w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="Breve descripción del proyecto" />
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-50">(opcional)</span></label>
+                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripción" />
             </div>
 
-            <!-- Zona de subida -->
-            <div id="upload-zone" class="mb-4 border-2 border-dashed border-outline-variant/30 bg-surface-container/50 rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
-                onclick="document.getElementById('file-input').click()"
-                ondragover="event.preventDefault();this.style.borderColor='var(--color-primary)';this.style.background='var(--color-primary/5)'"
-                ondragleave="this.style.borderColor='';this.style.background=''"
+            <div id="upload-zone" onclick="document.getElementById('file-input').click()"
+                ondragover="event.preventDefault();this.style.borderColor='#38bdf8'"
+                ondragleave="event.preventDefault();this.style.borderColor=''"
                 ondrop="event.preventDefault();onFileSelect({target:{files:event.dataTransfer.files}})">
                 <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
                 <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
                 <p class="text-sm text-on-surface-variant/60">
-                    <strong class="text-primary">Haz clic para seleccionar</strong> o arrastra aquí
+                    <strong class="text-primary">Haz clic</strong> o arrastra tu archivo
                 </p>
                 <p class="text-xs mt-1 text-on-surface-variant/40">ZIP, TAR.GZ, .py, .js — máx. 50 MB</p>
             </div>
-            <div id="file-name" class="hidden mb-4 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
+            <div id="file-name" class="hidden mt-3 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
 
-            <!-- Separador -->
             <div class="flex items-center gap-3 my-4">
                 <div class="flex-1 h-px bg-outline-variant/20"></div>
                 <span class="text-xs uppercase tracking-widest text-on-surface-variant/40">o</span>
                 <div class="flex-1 h-px bg-outline-variant/20"></div>
             </div>
 
-            <!-- GitHub URL -->
             <div class="mb-6">
                 <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
-                    <span class="material-symbols-outlined text-[14px] align-middle mr-1 text-primary">code</span>
-                    Ingresa URL de GitHub
+                    <span class="material-symbols-outlined text-sm align-middle mr-1">code</span>
+                    URL de GitHub
                 </label>
-                <input type="url" id="proj-github" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" placeholder="https://github.com/usuario/repositorio" />
+                <input type="url" id="proj-github" class="modal-input" placeholder="https://github.com/usuario/repositorio" />
             </div>
 
-            <!-- Botón -->
             <button onclick="createProject()" id="modal-submit-btn"
-                class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
+                class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-lg shadow-primary/25">
                 Crear y analizar
-                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
             </button>
         </div>
     </div>
 
     <!-- Loading Modal -->
-    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="loadingModal">
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="loadingModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <h3 class="text-2xl font-bold text-on-surface mb-1">Analizando proyecto</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Procesando código y generando documentación</p>
             <div class="flex flex-col items-center gap-4 py-8">
@@ -698,8 +693,8 @@
     </div>
 
     <!-- Limit Modal -->
-    <div class="modal-overlay fixed inset-0 z-50 bg-background/80 backdrop-blur-md hidden items-center justify-center" id="limitModal">
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_var(--color-primary)]">
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="limitModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeLimitModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Límite alcanzado</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Has alcanzado el límite de proyectos para tu plan actual.</p>
@@ -709,14 +704,291 @@
                 </div>
                 <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm">Actualiza tu plan para crear más proyectos.</p>
             </div>
-            <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95">
+            <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
                 Ver planes
             </button>
         </div>
     </div>
+    <!-- ══════════════ CONFIGURATION MODAL ══════════════ -->
+<div id="configModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this)closeConfigModal()">
+    <div class="glass p-0 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-outline-variant/10 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">settings</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-on-surface">Configuración</h3>
+                    <p class="text-sm text-on-surface-variant/60">Personaliza tu experiencia en AutoDocs AI</p>
+                </div>
+            </div>
+            <button onclick="closeConfigModal()" class="w-8 h-8 rounded-lg border-none bg-black/5 hover:bg-red-50 hover:text-red-500 text-on-surface-variant cursor-pointer flex items-center justify-center text-xl transition-all">✕</button>
+        </div>
 
+        <!-- Contenido con scroll -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-8">
+            
+            <!-- 1. PERFIL -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">person</span>
+                    Perfil
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nombre de usuario</label>
+                        <input type="text" id="config-username" class="modal-input" placeholder="Usuario" />
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Email</label>
+                        <input type="email" id="config-email" class="modal-input" placeholder="email@ejemplo.com" readonly />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Bio</label>
+                        <textarea id="config-bio" class="modal-input" rows="2" placeholder="Breve descripción sobre ti..."></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. PREFERENCIAS DE INTERFAZ -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">palette</span>
+                    Apariencia
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('light')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
+                                <span class="material-symbols-outlined text-gray-600">light_mode</span>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-on-surface">Claro</div>
+                                <div class="text-xs text-on-surface-variant/50">Modo día</div>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-light-indicator"></div>
+                    </div>
+                    <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('dark')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center shadow-sm">
+                                <span class="material-symbols-outlined text-white">dark_mode</span>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-on-surface">Oscuro</div>
+                                <div class="text-xs text-on-surface-variant/50">Modo noche</div>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-dark-indicator"></div>
+                    </div>
+                    <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('system')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-white to-gray-800 border-2 border-gray-300 flex items-center justify-center shadow-sm">
+                                <span class="material-symbols-outlined text-gray-600">auto_awesome</span>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-on-surface">Sistema</div>
+                                <div class="text-xs text-on-surface-variant/50">Automático</div>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-system-indicator"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. NOTIFICACIONES -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">notifications</span>
+                    Notificaciones
+                </h4>
+                <div class="space-y-3">
+                    <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-green-500">check_circle</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">Análisis completado</div>
+                                <div class="text-xs text-on-surface-variant/50">Cuando un proyecto termine de analizarse</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="notif-completed" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
+                    </label>
+                    <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary">upcoming</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">Recordatorios</div>
+                                <div class="text-xs text-on-surface-variant/50">Recordatorios semanales de proyectos</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="notif-reminders" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
+                    </label>
+                    <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">updates</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">Actualizaciones</div>
+                                <div class="text-xs text-on-surface-variant/50">Novedades y mejoras de AutoDocs</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="notif-updates" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
+                    </label>
+                </div>
+            </section>
+
+            <!-- 4. PLAN Y FACTURACIÓN -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">credit_card</span>
+                    Plan y Facturación
+                </h4>
+                <div class="glass p-5 rounded-xl border border-outline-variant/10">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold text-on-surface" id="config-plan-name">Plan Free</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200" id="config-plan-status">Activo</span>
+                            </div>
+                            <p class="text-sm text-on-surface-variant/60 mt-1" id="config-plan-details">3 proyectos · Análisis básico · Documentación automática</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.location.href='/pricing'" class="px-5 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar</button>
+                            <button class="px-5 py-2 border border-outline-variant/30 rounded-lg font-semibold text-sm text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all">Gestionar</button>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-outline-variant/10">
+                        <div class="flex items-center gap-6 text-sm flex-wrap">
+                            <span class="text-on-surface-variant/60">Proyectos usados: <strong class="text-on-surface" id="config-projects-used">0</strong> / <strong class="text-on-surface" id="config-projects-limit">3</strong></span>
+                            <span class="text-on-surface-variant/60">Próximo cobro: <strong class="text-on-surface" id="config-next-billing">—</strong></span>
+                        </div>
+                        <div class="mt-3 progress-track">
+                            <div id="config-progress-bar" class="progress-fill" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. INTEGRACIONES -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">integration_instructions</span>
+                    Integraciones
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🐙</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">GitHub</div>
+                                <div class="text-xs text-on-surface-variant/50">Conectado</div>
+                            </div>
+                        </div>
+                        <span class="text-xs text-green-600 font-semibold">✓ Activo</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">⬛</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">Slack</div>
+                                <div class="text-xs text-on-surface-variant/50">No conectado</div>
+                            </div>
+                        </div>
+                        <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📘</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">Notion</div>
+                                <div class="text-xs text-on-surface-variant/50">No conectado</div>
+                            </div>
+                        </div>
+                        <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📄</span>
+                            <div>
+                                <div class="text-sm font-medium text-on-surface">Google Docs</div>
+                                <div class="text-xs text-on-surface-variant/50">No conectado</div>
+                            </div>
+                        </div>
+                        <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. SEGURIDAD -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">security</span>
+                    Seguridad
+                </h4>
+                <div class="space-y-3">
+                    <button class="w-full text-left p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all flex items-center justify-between" onclick="document.getElementById('config-password-section').classList.toggle('hidden')">
+                        <span class="text-sm text-on-surface">Cambiar contraseña</span>
+                        <span class="material-symbols-outlined text-on-surface-variant/40">chevron_right</span>
+                    </button>
+                    <div id="config-password-section" class="hidden p-4 glass rounded-xl border border-primary/20 space-y-3">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nueva contraseña</label>
+                            <input type="password" id="config-new-password" class="modal-input" placeholder="••••••••" />
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Confirmar contraseña</label>
+                            <input type="password" id="config-confirm-password" class="modal-input" placeholder="••••••••" />
+                        </div>
+                        <button onclick="updatePassword()" class="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar contraseña</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                        <span class="text-sm text-on-surface">Autenticación de dos factores</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">Desactivado</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                        <span class="text-sm text-on-surface">Sesiones activas</span>
+                        <span class="text-xs text-on-surface-variant/50">1 dispositivo</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. EXPORTAR DATOS -->
+            <section>
+                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">download</span>
+                    Datos
+                </h4>
+                <div class="flex flex-wrap gap-3">
+                    <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        Exportar proyectos (JSON)
+                    </button>
+                    <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        Exportar documentación (PDF)
+                    </button>
+                    <button class="px-4 py-2 glass rounded-xl border border-red-200 hover:border-red-400 transition-all text-sm text-red-600 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                        Eliminar todos los datos
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer con botones de acción -->
+        <div class="flex items-center justify-between p-6 border-t border-outline-variant/10 flex-shrink-0 bg-surface-container/30">
+            <button onclick="closeConfigModal()" class="px-6 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all font-medium text-sm">
+                Cancelar
+            </button>
+            <button onclick="saveConfig()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-medium text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">save</span>
+                Guardar cambios
+            </button>
+        </div>
+    </div>
+</div>
     <script>
-        // ==================== LÓGICA ORIGINAL DEL DASHBOARD ====================
+        // ==================== LÓGICA PRINCIPAL ====================
         const token = localStorage.getItem('token');
         if (!token) window.location.href = '/';
 
@@ -728,9 +1000,7 @@
             document.getElementById('greeting').textContent = `Bienvenido, ${user.name}`;
         }
 
-        // Actualizar indicador de plan
         const planName = document.getElementById('plan-name');
-        const projectCount = document.getElementById('project-count');
         if (planName && user.plan) {
             const planDisplay = user.plan === 'free' ? 'Free' : user.plan === 'pro' ? 'Pro' : user.plan === 'enterprise' ? 'Enterprise' : 'Free';
             planName.textContent = planDisplay;
@@ -740,318 +1010,428 @@
             return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
         }
 
-        async function loadProjects() {
-            try {
-                const res = await fetch('/api/projects/', { headers: authHeaders() });
-                if (!res.ok) {
-                    console.error('Error loading projects:', res.status, res.statusText);
-                    return;
+        let allProjects = [];
+
+async function loadProjects() {
+    try {
+        // Cargar proyectos
+        const res = await fetch('/api/projects/', { headers: authHeaders() });
+        if (!res.ok) {
+            console.error('Error loading projects:', res.status);
+            return;
+        }
+        const projects = await res.json();
+        allProjects = projects;
+        renderStats(projects);
+        renderProjects(projects);
+        
+        // Actualizar contador en sidebar
+        document.getElementById('sidebar-project-count').textContent = projects.length;
+        
+        // Cargar plan del usuario
+        const planData = await loadUserPlan();
+        
+        // Actualizar contador de proyectos con el límite del plan
+        const projectCountEl = document.getElementById('project-count');
+        if (projectCountEl) {
+            const limits = { 'free': 3, 'pro': 20, 'enterprise': -1 };
+            const limit = limits[planData?.plan || 'free'] || 3;
+            const count = projects.length;
+            
+            if (limit === -1) {
+                projectCountEl.textContent = `${count}/∞`;
+            } else {
+                projectCountEl.textContent = `${count}/${limit}`;
+                // Cambiar color si está cerca del límite
+                if (count >= limit) {
+                    projectCountEl.classList.add('text-error');
+                } else if (count >= limit * 0.8) {
+                    projectCountEl.classList.add('text-yellow-500');
+                } else {
+                    projectCountEl.classList.remove('text-error', 'text-yellow-500');
                 }
-                const projects = await res.json();
-                console.log('Projects loaded:', projects);
-                renderStats(projects);
-                renderProjects(projects);
-                
-                // Actualizar contadorProjects en el indicador de plan
-                const projectCountEl = document.getElementById('project-count');
-                if (projectCountEl && user.plan) {
-                    const limits = { 'free': 3, 'pro': 20, 'enterprise': -1 };
-                    const limit = limits[user.plan] || 3;
-                    const count = projects.length;
-                    projectCountEl.textContent = limit === -1 ? `${count}/∞` : `${count}/${limit}`;
-                    
-                    // Si está cerca del límite, cambiar color
-                    if (limit !== -1 && count >= limit) {
-                        projectCountEl.classList.add('text-error');
-                    }
-                }
-            } catch(e) {
-                console.error('Error in loadProjects:', e);
+            }
+        }
+    } catch(e) {
+        console.error('Error in loadProjects:', e);
+    }
+}
+// ==================== CONFIGURACIÓN ====================
+
+// Variables globales
+let configUserData = {};
+let configPlanData = {};
+
+function openConfigModal() {
+    document.getElementById('configModal').classList.remove('hidden');
+    document.getElementById('configModal').classList.add('flex');
+    loadConfigData();
+}
+
+function closeConfigModal() {
+    document.getElementById('configModal').classList.add('hidden');
+    document.getElementById('configModal').classList.remove('flex');
+}
+
+async function loadConfigData() {
+    try {
+        // Cargar datos del usuario
+        const userRes = await fetch('/api/auth/me', { headers: authHeaders() });
+        if (userRes.ok) {
+            const user = await userRes.json();
+            configUserData = user;
+            document.getElementById('config-username').value = user.name || '';
+            document.getElementById('config-email').value = user.email || '';
+            document.getElementById('config-bio').value = user.bio || '';
+        }
+
+        // Cargar plan
+        const planRes = await fetch('/api/payments/my-plan', { headers: authHeaders() });
+        if (planRes.ok) {
+            const planData = await planRes.json();
+            configPlanData = planData;
+            
+            const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+            const planDetails = {
+                free: '3 proyectos · Análisis básico · Documentación automática',
+                pro: '20 proyectos · Análisis avanzado · PDF + IA',
+                enterprise: 'Proyectos ilimitados · Análisis ilimitados · Soporte prioritario'
+            };
+            const projectLimits = { free: 3, pro: 20, enterprise: -1 };
+
+            document.getElementById('config-plan-name').textContent = planNames[planData.plan] || 'Plan Free';
+            document.getElementById('config-plan-details').textContent = planDetails[planData.plan] || '';
+
+            // Cargar proyectos para contar
+            const projectsRes = await fetch('/api/projects/', { headers: authHeaders() });
+            if (projectsRes.ok) {
+                const projects = await projectsRes.json();
+                const used = projects.length;
+                const limit = projectLimits[planData.plan] || 3;
+
+                document.getElementById('config-projects-used').textContent = used;
+                document.getElementById('config-projects-limit').textContent = limit === -1 ? '∞' : limit;
+
+                const progress = limit === -1 ? 0 : Math.min((used / limit) * 100, 100);
+                document.getElementById('config-progress-bar').style.width = progress + '%';
             }
         }
 
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setThemeIndicator(savedTheme);
+
+        // Cargar notificaciones guardadas
+        const notifSettings = JSON.parse(localStorage.getItem('notifications') || '{}');
+        document.getElementById('notif-completed').checked = notifSettings.completed !== false;
+        document.getElementById('notif-reminders').checked = notifSettings.reminders || false;
+        document.getElementById('notif-updates').checked = notifSettings.updates !== false;
+
+    } catch (error) {
+        console.error('Error loading config:', error);
+    }
+}
+
+function saveConfig() {
+    const username = document.getElementById('config-username').value.trim();
+    const bio = document.getElementById('config-bio').value.trim();
+
+    if (!username) {
+        alert('El nombre de usuario no puede estar vacío');
+        return;
+    }
+
+    // Guardar perfil
+    fetch('/api/auth/me', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ name: username, bio: bio })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        
+        // Guardar notificaciones
+        const notifications = {
+            completed: document.getElementById('notif-completed').checked,
+            reminders: document.getElementById('notif-reminders').checked,
+            updates: document.getElementById('notif-updates').checked
+        };
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+
+        // Mostrar feedback
+        const btn = document.querySelector('#configModal .bg-gradient-to-r');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Guardado';
+        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+            closeConfigModal();
+        }, 1500);
+    })
+    .catch(err => {
+        alert('Error al guardar: ' + err.message);
+    });
+}
+
+async function updatePassword() {
+    const newPass = document.getElementById('config-new-password').value;
+    const confirmPass = document.getElementById('config-confirm-password').value;
+
+    if (!newPass || newPass.length < 6) {
+        alert('La contraseña debe tener al menos 6 caracteres');
+        return;
+    }
+    if (newPass !== confirmPass) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/auth/me', {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({ password: newPass })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert('Contraseña actualizada correctamente');
+            document.getElementById('config-new-password').value = '';
+            document.getElementById('config-confirm-password').value = '';
+            document.getElementById('config-password-section').classList.add('hidden');
+        } else {
+            alert(data.error || 'Error al actualizar contraseña');
+        }
+    } catch (err) {
+        alert('Error: ' + err.message);
+    }
+}
+
+function setTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'dark') {
+        html.classList.add('dark');
+        html.classList.remove('light');
+    } else if (theme === 'light') {
+        html.classList.remove('dark');
+        html.classList.add('light');
+    } else {
+        // Sistema
+        html.classList.remove('dark', 'light');
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.classList.add('dark');
+        } else {
+            html.classList.add('light');
+        }
+    }
+    setThemeIndicator(theme);
+    localStorage.setItem('theme', theme);
+    
+    // Actualizar icono del botón de tema si existe
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        const isDark = document.documentElement.classList.contains('dark');
+        themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
+    }
+}
+
+function setThemeIndicator(theme) {
+    document.querySelectorAll('[id^="theme-"]').forEach(el => {
+        el.style.background = 'rgba(56, 189, 248, 0.1)';
+    });
+    const indicator = document.getElementById(`theme-${theme}-indicator`);
+    if (indicator) {
+        indicator.style.background = 'linear-gradient(90deg, #38bdf8, #818cf8)';
+    }
+}
+
+// Cerrar configuración con Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeConfigModal();
+    }
+});
+
+// Click fuera del modal para cerrar
+document.getElementById('configModal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfigModal();
+});
+
+// Función auxiliar para auth headers
+function authHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
         function renderStats(projects) {
-            console.log('Rendering stats for projects:', projects);
-
-            const statProjects = document.getElementById('stat-projects');
-            const statCompleted = document.getElementById('stat-completed');
-            const statFunctions = document.getElementById('stat-functions');
-            const statEndpoints = document.getElementById('stat-endpoints');
-            const statActiveProjects = document.getElementById('stat-active-projects');
-            const progressPercent = document.getElementById('progress-percent');
-            const statCompletedPercent = document.getElementById('stat-completed-percent');
-            const progressCircle = document.getElementById('progress-circle');
-            const progressLabel = document.getElementById('progress-label');
-
-            if (statProjects) statProjects.textContent = projects.length;
+            document.getElementById('stat-projects').textContent = projects.length;
+            
             const completed = projects.filter(p => p.status === 'completed').length;
-            if (statCompleted) statCompleted.textContent = completed;
+            document.getElementById('stat-completed').textContent = completed;
+            document.getElementById('stat-completed-small').textContent = completed;
+            
             const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
-            if (statFunctions) statFunctions.textContent = totalFuncs;
+            document.getElementById('stat-functions').textContent = totalFuncs;
+            
             const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
-            if (statEndpoints) statEndpoints.textContent = totalEp;
+            document.getElementById('stat-endpoints').textContent = totalEp;
+            
             const active = projects.filter(p => p.status !== 'completed').length;
-            if (statActiveProjects) statActiveProjects.textContent = active;
+            document.getElementById('stat-active-small').textContent = active;
 
             const percent = projects.length ? Math.round((completed / projects.length) * 100) : 0;
-            if (progressPercent) progressPercent.textContent = percent + '%';
-            if (statCompletedPercent) statCompletedPercent.textContent = percent + '%';
-            if (progressCircle) {
-                const circumference = 251.2;
+            document.getElementById('progress-percent').textContent = percent + '%';
+            
+            const circle = document.getElementById('progress-circle');
+            if (circle) {
+                const circumference = 213.6;
                 const offset = circumference - (percent / 100) * circumference;
-                progressCircle.setAttribute('stroke-dashoffset', offset);
+                circle.setAttribute('stroke-dashoffset', offset);
             }
-            if (progressLabel) {
-                progressLabel.textContent =
-                    projects.length === 0 ? 'Sin proyectos' : completed === projects.length ? 'Todo completado' : `${completed} de ${projects.length} completados`;
-            }
-
-        }
-
-        function _unused_renderCharts_moved_to_analytics(projects) {
-            if (typeof Chart === 'undefined') return;
-
-            const isDark = document.documentElement.classList.contains('dark') ||
-                           document.body.getAttribute('data-theme') === 'dark' ||
-                           !document.documentElement.classList.contains('light');
-            const textColor  = isDark ? '#dee3e8' : '#1e293b';
-            const gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-            const palette    = ['#8ed5ff','#c0c1ff','#10b981','#ffc176','#ff8fab','#a8dadc','#cdb4db'];
-
-            Chart.defaults.color      = textColor;
-            Chart.defaults.borderColor = gridColor;
-            Chart.defaults.font.family = "'Geist', sans-serif";
-
-            // ── 1. Proyectos por mes (line) ──────────────────────────
-            const monthMap = {};
-            projects.forEach(p => {
-                const ca = p.created_at || '';
-                if (ca.length >= 7) {
-                    const key = ca.substring(0, 7);
-                    monthMap[key] = (monthMap[key] || 0) + 1;
-                }
-            });
-            const sortedMonths = Object.keys(monthMap).sort().slice(-12);
-            const monthLabels  = sortedMonths.map(m => {
-                const [y, mo] = m.split('-');
-                return new Date(+y, +mo - 1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
-            });
-            const monthValues = sortedMonths.map(m => monthMap[m]);
-
-            const ctxM = document.getElementById('user-chart-monthly')?.getContext('2d');
-            if (ctxM) {
-                if (window._uc_monthly) window._uc_monthly.destroy();
-                window._uc_monthly = new Chart(ctxM, {
-                    type: 'line',
-                    data: {
-                        labels: monthLabels.length ? monthLabels : ['Sin datos'],
-                        datasets: [{
-                            label: 'Proyectos',
-                            data: monthValues.length ? monthValues : [0],
-                            borderColor: '#8ed5ff',
-                            backgroundColor: 'rgba(142,213,255,0.12)',
-                            borderWidth: 2.5,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#8ed5ff',
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { grid: { color: gridColor }, ticks: { color: textColor } },
-                            y: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1, precision: 0 }, beginAtZero: true }
-                        }
-                    }
-                });
-            }
-
-            // ── 2. Lenguajes (doughnut) ──────────────────────────────
-            const langMap = {};
-            projects.forEach(p => {
-                const lang = (p.language && p.language !== 'unknown') ? p.language : 'Otro';
-                langMap[lang] = (langMap[lang] || 0) + 1;
-            });
-            const langLabels = Object.keys(langMap);
-            const langValues = Object.values(langMap);
-
-            const ctxL = document.getElementById('user-chart-langs')?.getContext('2d');
-            if (ctxL) {
-                if (window._uc_langs) window._uc_langs.destroy();
-                window._uc_langs = new Chart(ctxL, {
-                    type: 'doughnut',
-                    data: {
-                        labels: langLabels.length ? langLabels : ['Sin datos'],
-                        datasets: [{
-                            data: langValues.length ? langValues : [1],
-                            backgroundColor: palette,
-                            borderWidth: 2,
-                            borderColor: isDark ? '#1b2024' : '#ffffff'
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: textColor, padding: 10, font: { size: 11 } } },
-                            tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
-                        },
-                        cutout: '58%'
-                    }
-                });
-            }
-
-            // ── 3. Calidad por proyecto (horizontal bar) ─────────────
-            const completedProjects = projects.filter(p => p.status === 'completed' && p.stats?.quality_score);
-            const qLabels = completedProjects.map(p => p.name.length > 18 ? p.name.substring(0,16)+'…' : p.name);
-            const qValues = completedProjects.map(p => p.stats.quality_score || 0);
-            const qColors = qValues.map(v => v >= 70 ? '#10b981' : v >= 40 ? '#ffc176' : '#ff8fab');
-
-            const ctxQ = document.getElementById('user-chart-quality')?.getContext('2d');
-            if (ctxQ) {
-                if (window._uc_quality) window._uc_quality.destroy();
-                const dynHeight = Math.max(180, qLabels.length * 36);
-                ctxQ.canvas.parentElement.style.height = dynHeight + 'px';
-                window._uc_quality = new Chart(ctxQ, {
-                    type: 'bar',
-                    data: {
-                        labels: qLabels.length ? qLabels : ['Sin proyectos completados'],
-                        datasets: [{
-                            label: 'Calidad',
-                            data: qValues.length ? qValues : [0],
-                            backgroundColor: qColors.length ? qColors : ['#8ed5ff'],
-                            borderRadius: 5,
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false },
-                            tooltip: { callbacks: { label: ctx => ` Calidad: ${ctx.parsed.x}/100` } }
-                        },
-                        scales: {
-                            x: { grid: { color: gridColor }, ticks: { color: textColor }, min: 0, max: 100 },
-                            y: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } }
-                        }
-                    }
-                });
-            }
-
-            // ── 4. Estado de proyectos (pie) ─────────────────────────
-            const statusCounts = { Completado: 0, Pendiente: 0, Analizando: 0, Error: 0 };
-            projects.forEach(p => {
-                if (p.status === 'completed')  statusCounts['Completado']++;
-                else if (p.status === 'pending')   statusCounts['Pendiente']++;
-                else if (p.status === 'analyzing') statusCounts['Analizando']++;
-                else if (p.status === 'error')     statusCounts['Error']++;
-            });
-            const stLabels = Object.keys(statusCounts).filter(k => statusCounts[k] > 0);
-            const stValues = stLabels.map(k => statusCounts[k]);
-            const stColors = { Completado: '#10b981', Pendiente: '#8ed5ff', Analizando: '#ffc176', Error: '#ff8fab' };
-
-            const ctxS = document.getElementById('user-chart-status')?.getContext('2d');
-            if (ctxS) {
-                if (window._uc_status) window._uc_status.destroy();
-                window._uc_status = new Chart(ctxS, {
-                    type: 'pie',
-                    data: {
-                        labels: stLabels.length ? stLabels : ['Sin datos'],
-                        datasets: [{
-                            data: stValues.length ? stValues : [1],
-                            backgroundColor: stLabels.map(k => stColors[k] || '#8ed5ff'),
-                            borderWidth: 2,
-                            borderColor: isDark ? '#1b2024' : '#ffffff'
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: textColor, padding: 8, font: { size: 11 } } }
-                        }
-                    }
-                });
-            }
+            
+            document.getElementById('progress-label').textContent =
+                projects.length === 0 ? 'Sin proyectos' : 
+                completed === projects.length ? 'Todo completado' : 
+                `${completed} de ${projects.length} completados`;
         }
 
         function renderProjects(projects) {
             const grid = document.getElementById('projects-grid');
+            
             if (!projects.length) {
-                grid.innerHTML = `<div class="col-span-full glass p-12 rounded-3xl text-center text-on-surface-variant/50">
-                    <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
-                    <p class="text-lg font-semibold">Sin proyectos aún</p>
-                    <p class="text-sm">Sube tu primer proyecto para comenzar a generar documentación automática.</p>
-                </div>`;
+                grid.innerHTML = `
+                    <div class="col-span-full glass p-12 rounded-2xl text-center text-on-surface-variant/50">
+                        <span class="material-symbols-outlined text-5xl mb-4 block text-primary/40">folder_open</span>
+                        <p class="text-lg font-semibold text-on-surface">Sin proyectos aún</p>
+                        <p class="text-sm">Sube tu primer proyecto para comenzar</p>
+                        <button onclick="openUploadModal()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary/80 transition-all">
+                            Crear proyecto
+                        </button>
+                    </div>
+                `;
                 return;
             }
+
+            // Ordenar: primero los más recientes (por created_at)
+            const sorted = [...projects].sort((a, b) => {
+                const da = a.created_at ? new Date(a.created_at) : new Date(0);
+                const db = b.created_at ? new Date(b.created_at) : new Date(0);
+                return db - da;
+            });
+
             const statusMap = {
-                completed: { class: 'bg-green-100 text-green-700 border-green-200', label: 'Completado' },
-                analyzing: { class: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: 'Analizando' },
-                pending: { class: 'bg-gray-100 text-gray-600 border-gray-200', label: 'Pendiente' },
-                error: { class: 'bg-red-100 text-red-700 border-red-200', label: 'Error' }
+                completed: { class: 'completed', label: 'Completado' },
+                analyzing: { class: 'analyzing', label: 'Analizando' },
+                pending: { class: 'pending', label: 'Pendiente' },
+                error: { class: 'error', label: 'Error' }
             };
-            grid.innerHTML = projects.map(p => {
+
+            grid.innerHTML = sorted.map(p => {
                 const st = statusMap[p.status] || statusMap.pending;
                 const lang = p.language || 'Desconocido';
                 const q = p.stats?.quality_score || 0;
-                const color = q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444';
-                return `<div class="tilt-card">
-                    <div class="glass rounded-2xl p-6 glass-hover card-interaction cursor-pointer transition-all hover:shadow-md h-full" onclick="window.location.href='/analysis/${p._id}'">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                                    <span class="material-symbols-outlined text-xl">${p.status === 'completed' ? 'check_circle' : p.status === 'analyzing' ? 'sync' : 'pending'}</span>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-on-surface">${p.name}</h3>
-                                    <p class="text-xs text-on-surface-variant/60 font-mono">${lang}</p>
+                const created = p.created_at ? new Date(p.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+                
+                return `
+                    <div class="project-card glass rounded-2xl p-5 glass-hover cursor-pointer border border-outline-variant/10" onclick="window.location.href='/analysis/${p._id}'">
+                        <span class="status-badge ${st.class}">${st.label}</span>
+                        <div class="flex items-start gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 flex-shrink-0">
+                                <span class="material-symbols-outlined text-xl">${p.status === 'completed' ? 'check_circle' : p.status === 'analyzing' ? 'sync' : 'folder'}</span>
+                            </div>
+                            <div class="min-w-0 flex-1 pr-16">
+                                <h3 class="font-semibold text-on-surface truncate">${p.name}</h3>
+                                <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                                    <span class="font-mono">${lang}</span>
+                                    <span>·</span>
+                                    <span>${created}</span>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 ${st.class} text-[10px] font-bold uppercase rounded-full border">${st.label}</span>
                         </div>
                         ${p.status === 'completed' ? `
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs text-on-surface-variant">Calidad:</span>
-                            <span class="text-xs font-bold" style="color:${color}">${q}/100</span>
-                            <div class="flex-1 h-2 bg-surface-variant/30 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full" style="width:${q}%;background:${color}"></div>
+                            <span class="text-xs text-on-surface-variant">Calidad</span>
+                            <div class="flex-1 h-1.5 bg-surface-variant/30 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-1000" style="width:${q}%;background:${q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444'}"></div>
                             </div>
+                            <span class="text-xs font-bold" style="color:${q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444'}">${q}%</span>
                         </div>
                         ` : ''}
-                        <div class="flex justify-between text-xs text-on-surface-variant/70 border-t border-outline-variant/10 pt-4 mt-4">
-                            <span>Archivos <strong class="text-on-surface">${p.stats?.files || 0}</strong></span>
-                            <span>Funciones <strong class="text-on-surface">${p.stats?.functions || 0}</strong></span>
-                            <span>Endpoints <strong class="text-on-surface">${p.stats?.endpoints || 0}</strong></span>
+                        <div class="project-metrics">
+                            <div class="metric">
+                                <div class="value">${p.stats?.files || 0}</div>
+                                <div class="label">Archivos</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">${p.stats?.functions || 0}</div>
+                                <div class="label">Funciones</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">${p.stats?.endpoints || 0}</div>
+                                <div class="label">Endpoints</div>
+                            </div>
                         </div>
                     </div>
-                </div>`;
+                `;
             }).join('');
-            // Activar tilt sobre las nuevas tarjetas
+
             initTilt();
         }
 
-        function openUploadModal() { document.getElementById('uploadModal').classList.add('flex'); document.getElementById('uploadModal').classList.remove('hidden'); }
-        function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); document.getElementById('uploadModal').classList.remove('flex'); }
-        document.getElementById('uploadModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUploadModal(); });
+        // ==================== MODALES ====================
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.add('flex');
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            document.getElementById('uploadModal').classList.remove('flex');
+            selectedFile = null;
+            document.getElementById('file-name').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }
 
         let selectedFile = null;
+
         function onFileSelect(e) {
             selectedFile = e.target.files[0];
             const el = document.getElementById('file-name');
-            el.textContent = '📦 ' + selectedFile.name;
-            el.classList.remove('hidden');
+            if (selectedFile) {
+                el.textContent = '📦 ' + selectedFile.name;
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
         }
 
         async function createProject() {
-            const name = document.getElementById('proj-name').value || 'Nuevo Proyecto';
-            const desc = document.getElementById('proj-desc').value;
-            const github = document.getElementById('proj-github').value;
+            const name = document.getElementById('proj-name').value.trim() || 'Nuevo Proyecto';
+            const desc = document.getElementById('proj-desc').value.trim();
+            const github = document.getElementById('proj-github').value.trim();
+            
             const fd = new FormData();
             fd.append('name', name);
             fd.append('description', desc);
             fd.append('github_url', github);
             if (selectedFile) fd.append('file', selectedFile);
+
+            // Validar que hay archivo o URL
+            if (!selectedFile && !github) {
+                alert('Por favor, sube un archivo o ingresa una URL de GitHub');
+                return;
+            }
+
+            const btn = document.getElementById('modal-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Creando...';
+
             try {
                 const res = await fetch('/api/projects/', {
                     method: 'POST',
@@ -1059,48 +1439,58 @@
                     body: fd
                 });
                 const data = await res.json();
+
                 if (res.ok) {
                     closeUploadModal();
                     const modal = document.getElementById('loadingModal');
                     modal.classList.add('flex');
                     modal.classList.remove('hidden');
-                    await fetch(`/api/analysis/${data.id}/start`, { method: 'POST', headers: authHeaders() });
+                    
+                    await fetch(`/api/analysis/${data.id}/start`, { 
+                        method: 'POST', 
+                        headers: authHeaders() 
+                    });
+                    
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
-                    loadProjects();
+                    await loadProjects();
                 } else {
-                    // Verificar si es error por límite de proyectos
-                    if (data.error && data.error.includes('límite') && data.error.includes('plan')) {
+                    if (data.error && data.error.includes('límite')) {
                         showLimitModal(data.error);
                     } else {
                         alert(data.error || 'Error al crear proyecto');
                     }
                 }
-            } catch(e) { alert('Error al crear proyecto'); }
+            } catch(e) {
+                alert('Error al crear proyecto: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Crear y analizar <span class="material-symbols-outlined text-lg">arrow_forward</span>';
+            }
         }
 
-        function logout() { localStorage.clear(); window.location.href = '/'; }
-
         function showLimitModal(message) {
-            const modal = document.getElementById('limitModal');
             document.getElementById('limitMessage').textContent = message;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('limitModal').classList.remove('hidden');
+            document.getElementById('limitModal').classList.add('flex');
         }
 
         function closeLimitModal() {
-            const modal = document.getElementById('limitModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            document.getElementById('limitModal').classList.add('hidden');
+            document.getElementById('limitModal').classList.remove('flex');
         }
 
-        // ==================== PARTÍCULAS Y TILT SUAVE ====================
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // ==================== PARTÍCULAS ====================
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
         let mouse = { x: null, y: null };
-        const particleCount = 80;
-        const repulsionRadius = 180;
+        const particleCount = 60;
 
         function initCanvas() {
             canvas.width = window.innerWidth;
@@ -1114,9 +1504,9 @@
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 2 + 0.5;
-                this.vx = (Math.random() - 0.5) * 0.4;
-                this.vy = (Math.random() - 0.5) * 0.4;
-                this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(129, 140, 248, 0.2)';
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(129, 140, 248, 0.15)';
             }
             update() {
                 this.x += this.vx;
@@ -1125,11 +1515,11 @@
                     const dx = mouse.x - this.x;
                     const dy = mouse.y - this.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < repulsionRadius) {
+                    if (distance < 150) {
                         const angle = Math.atan2(dy, dx);
-                        const force = (repulsionRadius - distance) / repulsionRadius;
-                        this.x -= Math.cos(angle) * force * 2;
-                        this.y -= Math.sin(angle) * force * 2;
+                        const force = (150 - distance) / 150;
+                        this.x -= Math.cos(angle) * force * 1.5;
+                        this.y -= Math.sin(angle) * force * 1.5;
                     }
                 }
                 if (this.x < 0) this.x = canvas.width;
@@ -1142,10 +1532,12 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
+                
                 particles.forEach(p => {
                     const d = Math.hypot(this.x - p.x, this.y - p.y);
-                    if (d < 120) {
-                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - d/120)})`;
+                    if (d < 100) {
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.08 * (1 - d/100)})`;
+                        ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(this.x, this.y);
                         ctx.lineTo(p.x, p.y);
@@ -1165,62 +1557,100 @@
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
-
+// ==================== CARGAR PLAN DEL USUARIO ====================
+async function loadUserPlan() {
+    try {
+        const res = await fetch('/api/payments/my-plan', { 
+            headers: authHeaders() 
+        });
+        
+        if (res.ok) {
+            const planData = await res.json();
+            const plan = planData.plan || 'free';
+            
+            // Mapeo de planes
+            const planNames = {
+                'free': 'Gratuito',
+                'pro': 'Pro',
+                'enterprise': 'Enterprise'
+            };
+            
+            const planColors = {
+                'free': 'text-gray-500',
+                'pro': 'text-primary',
+                'enterprise': 'text-amber-500'
+            };
+            
+            // Actualizar nombre del plan
+            const planNameEl = document.getElementById('plan-name');
+            if (planNameEl) {
+                planNameEl.textContent = planNames[plan] || 'Gratuito';
+                planNameEl.className = `text-sm font-semibold ${planColors[plan] || 'text-gray-500'}`;
+            }
+            
+            // Guardar en localStorage para uso posterior
+            localStorage.setItem('userPlan', plan);
+            
+            // También actualizar el sidebar
+            const sidebarPlan = document.getElementById('sidebar-user-plan');
+            if (sidebarPlan) {
+                sidebarPlan.textContent = planNames[plan] || 'Plan Gratuito';
+            }
+            
+            return planData;
+        }
+    } catch (error) {
+        console.error('Error loading user plan:', error);
+    }
+    return null;
+}
+        // ==================== TILT ====================
         function initTilt() {
-            const cards = document.querySelectorAll('.tilt-card');
+            const cards = document.querySelectorAll('.tilt-card, .project-card');
             cards.forEach(card => {
-                // Evitar múltiples listeners
                 if (card.hasTilt) return;
                 card.hasTilt = true;
+                const interaction = card.querySelector('.card-interaction') || card;
                 card.addEventListener('mousemove', (e) => {
                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = (y - centerY) / 40;
-                    const rotateY = (centerX - x) / 40;
-                    const target = card.querySelector('.card-interaction');
-                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                    const rotateX = (y - rect.height/2) / 50;
+                    const rotateY = (rect.width/2 - x) / 50;
+                    interaction.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
                 });
                 card.addEventListener('mouseleave', () => {
-                    const target = card.querySelector('.card-interaction');
-                    if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                    interaction.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                 });
             });
         }
 
+        // ==================== INICIALIZACIÓN ====================
         window.addEventListener('resize', initCanvas);
         window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
 
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             animate();
-            initTilt();
             loadProjects();
-            setInterval(loadProjects, 8000);
+            // Recargar cada 10 segundos
+            setInterval(loadProjects, 10000);
+        });
+
+        // Cerrar modales con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeUploadModal();
+                closeLimitModal();
+                const loading = document.getElementById('loadingModal');
+                if (!loading.classList.contains('hidden')) {
+                    loading.classList.add('hidden');
+                    loading.classList.remove('flex');
+                }
+            }
         });
     </script>
     <script src="/static/theme.js"></script>
-    <script>
-        // Actualiza el gradiente del título del modal según el tema activo
-        function updateModalTitleGradient() {
-            const el = document.getElementById('modal-title-grad');
-            if (!el) return;
-            const isDark = document.documentElement.classList.contains('dark');
-            const from = isDark ? '#f1f5f9' : '#0f172a';
-            const to   = isDark ? '#38bdf8' : '#0ea5e9';
-            el.style.background = `linear-gradient(135deg, ${from} 0%, ${to} 100%)`;
-            el.style.webkitBackgroundClip = 'text';
-            el.style.backgroundClip = 'text';
-            el.style.webkitTextFillColor = 'transparent';
-        }
-        // Aplicar al cargar y al cambiar tema
-        updateModalTitleGradient();
-        document.getElementById('themeButton')?.addEventListener('click', () => {
-            setTimeout(updateModalTitleGradient, 50);
-        });
-    </script>
 </body>
 </html>
