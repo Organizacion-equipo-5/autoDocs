@@ -301,7 +301,23 @@ def get_predictions(project_id):
  
     try:
         from services.ml_analyzer import run_ml_analysis
-        ml_results = run_ml_analysis(result["results"])
+
+        # 🆕 Reunir los proyectos analizados del usuario para entrenar el
+        # árbol de decisión con datos reales cuando haya suficientes.
+        all_projects_data = []
+        try:
+            user_projects = list(db.projects.find({"user_id": user_id}))
+            user_project_ids = [p["_id"] for p in user_projects]
+            user_analyses = list(db.analysis_results.find({"project_id": {"$in": user_project_ids}}))
+            analysis_by_project = {a.get("project_id"): a for a in user_analyses if a.get("project_id")}
+            for proj in user_projects:
+                analysis = analysis_by_project.get(proj.get("_id"))
+                if analysis and analysis.get("results"):
+                    all_projects_data.append({"results": analysis["results"], "project": proj})
+        except Exception as e:
+            print(f"[WARN] No se pudo construir dataset de proyectos reales: {e}")
+
+        ml_results = run_ml_analysis(result["results"], all_projects_data=all_projects_data)
         print(f"[DEBUG] ML results for project {project_id}:")
         print(f"  - regresion_simple: {ml_results.get('regresion_simple', {}).keys() if ml_results.get('regresion_simple') else 'None'}")
         print(f"  - regresion_multiple: {ml_results.get('regresion_multiple', {}).keys() if ml_results.get('regresion_multiple') else 'None'}")

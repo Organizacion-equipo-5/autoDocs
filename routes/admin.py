@@ -55,7 +55,6 @@ def extract_technical_terms(text: str, known_names=None, limit=12):
     tokens = set(re.findall(r'\b[A-Za-z_][A-Za-z0-9_]{3,}\b', text))
     technical = []
     for token in sorted(tokens, key=lambda t: (-len(t), t)):
-        # Filtrar hashes largos y códigos aleatorios
         if len(token) > 50:
             continue
         if re.match(r'^[a-f0-9]{32,}$', token.lower()):
@@ -85,6 +84,20 @@ def find_user_by_identifier(db, identifier):
     if user:
         return user
     return db.users.find_one({"_id": identifier})
+
+
+# 🆕 Arma la lista de {"results", "project"} de todos los proyectos con análisis
+def _get_all_projects_data(db):
+    projects = list(db.projects.find({}))
+    analyses = list(db.analysis_results.find({}))
+    analysis_map = {a.get("project_id"): a for a in analyses if a.get("project_id")}
+
+    data = []
+    for project in projects:
+        analysis = analysis_map.get(project.get("_id"))
+        if analysis and analysis.get("results"):
+            data.append({"results": analysis["results"], "project": project})
+    return data
 
 
 @admin_bp.route('/users', methods=['GET'])
@@ -213,7 +226,16 @@ def admin_pca_analysis():
     db = get_db()
     analyses = list(db.analysis_results.find({}, {"project_id": 1, "results": 1}))
     if not analyses:
-        return jsonify({"error": "No hay resultados de análisis disponibles para PCA."}), 404
+        return jsonify({
+            "status": "ok",
+            "pca": {
+                "explained_variance_ratio": [],
+                "project_coordinates": [],
+                "conclusion": ["No hay suficientes proyectos para realizar el análisis PCA."],
+                "sugerencias": ["Agrega más proyectos para obtener insights significativos."],
+                "interpretacion": "PCA no disponible: se requieren al menos 2 proyectos."
+            }
+        }), 200
 
     project_map = {
         project['_id']: project.get('name', 'Desconocido')
@@ -222,10 +244,70 @@ def admin_pca_analysis():
 
     try:
         from services.ml_analyzer import pca_analysis
-        pca_result = pca_analysis(analyses, project_map=project_map, n_components=2)
-        return jsonify({"status": "ok", "pca": pca_result}), 200
+
+        analyses_data = []
+        for analysis in analyses:
+            project_id = analysis.get('project_id')
+            results = analysis.get('results', {})
+            if results and project_id:
+                analyses_data.append({
+                    "project_id": project_id,
+                    "results": results
+                })
+
+        if len(analyses_data) < 2:
+            return jsonify({
+                "status": "ok",
+                "pca": {
+                    "explained_variance_ratio": [],
+                    "project_coordinates": [],
+                    "conclusion": ["Se necesitan al menos 2 proyectos con análisis completos para PCA."],
+                    "sugerencias": ["Ejecuta análisis en más proyectos para obtener insights significativos."],
+                    "interpretacion": "PCA no disponible: se requieren al menos 2 proyectos analizados."
+                }
+            }), 200
+
+        pca_result = pca_analysis(analyses_data, project_map=project_map, n_components=2)
+
+        if "error" in pca_result:
+            return jsonify({
+                "status": "error",
+                "message": pca_result["error"]
+            }), 400
+
+        conclusion = pca_result.get("conclusion", [])
+        if isinstance(conclusion, str):
+            conclusion = [conclusion]
+        elif not isinstance(conclusion, list):
+            conclusion = ["Análisis PCA completado correctamente."]
+
+        sugerencias = pca_result.get("sugerencias", [])
+        if isinstance(sugerencias, str):
+            sugerencias = [sugerencias]
+        elif not isinstance(sugerencias, list):
+            sugerencias = ["Revisa la documentación del proyecto para identificar áreas de mejora."]
+
+        project_coordinates = pca_result.get("project_coordinates", [])
+
+        return jsonify({
+            "status": "ok",
+            "pca": {
+                "explained_variance_ratio": pca_result.get("explained_variance_ratio", []),
+                "project_coordinates": project_coordinates,
+                "conclusion": conclusion,
+                "sugerencias": sugerencias,
+                "interpretacion": pca_result.get("interpretacion", "PCA completado correctamente.")
+            }
+        }), 200
+
     except Exception as e:
-        return jsonify({"error": f"Error al calcular PCA: {str(e)}"}), 500
+        print(f"Error en PCA: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "message": f"Error al calcular PCA: {str(e)}"
+        }), 500
 
 
 @admin_bp.route('/projects', methods=['POST'])
@@ -315,7 +397,6 @@ def admin_overview():
         total_users = len(users)
         total_projects = len(projects)
 
-        # Calcular estadísticas de proyectos
         completed_projects = 0
         pending_projects = 0
         errored_projects = 0
@@ -336,20 +417,18 @@ def admin_overview():
 
         average_quality = round(sum(quality_scores) / max(len(quality_scores), 1), 1) if quality_scores else 0
 
-        # Distribución de lenguajes
         language_distribution = {}
         for p in projects:
             lang = p.get('language') or 'Unknown'
             language_distribution[lang] = language_distribution.get(lang, 0) + 1
 
-        # Proyectos creados por mes (últimos 12 meses)
         from collections import defaultdict
         projects_per_month = defaultdict(int)
         for p in projects:
             created_at = p.get('created_at', '')
             if created_at:
                 try:
-                    month_key = str(created_at)[:7]  # "YYYY-MM"
+                    month_key = str(created_at)[:7]
                     projects_per_month[month_key] += 1
                 except Exception:
                     pass
@@ -357,7 +436,6 @@ def admin_overview():
 
         print(f"[Admin Overview] Stats de proyectos calculadas: completados={completed_projects}, calidad={average_quality}")
 
-        # Calcular análisis de documentación
         docs_parts = []
         for analysis in analyses:
             doc = analysis.get('documentation', '')
@@ -368,8 +446,7 @@ def admin_overview():
                     print(f"[Admin Overview] Error processing documentation: {e}")
         docs_text = ' '.join(docs_parts)
 
-        # Limitar el texto a procesar para evitar timeouts
-        max_text_length = 100000  # 100k caracteres
+        max_text_length = 100000
         if len(docs_text) > max_text_length:
             docs_text = docs_text[:max_text_length]
             print(f"[Admin Overview] Texto limitado a {max_text_length} caracteres")
@@ -447,3 +524,91 @@ def admin_overview():
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route('/classify-project/<project_id>', methods=['GET'])
+@jwt_required()
+@admin_required
+def classify_project(project_id):
+    """Clasifica un proyecto usando árbol de decisión entrenado con proyectos reales."""
+    db = get_db()
+
+    project = db.projects.find_one({"_id": project_id})
+    if not project:
+        return jsonify({"error": "Proyecto no encontrado"}), 404
+
+    analysis = db.analysis_results.find_one({"project_id": project_id})
+    if not analysis:
+        return jsonify({"error": "No hay análisis disponible para este proyecto"}), 404
+
+    results = analysis.get("results", {})
+    if not results:
+        return jsonify({"error": "El análisis no tiene resultados"}), 404
+
+    try:
+        from services.ml_analyzer import classify_project_type
+
+        all_projects_data = _get_all_projects_data(db)  # 🆕 datos reales de todos los proyectos
+        classification = classify_project_type(results, project, all_projects_data)
+
+        return jsonify({
+            "status": "ok",
+            "classification": classification
+        }), 200
+
+    except Exception as e:
+        print(f"Error en clasificación: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error al clasificar: {str(e)}"}), 500
+
+
+@admin_bp.route('/classify-all-projects', methods=['GET'])
+@jwt_required()
+@admin_required
+def classify_all_projects():
+    """Clasifica todos los proyectos usando árbol de decisión entrenado con proyectos reales."""
+    db = get_db()
+
+    projects = list(db.projects.find({}))
+    analyses = list(db.analysis_results.find({}))
+
+    analysis_map = {}
+    for analysis in analyses:
+        project_id = analysis.get("project_id")
+        if project_id:
+            analysis_map[project_id] = analysis
+
+    try:
+        from services.ml_analyzer import classify_project_type
+
+        all_projects_data = _get_all_projects_data(db)  # 🆕 se calcula UNA sola vez
+
+        results = []
+        for project in projects:
+            project_id = project.get("_id")
+            analysis = analysis_map.get(project_id)
+
+            if analysis:
+                results_data = analysis.get("results", {})
+                if results_data:
+                    try:
+                        classification = classify_project_type(results_data, project, all_projects_data)
+                        results.append({
+                            "project_id": project_id,
+                            "project_name": project.get("name", "Desconocido"),
+                            "classification": classification
+                        })
+                    except Exception as e:
+                        print(f"Error clasificando proyecto {project_id}: {e}")
+
+        return jsonify({
+            "status": "ok",
+            "classifications": results
+        }), 200
+
+    except Exception as e:
+        print(f"Error en classify_all_projects: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error al clasificar proyectos: {str(e)}"}), 500

@@ -273,7 +273,7 @@
   <canvas id="particle-canvas"></canvas>
 
   <div class="flex min-h-screen w-full relative z-10">
-    <!-- Sidebar (estilo hover-expand, igual que el dashboard de usuario) -->
+    <!-- Sidebar (estilo hover-expand) -->
     <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
       <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
         <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
@@ -284,27 +284,27 @@
 
       <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
         <div class="sidebar-nav">
-          <!-- <a href="/perfil" class="sidebar-nav-item">
-            <span class="material-symbols-outlined">person</span>
-            <span class="nav-label">Perfil</span>
-          </a> -->
           <button onclick="showView('resumen')" id="nav-resumen" class="sidebar-nav-item active">
             <span class="material-symbols-outlined">shield_person</span>
             <span class="nav-label">Admin</span>
           </button>
-          <a href="/admin/users" class="sidebar-nav-item">
+          <button onclick="showView('users')" id="nav-users" class="sidebar-nav-item">
             <span class="material-symbols-outlined">group</span>
             <span class="nav-label">Usuarios</span>
             <span class="nav-badge" id="sidebar-user-count">0</span>
-          </a>
-          <a href="/admin/projects" class="sidebar-nav-item">
+          </button>
+          <button onclick="showView('projects')" id="nav-projects" class="sidebar-nav-item">
             <span class="material-symbols-outlined">folder_open</span>
             <span class="nav-label">Proyectos</span>
             <span class="nav-badge" id="sidebar-project-count">0</span>
-          </a>
+          </button>
           <button onclick="showView('pca')" id="nav-pca" class="sidebar-nav-item">
             <span class="material-symbols-outlined">scatter_plot</span>
             <span class="nav-label">Análisis PCA</span>
+          </button>
+          <button onclick="showView('classification')" id="nav-classification" class="sidebar-nav-item">
+            <span class="material-symbols-outlined">category</span>
+            <span class="nav-label">Clasificación</span>
           </button>
         </div>
       </nav>
@@ -385,8 +385,10 @@
           </div>
           <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
         </div>
+      </div>
 
-        <!-- Tabla de Usuarios con CRUD -->
+      <!-- ============ VISTA: USUARIOS ============ -->
+      <div id="view-users" class="hidden">
         <div id="users-section" class="mb-12 stagger-in" style="animation-delay:0.35s;">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold section-title">
@@ -408,13 +410,15 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Tabla de Proyectos con CRUD básico -->
+      <!-- ============ VISTA: PROYECTOS ============ -->
+      <div id="view-projects" class="hidden">
         <div id="projects-section" class="stagger-in" style="animation-delay:0.4s;">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold section-title">
               <span class="material-symbols-outlined">folder_open</span>
-              Proyectos recientes
+              Proyectos
             </h2>
             <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto</button>
           </div>
@@ -469,6 +473,41 @@
             <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">list</span>Proyectos en el espacio PCA</h3>
             <div id="pca-projects-list" class="grid gap-2 text-sm"></div>
           </div>
+          <!-- Conclusión -->
+          <div class="glass rounded-2xl p-4 mt-4">
+            <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">insights</span>Conclusión</h3>
+            <div id="pca-conclusion" class="space-y-2 text-sm text-on-surface-variant"></div>
+          </div>
+          <!-- Sugerencias -->
+          <div class="glass rounded-2xl p-4 mt-4 bg-secondary/10 border border-secondary/30">
+            <h3 class="font-semibold mb-2 flex items-center gap-2 text-secondary">
+              <span class="material-symbols-outlined" style="font-size:18px;">lightbulb</span>
+              Sugerencias
+            </h3>
+            <div id="pca-suggestions" class="space-y-2 text-sm text-on-surface-variant"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ VISTA: CLASIFICACIÓN ============ -->
+      <div id="view-classification" class="hidden">
+        <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.1s;">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold section-title">
+                <span class="material-symbols-outlined">category</span>
+                Clasificación de Proyectos
+              </h2>
+              <p class="text-on-surface-variant/70 text-sm">Clasifica automáticamente los proyectos por dominio usando Árbol de Decisión.</p>
+            </div>
+            <button onclick="classifyAllProjects()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">play_arrow</span> Clasificar todos
+            </button>
+          </div>
+          
+          <div id="classification-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <p class="text-on-surface-variant/60 text-sm col-span-full">Haz clic en "Clasificar todos" para analizar los proyectos.</p>
+          </div>
         </div>
       </div>
     </main>
@@ -510,6 +549,19 @@
     </div>
   </div>
 
+  <!-- MODAL CLASIFICACIÓN DETALLES -->
+  <div id="classificationModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeClassificationModal()" style="background:rgba(0,0,0,0.5);">
+    <div class="glass p-8 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-y-auto">
+      <button onclick="closeClassificationModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+      <h3 class="text-2xl font-bold text-on-surface mb-1" id="classificationModalTitle">Detalles de Clasificación</h3>
+      <p class="text-on-surface-variant/60 text-sm mb-6">Análisis detallado del árbol de decisión</p>
+      
+      <div id="classification-details">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </div>
+  </div>
+
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
@@ -520,44 +572,54 @@
 
     function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
 
-    // ─── Manejo de vistas (Resumen / PCA) ───────────────────────────
+    // ─── Manejo de vistas ───────────────────────────────────────────
     let pcaLoaded = false;
-    function showView(view) {
-      const resumen = document.getElementById('view-resumen');
-      const pca = document.getElementById('view-pca');
-      const navResumen = document.getElementById('nav-resumen');
-      const navPca = document.getElementById('nav-pca');
 
-      if (view === 'pca') {
-        resumen.classList.add('hidden');
-        pca.classList.remove('hidden');
-        navResumen.classList.remove('active');
-        navPca.classList.add('active');
-        if (!pcaLoaded) { loadPCA(); pcaLoaded = true; }
-      } else {
-        pca.classList.add('hidden');
-        resumen.classList.remove('hidden');
-        navPca.classList.remove('active');
-        navResumen.classList.add('active');
+    function showView(view) {
+      const views = ['resumen', 'users', 'projects', 'pca', 'classification'];
+      const navs = {
+        'resumen': document.getElementById('nav-resumen'),
+        'users': document.getElementById('nav-users'),
+        'projects': document.getElementById('nav-projects'),
+        'pca': document.getElementById('nav-pca'),
+        'classification': document.getElementById('nav-classification')
+      };
+
+      // Ocultar todas las vistas
+      views.forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.classList.add('hidden');
+      });
+
+      // Remover active de todos los navs
+      Object.values(navs).forEach(el => {
+        if (el) el.classList.remove('active');
+      });
+
+      // Mostrar la vista seleccionada
+      const targetView = document.getElementById('view-' + view);
+      if (targetView) {
+        targetView.classList.remove('hidden');
+      }
+
+      // Activar el nav correspondiente
+      if (navs[view]) {
+        navs[view].classList.add('active');
+      }
+
+      // Cargar datos específicos si es necesario
+      if (view === 'pca' && !pcaLoaded) {
+        loadPCA();
+        pcaLoaded = true;
       }
     }
 
-    // Carga datos iniciales
+    // ─── Carga de datos ─────────────────────────────────────────────
     async function loadStats() {
-      // Verificar autenticación y rol antes de cargar
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!token || user.role !== 'admin') {
-        window.location.href = '/dashboard';
-        return;
-      }
-
       try {
         const res = await fetch('/api/admin/overview', { headers: authHeaders() });
         if (!res.ok) {
-          console.error('Error loading stats:', res.status, res.statusText);
-          const errorData = await res.json().catch(() => ({}));
-          console.error('Error data:', errorData);
+          console.error('Error loading stats:', res.status);
           if (res.status === 403) {
             alert('No tienes permisos de administrador. Redirigiendo al dashboard...');
             window.location.href = '/dashboard';
@@ -583,6 +645,7 @@
         document.getElementById('matching-count').innerText = data.data_analysis?.matching_terms?.length || 0;
         document.getElementById('sidebar-user-count').innerText = data.stats.total_users || 0;
         document.getElementById('sidebar-project-count').innerText = data.stats.total_projects || 0;
+        
         const kwContainer = document.getElementById('keywords-list');
         if (data.data_analysis?.keywords) {
           kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:rgba(142,213,255,0.12);color:var(--color-primary);border-color:rgba(142,213,255,0.25);">${k}</span>`).join('');
@@ -598,7 +661,7 @@
         Chart.defaults.borderColor = gridColor;
         Chart.defaults.font.family = "'Geist', sans-serif";
 
-        // Obtener proyectos reales para las gráficas (fuente de verdad)
+        // Obtener proyectos reales para las gráficas
         let allProjects = [];
         try {
           const projRes = await fetch('/api/admin/projects', { headers: authHeaders() });
@@ -611,7 +674,6 @@
           const lang = (p.language && p.language !== 'unknown' && p.language !== 'Unknown') ? p.language : 'Otro';
           langMap[lang] = (langMap[lang] || 0) + 1;
         });
-        // Fallback: usar language_distribution del overview si no hay proyectos
         if (!allProjects.length && data.stats.language_distribution) {
           Object.assign(langMap, data.stats.language_distribution);
         }
@@ -645,11 +707,10 @@
         allProjects.forEach(p => {
           const ca = p.created_at || '';
           if (ca && ca.length >= 7) {
-            const key = ca.substring(0, 7); // "YYYY-MM"
+            const key = ca.substring(0, 7);
             monthMap[key] = (monthMap[key] || 0) + 1;
           }
         });
-        // Fallback
         if (!allProjects.length && data.stats.projects_per_month) {
           Object.assign(monthMap, data.stats.projects_per_month);
         }
@@ -684,12 +745,41 @@
           }
         });
 
-        // Si la vista PCA ya estaba activa (p.ej. recarga con tema), refrescar
         if (pcaLoaded) await loadPCA();
       } catch (error) {
         console.error('Error loading stats:', error);
         alert('Error al cargar estadísticas. Verifica la consola para más detalles.');
       }
+    }
+
+    async function loadUsers() {
+      const res = await fetch('/api/admin/users', { headers: authHeaders() });
+      if (!res.ok) return;
+      const users = await res.json();
+      const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
+      const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
+      document.getElementById('users-table').innerHTML = users.map(u => `
+        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+          <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
+          <td class="p-4"><span class="badge ${planColors[u.plan] || 'pending'}">${planNames[u.plan] || u.plan || 'Gratuito'}</span></td>
+          <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
+          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadProjects() {
+      const res = await fetch('/api/admin/projects', { headers: authHeaders() });
+      if (!res.ok) return;
+      const projects = await res.json();
+      document.getElementById('projects-table').innerHTML = projects.map(p => `
+        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+          <td class="p-4">${escapeHtml(p.name)}</td><td class="p-4">${escapeHtml(p.owner)}</td><td class="p-4">${p.language}</td>
+          <td class="p-4"><span class="badge ${p.status}">${p.status === 'completed' ? 'Completado' : p.status === 'error' ? 'Error' : 'Pendiente'}</span></td>
+          <td class="p-4">${p.quality_score || '—'}</td>
+          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editProject('${p._id}','${escapeHtml(p.name)}','${escapeHtml(p.owner)}','${p.language}','${p.status}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteProject('${p._id}')">delete</span></div></td>
+        </tr>
+      `).join('');
     }
 
     async function loadPCA() {
@@ -737,10 +827,31 @@
         projectList.innerHTML = pca.project_coordinates.slice(0, 8).map(item =>
           `<div class="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
              <div class="font-semibold">${item.name}</div>
-             <div class="text-xs text-on-surface-variant mt-1">Componente 1: ${item.component_1}, Componente 2: ${item.component_2}</div>
+             <div class="text-xs text-on-surface-variant mt-1">Componente 1: ${item.component_1.toFixed(3)}, Componente 2: ${item.component_2.toFixed(3)}</div>
            </div>`
         ).join('');
 
+        const conclusionContainer = document.getElementById('pca-conclusion');
+        if (pca.conclusion && Array.isArray(pca.conclusion)) {
+          conclusionContainer.innerHTML = pca.conclusion
+            .map(text => `<p class="mb-2">${text}</p>`)
+            .join('');
+        } else if (pca.interpretacion) {
+          conclusionContainer.innerHTML = `<p class="mb-2">${pca.interpretacion}</p>`;
+        } else {
+          conclusionContainer.innerHTML = `<p class="text-on-surface-variant/60">No hay conclusión disponible para este análisis.</p>`;
+        }
+
+        const suggestionsContainer = document.getElementById('pca-suggestions');
+        if (pca.sugerencias && Array.isArray(pca.sugerencias)) {
+          suggestionsContainer.innerHTML = pca.sugerencias
+            .map(text => `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>${text}</span></div>`)
+            .join('');
+        } else {
+          suggestionsContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>No hay sugerencias disponibles para este análisis.</span></div>`;
+        }
+
+        // Gráfico PCA
         if (window._chartPCA) window._chartPCA.destroy();
         window._chartPCA = new Chart(ctxPCA, {
           type: 'scatter',
@@ -792,55 +903,25 @@
       }
     }
 
-    async function loadUsers() {
-      // Verificar autenticación y rol antes de cargar
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!token || user.role !== 'admin') {
-        window.location.href = '/dashboard';
-        return;
-      }
-
-      const res = await fetch('/api/admin/users', { headers: authHeaders() });
-      if (!res.ok) return;
-      const users = await res.json();
-      const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
-      const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
-      document.getElementById('users-table').innerHTML = users.map(u => `
-        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
-          <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
-          <td class="p-4"><span class="badge ${planColors[u.plan] || 'pending'}">${planNames[u.plan] || u.plan || 'Gratuito'}</span></td>
-          <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
-          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
-        </tr>
-      `).join('');
+    // ─── CRUD Usuarios ──────────────────────────────────────────────
+    function openUserModal(edit = false) { 
+      const modal = document.getElementById('userModal');
+      modal.classList.remove('hidden'); 
+      modal.classList.add('flex'); 
+      if(!edit) { 
+        document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; 
+        document.getElementById('userId').value = ''; 
+        document.getElementById('userName').value = ''; 
+        document.getElementById('userEmail').value = ''; 
+        document.getElementById('userPassword').value = ''; 
+        document.getElementById('userRole').value = 'user'; 
+      } 
     }
-
-    async function loadProjects() {
-      // Verificar autenticación y rol antes de cargar
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!token || user.role !== 'admin') {
-        window.location.href = '/dashboard';
-        return;
-      }
-
-      const res = await fetch('/api/admin/projects', { headers: authHeaders() });
-      if (!res.ok) return;
-      const projects = await res.json();
-      document.getElementById('projects-table').innerHTML = projects.map(p => `
-        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
-          <td class="p-4">${escapeHtml(p.name)}</td><td class="p-4">${escapeHtml(p.owner)}</td><td class="p-4">${p.language}</td>
-          <td class="p-4"><span class="badge ${p.status}">${p.status === 'completed' ? 'Completado' : p.status === 'error' ? 'Error' : 'Pendiente'}</span></td>
-          <td class="p-4">${p.quality_score || '—'}</td>
-          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editProject('${p._id}','${escapeHtml(p.name)}','${escapeHtml(p.owner)}','${p.language}','${p.status}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteProject('${p._id}')">delete</span></div></td>
-        </tr>
-      `).join('');
+    function closeUserModal() { 
+      const modal = document.getElementById('userModal');
+      modal.classList.add('hidden'); 
+      modal.classList.remove('flex'); 
     }
-
-    // CRUD Usuarios
-    function openUserModal(edit = false) { document.getElementById('userModal').classList.remove('hidden'); document.getElementById('userModal').classList.add('flex'); if(!edit) { document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; document.getElementById('userId').value = ''; document.getElementById('userName').value = ''; document.getElementById('userEmail').value = ''; document.getElementById('userPassword').value = ''; document.getElementById('userRole').value = 'user'; } }
-    function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); document.getElementById('userModal').classList.remove('flex'); }
     window.editUser = (id, name, email, role) => {
       document.getElementById('userModalTitle').innerText = 'Editar Usuario';
       document.getElementById('userId').value = id;
@@ -871,9 +952,23 @@
       }
     };
 
-    // CRUD Proyectos
-    function openProjectModal() { document.getElementById('projectModal').classList.remove('hidden'); document.getElementById('projectModal').classList.add('flex'); document.getElementById('projectId').value = ''; document.getElementById('projectName').value = ''; document.getElementById('projectOwner').value = ''; document.getElementById('projectLanguage').value = 'Python'; document.getElementById('projectStatus').value = 'pending'; document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; }
-    function closeProjectModal() { document.getElementById('projectModal').classList.add('hidden'); document.getElementById('projectModal').classList.remove('flex'); }
+    // ─── CRUD Proyectos ─────────────────────────────────────────────
+    function openProjectModal() { 
+      const modal = document.getElementById('projectModal');
+      modal.classList.remove('hidden'); 
+      modal.classList.add('flex'); 
+      document.getElementById('projectId').value = ''; 
+      document.getElementById('projectName').value = ''; 
+      document.getElementById('projectOwner').value = ''; 
+      document.getElementById('projectLanguage').value = 'Python'; 
+      document.getElementById('projectStatus').value = 'pending'; 
+      document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; 
+    }
+    function closeProjectModal() { 
+      const modal = document.getElementById('projectModal');
+      modal.classList.add('hidden'); 
+      modal.classList.remove('flex'); 
+    }
     window.editProject = (id, name, owner, lang, status) => {
       document.getElementById('projectModalTitle').innerText = 'Editar Proyecto';
       document.getElementById('projectId').value = id;
@@ -881,8 +976,9 @@
       document.getElementById('projectOwner').value = owner;
       document.getElementById('projectLanguage').value = lang;
       document.getElementById('projectStatus').value = status;
-      document.getElementById('projectModal').classList.remove('hidden');
-      document.getElementById('projectModal').classList.add('flex');
+      const modal = document.getElementById('projectModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     };
     async function saveProject() {
       const id = document.getElementById('projectId').value;
@@ -903,30 +999,346 @@
       }
     };
 
-    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    // ─── Clasificación de proyectos ──────────────────────────────────
+    async function classifyAllProjects() {
+      const container = document.getElementById('classification-results');
+      container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">Clasificando proyectos...</p>';
+      
+      try {
+        const res = await fetch('/api/admin/classify-all-projects', { headers: authHeaders() });
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('Error response:', res.status, errorText);
+          container.innerHTML = `<p class="text-error text-sm col-span-full">Error al clasificar proyectos: ${res.status} ${res.statusText}</p>`;
+          return;
+        }
+        
+        const data = await res.json();
+        if (data.status !== 'ok' || !data.classifications) {
+          container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">No hay proyectos para clasificar</p>';
+          return;
+        }
+        
+        const classifications = data.classifications;
+        const colors = {
+          'Medico/Salud': 'border-emerald-400/30 bg-emerald-400/10',
+          'Financiero': 'border-blue-400/30 bg-blue-400/10',
+          'Educativo': 'border-amber-400/30 bg-amber-400/10',
+          'Comercio': 'border-purple-400/30 bg-purple-400/10',
+          'API/REST': 'border-cyan-400/30 bg-cyan-400/10',
+          'Otro': 'border-gray-400/30 bg-gray-400/10'
+        };
+        
+        // 🆕 Iconos Material Symbols en vez de emojis
+        const icons = {
+          'Medico/Salud': 'medical_services',
+          'Financiero': 'account_balance',
+          'Educativo': 'school',
+          'Comercio': 'shopping_cart',
+          'API/REST': 'api',
+          'Otro': 'folder'
+        };
+
+        const iconColors = {
+          'Medico/Salud': 'text-emerald-400',
+          'Financiero': 'text-blue-400',
+          'Educativo': 'text-amber-400',
+          'Comercio': 'text-purple-400',
+          'API/REST': 'text-cyan-400',
+          'Otro': 'text-gray-400'
+        };
+        
+        if (classifications.length === 0) {
+          container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">No se encontraron proyectos con análisis para clasificar.</p>';
+          return;
+        }
+        
+        container.innerHTML = classifications.map(c => {
+          const classification = c.classification;
+          const cls = classification.clasificacion || 'Otro';
+          const color = colors[cls] || colors['Otro'];
+          const icon = icons[cls] || icons['Otro'];
+          const iconColor = iconColors[cls] || iconColors['Otro'];
+          const confidence = classification.confianza || 0;
+          const fuenteDatos = classification.fuente_datos || '';
+          const esReal = fuenteDatos.includes('reales');
+          
+          return `
+            <div class="glass rounded-2xl p-4 glass-hover border ${color} cursor-pointer" onclick="showClassificationDetails('${c.project_id}')">
+              <div class="flex items-start justify-between">
+                <div class="flex items-start gap-3">
+                  <span class="material-symbols-outlined ${iconColor}" style="font-size:28px;">${icon}</span>
+                  <div>
+                    <div class="text-lg font-semibold">${escapeHtml(c.project_name)}</div>
+                    <div class="text-sm text-on-surface-variant mt-1">${cls}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-bold ${confidence > 70 ? 'text-green-accent' : confidence > 50 ? 'text-tertiary' : 'text-error'}">
+                    ${confidence}%
+                  </div>
+                  <div class="text-xs text-on-surface-variant">confianza</div>
+                </div>
+              </div>
+              <div class="mt-2 flex flex-wrap gap-1">
+                ${Object.entries(classification.probabilidades || {}).slice(0, 4).map(([label, prob]) => `
+                  <span class="badge ${prob > 20 ? 'completed' : 'pending'}" style="font-size:0.6rem;">
+                    ${label}: ${prob}%
+                  </span>
+                `).join('')}
+              </div>
+              ${fuenteDatos ? `
+                <div class="mt-3 flex items-center gap-1.5 text-xs ${esReal ? 'text-green-accent' : 'text-tertiary'}">
+                  <span class="material-symbols-outlined" style="font-size:14px;">${esReal ? 'verified' : 'science'}</span>
+                  <span>${esReal ? 'Entrenado con proyectos reales' : 'Entrenado con datos sintéticos'}</span>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Error clasificando proyectos:', error);
+        container.innerHTML = `<p class="text-error text-sm col-span-full">Error al clasificar proyectos: ${error.message}</p>`;
+      }
+    }
+    // ─── Mostrar detalles de clasificación ──────────────────────────
+    async function showClassificationDetails(projectId) {
+      try {
+        const res = await fetch(`/api/admin/classify-project/${projectId}`, { headers: authHeaders() });
+        if (!res.ok) {
+          alert('Error al obtener detalles del proyecto');
+          return;
+        }
+        
+        const data = await res.json();
+        if (data.status !== 'ok' || !data.classification) {
+          alert('No se encontró clasificación para este proyecto');
+          return;
+        }
+        
+        const classification = data.classification;
+        const modal = document.getElementById('classificationModal');
+        const details = document.getElementById('classification-details');
+
+        // 🆕 Iconos por categoría (mismos que en la lista)
+        const icons = {
+          'Medico/Salud': 'medical_services',
+          'Financiero': 'account_balance',
+          'Educativo': 'school',
+          'Comercio': 'shopping_cart',
+          'API/REST': 'api',
+          'Otro': 'folder'
+        };
+        const cls = classification.clasificacion || 'Otro';
+        const icon = icons[cls] || icons['Otro'];
+        const fuenteDatos = classification.fuente_datos || 'desconocida';
+        const esReal = fuenteDatos.includes('reales');
+        const muestras = classification.muestras_entrenamiento;
+        
+        document.getElementById('classificationModalTitle').innerHTML = `
+          <span class="inline-flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" style="font-size:24px;">${icon}</span>
+            Clasificación: ${cls}
+          </span>
+        `;
+        
+        let html = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="glass rounded-xl p-4">
+              <div class="text-sm text-on-surface-variant">Clasificación</div>
+              <div class="text-2xl font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined" style="font-size:22px;">${icon}</span>
+                ${cls}
+              </div>
+              <div class="text-sm mt-1">Confianza: ${classification.confianza || 0}%</div>
+            </div>
+            <div class="glass rounded-xl p-4">
+              <div class="text-sm text-on-surface-variant">Tipo de modelo</div>
+              <div class="text-lg font-semibold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary" style="font-size:20px;">account_tree</span>
+                ${classification.tipo || 'Árbol de Decisión'}
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-xl p-4 mb-4 ${esReal ? 'border border-green-accent/30' : 'border border-tertiary/30'}">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined ${esReal ? 'text-green-accent' : 'text-tertiary'}" style="font-size:20px;">
+                ${esReal ? 'verified' : 'science'}
+              </span>
+              <div>
+                <div class="font-semibold ${esReal ? 'text-green-accent' : 'text-tertiary'}">
+                  ${esReal ? 'Modelo entrenado con proyectos reales' : 'Modelo entrenado con datos sintéticos'}
+                </div>
+                <div class="text-xs text-on-surface-variant">
+                  ${muestras ? `${muestras} muestras de entrenamiento` : ''}
+                  ${esReal ? '' : ' — agrega más proyectos analizados para mejorar la precisión'}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass rounded-xl p-4 mb-4">
+            <h4 class="font-semibold mb-2 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px;">bar_chart</span>
+              Probabilidades por categoría
+            </h4>
+            <div class="space-y-2">
+              ${Object.entries(classification.probabilidades || {}).map(([label, prob]) => `
+                <div>
+                  <div class="flex justify-between text-sm">
+                    <span class="flex items-center gap-1.5">
+                      <span class="material-symbols-outlined" style="font-size:14px;">${icons[label] || 'folder'}</span>
+                      ${label}
+                    </span>
+                    <span class="font-bold">${prob}%</span>
+                  </div>
+                  <div class="w-full bg-surface-container rounded-full h-2">
+                    <div class="bg-primary rounded-full h-2 transition-all" style="width: ${prob}%"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="glass rounded-xl p-4 mb-4">
+            <h4 class="font-semibold mb-2 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px;">checklist</span>
+              Detalles de la decisión
+            </h4>
+            <ul class="list-disc list-inside text-sm space-y-1">
+              ${(classification.detalles_decision || []).map(d => `<li>${d}</li>`).join('')}
+            </ul>
+          </div>
+          
+          <div class="glass rounded-xl p-4 mb-4">
+            <h4 class="font-semibold mb-2 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px;">insights</span>
+              Características más importantes
+            </h4>
+            <div class="space-y-2">
+              ${(classification.caracteristicas_importantes || []).map(([feature, importance]) => `
+                <div>
+                  <div class="flex justify-between text-sm">
+                    <span>${feature}</span>
+                    <span class="font-bold">${(importance * 100).toFixed(1)}%</span>
+                  </div>
+                  <div class="w-full bg-surface-container rounded-full h-2">
+                    <div class="bg-secondary rounded-full h-2 transition-all" style="width: ${importance * 100}%"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="glass rounded-xl p-4 mb-4 bg-secondary/10 border border-secondary/30">
+            <h4 class="font-semibold mb-2 text-secondary flex items-center gap-2">
+              <span class="material-symbols-outlined" style="font-size:18px;">psychology</span>
+              Interpretación
+            </h4>
+            <p class="text-sm text-on-surface-variant">${classification.interpretacion || 'Sin interpretación disponible'}</p>
+          </div>
+          
+          <div class="glass rounded-xl p-4">
+            <h4 class="font-semibold mb-2 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px;">lightbulb</span>
+              Recomendaciones
+            </h4>
+            <ul class="list-disc list-inside text-sm space-y-1">
+              ${(classification.recomendaciones || []).map(r => `<li>${r}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+        
+        details.innerHTML = html;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+      } catch (error) {
+        console.error('Error mostrando detalles:', error);
+        alert('Error al obtener detalles del proyecto');
+      }
+    }
+    function closeClassificationModal() {
+      const modal = document.getElementById('classificationModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // ─── Utils ──────────────────────────────────────────────────────
+    function escapeHtml(str) { 
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); 
+    }
+    
     function logout() { localStorage.clear(); window.location.href = '/'; }
 
-    // Tema claro/oscuro con persistencia
+    // ─── Tema claro/oscuro ─────────────────────────────────────────
     const themeBtn = document.getElementById('themeButton');
     const themeIcon = document.getElementById('themeIcon');
     const savedTheme = localStorage.getItem('theme') || 'dark';
-    function applyTheme(theme) { document.body.setAttribute('data-theme', theme); themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode'; localStorage.setItem('theme', theme); }
+    function applyTheme(theme) { 
+      document.body.setAttribute('data-theme', theme); 
+      themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode'; 
+      localStorage.setItem('theme', theme); 
+    }
     applyTheme(savedTheme);
-    themeBtn?.addEventListener('click', () => { const cur = document.body.getAttribute('data-theme'); applyTheme(cur === 'light' ? 'dark' : 'light'); loadStats(); });
+    themeBtn?.addEventListener('click', () => { 
+      const cur = document.body.getAttribute('data-theme'); 
+      applyTheme(cur === 'light' ? 'dark' : 'light'); 
+      loadStats(); 
+    });
 
-    // Partículas (igual que index)
+    // ─── Partículas ──────────────────────────────────────────────────
     const canvas = document.getElementById('particle-canvas');
     let ctx = canvas.getContext('2d');
     let particles = [], mouse = { x: null, y: null };
     function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    class Particle { constructor() { this.reset(); } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; } update() { this.x += this.vx; this.y += this.vy; if (mouse.x) { let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy); if (d < 150) { let angle = Math.atan2(dy, dx), force = (150 - d) / 150; this.x -= Math.cos(angle) * force * 1.2; this.y -= Math.sin(angle) * force * 1.2; } } if (this.x < 0) this.x = canvas.width; if (this.x > canvas.width) this.x = 0; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; } draw() { const style = getComputedStyle(document.body); const c1 = style.getPropertyValue('--particle-color-1').trim(); const c2 = style.getPropertyValue('--particle-color-2').trim(); ctx.fillStyle = Math.random() > 0.7 ? c1 : c2; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); particles.forEach(p => { if (Math.hypot(this.x - p.x, this.y - p.y) < 100) { ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(p.x, p.y); ctx.strokeStyle = style.getPropertyValue('--particle-line').trim(); ctx.stroke(); } }); } }
+    class Particle { 
+      constructor() { this.reset(); } 
+      reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; } 
+      update() { 
+        this.x += this.vx; this.y += this.vy; 
+        if (mouse.x) { 
+          let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy); 
+          if (d < 150) { 
+            let angle = Math.atan2(dy, dx), force = (150 - d) / 150; 
+            this.x -= Math.cos(angle) * force * 1.2; 
+            this.y -= Math.sin(angle) * force * 1.2; 
+          } 
+        } 
+        if (this.x < 0) this.x = canvas.width; 
+        if (this.x > canvas.width) this.x = 0; 
+        if (this.y < 0) this.y = canvas.height; 
+        if (this.y > canvas.height) this.y = 0; 
+      } 
+      draw() { 
+        const style = getComputedStyle(document.body); 
+        const c1 = style.getPropertyValue('--particle-color-1').trim(); 
+        const c2 = style.getPropertyValue('--particle-color-2').trim(); 
+        ctx.fillStyle = Math.random() > 0.7 ? c1 : c2; 
+        ctx.beginPath(); 
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
+        ctx.fill(); 
+        particles.forEach(p => { 
+          if (Math.hypot(this.x - p.x, this.y - p.y) < 100) { 
+            ctx.beginPath(); 
+            ctx.moveTo(this.x, this.y); 
+            ctx.lineTo(p.x, p.y); 
+            ctx.strokeStyle = style.getPropertyValue('--particle-line').trim(); 
+            ctx.stroke(); 
+          } 
+        }); 
+      } 
+    }
     function initParticles() { particles = []; for (let i = 0; i < 70; i++) particles.push(new Particle()); }
     function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
     window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
     window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
     resizeCanvas(); initParticles(); animate();
 
-    // Cargar todo
+    // ─── Cargar todo ──────────────────────────────────────────────────
     loadStats(); loadUsers(); loadProjects();
   </script>
 </body>

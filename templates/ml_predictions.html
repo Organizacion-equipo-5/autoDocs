@@ -250,6 +250,7 @@
                             <button class="tab" onclick="showPredTab('lineal-multiple', this)">Regresión Múltiple</button>
                             <button class="tab" onclick="showPredTab('logistica', this)">Regresión Logística</button>
                             <button class="tab" onclick="showPredTab('mae', this)">Error Absoluto (MAE)</button>
+                            <button class="tab" onclick="showPredTab('arbol', this)">Árbol de Decisión</button>
                         </div>
 
                         <!-- ── Lineal Simple ── -->
@@ -417,6 +418,64 @@
                             <div class="flex flex-col gap-3" id="mae-bars"></div>
                             <svg id="mae-chart" viewBox="0 0 600 180" class="w-full rounded-lg" style="background:rgba(26,29,39,0.6);max-height:180px;"></svg>
                             <div class="rounded-lg p-4 bg-amber-500/5 border border-amber-500/20 text-sm text-on-surface-variant" id="mae-interp"></div>
+                        </div>
+
+                        <!-- ── Árbol de Decisión ── -->
+                        <div id="tab-arbol" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant">Un árbol de decisión clasifica automáticamente el dominio de tu proyecto (Médico/Salud, Financiero, Educativo, Comercio, API/REST u Otro) a partir de palabras clave en funciones, clases, endpoints y archivos.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Coincidencias de palabras clave por dominio, funciones, endpoints, documentación y estructura del proyecto (models, views, controllers, services, tests).</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>El árbol asigna una probabilidad a cada dominio posible; el de mayor probabilidad es la clasificación final.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Categoría predicha, nivel de confianza, probabilidades por categoría y las variables que más influyeron en la decisión.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="arbol-source" class="rounded-lg p-3 border text-xs flex items-center gap-2"></div>
+
+                            <div id="arbol-main" class="rounded-2xl p-5 border border-outline-variant/20 flex items-center gap-4" style="background:rgba(26,29,39,0.4);">
+                                <span id="arbol-icon" class="material-symbols-outlined text-primary" style="font-size:40px;">account_tree</span>
+                                <div>
+                                    <p class="text-xs text-on-surface-variant/60 uppercase tracking-wider">Clasificación</p>
+                                    <p id="arbol-clasificacion" class="text-2xl font-bold text-on-surface">—</p>
+                                    <p id="arbol-confianza" class="text-sm text-on-surface-variant"></p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <p class="text-xs text-on-surface-variant/60 uppercase tracking-wider">Probabilidades por categoría</p>
+                                <div id="arbol-probs" class="flex flex-col gap-2"></div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <p class="text-xs text-on-surface-variant/60 uppercase tracking-wider">Características más importantes</p>
+                                <div id="arbol-features" class="flex flex-col gap-2"></div>
+                            </div>
+
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Detalles de la decisión:</p>
+                                <ul id="arbol-detalles" class="list-disc list-inside space-y-1"></ul>
+                            </div>
+
+                            <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="arbol-interp"></div>
+
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Recomendaciones
+                                </p>
+                                <div id="arbol-recomendaciones" class="space-y-2"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -599,6 +658,7 @@
         renderLinealMultiple(data.regresion_multiple);
         renderLogistica(data.regresion_logistica);
         renderMAE(data.mae_analysis);
+        renderArbol(data.arbol_decision);
         
         // Reset a la primera pestaña
         var panels = document.querySelectorAll('.pred-tab-panel');
@@ -944,6 +1004,99 @@
         });
         svg.innerHTML = inner;
         document.getElementById('mae-interp').textContent = d.interpretacion || '';
+    }
+
+    // ─── Árbol de Decisión ────────────────────────────────────────────────────────
+    function renderArbol(d) {
+        if (!d || d.error) {
+            var interpEl = document.getElementById('arbol-interp');
+            if (interpEl) interpEl.textContent = (d && d.error) || 'No disponible';
+            return;
+        }
+
+        var domainIcons = {
+            'Medico/Salud': 'medical_services',
+            'Financiero': 'account_balance',
+            'Educativo': 'school',
+            'Comercio': 'shopping_cart',
+            'API/REST': 'api',
+            'Otro': 'folder'
+        };
+        var cls = d.clasificacion || 'Otro';
+        var icon = domainIcons[cls] || 'folder';
+        document.getElementById('arbol-icon').textContent = icon;
+        document.getElementById('arbol-clasificacion').textContent = cls;
+        document.getElementById('arbol-confianza').textContent = 'Confianza: ' + (d.confianza || 0) + '%';
+
+        // Fuente de datos (real vs sintética)
+        var fuente = d.fuente_datos || '';
+        var esReal = fuente.indexOf('reales') !== -1;
+        var sourceEl = document.getElementById('arbol-source');
+        if (sourceEl) {
+            sourceEl.className = 'rounded-lg p-3 border text-xs flex items-center gap-2 ' +
+                (esReal ? 'bg-green-500/5 border-green-500/20 text-green-400' : 'bg-amber-500/5 border-amber-500/20 text-amber-500');
+            sourceEl.innerHTML =
+                '<span class="material-symbols-outlined" style="font-size:16px;">' + (esReal ? 'verified' : 'science') + '</span>' +
+                '<span>' + (esReal
+                    ? 'Modelo entrenado con proyectos reales del sistema (' + (d.muestras_entrenamiento || 0) + ' muestras).'
+                    : 'Modelo entrenado con datos sintéticos de referencia' + (d.muestras_entrenamiento ? ' (' + d.muestras_entrenamiento + ' muestras)' : '') + '. Se usarán datos reales automáticamente cuando haya suficientes proyectos analizados.') +
+                '</span>';
+        }
+
+        // Probabilidades por categoría
+        var probs = d.probabilidades || {};
+        var probsHtml = '';
+        Object.keys(probs).forEach(function(label) {
+            var p = probs[label];
+            var color = label === cls ? '#38bdf8' : '#64748b';
+            probsHtml += `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-on-surface-variant" style="font-size:16px;">${domainIcons[label] || 'folder'}</span>
+                    <span class="text-xs text-on-surface-variant w-28 flex-shrink-0">${label}</span>
+                    <div class="flex-1 h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.05)">
+                        <div class="h-2 rounded-full" style="width:${p}%;background:${color}"></div>
+                    </div>
+                    <span class="text-xs font-mono w-14 text-right" style="color:${color}">${p}%</span>
+                </div>`;
+        });
+        document.getElementById('arbol-probs').innerHTML = probsHtml;
+
+        // Características más importantes
+        var feats = d.caracteristicas_importantes || [];
+        var featsHtml = '';
+        feats.forEach(function(pair) {
+            var name = pair[0], val = pair[1];
+            var pct = (val * 100).toFixed(1);
+            featsHtml += `
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-on-surface-variant w-44 flex-shrink-0">${name}</span>
+                    <div class="flex-1 h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.05)">
+                        <div class="h-2 rounded-full" style="width:${pct}%;background:#818cf8"></div>
+                    </div>
+                    <span class="text-xs font-mono w-14 text-right" style="color:#818cf8">${pct}%</span>
+                </div>`;
+        });
+        document.getElementById('arbol-features').innerHTML = featsHtml;
+
+        // Detalles de la decisión
+        var detalles = d.detalles_decision || [];
+        document.getElementById('arbol-detalles').innerHTML =
+            detalles.map(function(t) { return `<li>${t}</li>`; }).join('') ||
+            '<li class="text-on-surface-variant/60">Sin detalles disponibles.</li>';
+
+        document.getElementById('arbol-interp').textContent = d.interpretacion || '';
+
+        // Recomendaciones
+        var recs = d.recomendaciones || [];
+        var recsHtml = '';
+        recs.forEach(function(r) {
+            recsHtml += `<div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                <span class="text-xs">${r}</span>
+            </div>`;
+        });
+        document.getElementById('arbol-recomendaciones').innerHTML = recsHtml ||
+            '<div class="flex items-start gap-2 text-on-surface-variant/60"><span class="material-symbols-outlined text-sm mt-0.5">info</span><span class="text-xs">Sin recomendaciones específicas por ahora.</span></div>';
     }
 
     // ══════════════════════════════════════════════════════════

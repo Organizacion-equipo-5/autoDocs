@@ -140,12 +140,12 @@ Como conclusión, los resultados muestran que tu proyecto tiene {n_funcs} funcio
     else:
         sugerencias.append("Asigna tiempo específico para documentar antes de hacer merge de PRs.")
         sugerencias.append("Implementa checks de CI/CD que requieran documentación mínima.")
-    
+
     if r2 < 0.5:
         sugerencias.append("El modelo explica menos del 50% de la variación. Considera agregar más variables al análisis.")
     elif r2 > 0.8:
         sugerencias.append("Excelente ajuste del modelo. La relación entre funciones y calidad es muy consistente.")
-    
+
     if mae > 15:
         sugerencias.append("El error promedio es alto. Revisa la consistencia de la documentación entre módulos.")
     elif mae < 5:
@@ -248,7 +248,7 @@ def linear_regression_multiple(features: dict) -> dict:
     # 🔍 Identificar factor con mayor impacto
     mayor_impacto = max(coefs, key=lambda k: abs(coefs[k]))
     valor_impacto = coefs[mayor_impacto]
-    
+
     if valor_impacto > 0:
         rec = f"enfocarte en {mayor_impacto.lower()}, ya que cada unidad adicional mejora significativamente la calidad del proyecto"
     else:
@@ -266,12 +266,12 @@ Como conclusión, los resultados muestran que tu proyecto tiene {base_funcs} fun
     else:
         sugerencias.append(f"Prioriza reducir {mayor_impacto.lower()} para mejorar significativamente la calidad.")
         sugerencias.append(f"Implementa métricas para monitorear {mayor_impacto.lower()} y mantenerlo bajo control.")
-    
+
     if r2 < 0.6:
         sugerencias.append("El modelo explica menos del 60% de la variación. Revisa si hay factores externos no considerados.")
     elif r2 > 0.85:
         sugerencias.append("Excelente ajuste del modelo. Las variables seleccionadas explican muy bien la calidad.")
-    
+
     if mae > 10:
         sugerencias.append("El error promedio es moderado. Revisa outliers en los datos de calidad.")
     elif mae < 3:
@@ -376,12 +376,12 @@ Como conclusión, los resultados muestran que tu proyecto está {estado} con una
     else:
         sugerencias.append("Nivel de documentación bajo. Implementa políticas de documentación obligatoria.")
         sugerencias.append("Usa herramientas automáticas para verificar docstrings en CI/CD.")
-    
+
     if accuracy > 0.85:
         sugerencias.append("El modelo tiene alta exactitud. Las predicciones son muy confiables.")
     elif accuracy < 0.7:
         sugerencias.append("La exactitud del modelo es moderada. Revisa la calidad de los datos de entrenamiento.")
-    
+
     if precision < 0.7:
         sugerencias.append("Baja precisión: muchos falsos positivos. Revisa el criterio de 'documentado'.")
     if recall < 0.7:
@@ -570,13 +570,13 @@ def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# 🆕 NUEVAS FUNCIONES: ÁRBOLES DE DECISIÓN PARA CLASIFICAR TIPO DE PROYECTO
+# ÁRBOLES DE DECISIÓN PARA CLASIFICAR TIPO DE PROYECTO
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _extract_project_type_features(results: dict, features: dict = None) -> dict:
     """
     Extrae características específicas para clasificar el tipo de proyecto.
-    
+
     Estas características son clave para determinar si un proyecto es:
     - Médico/Salud
     - Financiero/Bancario
@@ -589,13 +589,13 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
     classes = results.get("classes", [])
     endpoints = results.get("endpoints", [])
     files = results.get("structure", [])
-    
+
     if features is None:
         features = _extract_features(results)
 
     # Palabras clave por dominio
     keywords = {
-        "medico": ["patient", "hospital", "doctor", "medical", "health", "clinical", "diagnosis", "treatment", 
+        "medico": ["patient", "hospital", "doctor", "medical", "health", "clinical", "diagnosis", "treatment",
                    "medic", "pharma", "therapy", "surgery", "emergency", "icu", "ward", "nurse", "prescription",
                    "medication", "laboratory", "lab", "imaging", "radiology", "cardiology", "neurology", "pediatrics"],
         "financiero": ["bank", "account", "transaction", "payment", "finance", "loan", "credit", "debit",
@@ -610,7 +610,7 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
         "api": ["endpoint", "route", "request", "response", "http", "rest", "graphql", "soap", "api",
                 "authentication", "authorization", "jwt", "oauth", "middleware", "controller", "service"]
     }
-    
+
     # Análisis de nombres de funciones
     func_domains = {domain: 0 for domain in keywords}
     for func in funcs:
@@ -618,7 +618,7 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
         for domain, words in keywords.items():
             if any(word in name for word in words):
                 func_domains[domain] += 1
-    
+
     # Análisis de nombres de clases
     class_domains = {domain: 0 for domain in keywords}
     for cls in classes:
@@ -626,7 +626,7 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
         for domain, words in keywords.items():
             if any(word in name for word in words):
                 class_domains[domain] += 1
-    
+
     # Análisis de rutas de endpoints
     endpoint_domains = {domain: 0 for domain in keywords}
     for endpoint in endpoints:
@@ -634,7 +634,7 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
         for domain, words in keywords.items():
             if any(word in path for word in words):
                 endpoint_domains[domain] += 1
-    
+
     # Análisis de nombres de archivos
     file_domains = {domain: 0 for domain in keywords}
     for file in files:
@@ -642,20 +642,20 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
         for domain, words in keywords.items():
             if any(word in name for word in words):
                 file_domains[domain] += 1
-    
+
     # Detectar presencia de módulos específicos
     has_models = any("model" in f.get("name", "").lower() for f in files)
     has_views = any("view" in f.get("name", "").lower() for f in files)
     has_controllers = any("controller" in f.get("name", "").lower() for f in files)
     has_services = any("service" in f.get("name", "").lower() for f in files)
     has_tests = features.get("test_funcs", 0) > 0
-    
+
     # Métricas adicionales
     total_funcs = features.get("total_funcs", 0)
     total_endpoints = features.get("total_endpoints", 0)
     doc_ratio = features.get("doc_ratio", 0)
     avg_complexity = features.get("avg_complexity", 0)
-    
+
     # Calcular puntuaciones por dominio
     domain_scores = {}
     for domain in keywords:
@@ -666,7 +666,7 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
             file_domains.get(domain, 0) * 1
         )
         domain_scores[domain] = score
-    
+
     return {
         "domain_scores": domain_scores,
         "total_funcs": total_funcs,
@@ -684,26 +684,94 @@ def _extract_project_type_features(results: dict, features: dict = None) -> dict
     }
 
 
-def decision_tree_classifier(features: dict, project_type_features: dict) -> dict:
+# 🆕 Etiquetado real de proyectos según sus keyword scores
+
+def _assign_domain_label(domain_scores: dict, threshold: int = 3) -> str:
+    """
+    Asigna la etiqueta de dominio 'real' de un proyecto según sus keyword scores.
+    Si ningún dominio supera el umbral, se etiqueta como 'Otro'.
+    """
+    label_map = {
+        "medico": "Medico/Salud",
+        "financiero": "Financiero",
+        "educativo": "Educativo",
+        "comercio": "Comercio",
+        "api": "API/REST",
+    }
+    if not domain_scores or max(domain_scores.values()) < threshold:
+        return "Otro"
+    best_domain = max(domain_scores, key=lambda d: domain_scores[d])
+    return label_map.get(best_domain, "Otro")
+
+
+# 🆕 Construcción del dataset de entrenamiento real
+
+def build_training_dataset(all_projects_data: list):
+    """
+    all_projects_data: lista de dicts {"results": {...}, "project": {...}}
+    Construye X, y a partir de los proyectos reales del sistema.
+
+    Retorna: X (np.array), y (np.array de índices), project_names (list), label_names (list)
+    """
+    label_names = ["Medico/Salud", "Financiero", "Educativo", "Comercio", "API/REST", "Otro"]
+    label_to_idx = {name: i for i, name in enumerate(label_names)}
+
+    X, y, project_names = [], [], []
+
+    for entry in all_projects_data:
+        results = entry.get("results")
+        project = entry.get("project", {})
+        if not results:
+            continue
+
+        features = _extract_features(results)
+        pt_features = _extract_project_type_features(results, features)
+        domain_scores = pt_features.get("domain_scores", {})
+        label = _assign_domain_label(domain_scores)
+
+        row = [
+            domain_scores.get("medico", 0),
+            domain_scores.get("financiero", 0),
+            domain_scores.get("educativo", 0),
+            domain_scores.get("comercio", 0),
+            domain_scores.get("api", 0),
+            pt_features.get("total_funcs", 0),
+            pt_features.get("total_endpoints", 0),
+            pt_features.get("doc_ratio", 0) * 100,
+            pt_features.get("avg_complexity", 0),
+            1 if pt_features.get("has_tests") else 0,
+            1 if pt_features.get("has_models") else 0,
+            1 if pt_features.get("has_views") else 0,
+            1 if pt_features.get("has_controllers") else 0,
+            1 if pt_features.get("has_services") else 0,
+        ]
+        X.append(row)
+        y.append(label_to_idx[label])
+        project_names.append(project.get("name", "Desconocido"))
+
+    return np.array(X, dtype=float), np.array(y), project_names, label_names
+
+
+def decision_tree_classifier(features: dict, project_type_features: dict,
+                              all_projects_data: list = None,
+                              min_real_samples: int = 12,
+                              min_real_classes: int = 2) -> dict:
     """
     🌳 ÁRBOL DE DECISIÓN PARA CLASIFICAR TIPO DE PROYECTO
-    
-    Utiliza un árbol de decisión para clasificar el proyecto en una de estas categorías:
-    - Médico/Salud
-    - Financiero/Bancario  
-    - Educativo
-    - Comercio electrónico
-    - API/REST
-    - Otro
-    
-    Basado en las características extraídas del código.
+
+    Si `all_projects_data` trae suficientes proyectos reales (>= min_real_samples)
+    y al menos `min_real_classes` categorías distintas representadas, entrena el
+    árbol con esos datos reales. Si no, cae en el modo sintético (heurístico) de
+    respaldo para que la función nunca falle por falta de datos.
     """
     if not _safe_import():
         return {"error": "scikit-learn no está instalado."}
-    
+
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.preprocessing import StandardScaler
-    
+
+    label_names = ["Medico/Salud", "Financiero", "Educativo", "Comercio", "API/REST", "Otro"]
+
     # Características del proyecto actual
     domain_scores = project_type_features.get("domain_scores", {})
     total_funcs = project_type_features.get("total_funcs", 0)
@@ -715,8 +783,7 @@ def decision_tree_classifier(features: dict, project_type_features: dict) -> dic
     has_views = 1 if project_type_features.get("has_views", False) else 0
     has_controllers = 1 if project_type_features.get("has_controllers", False) else 0
     has_services = 1 if project_type_features.get("has_services", False) else 0
-    
-    # Vector de características actual
+
     current_features = np.array([
         domain_scores.get("medico", 0),
         domain_scores.get("financiero", 0),
@@ -733,73 +800,84 @@ def decision_tree_classifier(features: dict, project_type_features: dict) -> dic
         has_controllers,
         has_services
     ]).reshape(1, -1)
-    
-    # Datos de entrenamiento sintéticos basados en heurísticas
-    # Esto simula un conjunto de datos de proyectos reales
-    rng = np.random.default_rng(seed=42)
-    n_samples = 200
-    
-    # Generar muestras para cada tipo de proyecto
-    samples = []
-    labels = []
-    label_names = ["Medico/Salud", "Financiero", "Educativo", "Comercio", "API/REST", "Otro"]
-    
-    # Configuración para cada tipo
-    configs = {
-        0: {"medico": (5, 15), "financiero": (0, 2), "educativo": (0, 2), "comercio": (0, 2), "api": (1, 3)},
-        1: {"medico": (0, 2), "financiero": (5, 15), "educativo": (0, 2), "comercio": (0, 2), "api": (1, 3)},
-        2: {"medico": (0, 2), "financiero": (0, 2), "educativo": (5, 15), "comercio": (0, 2), "api": (1, 3)},
-        3: {"medico": (0, 2), "financiero": (0, 2), "educativo": (0, 2), "comercio": (5, 15), "api": (1, 3)},
-        4: {"medico": (0, 2), "financiero": (0, 2), "educativo": (0, 2), "comercio": (0, 2), "api": (5, 15)},
-        5: {"medico": (0, 3), "financiero": (0, 3), "educativo": (0, 3), "comercio": (0, 3), "api": (0, 3)},
-    }
-    
-    for label in range(6):
-        config = configs[label]
-        for _ in range(n_samples // 6):
-            # Generar puntuaciones de dominio
-            medico = rng.integers(config["medico"][0], config["medico"][1] + 1)
-            financiero = rng.integers(config["financiero"][0], config["financiero"][1] + 1)
-            educativo = rng.integers(config["educativo"][0], config["educativo"][1] + 1)
-            comercio = rng.integers(config["comercio"][0], config["comercio"][1] + 1)
-            api = rng.integers(config["api"][0], config["api"][1] + 1)
-            
-            # Características generales
-            funcs = rng.integers(5, 100)
-            endpoints = rng.integers(0, 30)
-            doc_ratio_sample = rng.uniform(0.1, 0.9)
-            complexity = rng.uniform(1, 8)
-            has_tests_sample = rng.integers(0, 2)
-            has_models_sample = rng.integers(0, 2)
-            has_views_sample = rng.integers(0, 2)
-            has_controllers_sample = rng.integers(0, 2)
-            has_services_sample = rng.integers(0, 2)
-            
-            # Ajustar según el tipo
-            if label == 4:  # API
-                endpoints = rng.integers(10, 50)
-                has_controllers_sample = 1
-                has_services_sample = 1
-            elif label == 0:  # Médico
-                has_models_sample = 1
-                doc_ratio_sample = rng.uniform(0.4, 0.9)
-            
-            samples.append([
-                medico, financiero, educativo, comercio, api,
-                funcs, endpoints, doc_ratio_sample * 100,
-                complexity, has_tests_sample, has_models_sample,
-                has_views_sample, has_controllers_sample, has_services_sample
-            ])
-            labels.append(label)
-    
-    X_train = np.array(samples)
-    y_train = np.array(labels)
-    
+
+    # 🆕 Intentar construir dataset real
+    real_X = real_y = None
+    if all_projects_data:
+        real_X, real_y, _, _ = build_training_dataset(all_projects_data)
+
+    use_real_data = (
+        real_X is not None
+        and len(real_X) >= min_real_samples
+        and len(set(real_y.tolist())) >= min_real_classes
+    )
+
+    if use_real_data:
+        X_train, y_train = real_X, real_y
+        fuente_datos = "proyectos reales"
+        total_muestras_entrenamiento = len(X_train)
+    else:
+        # ─── Fallback: datos sintéticos ───────────────────────────────
+        rng = np.random.default_rng(seed=42)
+        n_samples = 200
+
+        samples = []
+        labels = []
+
+        configs = {
+            0: {"medico": (5, 15), "financiero": (0, 2), "educativo": (0, 2), "comercio": (0, 2), "api": (1, 3)},
+            1: {"medico": (0, 2), "financiero": (5, 15), "educativo": (0, 2), "comercio": (0, 2), "api": (1, 3)},
+            2: {"medico": (0, 2), "financiero": (0, 2), "educativo": (5, 15), "comercio": (0, 2), "api": (1, 3)},
+            3: {"medico": (0, 2), "financiero": (0, 2), "educativo": (0, 2), "comercio": (5, 15), "api": (1, 3)},
+            4: {"medico": (0, 2), "financiero": (0, 2), "educativo": (0, 2), "comercio": (0, 2), "api": (5, 15)},
+            5: {"medico": (0, 3), "financiero": (0, 3), "educativo": (0, 3), "comercio": (0, 3), "api": (0, 3)},
+        }
+
+        for label in range(6):
+            config = configs[label]
+            for _ in range(n_samples // 6):
+                medico = rng.integers(config["medico"][0], config["medico"][1] + 1)
+                financiero = rng.integers(config["financiero"][0], config["financiero"][1] + 1)
+                educativo = rng.integers(config["educativo"][0], config["educativo"][1] + 1)
+                comercio = rng.integers(config["comercio"][0], config["comercio"][1] + 1)
+                api = rng.integers(config["api"][0], config["api"][1] + 1)
+
+                funcs = rng.integers(5, 100)
+                endpoints = rng.integers(0, 30)
+                doc_ratio_sample = rng.uniform(0.1, 0.9)
+                complexity = rng.uniform(1, 8)
+                has_tests_sample = rng.integers(0, 2)
+                has_models_sample = rng.integers(0, 2)
+                has_views_sample = rng.integers(0, 2)
+                has_controllers_sample = rng.integers(0, 2)
+                has_services_sample = rng.integers(0, 2)
+
+                if label == 4:  # API
+                    endpoints = rng.integers(10, 50)
+                    has_controllers_sample = 1
+                    has_services_sample = 1
+                elif label == 0:  # Médico
+                    has_models_sample = 1
+                    doc_ratio_sample = rng.uniform(0.4, 0.9)
+
+                samples.append([
+                    medico, financiero, educativo, comercio, api,
+                    funcs, endpoints, doc_ratio_sample * 100,
+                    complexity, has_tests_sample, has_models_sample,
+                    has_views_sample, has_controllers_sample, has_services_sample
+                ])
+                labels.append(label)
+
+        X_train = np.array(samples)
+        y_train = np.array(labels)
+        fuente_datos = "datos sintéticos (aún no hay suficientes proyectos reales)"
+        total_muestras_entrenamiento = len(X_train)
+
     # Entrenar el árbol de decisión
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_train)
     X_current_scaled = scaler.transform(current_features)
-    
+
     clf = DecisionTreeClassifier(
         max_depth=6,
         min_samples_split=5,
@@ -808,64 +886,57 @@ def decision_tree_classifier(features: dict, project_type_features: dict) -> dic
         class_weight='balanced'
     )
     clf.fit(X_scaled, y_train)
-    
+
     # Predicción
     prediction = clf.predict(X_current_scaled)[0]
     probabilities = clf.predict_proba(X_current_scaled)[0]
-    
-    # Obtener la clase predicha y su confianza
+
+    # scikit puede no incluir todas las clases si el dataset real no las tiene todas;
+    # normalizamos las probabilidades al set completo de 6 etiquetas.
+    full_probs = np.zeros(len(label_names))
+    for idx, cls in enumerate(clf.classes_):
+        full_probs[cls] = probabilities[idx]
+
     predicted_class = label_names[prediction]
-    confidence = round(probabilities[prediction] * 100, 2)
-    
-    # Encontrar las características más importantes para la decisión
+    confidence = round(float(full_probs[prediction]) * 100, 2)
+
     feature_names = [
-        "Medico keywords", "Financiero keywords", "Educativo keywords", 
+        "Medico keywords", "Financiero keywords", "Educativo keywords",
         "Comercio keywords", "API keywords", "Total funciones",
         "Total endpoints", "Documentacion ratio", "Complejidad promedio",
         "Tiene tests", "Tiene models", "Tiene views",
         "Tiene controllers", "Tiene services"
     ]
-    
-    # Importancia de características
+
     importances = sorted(
-        [(feature_names[i], round(clf.feature_importances_[i], 4)) 
+        [(feature_names[i], round(clf.feature_importances_[i], 4))
          for i in range(len(feature_names))],
         key=lambda x: x[1],
         reverse=True
     )
-    
-    # Top 5 características más importantes
     top_features = importances[:5]
-    
-    # Generar conclusión en el estilo solicitado
+
     if confidence > 80:
-        nivel_confianza = "alta"
         recomendacion = f"basado en las características de tu código, el proyecto tiene una clara orientación a {predicted_class.lower()}"
     elif confidence > 60:
-        nivel_confianza = "media"
         recomendacion = f"el código muestra características de {predicted_class.lower()}, pero podría tratarse de un proyecto híbrido"
     else:
-        nivel_confianza = "baja"
         recomendacion = "el proyecto no muestra una orientación clara hacia un dominio específico, podría tratarse de un proyecto general o de propósito múltiple"
-    
-    # Características clave que influyeron en la decisión
+
     caracteristicas_clave = []
     for feat, imp in top_features:
         if imp > 0.01:
             caracteristicas_clave.append(f"• {feat}: {imp*100:.1f}% de influencia")
-    
+
     conclusion = f"""
-Como conclusión, los resultados del árbol de decisión muestran que tu proyecto se clasifica como **{predicted_class}** con un nivel de confianza del {confidence}%. Esto significa que el análisis de las palabras clave en funciones, clases, endpoints y archivos sugiere que el proyecto está orientado a {predicted_class.lower()}. Además, las características más importantes para esta clasificación son: {', '.join(caracteristicas_clave)}. Por ello, es recomendable {recomendacion} y considerar que la documentación y estructura del código deben alinearse con las mejores prácticas del dominio identificado.
+Como conclusión, los resultados del árbol de decisión (entrenado con {fuente_datos}, {total_muestras_entrenamiento} muestras) muestran que tu proyecto se clasifica como **{predicted_class}** con un nivel de confianza del {confidence}%. Esto significa que el análisis de las palabras clave en funciones, clases, endpoints y archivos sugiere que el proyecto está orientado a {predicted_class.lower()}. Además, las características más importantes para esta clasificación son: {', '.join(caracteristicas_clave) if caracteristicas_clave else 'sin variables dominantes claras'}. Por ello, es recomendable {recomendacion} y considerar que la documentación y estructura del código deben alinearse con las mejores prácticas del dominio identificado.
     """
-    
-    # Detalles adicionales para el frontend
+
     all_probabilities = {
-        label_names[i]: round(prob * 100, 2) 
-        for i, prob in enumerate(probabilities)
+        label_names[i]: round(float(p) * 100, 2)
+        for i, p in enumerate(full_probs)
     }
-    
-    # Identificar las características específicas que llevaron a la clasificación
-    detalles_decision = []
+
     if predicted_class == "Medico/Salud":
         detalles_decision = [
             "Palabras clave médicas encontradas en nombres de funciones",
@@ -902,10 +973,9 @@ Como conclusión, los resultados del árbol de decisión muestran que tu proyect
             "El código es generalista o de propósito múltiple",
             "Puede ser un proyecto interno o de soporte"
         ]
-    
-    # Calcular estadísticas adicionales
+
     domain_stats = project_type_features.get("domain_scores", {})
-    
+
     return {
         "tipo": "Árbol de Decisión",
         "clasificacion": predicted_class,
@@ -915,6 +985,8 @@ Como conclusión, los resultados del árbol de decisión muestran que tu proyect
         "detalles_decision": detalles_decision,
         "estadisticas_dominio": domain_stats,
         "interpretacion": conclusion.strip(),
+        "fuente_datos": fuente_datos,  # 🆕 "proyectos reales" o "datos sintéticos"
+        "muestras_entrenamiento": total_muestras_entrenamiento,  # 🆕
         "recomendaciones": [
             f"Priorizar documentación específica del dominio {predicted_class.lower()}",
             "Revisar que las convenciones de nombres sigan el estándar del dominio",
@@ -924,9 +996,27 @@ Como conclusión, los resultados del árbol de decisión muestran que tu proyect
     }
 
 
+# 🆕 Wrapper usado por admin.py
+
+def classify_project_type(results: dict, project: dict, all_projects_data: list = None) -> dict:
+    """
+    Punto de entrada usado por las rutas de admin para clasificar un proyecto.
+    Si se le pasa `all_projects_data` (lista de {"results", "project"} de TODOS
+    los proyectos del sistema), el árbol se entrena con datos reales cuando hay
+    suficientes muestras; si no, usa el modo sintético de respaldo.
+    """
+    features = _extract_features(results)
+    project_type_features = _extract_project_type_features(results, features)
+    return decision_tree_classifier(
+        features,
+        project_type_features,
+        all_projects_data=all_projects_data
+    )
+
+
 # ─── Función principal ────────────────────────────────────────────────────────
 
-def run_ml_analysis(results: dict) -> dict:
+def run_ml_analysis(results: dict, all_projects_data: list = None) -> dict:
     """
     Punto de entrada principal.
     Recibe el dict de ProjectAnalyzer.analyze() y devuelve todas las predicciones.
@@ -937,15 +1027,16 @@ def run_ml_analysis(results: dict) -> dict:
     """
     features = _extract_features(results)
     project_type_features = _extract_project_type_features(results, features)
-    
-    # Ejecutar todos los análisis
+
     resultados = {
         "features": features,
         "regresion_simple": linear_regression_simple(features),
         "regresion_multiple": linear_regression_multiple(features),
         "regresion_logistica": logistic_regression(features),
         "mae_analysis": mean_absolute_error_analysis(features),
-        "arbol_decision": decision_tree_classifier(features, project_type_features),
+        "arbol_decision": decision_tree_classifier(
+            features, project_type_features, all_projects_data=all_projects_data
+        ),
     }
-    
+
     return resultados
