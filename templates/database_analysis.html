@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis de Base de Datos — AutoDocs AI</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-container": "#001f2b",
+            "surface-tint": "#38bdf8",
+            "secondary": "#818cf8",
+            "primary": "#38bdf8",
+            "surface-container-high": "#e2e8f0",
+            "surface-variant": "#cbd5e1",
+            "secondary-container": "#e0e7ff",
+            "on-surface-variant": "#334155",
+            "primary-fixed": "#bae6fd",
+            "surface-container-highest": "#e2e8f0",
+            "outline-variant": "#94a3b8",
+            "on-surface": "#0f172a",
+            "on-secondary-container": "#1e1b4b",
+            "background": "#f1f5f9",
+            "primary-container": "#e0f2fe",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "surface-container": "#ffffff",
+            "on-background": "#0f172a",
+            "outline": "#64748b",
+            "surface-container-low": "#f8fafc",
+            "surface": "#f1f5f9",
+            "inverse-surface": "#1e293b"
+          },
+          fontFamily: {
+            "body-md": ["Geist"],
+            "display-lg": ["Geist"],
+            "code-md": ["JetBrains Mono"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: #f1f5f9;
+      overflow-x: hidden;
+      min-height: 100vh;
+      color: #0f172a;
+      font-family: 'Geist', sans-serif;
+    }
+    html.dark body { background: #0f1418; color: #e2e8f0; }
+
+    #particle-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      transform: translate3d(0,0,0);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+    html.dark .glass {
+      background: rgba(15,20,24,0.7);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .glass-hover:hover {
+      border-color: rgba(56,189,248,0.3);
+      box-shadow: 0 12px 30px rgba(56,189,248,0.12);
+    }
+    html.dark .glass-hover:hover {
+      border-color: rgba(56,189,248,0.4);
+      box-shadow: 0 12px 30px rgba(56,189,248,0.2);
+    }
+
+    .glow-cyan { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
+    .glow-violet { text-shadow: 0 0 12px rgba(129,140,248,0.4); }
+
+    .stagger-in {
+      opacity: 0;
+      transform: translateY(20px) translate3d(0,0,0);
+      animation: fadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes fadeInUp { to { opacity:1; transform: translateY(0) translate3d(0,0,0); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stagger-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
+
+    .input-field {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      color: #0f172a;
+      transition: all 0.2s;
+      font-family: 'Geist', sans-serif;
+      font-size: 0.875rem;
+    }
+    .input-field:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.2); }
+    .input-field::placeholder { color: rgba(100,116,139,0.45); }
+    .input-field:disabled { opacity: 0.5; cursor: not-allowed; }
+    html.dark .input-field { background: #1b2024; border-color: #3e484f; color: #dee3e8; }
+    html.dark .input-field::placeholder { color: rgba(189,200,209,0.35); }
+    html.dark .input-field:focus { border-color: #8ed5ff; box-shadow: 0 0 0 3px rgba(142,213,255,0.15); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      color: #fff;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(56,189,248,0.3); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+
+    .nav-icon { color: rgba(51,65,85,0.5); transition: color 0.2s; }
+    html.dark .nav-icon { color: rgba(148,163,184,0.5); }
+    .nav-icon:hover, .nav-icon.active { color: #38bdf8; }
+
+    .text-muted { color: rgba(51,65,85,0.6); }
+    html.dark .text-muted { color: rgba(148,163,184,0.7); }
+
+    .result-card {
+      border-radius: 1rem;
+      border: 1px solid rgba(148,163,184,0.2);
+      padding: 1.25rem;
+      transition: all 0.3s ease;
+    }
+    html.dark .result-card { border-color: rgba(148,163,184,0.15); }
+    .result-card:hover { border-color: rgba(56,189,248,0.25); }
+
+    .structure-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    .structure-table th { padding: 0.5rem 0.75rem; text-align: left; font-weight: 700; color: rgba(51,65,85,0.8); }
+    html.dark .structure-table th { color: rgba(148,163,184,0.8); }
+    .structure-table td { padding: 0.5rem 0.75rem; border-top: 1px solid rgba(148,163,184,0.15); }
+    .structure-table tr:hover td { background: rgba(56,189,248,0.03); }
+
+    .badge-pk { background: rgba(16,185,129,0.12); color: #065f46; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; }
+    .badge-nopk { background: rgba(239,68,68,0.12); color: #991b1b; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; }
+    html.dark .badge-pk { background: rgba(16,185,129,0.2); color: #4ade80; }
+    html.dark .badge-nopk { background: rgba(239,68,68,0.2); color: #f87171; }
+
+    .plan-banner {
+      background: rgba(186,26,26,0.08);
+      border: 1px solid rgba(186,26,26,0.2);
+      color: #ba1a1a;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+    }
+    html.dark .plan-banner { color: #f87171; border-color: rgba(248,113,113,0.2); }
+
+    .upload-zone {
+      border: 2px dashed rgba(148,163,184,0.4);
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-zone:hover { border-color: #38bdf8; background: rgba(56,189,248,0.04); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
+
+    #pdfExportContainer {
+      position: fixed; top: -9999px; left: -9999px;
+      width: 1100px; background: white;
+      font-family: 'Geist', sans-serif;
+      padding: 40px; color: #0f172a; z-index: -100;
+    }
+    #pdfExportContainer h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    #pdfExportContainer h2 { font-size: 22px; font-weight: 700; margin-top: 24px; margin-bottom: 12px; border-left: 5px solid #38bdf8; padding-left: 15px; }
+    #pdfExportContainer h3 { font-size: 18px; font-weight: 600; margin-top: 16px; margin-bottom: 8px; color: #1e293b; }
+    #pdfExportContainer table { width: 100%; border-collapse: collapse; margin: 12px 0; background: #f8fafc; border-radius: 12px; overflow: hidden; }
+    #pdfExportContainer th { background: #e2e8f0; padding: 8px 12px; text-align: left; font-weight: 700; }
+    #pdfExportContainer td { border: 1px solid #cbd5e1; padding: 8px 12px; }
+
+    html.dark .text-on-surface { color: #f1f5f9 !important; }
+    html.dark .text-on-surface-variant { color: #94a3b8 !important; }
+
+    .collapse-btn { cursor: pointer; user-select: none; }
+    .collapse-chevron { transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+    .collapse-chevron.open { transform: rotate(180deg); }
+    .collapse-body {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .collapse-body.open { max-height: 2000px; opacity: 1; }
+
+    #detailModal {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15,20,24,0.7);
+      backdrop-filter: blur(12px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    #detailModal.open { opacity: 1; pointer-events: all; }
+    #detailModalInner {
+      width: 90%; max-width: 780px; max-height: 85vh;
+      display: flex; flex-direction: column;
+      border-radius: 1.5rem;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(56,189,248,0.25);
+      box-shadow: 0 0 60px rgba(56,189,248,0.15), 0 8px 40px rgba(0,0,0,0.2);
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+      overflow: hidden;
+    }
+    html.dark #detailModalInner {
+      background: rgba(15,20,24,0.95);
+      border-color: rgba(56,189,248,0.2);
+    }
+    #detailModal.open #detailModalInner { transform: translateY(0) scale(1); }
+    #detailModalBody { overflow-y: auto; flex: 1; padding: 1.5rem 1.75rem; }
+    #detailModalBody::-webkit-scrollbar { width: 4px; }
+    #detailModalBody::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
+  </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="flex min-h-screen w-full relative z-10">
+
+    <!-- ====== SIDEBAR ====== -->
+    <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay:0.1s">
+      <div class="mb-12">
+        <a href="/dashboard" class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+          <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+        </a>
+      </div>
+      <nav class="flex-1 flex flex-col gap-8">
+        <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
+          <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">dashboard</span>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Dashboard</span>
+        </a>
+        <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
+          <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">folder_open</span>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Proyectos</span>
+        </a>
+        <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/database-analysis">
+          <span class="material-symbols-outlined text-2xl text-primary">storage</span>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Análisis BD</span>
+        </a>
+        <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/new-project">
+          <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">upload</span>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Nuevo proyecto</span>
+        </a>
+        <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/settings">
+          <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">settings</span>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Configuración</span>
+        </a>
+        <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="localStorage.clear()">
+          <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">logout</span>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Cerrar sesión</span>
+        </a>
+      </nav>
+      <div class="mt-auto">
+        <a href="/perfil" class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative inline-flex">
+          <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+          <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">
+            <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan</span>
+          </span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+
+      <!-- Header -->
+      <header class="flex justify-between items-center stagger-in" style="animation-delay:0.15s">
+        <div>
+          <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
+          <p class="text-muted font-mono text-xs mt-2 uppercase tracking-[0.3em]">Análisis de Base de Datos</p>
+        </div>
+        <div class="flex gap-4">
+          <button id="themeButton" onclick="toggleTheme()" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Page subtitle -->
+      <div class="stagger-in" style="animation-delay:0.2s">
+        <div class="flex items-center gap-2 text-sm text-muted mb-1">
+          <span class="material-symbols-outlined text-[18px] text-primary">storage</span>
+          <span>Visor de base de datos</span>
+        </div>
+        <p class="text-muted text-sm max-w-xl">Sube un archivo <code class="font-code-md text-primary text-xs">.sql</code> para recibir recomendaciones de estructura, índices, diagrama E-R y calidad del esquema.</p>
+      </div>
+
+      <!-- Main grid -->
+      <div class="grid xl:grid-cols-[1fr_340px] gap-8 stagger-in" style="animation-delay:0.3s">
+
+        <!-- ===== LEFT: Upload + Results ===== -->
+        <div class="flex flex-col gap-6">
+
+          <!-- Upload card -->
+          <div class="glass rounded-3xl p-8 glass-hover">
+            <div class="flex items-center gap-3 mb-6 pb-5 border-b border-outline-variant/20">
+              <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xl">analytics</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold tracking-tight text-on-surface">Cargar archivo SQL</h2>
+                <p class="text-muted text-sm">Sube el esquema y recibe sugerencias prácticas.</p>
+              </div>
+            </div>
+
+            <!-- Plan banner -->
+            <div id="planBanner" class="plan-banner hidden items-center gap-3 text-sm mb-5"></div>
+
+            <!-- File input -->
+            <div class="upload-zone mb-4" onclick="document.getElementById('dbFileInput').click()"
+              ondragover="event.preventDefault();this.style.borderColor='#38bdf8'"
+              ondragleave="this.style.borderColor=''"
+              ondrop="event.preventDefault();handleDrop(event)">
+              <input id="dbFileInput" type="file" accept=".sql" class="hidden" onchange="onFileSelected(event)" />
+              <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
+              <p class="text-sm text-muted"><strong class="text-primary">Haz clic para seleccionar</strong> o arrastra aquí</p>
+              <p class="text-xs mt-1 text-muted">Solo archivos .sql</p>
+            </div>
+
+            <div id="fileNameBadge" class="hidden mb-4 px-3 py-2 rounded-lg text-sm font-mono" style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);color:#0ea5e9"></div>
+
+            <button id="uploadSqlButton" onclick="submitSqlFile()"
+              class="btn-primary w-full px-6 py-3 rounded-2xl text-sm flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">play_circle</span>
+              Analizar archivo
+            </button>
+
+            <div id="uploadMessage" class="hidden mt-3 text-sm text-red-500"></div>
+          </div>
+
+          <!-- ===== RESULTS ===== -->
+          <div id="analysisResults" class="hidden flex flex-col gap-6">
+
+            <!-- Resumen -->
+            <div class="glass rounded-3xl p-6 glass-hover result-card">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-[18px]">summarize</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Resumen</h3>
+              </div>
+              <p id="analysisSummary" class="text-muted text-sm leading-relaxed"></p>
+            </div>
+
+            <!-- Estructura (colapsable) -->
+            <div id="analysisStructure" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center justify-between collapse-btn" onclick="toggleCollapse('structureBody','structureChevron')">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-secondary text-[18px]">table_chart</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg text-on-surface">Estructura de la base de datos</h3>
+                    <p class="text-muted text-xs">Haz clic para expandir las tablas detectadas</p>
+                  </div>
+                </div>
+                <span id="structureChevron" class="material-symbols-outlined text-2xl text-muted collapse-chevron">expand_more</span>
+              </div>
+              <div id="structureBody" class="collapse-body">
+                <div id="structureTablesContainer" class="space-y-3 pt-5"></div>
+              </div>
+            </div>
+
+            <!-- Diagrama E-R -->
+            <div id="analysisErDiagram" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-[18px]">device_hub</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Diagrama entidad-relación</h3>
+              </div>
+              <div id="erDiagramContent" class="overflow-auto rounded-xl p-4" style="background:rgba(56,189,248,0.04)"></div>
+            </div>
+
+            <!-- Data Warehouse -->
+            <div id="analysisWarehouseSchema" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-secondary text-[18px]">schema</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Esquema de Data Warehouse</h3>
+              </div>
+              <div class="flex items-center gap-3 mb-3">
+                <span id="warehouseSchemaTypeBadge" class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(129,140,248,0.15);color:#4338ca;"></span>
+              </div>
+              <p id="warehouseSchemaDescription" class="text-muted text-sm mb-4"></p>
+              <div id="snowflakeDiagramContent" class="overflow-auto rounded-xl p-4 hidden" style="background:rgba(56,189,248,0.04)"></div>
+            </div>
+
+            <!-- Preparación -->
+            <div id="analysisDataPreparation" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25)">
+                  <span class="material-symbols-outlined text-[18px]" style="color:#f59e0b">construction</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Preparación de datos</h3>
+              </div>
+              <ul id="dataPreparationList" class="space-y-2"></ul>
+            </div>
+
+            <!-- Minería -->
+            <div id="analysisDataMining" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25)">
+                  <span class="material-symbols-outlined text-[18px]" style="color:#10b981">scatter_plot</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Minería de datos</h3>
+              </div>
+              <ul id="dataMiningList" class="space-y-2"></ul>
+            </div>
+
+            <!-- Fuentes (colapsable) -->
+            <div id="analysisDataSources" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center justify-between collapse-btn" onclick="toggleCollapse('sourcesBody','sourcesChevron')">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-[18px]">database</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg text-on-surface">Fuentes y tipos de datos</h3>
+                    <p class="text-muted text-xs">Haz clic para ver la clasificacion de fuentes</p>
+                  </div>
+                </div>
+                <span id="sourcesChevron" class="material-symbols-outlined text-2xl text-muted collapse-chevron">expand_more</span>
+              </div>
+              <div id="sourcesBody" class="collapse-body">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-5">
+                  <div class="rounded-2xl p-4" style="background:rgba(56,189,248,0.07);border:1px solid rgba(56,189,248,0.2)">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#38bdf8">Estructurados</p>
+                    <ul id="dataSourcesStructured" class="text-muted text-sm space-y-1 list-disc list-inside"></ul>
+                  </div>
+                  <div class="rounded-2xl p-4" style="background:rgba(129,140,248,0.07);border:1px solid rgba(129,140,248,0.2)">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#818cf8">Semi-estructurados</p>
+                    <ul id="dataSourcesSemi" class="text-muted text-sm space-y-1 list-disc list-inside"></ul>
+                  </div>
+                  <div class="rounded-2xl p-4" style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2)">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#10b981">No estructurados</p>
+                    <ul id="dataSourcesUnstructured" class="text-muted text-sm space-y-1 list-disc list-inside"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sugerencias -->
+            <div class="glass rounded-3xl p-6 glass-hover result-card">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25)">
+                  <span class="material-symbols-outlined text-[18px]" style="color:#f59e0b">lightbulb</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Sugerencias</h3>
+              </div>
+              <ul id="analysisSuggestions" class="space-y-2"></ul>
+            </div>
+
+            <!-- Resumen IA -->
+            <div id="analysisAiSummary" class="glass rounded-3xl p-6 glass-hover result-card hidden">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-secondary text-[18px]">auto_awesome</span>
+                </div>
+                <h3 class="font-bold text-lg text-on-surface">Resumen IA</h3>
+              </div>
+              <p id="aiSummaryText" class="text-muted text-sm leading-relaxed"></p>
+            </div>
+
+            <!-- Descargar -->
+            <div class="flex gap-3 pt-2">
+              <button id="downloadPdfBtn" onclick="downloadAnalysisPdf()"
+                class="btn-primary px-6 py-3 rounded-2xl text-sm flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">download</span>
+                Descargar análisis (PDF)
+              </button>
+            </div>
+          </div>
+          <!-- end results -->
+
+        </div>
+        <!-- end left col -->
+
+        <!-- ===== RIGHT: Plan + Info ===== -->
+        <div class="flex flex-col gap-6">
+
+          <!-- Plan card -->
+          <div class="glass rounded-3xl p-8 glass-hover stagger-in" style="animation-delay:0.4s">
+            <div class="flex items-center gap-3 mb-6 pb-5 border-b border-outline-variant/20">
+              <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xl">workspace_premium</span>
+              </div>
+              <div>
+                <h2 class="text-lg font-bold tracking-tight text-on-surface">Estado del plan</h2>
+                <p class="text-muted text-xs">Solo Pro y Enterprise pueden analizar.</p>
+              </div>
+            </div>
+
+            <!-- Progress ring plan -->
+            <div class="glass rounded-2xl p-5 border border-outline-variant/20 mb-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-muted mb-2">Plan actual</p>
+              <p id="activePlanLabel" class="text-2xl font-bold glow-cyan text-on-surface">Cargando...</p>
+            </div>
+
+            <!-- Stats mini -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="glass rounded-2xl p-4 border border-outline-variant/20 text-center">
+                <div class="text-2xl font-bold text-on-surface glow-cyan" id="statTables">—</div>
+                <div class="text-xs text-muted mt-1 uppercase tracking-wider">Tablas</div>
+              </div>
+              <div class="glass rounded-2xl p-4 border border-outline-variant/20 text-center">
+                <div class="text-2xl font-bold text-on-surface glow-violet" id="statRelations">—</div>
+                <div class="text-xs text-muted mt-1 uppercase tracking-wider">Relaciones</div>
+              </div>
+            </div>
+
+            <!-- How it works -->
+            <div class="glass rounded-2xl p-5 border border-outline-variant/20">
+              <h3 class="font-bold text-sm text-on-surface mb-3 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-primary">info</span>
+                Cómo funciona
+              </h3>
+              <ul class="text-muted text-xs space-y-2.5">
+                <li class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-[14px] mt-0.5 text-primary shrink-0">arrow_right</span>
+                  Detecta tablas sin clave primaria.
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-[14px] mt-0.5 text-primary shrink-0">arrow_right</span>
+                  Identifica llaves foráneas sin constraints.
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-[14px] mt-0.5 text-primary shrink-0">arrow_right</span>
+                  Revisa TEXT/BLOB y VARCHAR sin tamaño.
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-[14px] mt-0.5 text-primary shrink-0">arrow_right</span>
+                  Genera diagrama E-R y esquema DW.
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-[14px] mt-0.5 text-primary shrink-0">arrow_right</span>
+                  Clasifica fuentes de datos por tipo.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Quick tips card -->
+          <div class="glass rounded-3xl p-6 glass-hover border-l-4 border-secondary stagger-in" style="animation-delay:0.5s">
+            <h3 class="font-bold text-sm text-on-surface mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px] text-secondary">tips_and_updates</span>
+              Tips para mejores resultados
+            </h3>
+            <ul class="text-muted text-xs space-y-2">
+              <li class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-[13px] mt-0.5 text-secondary shrink-0">check_circle</span>
+                Incluye sentencias <code class="text-primary">CREATE TABLE</code> completas.
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-[13px] mt-0.5 text-secondary shrink-0">check_circle</span>
+                Define explícitamente las <code class="text-primary">FOREIGN KEY</code>.
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-[13px] mt-0.5 text-secondary shrink-0">check_circle</span>
+                Usa UTF-8 al exportar desde tu DBMS.
+              </li>
+            </ul>
+          </div>
+
+        </div>
+        <!-- end right col -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" onclick="if(event.target===this)closeDetailModal()">
+    <div id="detailModalInner">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-secondary/15 border border-secondary/30 flex items-center justify-center">
+            <span class="material-symbols-outlined text-secondary text-[16px]">table_chart</span>
+          </div>
+          <div>
+            <h3 id="detailModalTitle" class="font-bold text-base text-on-surface">Detalle de tabla</h3>
+            <p id="detailModalSubtitle" class="text-muted text-xs"></p>
+          </div>
+        </div>
+        <button onclick="closeDetailModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-primary transition-colors" style="background:rgba(148,163,184,0.1);border:none;cursor:pointer">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div id="detailModalBody"></div>
+    </div>
+  </div>
+
+  <!-- PDF export container -->
+  <div id="pdfExportContainer"></div>
+
+  <script>
+    // ===== THEME =====
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.classList.add(savedTheme === 'dark' ? 'dark' : 'light');
+    if (savedTheme !== 'dark') document.documentElement.classList.remove('dark');
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.documentElement.classList.toggle('dark', !isDark);
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      
+      // Update icon
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.textContent = isDark ? 'dark_mode' : 'light_mode';
+      }
+    }
+
+    // Set initial theme icon
+    document.addEventListener('DOMContentLoaded', function() {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        const isDark = document.documentElement.classList.contains('dark');
+        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      }
+    });
+
+    // ===== AUTH =====
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) {
+      document.getElementById('sidebar-user-name').textContent = user.name;
+      document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
+      document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
+    }
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${token}` };
+    }
+
+    window.currentAnalysis = null;
+    window.uploadedSqlText = null;
+
+    // ===== PLAN INIT =====
+    async function initDatabaseAnalysis() {
+      const banner = document.getElementById('planBanner');
+      const planLabel = document.getElementById('activePlanLabel');
+      const uploadBtn = document.getElementById('uploadSqlButton');
+      const fileInput = document.getElementById('dbFileInput');
+      try {
+        const res = await fetch('/api/payments/my-plan', { headers: authHeaders() });
+        if (!res.ok) throw new Error('No autorizado');
+        const data = await res.json();
+        const plan = data.plan || 'free';
+        const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+        planLabel.textContent = planNames[plan] || plan;
+        if (plan === 'free') {
+          banner.classList.remove('hidden');
+          banner.classList.add('flex');
+          banner.innerHTML = '<span class="material-symbols-outlined text-base mr-2">lock</span>Tu plan no permite usar esta herramienta. <a href="/pricing" class="ml-1 font-bold underline" style="color:#38bdf8">Actualiza tu plan</a>.';
+          uploadBtn.disabled = true;
+          fileInput.disabled = true;
+        } else {
+          banner.classList.add('hidden');
+        }
+      } catch (e) {
+        banner.classList.remove('hidden');
+        banner.classList.add('flex');
+        banner.innerHTML = '<span class="material-symbols-outlined text-base mr-2">error</span>No se pudo verificar tu plan. Recarga la página.';
+      }
+    }
+
+    // ===== FILE SELECT =====
+    function onFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const badge = document.getElementById('fileNameBadge');
+      badge.textContent = file.name;
+      badge.classList.remove('hidden');
+    }
+
+    function handleDrop(e) {
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      const input = document.getElementById('dbFileInput');
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      onFileSelected({ target: { files: dt.files } });
+    }
+
+    function showUploadMessage(msg) {
+      const el = document.getElementById('uploadMessage');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+    function hideUploadMessage() {
+      const el = document.getElementById('uploadMessage');
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
+
+    // ===== SQL PARSER =====
+    function parseSqlToTables(sqlText) {
+      const tables = {};
+      let cleaned = sqlText.replace(/\/\*[\s\S]*?\*\//g, '').replace(/--.*$/gm, '');
+      const createRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[`"']?(?:\w+\.)?[`"']?\.)?[`"']?(\w+)[`"']?\s*\(/gmi;
+      let match;
+      while ((match = createRegex.exec(cleaned)) !== null) {
+        const tableName = match[1];
+        const startBody = match.index + match[0].length - 1;
+        let depth = 0, endBody = -1;
+        for (let i = startBody; i < cleaned.length; i++) {
+          if (cleaned[i] === '(') depth++;
+          else if (cleaned[i] === ')') { depth--; if (depth === 0) { endBody = i; break; } }
+        }
+        if (endBody === -1) continue;
+        const body = cleaned.slice(startBody + 1, endBody);
+        const columns = [], foreignKeys = [];
+        let primaryKeys = [];
+        const lines = body.split(/,(?![^(]*\))/);
+        for (let line of lines) {
+          line = line.trim();
+          if (!line) continue;
+          const pkMatch = line.match(/PRIMARY\s+KEY\s*\(([^)]+)\)/i);
+          if (pkMatch) { primaryKeys.push(...pkMatch[1].split(',').map(k => k.trim().replace(/[`"']/g, ''))); continue; }
+          const colPkMatch = line.match(/^[`"']?(\w+)[`"']?\s+.+\s+PRIMARY\s+KEY/i);
+          if (colPkMatch) primaryKeys.push(colPkMatch[1]);
+          const fkMatch = line.match(/FOREIGN\s+KEY\s*\([`"']?(\w+)[`"']?\)\s*REFERENCES\s+[`"']?(\w+)[`"']?\s*\([`"']?(\w+)[`"']?\)/i);
+          if (fkMatch) { foreignKeys.push({ column: fkMatch[1].trim().replace(/[`"']/g,''), references: { table: fkMatch[2], column: fkMatch[3].trim().replace(/[`"']/g,'') } }); continue; }
+          const colDefMatch = line.match(/^[`"']?(\w+)[`"']?\s+([^,\s]+(?:\([^)]*\))?)/);
+          if (colDefMatch && !line.toUpperCase().includes('CONSTRAINT')) {
+            columns.push({ name: colDefMatch[1], type: colDefMatch[2], nullable: !line.toUpperCase().includes('NOT NULL') });
+          }
+        }
+        primaryKeys = [...new Set(primaryKeys)];
+        tables[tableName] = { columns, primaryKeys, foreignKeys };
+      }
+      return tables;
+    }
+
+    function mergeTableDataFromAnalysis(analysis, sqlText) {
+      let parsed = sqlText ? parseSqlToTables(sqlText) : {};
+      if (!analysis) return parsed;
+      const backendTables = analysis.tables || [];
+      const backendColumns = analysis.table_columns || {};
+      const backendPrimaryKeys = analysis.table_primary_keys || {};
+      const backendForeignKeys = analysis.foreign_keys || {};
+      backendTables.forEach(name => {
+        if (parsed[name] && parsed[name].columns.length) return;
+        const columns = (backendColumns[name] || []).map(col => ({ name: col.name, type: col.type, nullable: col.nullable !== false }));
+        const primaryKeys = backendPrimaryKeys[name] || [];
+        const fkInfo = backendForeignKeys[name];
+        const foreignKeys = fkInfo ? [{ column: fkInfo.column, references: { table: fkInfo.references, column: fkInfo.ref_column || 'id' } }] : [];
+        parsed[name] = {
+          columns: parsed[name]?.columns?.length ? parsed[name].columns : columns,
+          primaryKeys: parsed[name]?.primaryKeys?.length ? parsed[name].primaryKeys : primaryKeys,
+          foreignKeys: parsed[name]?.foreignKeys?.length ? parsed[name].foreignKeys : foreignKeys
+        };
+      });
+      return parsed;
+    }
+
+    // ===== DISPLAY ANALYSIS =====
+    function displayAnalysis(result) {
+      const container = document.getElementById('analysisResults');
+
+      // Resumen
+      document.getElementById('analysisSummary').textContent = result.summary || 'Análisis completado.';
+
+      // Sugerencias
+      const suggestions = document.getElementById('analysisSuggestions');
+      suggestions.innerHTML = '';
+      const suggItems = result.suggestions || [];
+      if (suggItems.length) {
+        suggItems.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'flex items-start gap-3 text-sm text-muted';
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined text-[16px] mt-0.5 shrink-0';
+          icon.style.color = '#f59e0b';
+          icon.textContent = 'arrow_right';
+          const text = document.createElement('span');
+          text.textContent = item;
+          li.appendChild(icon);
+          li.appendChild(text);
+          suggestions.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.className = 'text-sm text-muted';
+        li.textContent = 'No se encontraron recomendaciones automáticas.';
+        suggestions.appendChild(li);
+      }
+
+      // Estructura
+      const structureCard = document.getElementById('analysisStructure');
+      const tablesContainer = document.getElementById('structureTablesContainer');
+      tablesContainer.innerHTML = '';
+      const parsed = mergeTableDataFromAnalysis(result, window.uploadedSqlText || '');
+      const tableNames = Object.keys(parsed);
+
+      // Update mini stats
+      let totalRelations = 0;
+      tableNames.forEach(t => { totalRelations += parsed[t].foreignKeys.length; });
+      document.getElementById('statTables').textContent = tableNames.length || '—';
+      document.getElementById('statRelations').textContent = totalRelations || '—';
+
+      // Store table details for modal
+      window._tableDetails = parsed;
+
+      if (tableNames.length) {
+        tableNames.forEach(tableName => {
+          const info = parsed[tableName];
+          const hasPk = info.primaryKeys.length > 0;
+          const div = document.createElement('div');
+          div.className = 'rounded-2xl overflow-hidden border border-outline-variant/20 transition-all hover:border-primary/30';
+          div.innerHTML = `
+            <div class="flex items-center justify-between px-4 py-3" style="background:rgba(56,189,248,0.05)">
+              <div class="flex items-center gap-3">
+                <span class="font-bold text-sm font-mono text-on-surface">${tableName}</span>
+                <span class="${hasPk ? 'badge-pk' : 'badge-nopk'}">${hasPk ? 'PK definida' : 'Sin PK'}</span>
+              </div>
+              <button onclick="openDetailModal('${tableName}')"
+                class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:scale-105"
+                style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);color:#38bdf8;cursor:pointer">
+                <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                Ver detalle
+              </button>
+            </div>
+            <div class="px-4 py-3 flex items-center gap-6 text-xs text-muted border-t border-outline-variant/10">
+              <span><span class="font-bold text-on-surface">${info.columns.length}</span> columnas</span>
+              <span><span class="font-bold text-on-surface">${info.foreignKeys.length}</span> FK</span>
+              ${hasPk ? '<span class="font-bold" style="color:#10b981">PK: ' + info.primaryKeys.join(', ') + '</span>' : '<span style="color:#ef4444">Sin clave primaria</span>'}
+            </div>`;
+          tablesContainer.appendChild(div);
+        });
+        structureCard.classList.remove('hidden');
+      } else {
+        structureCard.classList.add('hidden');
+      }
+
+      // E-R
+      const erCard = document.getElementById('analysisErDiagram');
+      const erContent = document.getElementById('erDiagramContent');
+      if (result.er_diagram) { erContent.innerHTML = result.er_diagram; erCard.classList.remove('hidden'); }
+      else erCard.classList.add('hidden');
+
+      // Warehouse
+      const warehouseCard = document.getElementById('analysisWarehouseSchema');
+      if (result.warehouse_schema?.type) {
+        document.getElementById('warehouseSchemaTypeBadge').textContent = result.warehouse_schema.type.toUpperCase();
+        document.getElementById('warehouseSchemaDescription').textContent = result.warehouse_schema.description || '';
+        const snwfl = document.getElementById('snowflakeDiagramContent');
+        if (result.snowflake_diagram) { snwfl.innerHTML = result.snowflake_diagram; snwfl.classList.remove('hidden'); }
+        else snwfl.classList.add('hidden');
+        warehouseCard.classList.remove('hidden');
+      } else warehouseCard.classList.add('hidden');
+
+      // Preparación
+      const prepCard = document.getElementById('analysisDataPreparation');
+      const prepList = document.getElementById('dataPreparationList');
+      prepList.innerHTML = '';
+      if (result.data_preparation?.length) {
+        result.data_preparation.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'flex items-start gap-3 text-sm text-muted';
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined text-[16px] mt-0.5 shrink-0';
+          icon.style.color = '#f59e0b';
+          icon.textContent = 'build_circle';
+          const text = document.createElement('span');
+          text.textContent = item;
+          li.appendChild(icon);
+          li.appendChild(text);
+          prepList.appendChild(li);
+        });
+        prepCard.classList.remove('hidden');
+      } else prepCard.classList.add('hidden');
+
+      // Minería
+      const miningCard = document.getElementById('analysisDataMining');
+      const miningList = document.getElementById('dataMiningList');
+      miningList.innerHTML = '';
+      const miningItems = result.data_mining_insights || [];
+      if (miningItems.length) {
+        miningItems.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'flex items-start gap-3 text-sm text-muted';
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined text-[16px] mt-0.5 shrink-0';
+          icon.style.color = '#10b981';
+          icon.textContent = 'insights';
+          const text = document.createElement('span');
+          text.textContent = item;
+          li.appendChild(icon);
+          li.appendChild(text);
+          miningList.appendChild(li);
+        });
+        miningCard.classList.remove('hidden');
+      } else {
+        miningCard.classList.add('hidden');
+      }
+
+      // Fuentes
+      const sourcesCard = document.getElementById('analysisDataSources');
+      const structured = result.data_sources?.structured || [];
+      const semi = result.data_sources?.semi_structured || [];
+      const unstructured = result.data_sources?.unstructured || [];
+      const fillList = (id, items, emptyText) => {
+        const el = document.getElementById(id);
+        el.innerHTML = '';
+        (items.length ? items : [emptyText]).forEach(i => { const li = document.createElement('li'); li.textContent = i; el.appendChild(li); });
+      };
+      fillList('dataSourcesStructured', structured, 'Ninguno detectado');
+      fillList('dataSourcesSemi', semi, 'Ninguno detectado');
+      fillList('dataSourcesUnstructured', unstructured, 'Ninguno detectado');
+      if (structured.length || semi.length || unstructured.length) sourcesCard.classList.remove('hidden');
+      else sourcesCard.classList.add('hidden');
+
+      // AI Summary
+      const aiCard = document.getElementById('analysisAiSummary');
+      if (result.ai_summary && !result.ai_summary.toLowerCase().includes('no disponible')) {
+        document.getElementById('aiSummaryText').textContent = result.ai_summary;
+        aiCard.classList.remove('hidden');
+      } else aiCard.classList.add('hidden');
+
+      window.currentAnalysis = result;
+      container.classList.remove('hidden');
+    }
+
+    // ===== SUBMIT =====
+    async function submitSqlFile() {
+      hideUploadMessage();
+      const fileInput = document.getElementById('dbFileInput');
+      const file = fileInput.files[0];
+      if (!file) { showUploadMessage('Selecciona un archivo .sql antes de analizar.'); return; }
+      if (!file.name.toLowerCase().endsWith('.sql')) { showUploadMessage('El archivo debe tener extensión .sql.'); return; }
+
+      const uploadBtn = document.getElementById('uploadSqlButton');
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">autorenew</span>&nbsp;Analizando...';
+
+      try {
+        const fileContent = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = e => reject(e);
+          reader.readAsText(file, 'utf-8');
+        });
+        window.uploadedSqlText = fileContent;
+      } catch (err) {
+        showUploadMessage('No se pudo leer el archivo SQL. Intenta nuevamente.');
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_circle</span> Analizar archivo';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/analysis/database/analyze-sql', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) { showUploadMessage(data.error || 'Error al analizar el archivo.'); return; }
+        displayAnalysis(data);
+      } catch (error) {
+        showUploadMessage('No se pudo procesar el archivo. Intenta nuevamente.');
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_circle</span> Analizar archivo';
+      }
+    }
+
+    // ===== PDF =====
+    function buildPdfContent(analysis, sqlText) {
+      const parsedTables = mergeTableDataFromAnalysis(analysis, sqlText);
+      const stats = analysis?.stats || {};
+      const timestamp = new Date().toLocaleString();
+      let tablesHtml = '', relationshipsHtml = '';
+      let totalTables = stats.total_tables ?? Object.keys(parsedTables).length;
+      let totalRelations = 0;
+      const relationshipList = [];
+
+      for (const [tableName, info] of Object.entries(parsedTables)) {
+        const hasPk = info.primaryKeys.length > 0;
+        const pkStr = hasPk ? info.primaryKeys.join(', ') : '⚠️ Ninguna PK definida';
+        const pkBadge = hasPk
+          ? '<span style="background:#38bdf8;color:#0f172a;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600;">PK</span>'
+          : '<span style="background:#f97316;color:white;padding:2px 8px;border-radius:20px;font-size:12px;">Sin PK</span>';
+        tablesHtml += `<div style="margin-bottom:28px;border-radius:20px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);background:#ffffff;border:1px solid #e2e8f0;">
+          <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:800;font-size:20px;">${tableName}</div><div>${pkBadge}</div>
+          </div>
+          <div style="padding:16px 20px;">
+            <div style="margin-bottom:16px;background:#f8fafc;padding:10px 12px;border-radius:14px;font-family:monospace;font-size:13px;"><strong>Clave(s) primaria(s):</strong> ${pkStr}</div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+              <thead><tr style="background:#eef2ff;border-bottom:1px solid #cbd5e1;">
+                <th style="text-align:left;padding:10px 12px;font-weight:700;">Columna</th>
+                <th style="text-align:left;padding:10px 12px;font-weight:700;">Tipo</th>
+                <th style="text-align:left;padding:10px 12px;font-weight:700;">Nullable</th>
+                <th style="text-align:left;padding:10px 12px;font-weight:700;">FK</th>
+              </tr></thead>
+              <tbody>
+                ${info.columns.map(col => {
+                  const fkRef = info.foreignKeys.find(fk => fk.column === col.name);
+                  if (fkRef) { relationshipList.push(`${tableName}.${col.name} → ${fkRef.references.table}.${fkRef.references.column}`); totalRelations++; }
+                  return `<tr style="border-bottom:1px solid #e2e8f0;${fkRef ? 'background:#ecfdf5;' : ''}">
+                    <td style="padding:8px 12px;font-weight:500;">${col.name}</td>
+                    <td style="padding:8px 12px;"><code style="background:#f1f5f9;padding:2px 6px;border-radius:8px;">${col.type}</code></td>
+                    <td style="padding:8px 12px;">${col.nullable ? 'Sí' : 'No'}</td>
+                    <td style="padding:8px 12px;">${fkRef ? ` → ${fkRef.references.table}.${fkRef.references.column}` : '—'}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+            ${info.foreignKeys.length ? `<div style="margin-top:14px;background:#eff6ff;padding:10px 14px;border-radius:14px;"><strong>Restricciones FOREIGN KEY:</strong><ul style="margin:8px 0 0 20px;">${info.foreignKeys.map(fk => `<li>${fk.column} → <strong>${fk.references.table}</strong>.${fk.references.column}</li>`).join('')}</ul></div>` : ''}
+          </div>
+        </div>`;
+      }
+
+      if (relationshipList.length) {
+        relationshipsHtml = `<div style="background:#fefce8;border-left:4px solid #eab308;padding:16px 20px;border-radius:20px;margin:20px 0;">
+          <h3 style="margin:0 0 12px 0;font-size:18px;font-weight:700;">Relaciones detectadas (${totalRelations})</h3>
+          ${relationshipList.map(rel => `<div style="background:#ffffff;padding:8px 14px;border-radius:40px;margin:4px 0;border:1px solid #fde68a;">${rel}</div>`).join('')}
+        </div>`;
+      }
+
+      const preparationItems = analysis?.data_preparation || [];
+      const miningItems = analysis?.data_mining_insights || [];
+      const warehouseType = analysis?.warehouse_schema?.type || '';
+      const warehouseDesc = analysis?.warehouse_schema?.description || '';
+      const tablesWithPkCount = stats.tables_with_pk ?? Object.values(parsedTables).filter(t => t.primaryKeys.length > 0).length;
+      const tablesWithoutPk = Math.max(totalTables - tablesWithPkCount, 0);
+
+      const preparationHtml = preparationItems.length
+        ? `<ul style="margin:0;list-style:disc;padding-left:20px;">${preparationItems.map(i => `<li style="margin-bottom:10px;line-height:1.5;">${i}</li>`).join('')}</ul>`
+        : '<p style="color:#64748b;">No se encontraron recomendaciones.</p>';
+      const miningHtml = miningItems.length
+        ? `<ul style="margin:0;list-style:disc;padding-left:20px;">${miningItems.map(i => `<li style="margin-bottom:10px;line-height:1.5;">${i}</li>`).join('')}</ul>`
+        : '<p style="color:#64748b;">No se detectaron insights de minería.</p>';
+      const suggestionsHtml = (analysis?.suggestions || []).length
+        ? `<ul style="margin:0;list-style:none;padding:0;">${analysis.suggestions.map(s => `<li style="margin:10px 0;display:flex;gap:10px;"><span style="background:#38bdf8;color:#0f172a;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px;flex-shrink:0;">✓</span><span style="flex:1;line-height:1.4;">${s}</span></li>`).join('')}</ul>`
+        : '<p style="color:#64748b;">Sin sugerencias.</p>';
+      const warehouseHtml = warehouseType
+        ? `<div style="margin-top:24px;background:#eff6ff;border-radius:22px;padding:18px;border:1px solid #c7d2fe;"><h3 style="margin:0 0 10px 0;font-size:18px;font-weight:700;">Esquema de Data Warehouse</h3><p style="margin:0 0 8px 0;font-weight:600;">Tipo: ${warehouseType}</p><p style="margin:0;">${warehouseDesc}</p></div>` : '';
+      const erDiagramHtml = analysis?.er_diagram
+        ? `<div style="background:#f8fafc;border-radius:24px;padding:20px;margin:28px 0;border:1px solid #e2e8f0;"><h3 style="margin:0 0 12px 0;font-size:18px;font-weight:700;">Diagrama Entidad-Relación</h3>${analysis.er_diagram}</div>`
+        : `<div style="background:#f1f5f9;border-radius:20px;padding:16px;margin-top:24px;"><p>No se pudo generar el diagrama E-R.</p></div>`;
+      const aiSummaryHtml = analysis?.ai_summary && !analysis.ai_summary.toLowerCase().includes('no disponible')
+        ? `<div style="margin:28px 0 24px 0;"><h2 style="font-size:24px;font-weight:700;border-left:5px solid #6366f1;padding-left:18px;margin:0 0 12px 0;">Resumen con IA</h2><div style="background:#eef2ff;border-radius:24px;padding:20px 24px;line-height:1.6;">${analysis.ai_summary}</div></div>` : '';
+
+      return `<div style="font-family:'Geist','Segoe UI',system-ui,sans-serif;max-width:1000px;margin:0 auto;background:white;color:#0f172a;">
+        <div style="text-align:center;margin-bottom:32px;border-bottom:3px solid #38bdf8;padding-bottom:24px;">
+          <h1 style="font-size:34px;font-weight:800;margin:0 0 8px 0;">Análisis de Base de Datos</h1>
+          <p style="color:#334155;margin:0;">AutoDocs AI · Reporte profesional de esquema SQL</p>
+          <p style="color:#64748b;font-size:13px;margin-top:8px;">${timestamp}</p>
+        </div>
+        <div style="background:#f0f9ff;border-radius:28px;padding:20px 24px;margin-bottom:32px;">
+          <h2 style="margin:0 0 12px 0;font-size:20px;font-weight:700;">Resumen del análisis</h2>
+          <p style="font-size:15px;line-height:1.5;">${analysis?.summary || 'Análisis completado.'}</p>
+          <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;">
+            <div style="background:white;border-radius:40px;padding:6px 16px;"><strong>Tablas:</strong> ${totalTables}</div>
+            <div style="background:white;border-radius:40px;padding:6px 16px;"><strong>Relaciones FK:</strong> ${totalRelations}</div>
+            <div style="background:white;border-radius:40px;padding:6px 16px;"><strong>Con PK:</strong> ${tablesWithPkCount}/${totalTables}</div>
+            ${tablesWithoutPk > 0 ? `<div style="background:#fee2e2;border-radius:40px;padding:6px 16px;"><strong>Sin PK:</strong> ${tablesWithoutPk}</div>` : ''}
+          </div>
+        </div>
+        <div style="margin-bottom:32px;">
+          <h2 style="font-size:24px;font-weight:700;border-left:5px solid #38bdf8;padding-left:18px;margin:0 0 20px 0;">Estructura de la base de datos</h2>
+          ${totalTables ? tablesHtml : '<div style="background:#fef2f2;padding:24px;border-radius:24px;text-align:center;">No se encontraron sentencias CREATE TABLE.</div>'}
+          ${relationshipsHtml}
+        </div>
+        ${warehouseHtml}
+        <div style="margin:28px 0 24px 0;"><h2 style="font-size:24px;font-weight:700;border-left:5px solid #f59e0b;padding-left:18px;margin:0 0 12px 0;">Preparación de datos</h2><div style="background:#f8fafc;border-radius:24px;padding:20px 24px;">${preparationHtml}</div></div>
+        <div style="margin:28px 0 24px 0;"><h2 style="font-size:24px;font-weight:700;border-left:5px solid #22c55e;padding-left:18px;margin:0 0 12px 0;">Minería de datos</h2><div style="background:#ecfdf5;border-radius:24px;padding:20px 24px;">${miningHtml}</div></div>
+        <div style="margin:28px 0 24px 0;"><h2 style="font-size:24px;font-weight:700;border-left:5px solid #f59e0b;padding-left:18px;margin:0 0 12px 0;">Recomendaciones</h2><div style="background:#fffbeb;border-radius:24px;padding:20px 24px;">${suggestionsHtml}</div></div>
+        ${aiSummaryHtml}
+        ${erDiagramHtml}
+        <div style="font-size:11px;text-align:center;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:24px;margin-top:32px;">Documento generado por AutoDocs AI · Análisis automatizado de esquemas SQL</div>
+      </div>`;
+    }
+
+    async function downloadAnalysisPdf() {
+      if (!window.currentAnalysis && !window.uploadedSqlText) { 
+        alert('No hay análisis disponible. Carga un archivo .sql primero.'); 
+        return; 
+      }
+      const downloadBtn = document.getElementById('downloadPdfBtn');
+      const originalText = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">hourglass_empty</span>&nbsp;Generando PDF...';
+      downloadBtn.disabled = true;
+      try {
+        const container = document.getElementById('pdfExportContainer');
+        container.innerHTML = buildPdfContent(window.currentAnalysis, window.uploadedSqlText);
+        container.style.display = 'block';
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style.left = '-9999px';
+        await new Promise(r => setTimeout(r, 300));
+        const canvas = await html2canvas(container, { scale: 2, logging: false, useCORS: false, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const imgWidth = 210, pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let position = 0;
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        let heightLeft = imgHeight - pageHeight;
+        while (heightLeft > 0) { 
+          position = heightLeft - imgHeight; 
+          pdf.addPage(); 
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); 
+          heightLeft -= pageHeight; 
+        }
+        pdf.save(`database_analysis_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.pdf`);
+      } catch (error) {
+        alert('Error al generar el PDF: ' + error.message);
+      } finally {
+        downloadBtn.innerHTML = originalText;
+        downloadBtn.disabled = false;
+        const container = document.getElementById('pdfExportContainer');
+        container.innerHTML = '';
+        container.style.display = 'none';
+      }
+    }
+
+    // ===== PARTICLES =====
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: null, y: null };
+    const particleCount = 80;
+    const repulsionRadius = 180;
+
+    function initCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      setupParticles();
+    }
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+        this.color = Math.random() > 0.6 ? 'rgba(56,189,248,0.25)' : 'rgba(129,140,248,0.2)';
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (mouse.x !== null) {
+          const dx = mouse.x - this.x, dy = mouse.y - this.y;
+          const distance = Math.sqrt(dx*dx + dy*dy);
+          if (distance < repulsionRadius) {
+            const angle = Math.atan2(dy, dx);
+            const force = (repulsionRadius - distance) / repulsionRadius;
+            this.x -= Math.cos(angle) * force * 2;
+            this.y -= Math.sin(angle) * force * 2;
+          }
+        }
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
+      }
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        particles.forEach(p => {
+          const d = Math.hypot(this.x - p.x, this.y - p.y);
+          if (d < 120) {
+            ctx.strokeStyle = `rgba(56,189,248,${0.12 * (1 - d/120)})`;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+          }
+        });
+      }
+    }
+
+    function setupParticles() { particles = []; for (let i = 0; i < particleCount; i++) particles.push(new Particle()); }
+    function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+
+    window.addEventListener('resize', initCanvas);
+    window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCanvas();
+      animate();
+      initDatabaseAnalysis();
+    });
+
+    // ===== COLLAPSE =====
+    function toggleCollapse(bodyId, chevronId) {
+      const body = document.getElementById(bodyId);
+      const chevron = document.getElementById(chevronId);
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      chevron.classList.toggle('open', !isOpen);
+    }
+
+    // ===== DETAIL MODAL =====
+    window._tableDetails = {};
+
+    function openDetailModal(tableName) {
+      const info = window._tableDetails[tableName];
+      if (!info) return;
+      const modal = document.getElementById('detailModal');
+      const title = document.getElementById('detailModalTitle');
+      const subtitle = document.getElementById('detailModalSubtitle');
+      const body = document.getElementById('detailModalBody');
+
+      const hasPk = info.primaryKeys.length > 0;
+      const pkStr = hasPk ? info.primaryKeys.join(', ') : 'Ninguna definida';
+
+      title.textContent = tableName;
+      subtitle.textContent = `${info.columns.length} columnas · ${info.foreignKeys.length} FK · PK: ${pkStr}`;
+
+      let html = '';
+
+      // Columns table
+      if (info.columns.length) {
+        html += `
+        <div class="mb-5">
+          <p class="text-xs uppercase tracking-widest font-bold text-muted mb-3">Columnas</p>
+          <div class="rounded-2xl overflow-hidden border border-outline-variant/20">
+            <table class="structure-table w-full">
+              <thead style="background:rgba(56,189,248,0.06)">
+                <tr>
+                  <th>Nombre</th><th>Tipo</th><th>Nullable</th><th>Rol</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${info.columns.map(col => {
+                  const isPk = info.primaryKeys.includes(col.name);
+                  const fkRef = info.foreignKeys.find(fk => fk.column === col.name);
+                  const rolBadge = isPk
+                    ? '<span class="badge-pk">PK</span>'
+                    : fkRef
+                      ? '<span style="background:rgba(129,140,248,0.15);color:#4338ca;font-size:0.65rem;font-weight:700;padding:0.15rem 0.6rem;border-radius:9999px;">FK</span>'
+                      : '—';
+                  return `<tr>
+                    <td class="font-mono text-on-surface font-bold">${col.name}</td>
+                    <td class="text-muted">${col.type}</td>
+                    <td>${col.nullable ? '<span style="color:#10b981">Sí</span>' : '<span style="color:#ef4444">No</span>'}</td>
+                    <td>${rolBadge}${fkRef ? '<span class="text-muted text-xs ml-1"> → ' + fkRef.references.table + '.' + fkRef.references.column + '</span>' : ''}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+      }
+
+      // FK section
+      if (info.foreignKeys.length) {
+        html += `
+        <div class="mb-5">
+          <p class="text-xs uppercase tracking-widest font-bold text-muted mb-3">Relaciones (Foreign Keys)</p>
+          <div class="space-y-2">
+            ${info.foreignKeys.map(fk => `
+            <div class="flex items-center gap-3 rounded-xl px-4 py-3" style="background:rgba(129,140,248,0.07);border:1px solid rgba(129,140,248,0.2)">
+              <span class="material-symbols-outlined text-[16px] shrink-0" style="color:#818cf8">link</span>
+              <code class="font-mono text-sm text-on-surface">${fk.column}</code>
+              <span class="material-symbols-outlined text-[16px] text-muted">arrow_forward</span>
+              <code class="font-mono text-sm" style="color:#818cf8">${fk.references.table}.${fk.references.column}</code>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      }
+
+      if (!info.columns.length && !info.foreignKeys.length) {
+        html = '<p class="text-muted text-sm">No hay detalle disponible para esta tabla.</p>';
+      }
+
+      body.innerHTML = html;
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById('detailModal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailModal(); });
+  </script>
+</body>
+</html>

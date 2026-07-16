@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predicciones ML — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#001f2b","tertiary-container": "#ffdbb7","surface-tint": "#38bdf8",
+                        "on-secondary-fixed-variant": "#2f2ebe","on-error-container": "#ffdad6","on-secondary-fixed": "#07006c",
+                        "secondary": "#818cf8","primary": "#38bdf8","surface-container-high": "#e2e8f0",
+                        "on-tertiary-container": "#613b00","on-tertiary-fixed": "#2a1700","surface-variant": "#cbd5e1",
+                        "secondary-container": "#e0e7ff","on-surface-variant": "#334155","primary-fixed": "#bae6fd",
+                        "surface-container-highest": "#e2e8f0","surface-dim": "#cbd5e1","outline-variant": "#94a3b8",
+                        "on-surface": "#0f172a","on-secondary-container": "#1e1b4b","secondary-fixed": "#e0e7ff",
+                        "tertiary": "#7c5800","primary-fixed-dim": "#7dd3fc","background": "#f1f5f9",
+                        "primary-container": "#e0f2fe","tertiary-fixed-dim": "#ffb960","surface-bright": "#ffffff",
+                        "surface-container-lowest": "#ffffff","on-primary-fixed": "#001e2c","inverse-on-surface": "#eef2f5",
+                        "error": "#ba1a1a","error-container": "#ffdad6","secondary-fixed-dim": "#c7d2fe",
+                        "on-tertiary": "#ffffff","surface-container": "#ffffff","on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#004c69","on-background": "#0f172a","on-tertiary-fixed-variant": "#653e00",
+                        "inverse-primary": "#7dd3fc","tertiary-fixed": "#ffddb8","on-primary": "#ffffff",
+                        "outline": "#64748b","surface-container-low": "#f8fafc","surface": "#f1f5f9",
+                        "on-secondary": "#ffffff","inverse-surface": "#1e293b"
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem","lg": "0.25rem","xl": "0.5rem","full": "0.75rem" },
+                    fontFamily: { "body-md": ["Geist"],"headline-lg": ["Geist"],"display-lg": ["Geist"],"code-md": ["JetBrains Mono"],"label-caps": ["Geist"] }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { background: #f1f5f9; overflow-x: hidden; min-height: 100vh; color: #0f172a; }
+        html.dark body { background: #0f1418; color: #e2e8f0; }
+        html.dark .glass { background: rgba(15,20,24,0.7); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        html.dark .glass-hover:hover { border-color: rgba(56,189,248,0.4); box-shadow: 0 12px 30px rgba(56,189,248,0.2); }
+        html.dark .text-on-surface { color: #f1f5f9 !important; }
+        html.dark .text-on-surface-variant { color: #94a3b8 !important; }
+        html.dark .text-on-surface-variant\/60 { color: #64748b !important; }
+        html.dark .text-on-surface-variant\/70 { color: #94a3b8 !important; }
+        html.dark .text-on-surface-variant\/50 { color: #64748b !important; }
+        html.dark .text-on-surface-variant\/40 { color: #475569 !important; }
+        html.dark .text-primary { color: #38bdf8 !important; }
+        html.dark .text-primary\/80 { color: #7dd3fc !important; }
+        html.dark .text-secondary { color: #818cf8 !important; }
+        html.dark .border-outline-variant\/20 { border-color: rgba(148,163,184,0.2) !important; }
+        html.dark .border-outline-variant\/30 { border-color: rgba(148,163,184,0.3) !important; }
+        html.dark .border-primary\/30 { border-color: rgba(56,189,248,0.3) !important; }
+        html.dark .border-primary\/40 { border-color: rgba(56,189,248,0.4) !important; }
+        html.dark .bg-primary\/15 { background: rgba(56,189,248,0.15) !important; }
+        html.dark .bg-primary\/5 { background: rgba(56,189,248,0.05) !important; }
+        html.dark .bg-surface-container\/50 { background: rgba(30,41,59,0.5) !important; }
+        html.dark .bg-gray-100 { background: #1e293b !important; }
+        html.dark .text-gray-600 { color: #94a3b8 !important; }
+        html.dark .text-gray-700 { color: #cbd5e1 !important; }
+        html.dark .border-gray-200 { border-color: #334155 !important; }
+        html.dark .border-green-200 { border-color: #166534 !important; }
+        html.dark .text-green-700 { color: #4ade80 !important; }
+        html.dark .bg-green-100 { background: #14532d !important; }
+        html.dark .border-yellow-200 { border-color: #854d0e !important; }
+        html.dark .text-yellow-700 { color: #fbbf24 !important; }
+        html.dark .bg-yellow-100 { background: #713f12 !important; }
+        html.dark .border-red-200 { border-color: #991b1b !important; }
+        html.dark .text-red-700 { color: #f87171 !important; }
+        html.dark .bg-red-100 { background: #7f1d1d !important; }
+        html.dark .text-purple-700 { color: #c084fc !important; }
+        html.dark .bg-purple-100 { background: #581c87 !important; }
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 12px rgba(0,0,0,0.02); transform: translate3d(0,0,0); transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out; will-change: transform, opacity; }
+        .glass-hover:hover { border-color: rgba(56,189,248,0.3); box-shadow: 0 12px 30px rgba(56,189,248,0.12); }
+        .glow-cyan { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
+        .glow-violet { text-shadow: 0 0 12px rgba(129,140,248,0.4); }
+        .stagger-in { opacity: 0; transform: translateY(20px) translate3d(0,0,0); animation: fadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0) translate3d(0,0,0); } }
+        @media (prefers-reduced-motion: reduce) { .stagger-in, .animate-float, .glass-hover { animation: none !important; transition: none !important; transform: none !important; opacity: 1 !important; } }
+        .tilt-card { perspective: 1000px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
+        .tab { padding: 0.6rem 1.2rem; font-size: 0.85rem; color: var(--on-surface-variant); cursor: pointer; background: none; border: none; border-radius: 6px; transition: all 0.15s; font-family: "Geist", sans-serif; }
+        .tab.active { background: rgba(56,189,248,0.1); color: #38bdf8; }
+        .tab:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--on-surface); }
+        /* Los paneles se ocultan/muestran con JavaScript */
+        .pred-tab-panel { display: none; }
+        .spinner { width: 36px; height: 36px; border: 3px solid rgba(129,140,248,0.2); border-top-color: #818cf8; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .project-card { cursor: pointer; transition: all 0.2s; }
+        .project-card:hover { border-color: rgba(129,140,248,0.4); background: rgba(129,140,248,0.06); }
+        .project-card.selected { border-color: rgba(129,140,248,0.6); background: rgba(129,140,248,0.1); }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ── Overrides de modo oscuro para la tarjeta "Qué estamos midiendo" ── */
+        html.dark .bg-surface-container-highest { background: rgba(30,41,59,0.6) !important; }
+        html.dark .bg-cyan-100 { background: rgba(56,189,248,0.15) !important; }
+        html.dark .text-cyan-700 { color: #38bdf8 !important; }
+        html.dark .bg-violet-100 { background: rgba(129,140,248,0.18) !important; }
+        html.dark .text-violet-700 { color: #a5b4fc !important; }
+        html.dark .bg-amber-100 { background: rgba(245,158,11,0.15) !important; }
+        html.dark .text-amber-700 { color: #fbbf24 !important; }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="flex min-h-screen w-full relative z-10">
+        <!-- Sidebar -->
+        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
+            <div class="mb-12">
+                <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                </div>
+            </div>
+            <nav class="flex-1 flex flex-col gap-8">
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">dashboard</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Dashboard</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Proyectos</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/analytics">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">analytics</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Analytics</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/database-analysis">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">storage</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Análisis BD</span>
+                </a>
+                <div class="group relative flex items-center justify-center hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-violet-400 text-2xl group-hover:glow-violet transition-colors">scatter_plot</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-violet-400 pointer-events-none">Predicciones ML</span>
+                </div>
+            </nav>
+            <div class="mt-auto">
+                <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative">
+                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
+                <div>
+                    <h1 class="font-display-lg text-3xl lg:text-4xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-1 uppercase tracking-[0.3em]">Predicciones & Machine Learning</p>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <button id="themeButton" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        <span id="themeIcon" class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">light_mode</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ── Seleccionar proyecto ─────────────────────────────────── -->
+            <div class="glass rounded-2xl p-6 flex flex-col gap-5 stagger-in" style="animation-delay: 0.2s;">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary" style="font-size:20px;">folder_open</span>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-on-surface">Selecciona un proyecto</h2>
+                        <p class="text-sm text-on-surface-variant/70">Elige el proyecto sobre el que quieres correr los modelos ML</p>
+                    </div>
+                </div>
+
+                <!-- Buscador -->
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50" style="font-size:18px;">search</span>
+                    <input id="search-input" type="text" placeholder="Buscar proyecto por nombre…"
+                        class="w-full bg-surface-container/50 border border-outline-variant/30 rounded-xl pl-10 pr-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary/50"
+                        oninput="filterProjects(this.value)" />
+                </div>
+
+                <!-- Lista de proyectos -->
+                <div id="projects-loading" class="flex items-center gap-3 py-6 justify-center text-on-surface-variant/60">
+                    <div class="spinner"></div>
+                    <span class="text-sm">Cargando proyectos…</span>
+                </div>
+                <div id="projects-error" style="display:none;" class="p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size:18px;">error</span>
+                    <span id="projects-error-msg">No se pudieron cargar los proyectos.</span>
+                </div>
+                <div id="projects-list" style="display:none;" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <div id="projects-empty" style="display:none;" class="py-8 text-center text-on-surface-variant/50 text-sm">
+                    No se encontraron proyectos con ese nombre.
+                </div>
+            </div>
+
+            <!-- ── Resultados ML ─────────────────────────────────────────── -->
+            <div id="ml-section" style="display:none;" class="flex flex-col gap-6">
+
+                <!-- Header proyecto seleccionado -->
+                <div class="glass rounded-xl p-4 flex items-center justify-between gap-4 stagger-in" style="animation-delay: 0.3s;">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-violet-500/15 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary" style="font-size:18px;">code</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-on-surface-variant/60 uppercase tracking-wider">Proyecto activo</p>
+                            <p class="font-semibold text-on-surface" id="selected-project-name">—</p>
+                        </div>
+                    </div>
+                    <button onclick="recalcular()"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/10 border border-secondary/20 text-secondary text-sm font-medium hover:bg-secondary/20 transition-all">
+                        <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
+                        Recalcular
+                    </button>
+                </div>
+
+                <!-- Loading ML -->
+                <div id="ml-loading" class="glass rounded-xl p-10 flex flex-col items-center gap-4 text-on-surface-variant/60">
+                    <div class="spinner"></div>
+                    <span class="text-sm">Ejecutando modelos de predicción…</span>
+                </div>
+
+                <!-- Error ML -->
+                <div id="ml-error" style="display:none;" class="glass rounded-xl p-5 border border-red-500/20 bg-red-500/5 text-red-400 text-sm flex items-center gap-3">
+                    <span class="material-symbols-outlined">error</span>
+                    <span id="ml-error-msg">No se pudieron cargar las predicciones.</span>
+                </div>
+
+                <!-- Contenido ML -->
+                <div id="ml-content" style="display:none;" class="flex flex-col gap-6">
+
+                    <!-- Features extraídas -->
+                    <div class="glass rounded-xl p-6">
+                        <h3 class="text-sm font-semibold text-on-surface-variant mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary" style="font-size:18px;">data_object</span>
+                            Variables del Proyecto (Features)
+                        </h3>
+                        <div id="pred-features" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"></div>
+                    </div>
+
+                    <!-- Tabs ML -->
+                    <div class="glass rounded-xl overflow-hidden">
+                        <div class="flex gap-1 p-3 border-b border-outline-variant/10 overflow-x-auto">
+                            <button class="tab active" onclick="showPredTab('lineal-simple', this)">Regresión Lineal Simple</button>
+                            <button class="tab" onclick="showPredTab('lineal-multiple', this)">Regresión Múltiple</button>
+                            <button class="tab" onclick="showPredTab('logistica', this)">Regresión Logística</button>
+                            <button class="tab" onclick="showPredTab('mae', this)">Error Absoluto (MAE)</button>
+                        </div>
+
+                        <!-- ── Lineal Simple ── -->
+                        <div id="tab-lineal-simple" class="pred-tab-panel p-6 flex flex-col gap-5" style="display:block;">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant" id="rl-simple-desc">Un modelo simple que usa una sola variable para estimar la calidad de la documentación.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Número de funciones y su relación con la documentación.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>El coeficiente muestra si más funciones mejoran o empeoran la calidad.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Resultado</strong><br>Predicción de calidad en porcentaje y error promedio.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="rl-simple-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+                            <div class="rounded-lg p-3 bg-primary/5 border border-primary/15 font-mono text-sm text-primary" id="rl-simple-eq"></div>
+                            <svg id="rl-simple-chart" viewBox="0 0 600 220" class="w-full rounded-lg" style="background:rgba(26,29,39,0.6);max-height:220px;"></svg>
+                            <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="rl-simple-interp"></div>
+                            <!-- Métricas Info -->
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Significado de las métricas:</p>
+                                <div id="rl-simple-metrics-info" class="space-y-1"></div>
+                            </div>
+                            <!-- Sugerencias -->
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Sugerencias
+                                </p>
+                                <div id="rl-simple-suggestions" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- ── Lineal Múltiple ── -->
+                        <div id="tab-lineal-multiple" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant" id="rl-multiple-desc">Un modelo con varias variables que calcula el Quality Score global del proyecto.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Funciones, complejidad, issues, tests y endpoints.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>Cada coeficiente indica el impacto de cada variable.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Score predicho y tabla real vs predicho.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="rl-multiple-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+                            <div class="flex flex-col gap-2" id="rl-multiple-coefs"></div>
+                            <div class="overflow-x-auto rounded-lg border border-outline-variant/10">
+                                <table class="w-full text-xs">
+                                    <thead><tr class="border-b border-outline-variant/10 text-on-surface-variant/60 uppercase tracking-wider">
+                                        <th class="px-3 py-2 text-left">Funcs</th><th class="px-3 py-2 text-left">Cx</th>
+                                        <th class="px-3 py-2 text-left">Issues</th><th class="px-3 py-2 text-left">Tests</th>
+                                        <th class="px-3 py-2 text-left">Endpoints</th><th class="px-3 py-2 text-left">Real</th>
+                                        <th class="px-3 py-2 text-left">Pred.</th>
+                                    </tr></thead>
+                                    <tbody id="rl-multiple-table" class="divide-y divide-outline-variant/10"></tbody>
+                                </table>
+                            </div>
+                            <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="rl-multiple-interp"></div>
+                            <!-- Métricas Info -->
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Significado de las métricas:</p>
+                                <div id="rl-multiple-metrics-info" class="space-y-1"></div>
+                            </div>
+                            <!-- Sugerencias -->
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Sugerencias
+                                </p>
+                                <div id="rl-multiple-suggestions" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- ── Logística ── -->
+                        <div id="tab-logistica" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant" id="rl-logistic-desc">Un modelo de clasificación que estima la probabilidad de buena documentación.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Complejidad, async, parámetros y ratio de documentación.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>Predice si el proyecto estará bien documentado o no.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Probabilidad, exactitud y matriz de confusión.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="rl-logistic-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+                            <div class="flex flex-col gap-2">
+                                <p class="text-xs text-on-surface-variant/60 uppercase tracking-wider">Matriz de Confusión</p>
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex gap-1 justify-center text-xs text-on-surface-variant/50 pl-20">
+                                        <span class="w-28 text-center">Pred: No Doc</span>
+                                        <span class="w-28 text-center">Pred: Doc</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex flex-col gap-1 text-xs text-on-surface-variant/50 text-right w-16 flex-shrink-0">
+                                            <span class="h-24 flex items-center justify-end">Real: No</span>
+                                            <span class="h-24 flex items-center justify-end">Real: Sí</span>
+                                        </div>
+                                        <div id="confusion-matrix-grid" class="grid grid-cols-2 gap-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rounded-lg p-4 bg-violet-500/5 border border-violet-500/20 text-sm text-on-surface-variant" id="rl-logistic-interp"></div>
+                            <!-- Métricas Info -->
+                            <div class="rounded-lg p-4 bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+                                <p class="font-semibold text-on-surface mb-2">Significado de las métricas:</p>
+                                <div id="rl-logistic-metrics-info" class="space-y-1"></div>
+                            </div>
+                            <!-- Sugerencias -->
+                            <div class="rounded-lg p-4 bg-secondary/10 border border-secondary/30 text-sm text-on-surface-variant">
+                                <p class="font-semibold text-secondary mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                    Sugerencias
+                                </p>
+                                <div id="rl-logistic-suggestions" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- ── MAE ── -->
+                        <div id="tab-mae" class="pred-tab-panel p-6 flex flex-col gap-5">
+                            <div class="rounded-3xl p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 text-sm text-on-surface-variant shadow-sm">
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Qué estamos midiendo</p>
+                                <p class="mt-3 text-sm text-on-surface-variant">El MAE muestra el error promedio absoluto entre las predicciones y el quality score real.</p>
+                                <div class="mt-4 grid gap-3 text-xs">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-bold">1</span>
+                                        <div><strong class="text-on-surface">Aspectos considerados</strong><br>Predicciones actuales de los modelos frente al valor real.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-bold">2</span>
+                                        <div><strong class="text-on-surface">Interpretación</strong><br>El MAE más bajo indica un modelo más cercano al resultado real.</div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">3</span>
+                                        <div><strong class="text-on-surface">Salida</strong><br>Barras comparativas de error y resumen de precisión.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="mae-summary" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                            <div class="flex flex-col gap-3" id="mae-bars"></div>
+                            <svg id="mae-chart" viewBox="0 0 600 180" class="w-full rounded-lg" style="background:rgba(26,29,39,0.6);max-height:180px;"></svg>
+                            <div class="rounded-lg p-4 bg-amber-500/5 border border-amber-500/20 text-sm text-on-surface-variant" id="mae-interp"></div>
+                        </div>
+                    </div>
+
+                </div><!-- /ml-content -->
+            </div><!-- /ml-section -->
+
+        </main>
+    </div>
+
+    <script>
+    // ══════════════════════════════════════════════════════════
+    //  ESTADO Y AUTENTICACIÓN
+    // ══════════════════════════════════════════════════════════
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) {
+        document.getElementById('sidebar-user-name').textContent = user.name;
+        document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
+        document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
+    }
+
+    let allProjects = [];
+    let selectedProjectId = null;
+
+    // ─── Cargar proyectos ───────────────────────────────────────────────────────
+    async function loadProjects() {
+        try {
+            const res = await fetch('/api/projects', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const rawProjects = Array.isArray(data) ? data : (data.projects || []);
+            allProjects = rawProjects.filter(p => p.status === 'completed');
+            document.getElementById('projects-loading').style.display = 'none';
+            if (allProjects.length === 0) {
+                document.getElementById('projects-error').style.display = '';
+                document.getElementById('projects-error-msg').textContent =
+                    'No tienes proyectos analizados aún. Analiza un proyecto primero desde el Dashboard.';
+                return;
+            }
+            document.getElementById('projects-list').style.display = '';
+            renderProjects(allProjects);
+        } catch (err) {
+            document.getElementById('projects-loading').style.display = 'none';
+            document.getElementById('projects-error').style.display = '';
+            document.getElementById('projects-error-msg').textContent = 'Error al cargar proyectos: ' + err.message;
+        }
+    }
+
+    function renderProjects(projects) {
+        const list = document.getElementById('projects-list');
+        const empty = document.getElementById('projects-empty');
+        if (projects.length === 0) {
+            list.innerHTML = '';
+            empty.style.display = '';
+            return;
+        }
+        empty.style.display = 'none';
+        list.innerHTML = projects.map(p => {
+            const lang = p.language || 'N/A';
+            const files = p.stats?.files ?? '?';
+            const funcs = p.stats?.functions ?? '?';
+            const score = p.stats?.quality_score ?? '?';
+            const isSelected = p._id === selectedProjectId;
+            return `
+                <div class="project-card glass rounded-xl p-4 border border-outline-variant/20 flex flex-col gap-3 ${isSelected ? 'selected' : ''}"
+                    onclick="selectProject('${p._id}', '${escHtml(p.name || 'Proyecto')}')">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:18px;">folder</span>
+                            <span class="font-semibold text-on-surface text-sm truncate">${escHtml(p.name || 'Sin nombre')}</span>
+                        </div>
+                        ${isSelected ? '<span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:18px;">check_circle</span>' : ''}
+                    </div>
+                    <div class="flex gap-3 text-xs text-on-surface-variant/60 flex-wrap">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:13px;">code</span>${lang}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:13px;">folder</span>${files} archivos
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:13px;">functions</span>${funcs} funcs
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 rounded-full bg-outline-variant/20 overflow-hidden">
+                            <div class="h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-sky-400"
+                                style="width:${Math.min(score, 100)}%"></div>
+                        </div>
+                        <span class="text-xs font-mono text-primary">${score}/100</span>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function filterProjects(query) {
+        const q = query.toLowerCase().trim();
+        const filtered = q ? allProjects.filter(p => (p.name || '').toLowerCase().includes(q)) : allProjects;
+        renderProjects(filtered);
+    }
+
+    // ─── Seleccionar proyecto ───────────────────────────────────────────────────
+    function selectProject(id, name) {
+        selectedProjectId = id;
+        document.getElementById('selected-project-name').textContent = name;
+        renderProjects(allProjects.filter(p =>
+            (document.getElementById('search-input').value.trim() === '' ||
+             (p.name || '').toLowerCase().includes(document.getElementById('search-input').value.toLowerCase()))
+        ));
+        const section = document.getElementById('ml-section');
+        section.style.display = '';
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        loadMLPredictions(id);
+    }
+
+    // ─── Cargar predicciones ML ─────────────────────────────────────────────────
+    async function loadMLPredictions(projectId) {
+        document.getElementById('ml-loading').style.display = '';
+        document.getElementById('ml-content').style.display = 'none';
+        document.getElementById('ml-error').style.display = 'none';
+        try {
+            const res = await fetch(`/api/analysis/${projectId}/predictions`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            if (json.status !== 'ok') throw new Error(json.error || 'Error desconocido');
+            renderPredictions(json.predictions);
+            document.getElementById('ml-loading').style.display = 'none';
+            document.getElementById('ml-content').style.display = '';
+        } catch (err) {
+            document.getElementById('ml-loading').style.display = 'none';
+            document.getElementById('ml-error-msg').textContent = 'Error al cargar predicciones: ' + err.message;
+            document.getElementById('ml-error').style.display = '';
+        }
+    }
+
+    function recalcular() {
+        if (selectedProjectId) loadMLPredictions(selectedProjectId);
+    }
+
+    // ─── Tabs ───────────────────────────────────────────────────────────────────
+    function showPredTab(name, el) {
+        // Ocultar TODOS los paneles
+        var panels = document.querySelectorAll('.pred-tab-panel');
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].style.display = 'none';
+        }
+        
+        // Desactivar TODOS los tabs
+        var tabs = document.querySelectorAll('.tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        
+        // Mostrar SOLO el panel seleccionado
+        var targetPanel = document.getElementById('tab-' + name);
+        if (targetPanel) {
+            targetPanel.style.display = 'block';
+        }
+        
+        // Activar SOLO el tab clickeado
+        if (el) {
+            el.classList.add('active');
+        }
+    }
+
+    // ─── Render principal ───────────────────────────────────────────────────────
+    function renderPredictions(data) {
+        renderFeatures(data.features);
+        renderLinealSimple(data.regresion_simple);
+        renderLinealMultiple(data.regresion_multiple);
+        renderLogistica(data.regresion_logistica);
+        renderMAE(data.mae_analysis);
+        
+        // Reset a la primera pestaña
+        var panels = document.querySelectorAll('.pred-tab-panel');
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].style.display = 'none';
+        }
+        var tabs = document.querySelectorAll('.tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        
+        // Mostrar la primera pestaña
+        var firstPanel = document.getElementById('tab-lineal-simple');
+        if (firstPanel) firstPanel.style.display = 'block';
+        var firstTab = document.querySelector('.tab');
+        if (firstTab) firstTab.classList.add('active');
+    }
+
+    // ─── Features ───────────────────────────────────────────────────────────────
+    function renderFeatures(f) {
+        if (!f) return;
+        var labels = {
+            total_files:     ['Archivos', 'folder'],
+            total_funcs:     ['Funciones', 'functions'],
+            total_classes:   ['Clases', 'category'],
+            total_endpoints: ['Endpoints', 'api'],
+            total_issues:    ['Issues', 'bug_report'],
+            doc_ratio:       ['Doc. Ratio', 'description'],
+            avg_complexity:  ['Cx Avg', 'account_tree'],
+            test_funcs:      ['Tests', 'science'],
+            quality_score:   ['Quality', 'verified'],
+            total_size_kb:   ['Tamaño KB', 'storage'],
+        };
+        var html = '';
+        for (var key in labels) {
+            if (labels.hasOwnProperty(key)) {
+                var label = labels[key][0];
+                var icon = labels[key][1];
+                var val = f[key] !== undefined ? f[key] : '—';
+                var display = key === 'doc_ratio' ? (val * 100).toFixed(1) + '%' :
+                              key === 'quality_score' ? val + '/100' :
+                              key === 'total_size_kb' ? val + ' KB' : val;
+                html += `
+                    <div class="glass-hover rounded-lg p-3 border border-outline-variant/20 flex flex-col gap-1">
+                        <div class="flex items-center gap-1 text-on-surface-variant/60">
+                            <span class="material-symbols-outlined text-primary" style="font-size:13px;">${icon}</span>
+                            <span class="text-xs">${label}</span>
+                        </div>
+                        <span class="text-base font-bold font-mono text-on-surface">${display}</span>
+                    </div>`;
+            }
+        }
+        document.getElementById('pred-features').innerHTML = html;
+    }
+
+    // ─── Regresión Lineal Simple ─────────────────────────────────────────────────
+    function renderLinealSimple(d) {
+        if (!d || d.error) {
+            document.getElementById('rl-simple-interp').textContent = d?.error || 'No disponible';
+            return;
+        }
+        // Mostrar descripción del modelo
+        if (d.descripcion) {
+            document.getElementById('rl-simple-desc').textContent = d.descripcion;
+        }
+        // Mostrar info de métricas
+        if (d.metricas_info) {
+            var metricsHtml = '';
+            for (var key in d.metricas_info) {
+                if (d.metricas_info.hasOwnProperty(key)) {
+                    metricsHtml += `<div><span class="font-semibold text-primary">${key}:</span> ${d.metricas_info[key]}</div>`;
+                }
+            }
+            document.getElementById('rl-simple-metrics-info').innerHTML = metricsHtml;
+        }
+        // Mostrar sugerencias
+        if (d.sugerencias && d.sugerencias.length > 0) {
+            var suggestionsHtml = '';
+            d.sugerencias.forEach(function(s) {
+                suggestionsHtml += `<div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                    <span class="text-xs">${s}</span>
+                </div>`;
+            });
+            document.getElementById('rl-simple-suggestions').innerHTML = suggestionsHtml;
+        } else {
+            document.getElementById('rl-simple-suggestions').innerHTML =
+                `<div class="flex items-start gap-2 text-on-surface-variant/60">
+                    <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                    <span class="text-xs">No hay sugerencias específicas para este modelo por ahora.</span>
+                </div>`;
+        }
+        document.getElementById('rl-simple-stats').innerHTML = [
+            ['R²', d.r2, '#10b981'],
+            ['MAE', d.mae, '#f59e0b'],
+            ['Predicción Actual', d.prediccion_proyecto_actual + '%', '#818cf8'],
+            ['Puntos', d.puntos?.length || 0, '#38bdf8'],
+        ].map(function(item) {
+            var l = item[0], v = item[1], c = item[2];
+            return `
+                <div class="rounded-lg p-3 border border-outline-variant/20" style="background:rgba(26,29,39,0.5)">
+                    <p class="text-xs text-on-surface-variant/60 mb-1">${l}</p>
+                    <p class="text-lg font-bold font-mono" style="color:${c}">${v}</p>
+                </div>`;
+        }).join('');
+        document.getElementById('rl-simple-eq').textContent = 'ŷ = ' + d.coeficiente + ' · x + ' + d.intercepto;
+        document.getElementById('rl-simple-interp').textContent = d.interpretacion || '';
+        var pts = d.puntos || [];
+        var svg = document.getElementById('rl-simple-chart');
+        var W = 600, H = 220, PAD = 40;
+        var xs = pts.map(function(p) { return p.x; });
+        var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+        var scX = function(x) { return PAD + (x - minX) / (maxX - minX + 0.001) * (W - PAD * 2); };
+        var scY = function(y) { return H - PAD - (y / 100) * (H - PAD * 2); };
+        var lx1 = pts[0]?.x, lx2 = pts[pts.length-1]?.x;
+        var ly1 = pts[0]?.y_pred, ly2 = pts[pts.length-1]?.y_pred;
+        var inner = `
+            <line x1="${PAD}" y1="${PAD}" x2="${PAD}" y2="${H-PAD}" stroke="#475569" stroke-width="1"/>
+            <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="#475569" stroke-width="1"/>
+            <text x="${W/2}" y="${H-5}" text-anchor="middle" font-size="10" fill="#64748b">Funciones</text>
+            <text x="10" y="${H/2}" text-anchor="middle" font-size="10" fill="#64748b" transform="rotate(-90,10,${H/2})">Calidad Doc %</text>
+            <line x1="${scX(lx1)}" y1="${scY(ly1)}" x2="${scX(lx2)}" y2="${scY(ly2)}" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,3" opacity="0.8"/>`;
+        pts.forEach(function(p) {
+            inner += `<circle cx="${scX(p.x)}" cy="${scY(p.y_real)}" r="4" fill="#818cf8" opacity="0.7" stroke="#c7d2fe" stroke-width="1"><title>x=${p.x}, y=${p.y_real}</title></circle>`;
+        });
+        svg.innerHTML = inner;
+    }
+
+    // ─── Regresión Lineal Múltiple ───────────────────────────────────────────────
+    function renderLinealMultiple(d) {
+        if (!d || d.error) {
+            document.getElementById('rl-multiple-interp').textContent = d?.error || 'No disponible';
+            return;
+        }
+        // Mostrar descripción del modelo
+        if (d.descripcion) {
+            document.getElementById('rl-multiple-desc').textContent = d.descripcion;
+        }
+        // Mostrar info de métricas
+        if (d.metricas_info) {
+            var metricsHtml = '';
+            for (var key in d.metricas_info) {
+                if (d.metricas_info.hasOwnProperty(key)) {
+                    metricsHtml += `<div><span class="font-semibold text-primary">${key}:</span> ${d.metricas_info[key]}</div>`;
+                }
+            }
+            document.getElementById('rl-multiple-metrics-info').innerHTML = metricsHtml;
+        }
+        // Mostrar sugerencias
+        if (d.sugerencias && d.sugerencias.length > 0) {
+            var suggestionsHtml = '';
+            d.sugerencias.forEach(function(s) {
+                suggestionsHtml += `<div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                    <span class="text-xs">${s}</span>
+                </div>`;
+            });
+            document.getElementById('rl-multiple-suggestions').innerHTML = suggestionsHtml;
+        } else {
+            document.getElementById('rl-multiple-suggestions').innerHTML =
+                `<div class="flex items-start gap-2 text-on-surface-variant/60">
+                    <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                    <span class="text-xs">No hay sugerencias específicas para este modelo por ahora.</span>
+                </div>`;
+        }
+        document.getElementById('rl-multiple-stats').innerHTML = [
+            ['R²', d.r2, '#10b981'],
+            ['MAE', d.mae, '#f59e0b'],
+            ['Predicción Actual', d.prediccion_proyecto_actual, '#818cf8'],
+            ['Variables X', (d.variables_x || []).length, '#38bdf8'],
+        ].map(function(item) {
+            var l = item[0], v = item[1], c = item[2];
+            return `
+                <div class="rounded-lg p-3 border border-outline-variant/20" style="background:rgba(26,29,39,0.5)">
+                    <p class="text-xs text-on-surface-variant/60 mb-1">${l}</p>
+                    <p class="text-lg font-bold font-mono" style="color:${c}">${v}</p>
+                </div>`;
+        }).join('');
+        var coefs = d.coeficientes || {};
+        var maxAbs = Math.max.apply(null, Object.values(coefs).map(Math.abs), [0.01]);
+        var coefHtml = '';
+        for (var key in coefs) {
+            if (coefs.hasOwnProperty(key)) {
+                var v = coefs[key];
+                var pct = Math.abs(v) / maxAbs * 100;
+                var color = v >= 0 ? '#10b981' : '#f43f5e';
+                var sign = v >= 0 ? '+' : '';
+                coefHtml += `
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-on-surface-variant w-36 flex-shrink-0">${key}</span>
+                        <div class="flex-1 h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.05)">
+                            <div class="h-2 rounded-full" style="width:${pct.toFixed(1)}%;background:${color}"></div>
+                        </div>
+                        <span class="text-xs font-mono w-16 text-right" style="color:${color}">${sign}${v}</span>
+                    </div>`;
+            }
+        }
+        document.getElementById('rl-multiple-coefs').innerHTML = coefHtml;
+        var tableHtml = '';
+        (d.muestra_datos || []).forEach(function(r) {
+            var diff = Math.abs(r.quality_pred - r.quality_real);
+            var c = diff < 5 ? '#10b981' : diff < 15 ? '#f59e0b' : '#f43f5e';
+            tableHtml += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Funciones']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Complejidad promedio']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Issues']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Tests']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['Endpoints']}</td>
+                <td class="px-3 py-2 font-mono text-sm text-on-surface">${r['quality_real']}</td>
+                <td class="px-3 py-2 font-mono text-sm font-bold" style="color:${c}">${r['quality_pred']}</td>
+            </tr>`;
+        });
+        document.getElementById('rl-multiple-table').innerHTML = tableHtml;
+        document.getElementById('rl-multiple-interp').textContent = d.interpretacion || '';
+    }
+
+    // ─── Regresión Logística ─────────────────────────────────────────────────────
+    function renderLogistica(d) {
+        if (!d || d.error) {
+            document.getElementById('rl-logistic-interp').textContent = d?.error || 'No disponible';
+            return;
+        }
+        // Mostrar descripción del modelo
+        if (d.descripcion) {
+            var descEl = document.getElementById('rl-logistic-desc');
+            if (descEl) descEl.textContent = d.descripcion;
+        }
+        // Mostrar info de métricas
+        if (d.metricas_info) {
+            var metricsHtml = '';
+            for (var key in d.metricas_info) {
+                if (d.metricas_info.hasOwnProperty(key)) {
+                    metricsHtml += `<div><span class="font-semibold text-primary">${key}:</span> ${d.metricas_info[key]}</div>`;
+                }
+            }
+            var metricsEl = document.getElementById('rl-logistic-metrics-info');
+            if (metricsEl) metricsEl.innerHTML = metricsHtml;
+        }
+        // Mostrar sugerencias
+        if (d.sugerencias && d.sugerencias.length > 0) {
+            var suggestionsHtml = '';
+            d.sugerencias.forEach(function(s) {
+                suggestionsHtml += `<div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
+                    <span class="text-xs">${s}</span>
+                </div>`;
+            });
+            var suggestionsEl = document.getElementById('rl-logistic-suggestions');
+            if (suggestionsEl) suggestionsEl.innerHTML = suggestionsHtml;
+        } else {
+            var suggestionsElEmpty = document.getElementById('rl-logistic-suggestions');
+            if (suggestionsElEmpty) {
+                suggestionsElEmpty.innerHTML =
+                    `<div class="flex items-start gap-2 text-on-surface-variant/60">
+                        <span class="material-symbols-outlined text-sm mt-0.5">info</span>
+                        <span class="text-xs">No hay sugerencias específicas para este modelo por ahora.</span>
+                    </div>`;
+            }
+        }
+        var pct = (d.prob_documentada_actual * 100).toFixed(1);
+        document.getElementById('rl-logistic-stats').innerHTML = [
+            ['Exactitud', (d.accuracy * 100).toFixed(1) + '%', '#10b981'],
+            ['Precisión', (d.precision * 100).toFixed(1) + '%', '#38bdf8'],
+            ['Recall',    (d.recall * 100).toFixed(1) + '%', '#a78bfa'],
+            ['Prob. Doc.', pct + '%', '#818cf8'],
+        ].map(function(item) {
+            var l = item[0], v = item[1], c = item[2];
+            return `
+                <div class="rounded-lg p-3 border border-outline-variant/20" style="background:rgba(26,29,39,0.5)">
+                    <p class="text-xs text-on-surface-variant/60 mb-1">${l}</p>
+                    <p class="text-lg font-bold font-mono" style="color:${c}">${v}</p>
+                </div>`;
+        }).join('');
+        var cm = d.matriz_confusion || {};
+        var cells = [
+            { label:'TN', value:cm.TN, bg:'rgba(56,189,248,0.7)',  border:'rgba(56,189,248,0.3)' },
+            { label:'FP', value:cm.FP, bg:'rgba(245,158,11,0.7)',  border:'rgba(245,158,11,0.3)' },
+            { label:'FN', value:cm.FN, bg:'rgba(244,63,94,0.7)',   border:'rgba(244,63,94,0.3)'  },
+            { label:'TP', value:cm.TP, bg:'rgba(16,185,129,0.7)',  border:'rgba(16,185,129,0.3)' },
+        ];
+        document.getElementById('confusion-matrix-grid').innerHTML = cells.map(function(c) {
+            return `
+                <div style="width:112px;height:96px;background:${c.bg};border:1px solid ${c.border};border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+                    <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.8)">${c.label}</span>
+                    <span style="font-size:28px;font-weight:900;color:#fff">${c.value ?? '—'}</span>
+                </div>`;
+        }).join('');
+        document.getElementById('rl-logistic-interp').textContent = d.interpretacion || '';
+    }
+
+    // ─── MAE ────────────────────────────────────────────────────────────────────
+    function renderMAE(d) {
+        if (!d) return;
+        document.getElementById('mae-summary').innerHTML = [
+            ['Quality Score Real', d.quality_score_real + '/100', '#818cf8'],
+            ['MAE Prom. Regresión', d.mae_promedio_regresion, '#f59e0b'],
+            ['Modelos evaluados', (d.modelos || []).length, '#38bdf8'],
+        ].map(function(item) {
+            var l = item[0], v = item[1], c = item[2];
+            return `
+                <div class="rounded-lg p-4 border border-outline-variant/20" style="background:rgba(26,29,39,0.5)">
+                    <p class="text-xs text-on-surface-variant/60 mb-1">${l}</p>
+                    <p class="text-2xl font-bold font-mono" style="color:${c}">${v}</p>
+                </div>`;
+        }).join('');
+        var models = d.modelos || [];
+        var barsHtml = '';
+        models.forEach(function(m) {
+            var mae = typeof m.mae_interno === 'number' ? m.mae_interno : null;
+            var pct = mae !== null ? Math.min(mae / 30 * 100, 100).toFixed(1) : 0;
+            var color = mae !== null ? (mae < 5 ? '#10b981' : mae < 10 ? '#f59e0b' : '#f43f5e') : '#64748b';
+            barsHtml += `
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-on-surface font-medium">${m.modelo}</span>
+                        <span class="text-on-surface-variant font-mono">
+                            MAE=${mae !== null ? mae : '—'}${typeof m.error_abs_vs_real === 'number' ? ' | Δreal='+m.error_abs_vs_real : ''}
+                        </span>
+                    </div>
+                    <div class="h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.05)">
+                        <div class="h-2 rounded-full" style="width:${pct}%;background:${color}"></div>
+                    </div>
+                    <p class="text-xs text-on-surface-variant/60">Predicción: ${m.prediccion}</p>
+                </div>`;
+        });
+        document.getElementById('mae-bars').innerHTML = barsHtml;
+        
+        var svg = document.getElementById('mae-chart');
+        var W = 600, H = 180, PAD = 50;
+        var maes = models.filter(function(m) { return typeof m.mae_interno === 'number'; }).map(function(m) { return m.mae_interno; });
+        var names = models.filter(function(m) { return typeof m.mae_interno === 'number'; }).map(function(m) { return m.modelo.replace('Regresión ','').replace('Lineal ','L.'); });
+        var maxV = Math.max.apply(null, maes.concat([1]));
+        var bw = (W - PAD * 2) / (maes.length || 1);
+        var colors = ['#38bdf8', '#818cf8', '#f59e0b'];
+        var inner = '<line x1="' + PAD + '" y1="' + PAD + '" x2="' + PAD + '" y2="' + (H-PAD) + '" stroke="#475569" stroke-width="1"/><line x1="' + PAD + '" y1="' + (H-PAD) + '" x2="' + (W-PAD) + '" y2="' + (H-PAD) + '" stroke="#475569" stroke-width="1"/>';
+        maes.forEach(function(v, i) {
+            var bh = (v / maxV) * (H - PAD * 2);
+            var bx = PAD + i * bw + bw * 0.1;
+            var by = H - PAD - bh;
+            inner += '<rect x="' + bx + '" y="' + by + '" width="' + (bw*0.8) + '" height="' + bh + '" rx="4" fill="' + colors[i%colors.length] + '" opacity="0.8"/>';
+            inner += '<text x="' + (bx+bw*0.4) + '" y="' + (by-4) + '" text-anchor="middle" font-size="10" fill="#94a3b8">' + v + '</text>';
+            inner += '<text x="' + (bx+bw*0.4) + '" y="' + (H-PAD+14) + '" text-anchor="middle" font-size="9" fill="#94a3b8">' + (names[i]||'') + '</text>';
+        });
+        svg.innerHTML = inner;
+        document.getElementById('mae-interp').textContent = d.interpretacion || '';
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  PARTÍCULAS Y TILT
+    // ══════════════════════════════════════════════════════════
+    var canvas = document.getElementById('particle-canvas');
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var mouse = { x: null, y: null };
+    var particleCount = 80;
+    var repulsionRadius = 180;
+
+    function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; setupParticles(); }
+
+    function Particle() {
+        this.reset = function() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.vx = (Math.random() - 0.5) * 0.4;
+            this.vy = (Math.random() - 0.5) * 0.4;
+            this.color = Math.random() > 0.6 ? 'rgba(56,189,248,0.25)' : 'rgba(129,140,248,0.2)';
+        };
+        this.update = function() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (mouse.x !== null) {
+                var dx = mouse.x - this.x, dy = mouse.y - this.y;
+                var distance = Math.sqrt(dx*dx+dy*dy);
+                if (distance < repulsionRadius) {
+                    var angle = Math.atan2(dy, dx);
+                    var force = (repulsionRadius - distance) / repulsionRadius;
+                    this.x -= Math.cos(angle)*force*2;
+                    this.y -= Math.sin(angle)*force*2;
+                }
+            }
+            if (this.x < 0) this.x = canvas.width;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.y < 0) this.y = canvas.height;
+            if (this.y > canvas.height) this.y = 0;
+        };
+        this.draw = function() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+            ctx.fill();
+            particles.forEach(function(p) {
+                var d = Math.hypot(this.x - p.x, this.y - p.y);
+                if (d < 120) {
+                    ctx.strokeStyle = 'rgba(56,189,248,' + (0.12*(1-d/120)) + ')';
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+                }
+            }.bind(this));
+        };
+        this.reset();
+    }
+
+    function setupParticles() {
+        particles = [];
+        for (var i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(function(p) {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    function initTilt() {
+        var cards = document.querySelectorAll('.tilt-card');
+        cards.forEach(function(card) {
+            if (card.hasTilt) return;
+            card.hasTilt = true;
+            card.addEventListener('mousemove', function(e) {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                var rect = card.getBoundingClientRect();
+                var x = e.clientX - rect.left, y = e.clientY - rect.top;
+                var rx = (y - rect.height/2) / 80, ry = (rect.width/2 - x) / 80;
+                var t = card.querySelector('.card-interaction');
+                if (t) t.style.transform = 'perspective(1000px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) scale3d(1.01,1.01,1.01)';
+            });
+            card.addEventListener('mouseleave', function() {
+                var t = card.querySelector('.card-interaction');
+                if (t) t.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+            });
+        });
+    }
+
+    window.addEventListener('resize', initCanvas);
+    window.addEventListener('mousemove', function(e) { mouse.x = e.x; mouse.y = e.y; });
+    document.addEventListener('DOMContentLoaded', function() {
+        initCanvas();
+        animate();
+        initTilt();
+        loadProjects();
+    });
+    </script>
+    <script src="/static/theme.js"></script>
+</body>
+</html>

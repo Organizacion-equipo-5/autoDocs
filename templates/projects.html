@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proyectos — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#001f2b",
+                        "tertiary-container": "#ffdbb7",
+                        "surface-tint": "#38bdf8",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#07006c",
+                        "secondary": "#818cf8",
+                        "primary": "#38bdf8",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary-container": "#613b00",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-variant": "#cbd5e1",
+                        "secondary-container": "#e0e7ff",
+                        "on-surface-variant": "#334155",
+                        "primary-fixed": "#bae6fd",
+                        "surface-container-highest": "#e2e8f0",
+                        "surface-dim": "#cbd5e1",
+                        "outline-variant": "#94a3b8",
+                        "on-surface": "#0f172a",
+                        "on-secondary-container": "#1e1b4b",
+                        "secondary-fixed": "#e0e7ff",
+                        "tertiary": "#7c5800",
+                        "primary-fixed-dim": "#7dd3fc",
+                        "background": "#f1f5f9",
+                        "primary-container": "#e0f2fe",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "surface-bright": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001e2c",
+                        "inverse-on-surface": "#eef2f5",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7d2fe",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#004c69",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "inverse-primary": "#7dd3fc",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-primary": "#ffffff",
+                        "outline": "#64748b",
+                        "surface-container-low": "#f8fafc",
+                        "surface": "#f1f5f9",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#1e293b"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: #f1f5f9;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: #0f172a;
+        }
+
+        html.dark body {
+            background: #0f1418;
+            color: #e2e8f0;
+        }
+
+        html.dark .glass {
+            background: rgba(15, 20, 24, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        html.dark .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
+        }
+
+        html.dark .text-on-surface {
+            color: #f1f5f9 !important;
+        }
+
+        html.dark .text-on-surface-variant {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/60 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/70 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-on-surface-variant\/50 {
+            color: #64748b !important;
+        }
+
+        html.dark .text-on-surface-variant\/40 {
+            color: #475569 !important;
+        }
+
+        html.dark .text-primary {
+            color: #38bdf8 !important;
+        }
+
+        html.dark .text-primary\/80 {
+            color: #7dd3fc !important;
+        }
+
+        html.dark .text-secondary {
+            color: #818cf8 !important;
+        }
+
+        html.dark .border-outline-variant\/20 {
+            border-color: rgba(148, 163, 184, 0.2) !important;
+        }
+
+        html.dark .border-outline-variant\/30 {
+            border-color: rgba(148, 163, 184, 0.3) !important;
+        }
+
+        html.dark .border-primary\/30 {
+            border-color: rgba(56, 189, 248, 0.3) !important;
+        }
+
+        html.dark .border-primary\/40 {
+            border-color: rgba(56, 189, 248, 0.4) !important;
+        }
+
+        html.dark .bg-primary\/15 {
+            background: rgba(56, 189, 248, 0.15) !important;
+        }
+
+        html.dark .bg-primary\/5 {
+            background: rgba(56, 189, 248, 0.05) !important;
+        }
+
+        html.dark .bg-surface-container\/50 {
+            background: rgba(30, 41, 59, 0.5) !important;
+        }
+
+        html.dark .bg-gray-100 {
+            background: #1e293b !important;
+        }
+
+        html.dark .text-gray-600 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transform: translate3d(0, 0, 0);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out;
+            will-change: transform, opacity;
+        }
+
+        .card-interaction {
+            position: relative;
+            overflow: visible;
+        }
+        .card-interaction > button {
+            position: relative;
+            z-index: 30;
+            background: transparent;
+            border: none;
+        }
+        .card-interaction > button .material-symbols-outlined {
+            pointer-events: none;
+        }
+        .glass:hover {
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.08);
+        }
+        html.dark .card-interaction > button {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+        }
+
+        .glow-cyan {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+        .glow-violet {
+            text-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
+        }
+
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(20px) translate3d(0, 0, 0);
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0) translate3d(0, 0, 0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in,
+            .animate-float,
+            .glass-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+        }
+
+        /* Avatar de colaborador */
+        .contributor-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: white;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+        }
+        .contributor-avatar:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            border-color: #38bdf8;
+        }
+
+        .contributor-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f172a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .contributor-avatar:hover .contributor-tooltip {
+            opacity: 1;
+        }
+
+        /* Modal de colaboradores */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 20, 24, 0.7);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            border-radius: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            box-shadow: 0 0 60px rgba(56, 189, 248, 0.15), 0 8px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px) scale(0.97);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-overlay.open .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        html.dark .modal-content {
+            background: rgba(15, 20, 24, 0.95);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+            padding: 1.5rem 1.75rem;
+        }
+        .modal-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    <canvas id="particle-canvas"></canvas>
+    <div class="flex min-h-screen w-full relative z-10">
+        <!-- Sidebar -->
+        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
+            <div class="mb-12">
+                <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                </div>
+            </div>
+            <nav class="flex-1 flex flex-col gap-8">
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">dashboard</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Dashboard</span>
+                </a>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
+                    <span class="material-symbols-outlined text-primary text-2xl group-hover:glow-cyan">folder_open</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Proyectos</span>
+                </a>
+                <button class="group relative flex items-center justify-center hover:scale-110 transition-transform bg-transparent border-none cursor-pointer" onclick="openUploadModal()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">upload</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Nuevo proyecto</span>
+                </button>
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Cerrar sesión</span>
+                </a>
+            </nav>
+            <div class="mt-auto">
+                <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative">
+                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
+                <div>
+                    <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="projects-count">Cargando...</p>
+                </div>
+                <div class="flex gap-4">
+                    <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                    <button onclick="openUploadModal()" class="px-6 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all active:scale-95 hover:bg-primary/5">
+                        <span class="material-symbols-outlined text-xl">upload</span>
+                        Nuevo Proyecto
+                    </button>
+                </div>
+            </header>
+
+            <!-- Filtros -->
+            <div class="flex flex-col sm:flex-row gap-4 stagger-in" style="animation-delay: 0.2s;">
+                <input type="text" class="glass rounded-xl px-4 py-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors flex-1 font-code-md text-sm" placeholder="Buscar proyecto..." id="search-input" oninput="filterProjects()" />
+                <select class="glass rounded-xl px-4 py-3 text-on-surface-variant focus:border-primary focus:outline-none transition-colors font-code-md text-sm" id="status-filter" onchange="filterProjects()">
+                    <option value="">Todos los estados</option>
+                    <option value="completed">Completados</option>
+                    <option value="analyzing">Analizando</option>
+                    <option value="pending">Pendientes</option>
+                    <option value="error">Con error</option>
+                </select>
+            </div>
+
+            <!-- Lista de proyectos -->
+            <div class="flex flex-col gap-4 stagger-in" style="animation-delay: 0.3s;" id="projects-list">
+                <div class="glass p-12 rounded-3xl text-center text-on-surface-variant/50">
+                    <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
+                    <p class="text-lg font-semibold">Cargando proyectos...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de colaboradores -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="contributorsModal" onclick="if(event.target===this)closeContributorsModal()">
+        <div class="glass p-6 rounded-3xl w-full max-w-2xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]" onclick="event.stopPropagation()" style="max-height:90vh;overflow:hidden;display:flex;flex-direction:column;">
+            <div class="flex items-center justify-between mb-5 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-secondary text-xl">group</span>
+                    </div>
+                    <div>
+                        <h3 id="contributorsModalTitle" class="font-bold text-base text-on-surface">Colaboradores</h3>
+                        <p id="contributorsModalSubtitle" class="text-muted text-xs"></p>
+                    </div>
+                </div>
+                <button onclick="closeContributorsModal()" class="w-7 h-7 rounded-lg border-none bg-black/5 hover:bg-red-50 hover:text-red-500 text-on-surface-variant cursor-pointer flex items-center justify-center text-base transition-all">✕</button>
+            </div>
+            <div id="contributorsModalBody" class="flex-1 overflow-y-auto pr-1">
+                <div class="text-center py-8 text-muted">Cargando colaboradores...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== AUTENTICACIÓN ====================
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/';
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            document.getElementById('sidebar-user-name').textContent = user.name;
+            document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
+            document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
+        }
+
+        let allProjects = [];
+
+        // ==================== OBTENER COLABORADORES ====================
+        async function getContributors(projectId) {
+            try {
+                const res = await fetch(`/api/projects/${projectId}/contributors`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Error al obtener colaboradores');
+                return await res.json();
+            } catch (error) {
+                console.error('Error fetching contributors:', error);
+                return null;
+            }
+        }
+
+        function openContributorsModal(projectId, projectName) {
+            const modal = document.getElementById('contributorsModal');
+            const title = document.getElementById('contributorsModalTitle');
+            const subtitle = document.getElementById('contributorsModalSubtitle');
+            const body = document.getElementById('contributorsModalBody');
+
+            title.textContent = 'Colaboradores';
+            subtitle.textContent = `${projectName}`;
+
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            body.innerHTML = `<div class="text-center py-8 text-muted">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-sm">Cargando colaboradores...</p>
+            </div>`;
+
+            // Agregar spinner si no existe
+            if (!document.querySelector('.spinner')) {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .spinner {
+                        width: 36px;
+                        height: 36px;
+                        border: 3px solid rgba(129,140,248,0.2);
+                        border-top-color: #818cf8;
+                        border-radius: 50%;
+                        animation: spin 0.8s linear infinite;
+                    }
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Cargar colaboradores
+            getContributors(projectId).then(data => {
+                if (!data || !data.contributors || data.contributors.length === 0) {
+                    body.innerHTML = `
+                        <div class="text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-muted mb-3 block">group_off</span>
+                            <p class="text-muted text-sm">No se encontraron colaboradores para este proyecto.</p>
+                            <p class="text-muted text-xs mt-2">Los colaboradores se detectan automáticamente desde el repositorio Git.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const contributors = data.contributors;
+                const totalCommits = contributors.reduce((sum, c) => sum + (c.commits || 0), 0);
+
+                let html = `
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-xs font-semibold text-muted uppercase tracking-wider">${contributors.length} colaboradores</span>
+                        <span class="text-xs text-muted">· ${totalCommits} commits totales</span>
+                    </div>
+                    <div class="space-y-3">
+                `;
+
+                // Ordenar por commits descendente
+                contributors.sort((a, b) => (b.commits || 0) - (a.commits || 0));
+
+                const colors = [
+                    '#38bdf8', '#818cf8', '#10b981', '#f59e0b', '#ef4444',
+                    '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#6366f1'
+                ];
+
+                contributors.forEach((contrib, index) => {
+                    const initials = contrib.name ? contrib.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
+                    const color = colors[index % colors.length];
+                    const commitCount = contrib.commits || 0;
+                    const maxCommits = contributors[0]?.commits || 1;
+                    const barWidth = Math.min((commitCount / maxCommits) * 100, 100);
+
+                    html += `
+                        <div class="flex items-center gap-3 p-3 rounded-xl ${index % 2 === 0 ? 'bg-primary/5' : ''} border border-outline-variant/10">
+                            <div class="contributor-avatar" style="background:${color}">
+                                ${initials}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-sm text-on-surface truncate">${contrib.name || contrib.email || 'Desconocido'}</span>
+                                    ${contrib.email ? `<span class="text-xs text-muted truncate">${contrib.email}</span>` : ''}
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <div class="flex-1 h-1.5 rounded-full bg-outline-variant/20 overflow-hidden">
+                                        <div class="h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary" style="width:${barWidth}%"></div>
+                                    </div>
+                                    <span class="text-xs font-mono text-muted">${commitCount} commits</span>
+                                </div>
+                            </div>
+                            ${contrib.role === 'admin' ? '<span class="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary">Admin</span>' : ''}
+                            ${contrib.role === 'owner' ? '<span class="text-xs px-2 py-0.5 rounded-full bg-secondary/15 text-secondary">Owner</span>' : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                // Agregar estadísticas adicionales si existen
+                if (data.total_commits || data.active_days) {
+                    html += `
+                        <div class="mt-4 pt-4 border-t border-outline-variant/10 grid grid-cols-2 gap-3">
+                            ${data.total_commits ? `<div class="text-center p-2 rounded-lg bg-primary/5">
+                                <p class="text-xs text-muted">Total commits</p>
+                                <p class="text-lg font-bold text-primary">${data.total_commits}</p>
+                            </div>` : ''}
+                            ${data.active_days ? `<div class="text-center p-2 rounded-lg bg-secondary/5">
+                                <p class="text-xs text-muted">Días activos</p>
+                                <p class="text-lg font-bold text-secondary">${data.active_days}</p>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+
+                body.innerHTML = html;
+            }).catch(err => {
+                body.innerHTML = `
+                    <div class="text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-red-400 mb-3 block">error</span>
+                        <p class="text-red-400 text-sm">Error al cargar colaboradores</p>
+                        <p class="text-muted text-xs mt-2">${err.message}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function closeContributorsModal() {
+            const modal = document.getElementById('contributorsModal');
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeContributorsModal();
+        });
+
+        // ==================== GESTIÓN DE PROYECTOS ====================
+        async function loadProjects() {
+            const res = await fetch('/api/projects/', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) return;
+            allProjects = await res.json();
+            document.getElementById('projects-count').textContent = `${allProjects.length} proyecto${allProjects.length !== 1 ? 's' : ''}`;
+            renderProjects(allProjects);
+        }
+
+        function filterProjects() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const status = document.getElementById('status-filter').value;
+            const filtered = allProjects.filter(p =>
+                (!q || p.name.toLowerCase().includes(q)) &&
+                (!status || p.status === status)
+            );
+            renderProjects(filtered);
+        }
+
+        function renderProjects(projects) {
+            const list = document.getElementById('projects-list');
+            if (!projects.length) {
+                list.innerHTML = `<div class="glass p-12 rounded-3xl text-center text-on-surface-variant/50">
+                    <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
+                    <p class="text-lg font-semibold">Sin proyectos</p>
+                    <p class="text-sm">No se encontraron proyectos con estos filtros.</p>
+                </div>`;
+                return;
+            }
+            const labels = { completed: '✓ Completado', analyzing: '⟳ Analizando', pending: '○ Pendiente', error: '✕ Error' };
+            const langIcons = { Python: '🐍', JavaScript: '⚡', TypeScript: '🔷', Java: '☕', PHP: '🐘', Go: '🔵', Ruby: '💎' };
+            list.innerHTML = projects.map(p => {
+                const q = p.stats?.quality_score || 0;
+                const qColor = q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444';
+                const icon = langIcons[p.language] || '';
+                const statusClass =
+                    p.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
+                    p.status === 'analyzing' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                    p.status === 'pending' ? 'bg-surface-container-high text-on-surface-variant border-outline-variant/20' :
+                    'bg-red-100 text-red-700 border-red-200';
+                const contributorCount = p.contributors_count || 0;
+                return `<div class="tilt-card">
+                    <div class="glass rounded-2xl p-5 glass-hover card-interaction cursor-pointer transition-all hover:shadow-md flex items-center gap-5" onclick="goToProject('${p._id}')">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl border border-primary/20 flex-shrink-0">${icon}</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-on-surface">${p.name}</h3>
+                            <p class="text-xs text-on-surface-variant/60 font-code-md">${p.language || 'Desconocido'} · ${new Date(p.created_at).toLocaleDateString('es-MX')}</p>
+                        </div>
+                        <div class="hidden md:flex gap-6 text-sm text-on-surface-variant/70 font-code-md">
+                            <span>Archivos <strong class="text-on-surface">${p.stats?.files || 0}</strong></span>
+                            <span>Funciones <strong class="text-on-surface">${p.stats?.functions || 0}</strong></span>
+                            <span>Endpoints <strong class="text-on-surface">${p.stats?.endpoints || 0}</strong></span>
+                            ${p.status === 'completed' ? `<span>Calidad <strong style="color:${qColor}">${q}/100</strong></span>` : ''}
+                        </div>
+                        <!-- 🆕 Botón de colaboradores -->
+                        <button class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105" 
+                            style="background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.2);color:#818cf8;cursor:pointer;position:relative;z-index:30;"
+                            onclick="openContributorsModal('${p._id}','${p.name}')">
+                            <span class="material-symbols-outlined text-[16px]">group</span>
+                            ${contributorCount > 0 ? contributorCount : ''}
+                        </button>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase border ${statusClass}">${labels[p.status] || p.status}</span>
+                        <button class="text-on-surface-variant/40 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors project-delete-btn" style="position:relative; z-index:30;" onclick="deleteProject(event,'${p._id}')">
+                            <span class="material-symbols-outlined text-xl">delete</span>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+            initTilt();
+        }
+
+        function goToProject(id) { window.location.href = `/analysis/${id}`; }
+
+        async function deleteProject(e, id) {
+            e.stopPropagation();
+            if (!confirm('¿Eliminar este proyecto?')) return;
+
+            const btn = e.target.closest('button') || e.target;
+            const cardWrapper = btn ? btn.closest('.tilt-card') : null;
+            if (cardWrapper) {
+                const el = cardWrapper;
+                el.style.overflow = 'hidden';
+                const startH = el.offsetHeight + 'px';
+                el.style.height = startH;
+                el.style.transition = 'height 300ms ease, opacity 300ms ease, margin 300ms ease, padding 300ms ease';
+                requestAnimationFrame(() => {
+                    el.style.height = '0px';
+                    el.style.opacity = '0';
+                    el.style.margin = '0';
+                    el.style.padding = '0';
+                });
+                try {
+                    await fetch(`/api/projects/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                } catch (e) { /* ignore */ }
+                setTimeout(() => loadProjects(), 350);
+                return;
+            }
+
+            await fetch(`/api/projects/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            loadProjects();
+        }
+
+        function openUploadModal() { window.location.href = '/dashboard'; }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        // ==================== PARTÍCULAS Y TILT ====================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+        const particleCount = 80;
+        const repulsionRadius = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(129, 140, 248, 0.2)';
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < repulsionRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (repulsionRadius - distance) / repulsionRadius;
+                        this.x -= Math.cos(angle) * force * 2;
+                        this.y -= Math.sin(angle) * force * 2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    const d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - d/120)})`;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        function initTilt() {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                if (card.hasTilt) return;
+                card.hasTilt = true;
+                card.addEventListener('mousemove', (e) => {
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 200;
+                    const rotateY = (centerX - x) / 200;
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.005, 1.005, 1.005)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animate();
+            initTilt();
+            loadProjects();
+        });
+    </script>
+    <script src="/static/theme.js"></script>
+</body>
+</html>
