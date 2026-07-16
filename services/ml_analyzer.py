@@ -473,6 +473,8 @@ Como conclusión, los resultados muestran que el quality score real de tu proyec
     }
 
 
+# ─── PCA ─────────────────────────────────────────────────────
+
 def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2) -> dict:
     """Aplica PCA a las métricas de análisis de proyectos.
 
@@ -548,19 +550,91 @@ def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2
             ]
         })
 
+    # Construimos las coordenadas mapeando los componentes
+    project_coordinates = [
+        {
+            "project_id": item["project_id"],
+            "name": item["name"],
+            **{f"component_{k+1}": round(float(components[idx, k]), 4) for k in range(components.shape[1])}
+        }
+        for idx, item in enumerate(meta)
+    ]
+
+    # --- GENERADOR COGNITIVO DE CONCLUSIONES Y SUGERENCIAS ---
+    conclusion = []
+    sugerencias = []
+
+    # Agrupamos los proyectos según su posición en las coordenadas del PCA
+    complejos_baja_salud = []
+    saludables_eficientes = []
+    simples_baja_salud = []
+
+    for pc in project_coordinates:
+        c1 = pc.get("component_1", 0.0)
+        c2 = pc.get("component_2", 0.0)
+        p_name = pc.get("name", "Desconocido")
+
+        # --- LIMPIEZA INTELIGENTE DEL NOMBRE DE PROYECTO ---
+        if "Proyecto " in p_name:
+            # Si el nombre ya es "Proyecto 7987438f-1461...", extraemos el hash limpio
+            parts = p_name.split("Proyecto ")
+            if len(parts) > 1 and len(parts[1]) > 8:
+                p_name = f"Proyecto ({parts[1][:8]})"
+        elif len(p_name) > 30 and "-" in p_name:
+            # Si viene el UUID crudo sin prefijo, lo recortamos de forma segura
+            p_name = f"Proyecto ({p_name[:8]})"
+
+        # Clasificación por cuadrantes de PCA
+        if c1 > 1.0 and c2 < -0.5:
+            complejos_baja_salud.append(p_name)
+        elif c1 < -0.5 and c2 > 0.5:
+            saludables_eficientes.append(p_name)
+        elif c1 < -0.5 and c2 < -0.5:
+            simples_baja_salud.append(p_name)
+
+    # Inyectamos las conclusiones y sugerencias usando los nombres ya limpios
+    if complejos_baja_salud:
+        conclusion.append(
+            f"Alerta de Deuda Técnica: Los proyectos [{', '.join(complejos_baja_salud)}] presentan alta complejidad "
+            f"y un volumen de código crítico, pero sufren de un nivel de documentación y calidad deficiente."
+        )
+        sugerencias.append(
+            f"En [{', '.join(complejos_baja_salud)}], detén la incorporación de nuevas características "
+            f"y asigna un sprint para refactorizar clases de alta complejidad y redactar la documentación técnica faltante."
+        )
+
+    if saludables_eficientes:
+        conclusion.append(
+            f"Casos de Éxito: Los proyectos [{', '.join(saludables_eficientes)}] sobresalen por su modularidad. "
+            f"Mantienen un código altamente eficiente con una estructura ligera y una cobertura de documentación sobresaliente."
+        )
+        sugerencias.append(
+            f"Establece la arquitectura y los estándares de diseño de [{', '.join(saludables_eficientes)}] "
+            f"como la plantilla de referencia obligatoria para los desarrollos futuros de tu equipo."
+        )
+
+    if simples_baja_salud:
+        conclusion.append(
+            f"Riesgo Temprano: Los proyectos [{', '.join(simples_baja_salud)}] aún son pequeños, "
+            f"pero ya muestran signos de desatención en calidad o nula documentación de sus funciones."
+        )
+        sugerencias.append(
+            f"Corrige la estructura de [{', '.join(simples_baja_salud)}] ahora. Es el momento ideal para "
+            f"documentar e implementar buenas prácticas antes de que escalen y se vuelvan inmanejables."
+        )
+
+    if not conclusion:
+        conclusion.append("La mayor parte de tus proyectos se encuentran concentrados de manera homogénea cerca de la media general del ecosistema.")
+        sugerencias.append("El diseño de tu arquitectura es consistente en todos los proyectos. Continúa aplicando las revisiones periódicas de código.")
+
     return {
         "tipo": "PCA",
         "n_components": pca.n_components_,
         "explained_variance_ratio": variance_ratio,
         "components": component_loadings,
-        "project_coordinates": [
-            {
-                "project_id": item["project_id"],
-                "name": item["name"],
-                **{f"component_{k+1}": round(float(components[idx, k]), 4) for k in range(components.shape[1])}
-            }
-            for idx, item in enumerate(meta)
-        ],
+        "project_coordinates": project_coordinates,
+        "conclusion": conclusion,
+        "sugerencias": sugerencias,
         "interpretacion": (
             f"PCA aplicado a {len(meta)} proyectos analizados. "
             f"Las primeras {pca.n_components_} componentes capturan "
@@ -568,8 +642,6 @@ def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2
         )
     }
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # ÁRBOLES DE DECISIÓN PARA CLASIFICAR TIPO DE PROYECTO
 # ═══════════════════════════════════════════════════════════════════════════════
 
