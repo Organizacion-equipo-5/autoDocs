@@ -238,7 +238,7 @@ def admin_pca_analysis():
         }), 200
 
     project_map = {
-        project['_id']: project.get('name', 'Desconocido')
+        str(project['_id']): project.get('name', 'Desconocido')
         for project in db.projects.find({}, {"_id": 1, "name": 1})
     }
 
