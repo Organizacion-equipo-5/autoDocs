@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fbfbfb — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+  .doc-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; }
+  .doc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .doc-header .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat .val { font-size: 1.8rem; font-weight: 800; color: var(--white); }
+  .stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .quality-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #10b981; margin-top: 1rem; }
+  h1 { font-size: 1.8rem; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  h2 { font-size: 1.4rem; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }
+  h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 1rem; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  p { margin: 0.75rem 0; }
+  code { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.15); padding: 0.15rem 0.45rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+  pre { background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; border: none; padding: 0; color: #a8d8f0; font-size: 0.85rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .report-table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }
+  .report-table thead tr { background: rgba(56,189,248,0.08); }
+  .report-table th, .report-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); }
+  .report-table th { color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .report-table td { color: var(--text); }
+  th { background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  blockquote { border-left: 3px solid var(--accent3); padding: 0.75rem 1rem; background: rgba(52,211,153,0.05); border-radius: 0 8px 8px 0; margin: 1rem 0; color: var(--accent3); font-style: italic; }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc ol { padding-left: 1.5rem; }
+  .toc li { margin: 0.4rem 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .doc-footer { margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; }
+  /* Page numbers for print/PDF export */
+  @media print {
+    @page { margin: 2cm; @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; } }
+    .doc-header { page-break-after: avoid; }
+    .toc { page-break-after: always; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .diagram-section { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <h1><span class="material-icons">description</span> Fbfbfb</h1>
+    <div class="subtitle">Documentación Técnica Profesional · Generado 07/07/2026 04:12 UTC</div>
+    <div class="quality-badge">Score de Calidad: 71/100</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">21</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">42</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">0</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">3</div><div class="lbl">Endpoints</div></div>
+    </div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ol>
+      <li><a href="#sec1">Resumen del Proyecto</a></li>
+      <li><a href="#sec2">Arquitectura y Diseño</a></li>
+      <li><a href="#sec3">Documentación de API</a></li>
+      <li><a href="#sec4">Clases y Objetos</a></li>
+      <li><a href="#sec5">Funciones</a></li>
+      <li><a href="#sec6">Modelos de Datos</a></li>
+      <li><a href="#sec7">Guía de Despliegue</a></li>
+      <li><a href="#sec8">Reporte de Calidad</a></li>
+    </ol>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-07-07 04:11 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>JavaScript</strong> y cuenta con
+21 archivos fuente, 42 funciones, 0 clases y
+3 endpoints de API documentados. El score de calidad del código es
+<strong>71/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SQL</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>6 archivos</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>14 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>42</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>71/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>0 / 42</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 0</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3>2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── (raíz)/
+├── backend/
+├── mobile/
+</code></pre>
+<h3>2.2 Distribución por Capas</h3>
+<ul>
+<li><strong><code>(raíz)/</code></strong> — 1 archivos [.gitignore(1)]</li>
+<li><strong><code>backend/</code></strong> — 9 archivos [.example(1), .sql(1), .json(2), .sin ext(1), .js(3), .env(1)]</li>
+<li><strong><code>mobile/</code></strong> — 15 archivos [.js(11), .json(4)]</li>
+</ul>
+<h3>2.3 Distribución de Lenguajes</h3>
+<ul>
+<li>JavaScript: 14 archivos (67%)</li>
+<li>JSON: 6 archivos (29%)</li>
+<li>SQL: 1 archivos (5%)</li>
+</ul>
+<h3>2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYgAAAGeCAMAAAC5EmaSAAAAYFBMVEUAAAAJCQkTExMYGBgnJycrKyswMDA8PDxHR0dLS0tWVlZaWlplZWVpaWlwcHB4eHiHh4eKioqQkJCYmJilpaWtra2wsLC/v7/AwMDLy8vX19fa2trm5ubt7e3x8fH///9UjIoWAAAAKnRFWHRjb3B5bGVmdABHZW5lcmF0ZWQgYnkgaHR0cHM6Ly9wbGFudHVtbC5jb212zsofAAABH2lUWHRwbGFudHVtbAABAAAAeJxNUb1OwzAQ3v0Up+wN0KFsqG0AqVKpEB0rhotzCladOLKdUIT6QMx9hLwYZydSslj+/u6Tz2vn0fq20sKdVd2gxQqkqRpTU+2P/kcTWJIe61KTaFCesSRIMq1YJriDV2v4UhcJ/AqA0wE7KrEw9hPQQW7NtyMbhE3TwFt/65SOSmVyxQNZyPa7yEitxHVq2LzvePqW4TT8o/Xootma1pML3L6/lUoiFAQHKo1UJhq0YZb1wQiLxdNIXUWBHnN03LENJwef0RuXhFiRz+QM5Vf/F3nJVxKnI9lOcYWDl4tPYxFdvIiTYwfnJzCEJhys40YiHh8xrGLO8CrmcM0bCB8kHtLl/XKVPubkcfUP0n2SU1c2DasAACN/SURBVHja7X0Jm6K61nXCDCpqVVl233Pvc///33q/212DM4MyJl8CiFgOhSIkdLOec6qRYROyMuyd7OzA/4IOPEBgnYAOKToiOEFHBCfoiOAEUvZvHLJOyRdAlXUKmkVGxGbNOiGnKZsorJPQ6Ocmf9G612edki9Aq9k/rNPQJFIiQtDXWKfkK+DnTmedhgaRdtaYdTLOQBdc1kloEtLxzzDEEukl15HWT/+UB4rSNj1CqeAq+pjjiWPQczBknT3N4YgIf0F1J2GibUlbBZI/Z7Bxpdczp5fev5N/F17yz/M1Ei+IOCTElQgR9rbHOnuaQ5EI/500CHK0i9KfYySdfSQKz7Zku0Ou0aohXnvrBRHHUEX3LyViCcCU9Nk4Tn96kUZaqZ0TCpopgFWkSRYyhmDlgXgGTDW/kt2NjL0c4Wf6L3lEtIRXeiNUTemaiPwSqS1baKbP9yz099ibBSKiABhUd4LZuV0IB9TAkELf/SnsQp8QFECTVBi8BbqaX0nv3gq53kUuk6oFiYAgIi8gN0IcuD/kKyLyS2BpAzBLq1PP2vKmVNeHIhFpm3KEeA1GQ/QrskbkeKq8h1vzx9KVfgCheIVie9A18Yz8+YdKjoa9mNxoTKI3tHq9KiK7FNvk7vAtkaPI7l9JBDijxvrkP5qttAPWNKCGMRBg0gEUrxAEsXF4ih4mFUUZAZlUDxNIhvONiOxSQO+WtV0ip7eOr3Y1fxIKRChJ1hwDU2MPCALNDzE7cXqFYAsPNUKY7I/k9EZI/8PXRWSX0ruz5q63dk3WGdQUCkQI+s6zB6RwF1ookpNPJIcxKjyS5umXK1vtks5PbvQVQrH8nYj93Z6yLxCS8lcSAZ7e0HIjR9HzgQhF8+Z9IdoOCxkig/gNTo6vROHFHFNUfxWEASjecE5EdiW5O1OgQW8VSeDvQFE/lP7Vg7EXqcUue9JD1tqRiqf6hhD46PjKFhgXX/FqYMcXnvrfiMjwIgNX3NsPPfDXDHPAxHnA+5hmymeEpS9tDI6geL7ZKVx5Bz+uvITcKIHvROQIhUMP/RH/i3UONQTpm9+EKvnSs4Urw6stSCkROYqneovgL5mVeJDpqsvVZZyD8de0TZyPIQh6RwQf6MV+dSFtAO9EGPAvqRJpJ4vp0AKfUB29PdND8v0jMvs56xXrb7iMT9YJuAHK071eQCkRMnjiVUvEodSeGhFaH/+5M7UpERDI3Ppzcedeci2t0mdwZ0by3lm3DPBuh5iOCE7QEcEJOiI4QUcEJ+iI4AQdEZygI4ITdERwgo4ITnBhitP3an2rVmYcoKY0lHk3tssZyHDwsHGw80RsQb3+RLut8e09daWhzLvtXrmWAtkPS+P5F0Y1L5rSS6xhrSsNZd6NS7bYwuOWWjHqI1iObPM5qt511pygI4ITdERwgo4ITtARwQk6IjhBRwQn+DOJCGPWKbgZ3xMRBXRpFQpuNyJt54EJDaIrF6Mgyfk4SK3mXdEnzXLT/+8G9twkBkCUmeRRLaGtvidi8069AMN39L2wL/Af6D/svV9z+Nu8L+k/6ySpIFpNCq6PQVAtJdvfM3v9e05essxetnzcZx1QYoma4Jo1rX64AY7q+1eGTeVdLAK8TdOJXopuiy/VXuzNByMIonXdAVpKEKHgdbpe13dCoA4FsNs90ayJh2Bnx7Kp0GHjLewj2M9vARY5keagixRK5EZCrvx8bzLR7sV21FQK6PcLBylEUlrAVpJR/sY8kZZQadX8Wh7TbKpI5/co01mPdqmvuC+PzGBGUuWQ33gDgTPXxvIH+WFt+qa78Q+3WJuemSxxt1f6CH2Q/PHWnvn9+PMluILW25Jeylt5Q2PpFg4y9Mmhk+R49sY8kX4lR/c4aCj4QRkiVD2N+GeamvHih0BWaE7EPbwemdrQsAC2xn19UrgFW6OBPsE0J4am/gIt+qaJcf/AtmtAA9AQH8KLbg42xYMURhREPiV6/8Z9IivmT1ymzXgESr1m9ObRFjK2fVK0Ixn01yPo6mKAwg0GcQwiTFoNqBxuAUgjWaXSKFrkAGpUz6ji5RwETwAaDslVlSREt0mDnR+kgIYLddpF52/MElk5hxqK7laKCLm3pg3lTDBF+EYSZqw8dfdMkgghBBp1vKX5AQ+35CdwUuUgbbqrWCwuXb8RR5GUigNIPBxk6M/gOM237I1ZIivnT0NxWMtVvOHvLW0uf8ppsgTdiaEOZKAamZBAAjjQ8ltI8ongUE2vJD+qALs9Wp82zihZ2RRCERwOMqgC0vO00DdmiawIQXNMWqhqj2pXrpxKA5ve6gGUrizq7eweBEJvTbIj9IDQX/vRGh1uEYwNAnaUHMTA9St2eDs07BP0XAz8LYgsKi4/2OPnP0leHd6YJrIqxmgWEpvunXZ4IUFUWeKFLC53m+mQ1ma82uBhYhppYkgr/Xj1LmA4Ip3I6hP2NeFwy/jzf4JMi+N4/guCUcVVMK6aJLNneaC3WSKVBjrLD/bY53n+xiyRFSH/WL5BLNBqEdAwUtprZZFn8TUERAprcPZmFH2NXYkiYR/CAf82B4Vbwn3UhwjJp+WyhPfD2TR8qKNUcH5wBmffeNO7N0e3oEi81Odbw+PfXzOyPG5qvQXlwpkgULCNe8VbcmP80eqffHJQ6Zvu+uwa8JhEw60FlGkDI7l5BBWRT1+M+/EYIuSaGs4TvJwc/Cn4M+cjWoiOCE7QEcEJOiI4QUcEJ+iI4AQdEZzgPBFCze4ocQn+60pDmXczwPlU9e0H5MLlGZXYLjEc+5A03PluGpu8zITQ7nGhcy5Y1mPndu+ZL8COdmk0SBiXEXBLGqzSS6hKvVvd2vG2/+0oCn5gcKVLQxwPmDI35mo1KTc8XZ6IkmmPPp+bDRRVY4Mpv7ocB6i7jng2ajhgV509l/gaz3jcWO17oNngftef+1CrCgFf5M/2uQOTtn+uN76VS8263Kj3yW0g08tYyMPqQm5E3Up1fzzfNf5RFbEEpbS6x6J260abrO3mP6sKNtEDfA5uRv1mpvy6bZXyZHsTFtOwTcwzt0p52jovTKbDmxh4IcrTR1uUJ289YbPjWjMjYKN+S5SnYPnCaHephoYiW6I8RXNmMdJTIupvFVuhPKHKAxv47qxMiZBAXb61OeTptpZFgA8EnvWrDmw48N4albaIorKp33VuaH2Ytb3kEWHnNpJcTQx2tuN7vzB1Qgb+RxMKJoSVZzkuQHyAViaAyqmDo7uH4zMiAL5jQfvt8LZmPUrJvLoLphtVHmCCyv01fp8vsJGNPDR9MapnfLny7IEdvTL1a254Jl2dbCyWn3sRW4fJwMYBTbs0yFOPR+WJGNSMnTsaf70wwbO6uuy7wc6gztF8OYDPymftVsttYGhQ52BRIYcDvkae0GzIfmsvJi1j73m+Zf3hBxCDumqgiAeATRelvnKkPM3VQXUhlcFIV5D4UZ6Wwoh1EihYKW3cKE/rmMUM9SmYac+cKE+Oz8n6VIZmDFGemG8avrXZzFCfgqU92XteMFaefFYz1KdgatizVp7CBXODOgfbERa2ylM8HzM3qHOwHup6xZ+slCc0M2veweemnGCdgGeVkfKE5wYHBnUO5kSAoclGeVrI9e4sdiPYEwEMJsrTioXL9xVwQARRnqzGlafNI8LMPRI8EAGk16aVJ3fHiyGX50Gjb4svBVE17fdhpZw555B02SFiZ71yUQKLif1vgy/brK8kpJLP03m/JmFwnt1gPmEf//8LmqwRaN27skbQdyrsjjCfnjmJ3Y1/7nw0f+aOh0aJCEH/ypSkplXxeTorWNcWu1ObLZ5VjUNbB5psKr/xJSTK06acoNLoC6d72uB542uoy4DFoBcmXXYyyBPRbkFMY9xDmShP88UzjXebjgAdrp7BOtKuL4V2PJEYCj3nJKj3XGt8DXUZsCDCIbrqD9o6LBJdRxz1yZHwHzrytPx8EZbev5PbsqtPZ8vvNvwmVIfvSpQIe/tlHGMhNr+GugxYaHFO9j+FrsF4cVhM9KR9hLs85+GgL8SVZlRV8UvbtEZPDL64BBjUiDAAqu8+pbHtX2no8+2hRzWlT3Qg4gkoS7r7gbOLkaCZpNR4TgjkYab0rCJxDHdOKGjJD02ykEHL+2YL9+NIPQsVy5rlNxUq+FYwIMIF8Pk3zpsM8bgXN7Y4twmwB7aAdB7A9SXg+7ufwFoRegI9JeJzJ04hsU2k0BeRsAt98mBAKFjaAMyyvqVnbQtNmOtOOTOoczAgwgE9WQmchAhs4e2XXW881d6vVMAf5M8TKdF0Amf3GQTiiuhWQmaef+6kqRSvwWiIfgFrRPTSqfIebs3YBsYkfEtvUmT3QIS34c6gztE8EV4MeqAXeDEts5gGJegVHbyCuKctFmnDBQfACxYKYWEWYFJtogiAkZCFyXeB9EMEdKevGUiHODQNqGFM91oxgaxlHU9vHe8VLw5cjS+j+ZSRbnpNGyOXNuNwBET1KA1bqMPJcvaS7BQ0Bvj/gP0cv2NZx07ShBWKdByJ9BSpIAKmmZ1kOKan4OG+3trN+gseXI0vo/GqSpsin+4Nl+hN0DR7x2Vhq8FEecqm7ZL+wsdgmmixpC7QqYukT+np+COgZ57++ecfUNCF5KR+7CebJCXTm6qv3a0VjdcIF4MJKZjbVRicK59RmJRfojxR0+4NEz4MWtSXCl2mrWjexpd9M+lfJh/+xw9yZt4XIuAepttk1V8Fh72AequIfuQD1u7WisZrhANEQ5Kk/sGUOMIWpNllvCyI/RCEQHnRgWqC7SbpwF/7wLODbJX+VEHv4aSHrLUDjnYnlYEr5nZcDyRVgg9X48tochi8zAY87+BHdhTN9YMNjGJpv5VRBKRjFRRHUPz176NToVAYGfmI/0UMasDZjNxX8KbODfP8kqbBIjcwhHz7Jih/3ckJytJX40AujlD1iAW5RpzzwB0R+mGmAE7gQxzGDeDavLgaXwZvRBzhSf94wAaVgu6yXrtbJpWsE3AVg9HsAUE2FDzk+zMpOE+h/rJ0q8oItvgRIVNqRpN2BAZ3LCYdbbwynpGXszreDLaOfl/TVCW4xq2valB9te6LdlkmasyV6DQCrhDupUK4mRvRZI2QwV2DPdiJzCvLSRK7efZjf5TDS2wWtNYMgEPpvpKNnRVoiIkmiYDgvv0WNHvzkmq16EyXFiaj6CodkTqSblNzEM+SmaK7B5n02XrQTOvEeWedIleezrnIGot0fM9fHI0lpR30Qqo4Q93HDQVJaAURRHlaJSNT5/ZYEeQ5ZcKf6Uffkty/AlVnqGGpLW4egHYQAZRXN3HXPFcldEyY8GfgeFCPar3cuXxfQUuIAOJrOKezSWeqRB+KCzCH2lF3R8fPHe5cvq+gLUQAOBHppiDnqkQvUgEWjiuEQ9dQ02BY4Y6rSDgXwe8k7gnG9ifArnladIbODsAvPvikZVqbbhjGxqAdn9iOVFKEXkhno63TECZQ84B4XCFoy4TWABotGGVK0RIiQmebai/oXJUYvwF0PA6S6EzCgO9JuSO0hAh5PA58L4lNe6ZKiHL4xRGWtEwS174CJ2gJEQSKMgCxtwvOVYnR/JgIHGmj9nxZgtYkF9uJaSXL4FzUff34JO7DfPQcgoYGKaqhNUTYvXu7XWRztbL9AtqiVBBD4e5PbMUGR60h4k9HRwQn6IjgBB0RnKAjghN0RHCCjghO0BHBCToiOEFrhjgKoLEhRF4C5z4KbSRi4woYq8/FpC+lNownXUMbiQDqFISfy2IMgagNA6xX0UoiCOQenYRbqzoANuzbYRSDceSEQKVzo4EVQnnUrsartZ11SFO+o+tYfB+oomQY0JdHZjADAH8K46HIxe4U5dHKGhFbINgVF2MpgmyAxF1Y/RXKETIlwFG06VJoJRHIx75+Jkac7ZNqEMmS/GHoast6jVYSIU9A9L45cSKYCaYI3zCA0+1uJr6269Pa2kdIQzsmqacdAY0xADGpEMFYT9dfCP3JP4D/DeWP0FYiQF/YkL5hGwOHulRKQYwg8ACii5KiHZ0cbZfS1M6miQKaK1MyvV9Qo53FIPiNf45XGzz0SReyQGKst8i5jKKNRKS+9tSNT/wZpV8g0UC7ci+SBKI6Kf+OkNS2qt5GIi6mX1DOnW0H2lZw/lh0RHCCjghO0BHBCToiOEFHBCfoiOAEHRGcoCOCE3REcILWEHH/plyoFVNErRmVGdjXwpPYl8daIWjFOGxriIBXHZdsPveruQGtaZr+dHREcIKOCE7QEcEJOiI4QUcEJ+iI4AQdEZygI4ITdERwgo4ITtARwQk6IjhBRwQn6IjgBB0RnKAjghN0RHCCjghO0BHBCToiOEFHBCfoiOAEHRGcoCOCE3REcIKOCE7QEcEJOiI4QUcEJ+iI4AQdEZygI4ITdERwgo4ITtARwQk6IjhBRwQn6IjgBB0RnKAjghN0RHCCjghO0BHBCToiOEFHBCfoiOAE7SciOnPUQrSfCM/PDnyPdVKqoP1EGPOUie3CYJ2UKmg/EYI8o0zYS73V39LqxKcYA1In7E07YiheRGuCK16GLMZzsJGkdn/KH1AjwDAJRNruCvFHEGFAAFSosk5GNfwJRNDKgPusE1ERfwQRJpCiHutEVMQfQQTQo7ZXCMZak42ry6AQIbYeIggy6/KZErEaPGpDUe1BXXW8GjPKC5ZNk/MwHsCjVCZx4DDKDJZEIA432BXv3qaiIv6MzvoPQEcEJ+iI4AQdEZygI4ITdERwgo4ITtARwQl4JCKMWaeAAXghIgrzw91n8YLlXnvM/joiEQXUNEZBmdHE66IbBi9EbJb7o2g1KQ59BMG1x3z/q5z3FfkbvpcZqbguumHwN+OOXpTiz5cbHxdcUy55662iawV3RDguUkhWYnsL+wj2gSX0SWvlRIIxAL4TAnW4r8QWuSM52NmxbO7ZU/B6Ao5O56L2svfiEtH7c6zBS9O0h73SR+gDAWvTN90NaXh80n44M3ncJz24L4/MYJbdaW16pkO9LJ25NpY/8mZmtEsP89O5qL3sXFxwOMccnNUIvBmaQPttDa1xH2i/spPrYbonLN03Vv0VJuUXW6MB+UGvkgMtsvYNjaqvX0HhNN6LymXvxRXeN2L94bwRESENAKiFEVbJv1lzEyI9PYhtn5TdSM7vFFR6NdxgEB9U3tGbBwunc1F72bm4wvtYfzd3ROCkrYQIA7obONyfzA5mginCN1w4CZMDCIF22D1c7q3HhdOFG4uyj9/H+ru5I0ICAUlRKCX/4kBLTsogbY3i4Cc5zO8M6Z0quap+cQMf/t6Cw+lc1F72Xlzxfay/m6POGocERJnZxMD1+0J/7UfrrKAKxjoE2Cdp9QBa7RNubBCwI3LQW5NONywsjpAGduF0LiqXnYnLpCTnWH89RzUieCN/tNfx/BcEIxWMVp+wr2XF5Gn5JiB9AserDR7uTbjx5/8Embb249W7gGGxuzUdXDidi9rLzsSlUrJzzAH/29y7vI+pVvxtnXUiipC87xt+m/s74lik5jaKpEIVDmFWjFAkiPBUUuF0JmovOxP35X0JbPNqmmsDNzXiS4qCQME2zv0os3wTjozuvKU/Pg2+nC6Iko7F8ZQDnCTjBHBrAWX6kB7sgaJqBK9EyK88iqoRvBeUvwYdEZygI4ITdERwgo4ITtARwQlYEvGg5UJ/BlgSIe9Yf/0pdqwMK5YGneE/ZuEbgf2otW+PWgN2M5ha1urNX73d/IDnztvD03P4fdiieDXt6qzX1gssfTN8sTasE1webSIi/oyntzi+yNNwxsEkaDm0iAj/U38uXx8o4IvywYFfQCnwOvp6Ctt5ur0jHSqzYTuCQ7SFCLyMX+9ZDazL84DVGvab0JKmKfwQ7+KBlLQp+myDm387iNjOzLt98eCz/unf+3BzaEXTtPYmVdyEB8piwH18sxbUiFu11lOo092C94Et/om4XWs9hfgqfHAeJ5l7IuzF0yOalbH5yeEQYwGc9xFEa50+JoaNIc999s73l9Fkjbi9gblfaz2F/CO6Y8AD35Hqu9BkjZDBjVGpfKevloy8Xua2/vbdvPF7Qwsqtz1xL5r0fQWb9W1pK79uQSxpswn4Ru1JuWNc5S402kcMB2H5fECWMCjdLMynZYWK/VvaGrmxIGvNdtZC+eLlb/q3aEtlXbaN1eaFSwWFV/X1QVrrKYgeu2X9cefAZel4oNZ6CkNeBBzqsVzWiEdqraeQpzGH47E8ElFlrLUMuByP5bBpqjjWWgYDZXmTKtAAuKsR1cday0B93c35Go/ljYhHjLWWgfgq8eVXwFnTZNvPTbnajXZc+RVwRUSdWusp+PIr4KlpqldrPYU0xR/c6LEcEVG31noK+NT74GVfTX6apga01lP0lYUxrC7mAeClRjSjtZ5CmQZ8+MdyQkRTWuuZDJioHzxEu+SjabrLr/VRMJW5yT5OEA81Ai92rywD9WhTd8nczOaAiKa11lOIU8jc7Yk9Ec1rrWfA3u2JeR/BRGs9hSEv2Lo9Ma4RrLTWU7CeLmJLBDut9RSMp4uYNk1MtdZTMJ0uYlgjWGutp2A5XcSOCPZa6ykYThcxI4ILrfUUo+GMjdsTqz6CE631FLo891lMF7GpEfxoraeQpojFdBETInjSWk8Bn1lMF7FomjjTWk/RVxY9s7qYm9B8jeBPaz2FMvWb1mMbIyLbJ+DxWmt05qgyhIn83qwe2xgRdvqmx2ut3n5cwn9owz4cNavHNkVEbCda0tqaPDqqmLFImfAXj5Wsv1qr6lJKoykilrQ5qkVrFaQ5ZcKb6Q/+lmbDqTREROjLtWmtA0yY8Obg4eN18Fn/yNq9+ufvGlJfF0CuTWslNWEB5oJSw6fk47GBUHeJbaZG7CJRqk9r7SPS7sFaBrDV1zScivSwwKiX0AwRK4A39Y21miAE4g0LVm9BFk5Fcev2QhObGAJ1djSUQlhbOxgRIgZ1RQjQ4VKSgRvr1UVdQxNE4Dn9GwdbK5ZqqRWqDcFzbclXtCXSvN1NC+VvRxOd9QZDAUFVUesqtILq1znFKU8Xc9nf1Ds4fjMRGOEYIAxi0odhWkhwXlJwtnVoIlUEggCTHih2ZVVVHl8VUIRQlgrJxxuaDFEQ6qhzwmTjAndYa39aiog4RtnuuOSjRZrHIoBXkoURQAiEhDPKEh4AiCP8OAUQhwEpCVgSBUXISoGedtUxQl5M3ynLD6zqYRRSO2L99DiRp7ganSaKIkx3eRBJSatU0DAtvVTvgKIoVyIEeRGAkvKNDExSDqDyCEXKd/Mhp3/VWSUuEIH9iBIgSY/uoeI4iiEEinyPYLyNBbV0UcehD+RH6DqBv0ui6hh1VokzRMQeaeflWmcycRiSDly7rYTFLtRvrZehBx+j7cTeLkB1VomvREQeltRmpjGRj8ANOevg3j3pQq5YbhHvY0fRS+B4z5BjIvxQbIiFFKQFLKnTYsu4t/sNd2VWyW1BzRbbCXagOG5frGzYAj2t0Ul9qPWxXWpO0urfrQbJvTL7eURN8wD0oynAAhHY6jcUSLAIpWeVYML/Tk+6BlHmLhZNgqMyX/g+p2Yj/lJy+iViX/qVdvfW+I69m6BAhM/I/VIoUV6rrfuErNdllcmFwyFmtN4YlWiaqiWN1ZfdggIRisPEJR07JXomqZJu6TFfoPY9CkSQxprBym+/VNck+hUKdRzy5v5/BsV+QRhgZ9dorcA7Bw5KdU2mfXc7H7qcRY07i+NKq6qRC0S1mV47vsWyhqYL7rSshabdWO/C19ZT6oOI1Aqo1DzWFGAoqLe0GLAf29C4fawJ9NgvJS+DM92YRM6hwMf0SHz0V8RxiIglIxu3CxZNtIsFrfzoaxBg+T7bCPuxcHlGwyqMXlkXRrKipE+D5YvzhbcJiQEVRX4yAyYKYsX5iDhGKKa2pCBp90sSegB5Wzo0/I0MTKdy4J0sEAVijuU4Gl1q0oJC5gcXiNi49N3yj/zEUrreQl4tX5KUZSOK0N75ENIZOiiAaxNuOE4m6TBC+UOiVI3KPQSDzpHuqOCkeBxndYRRFNPJWlmp4gi7UJ9hVqbP4eXC8RHUL/H7o28KRZmKDos3kcyNQRydnbOGBakikCCsR20UlMTyILWM5noRokA6nsoDNTgawixndnYsmwrYSMiVjR2dGHLioSX0yRUnEowBSI4dFymmDAIrhPLo+JvjVV8DaGWQKhqD8ZX8uNnUITWBE/NIrMs6gKItKQmdzmqo+B9TxYsUE0pOXwF4MwA+ebGzNAdxCJJjez2UnY9/wU9jjH20TxVORcnzn+Iy0kKR1OVrRYSTTOULL4sPqPZ6AK9HA6BF1gsQJoC6+ynAi5M+Aa+H+SQH3gxNoP22esiUDpMa/v8jf3rPwPQX+u4nVAT5emPZEXEG6r98f7cIxiEKNxhQB5ZkMq2/HkE3tXxCdJi+iJBGZ1ZCSf4w9HxeTaEebwJ1KX/znkvkcjuU7MahmtOBjUm3DwVB62fZZGAP7VIlqbgZF06uQgSnw2j2th8AIKpdrtyVaUO7GnEJMsAyUI9mM3Unhnp2McxNBAkEJBdDCQj9Pnq3vzgE4oWiLH4QRfObsaM/tkZE989B4Dkxn0JbEYTeOkis8wy9nZ0NswjGOtyvzxSMTQxcvx8l43R5Xx1SEIsveB5KC0JXEBN92J1deun5GkF1aKGkHmjD/pmH66xpl+zeopUbfrze/wL0iSHWiLI6Xr0LGOZ+2poY7n2dn5ZvAtInyfF4/guCkRoskBjr+wHG4I38gf/xN68ieH63zEHwG/+Uo4vD+QUvDuswSLlwBYCEp1JG0Rx+ccROHoZGUaG+blba34/KbQq3bFdIxqFxakp9qHmW4fdR0RnA+t6PwyoO0eIYZ4M7KLpUIOP4oD9HKHGYi5B0Swtz9N0XSi6xC/Fyod9nG9GHvfX7jwMT35mVt8CbD0bE7l3jazKjcaVJ7oMJK1yctSqaMdLRP3fh8rOw50Yy8J0QqNQPem82ZrZmCmubtUtHZ+nDuvLbHu2ftjOz8ooFWh5rmXaH0gs4pG1v5gLHgb3+meS0AJerUuyIhCVfHpkB6WHwpzAeigg4c20s72M4W5ue6dBW7+hsClHf5U+romQYENgrfYQ+0F7UfYiDvEvapw04M3ncJ9q+65na0jubHO5xoUb4/0eycgLp+jTS1PwK5Sg1Gw+2JqCOUOSH+gscn80le/nTqVl53gK9FfEhyfu05WauSKvJVjubHN5xgQjlBSDn84cEYpvOFkdyZjYebE2QmZR0EeHR2T2oLrd/+nD7iQV6O3KFfC89N3Op/SvF55PDOy4QQXurp60zAjPBFOEbMSSn291MfKW2JgSZX2ZqXqarhA5n9yAWTv50dvveAk1E3dmzSSD3VNxLz81cuH/RmeTwjivZkRTp4KecfnlqNg6LtqaUZHaogi8WaILAGx2eTszK6xZoWQiaY6aj77n0opkLkt/qowN+1I8LnTWxC4MVqfEC8ACisUEys/HI1iQmJQLUu+KLBUoe9jcf6uDwdGJWnrdAb8YYzYhR673jXHrRzE3S9cUgbgUKNQKiAyvELoTyiwrgeLXBQ/KNKDMbj2zN8ef/hGRNzrEFSh4W5FEfHp5OzcqzFigRXaINKdwi/1i+QSyQarGXfmTmgpPkFGes+EXBssbWuY28UZRZi3uz8cjWDPemzwULNH8aZDJOLVBsm9/nk4+0I6mpNXWQXjRzT5OzE79fTWc17/x0ybKGpn1m1UhuWkpfT1DI4NzZM08fySh2TEFQggegbop++XupB+lfZ+uO3huHJboM1jt5FCMPQDXeoepTvjcAe75klHqhat/t2RNuy6wYQlHT8U93QvGN3Rq6PbhaQ5egW1XKAt+ss67B0y9ZZy0rd66zhjd4+j1qnXUj+DbyQKLz/8WRB5rCVSL2OInFAcvE4kBJLI5Ehyf5Lz42Fgf5K1JXv+OKFSPqcwZpy9q2yfhSRBzlws3RaepCITrNPhk1RadpAjcXHFIZOClsQrtmfr77GtYJ6JCiI4ITdERwgo4ITtARwQk6IjhBRwQn6IjgBB0RnKAjghN0RHCCjghO0BHBCToiOEFHBCfoiOAEHRGcoCOCE3REcIKOCE7QEcEJOiI4wf8He5qZTwMxnKoAAAAASUVORK5CYII="  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3>2.5 Diagrama de Casos de Uso</h3>
+<h3>2.6 Diagrama de Clases</h3>
+<h3>2.7 Patrones Detectados</h3>
+<ul>
+<li><strong>API REST</strong>: 3 endpoints detectados (Express.js)</li>
+<li><strong>Testing</strong>: 1 funciones de prueba detectadas</li>
+<li><strong>Programación Asíncrona</strong>: 12 funciones async/await</li>
+</ul>
+<h3>2.8 Insights de Arquitectura (IA)</h3>
+<p><strong>Insights Arquitectónicos</strong></p>
+<ol>
+<li><strong>Patrones arquitectónicos probables</strong>: Debido a la presencia de endpoints y la ausencia de clases, es probable que se esté utilizando un patrón arquitectónico basado en funciones, como un Monolito o un enfoque de Servidor de Funciones (FaaS).</li>
+<li><strong>Buenas prácticas detectadas</strong>: El uso de JSON como formato de intercambio de datos es una buena práctica común en proyectos de software.</li>
+<li><strong>Áreas de mejora sugeridas</strong>: La falta de clases y la dependencia en funciones pueden indicar una arquitectura poco modular y difícil de mantener. Se sugiere considerar la implementación de patrones de diseño orientados a objetos.</li>
+<li><strong>Complejidad del proyecto</strong>: La complejidad parece ser moderada, con 42 funciones y 3 endpoints.</li>
+<li><strong>Recomendaciones de escalabilidad</strong>: Para mejorar la escalabilidad, se sugiere considerar la implementación de un patrón de arquitectura de Microservicios o la utilización de un framework que permita una mayor modularidad y reutilización de código.</li>
+</ol>
+<hr />
+<h2 id="sec6">3. Documentación Técnica de Código</h2>
+<h3>3.1 Guía de Configuración del Entorno de Desarrollo</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Crear entorno virtual (recomendado para Python)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# 3. Instalar dependencias
+npm install
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores locales
+
+# 5. Ejecutar en modo desarrollo
+python app.py  # o npm run dev
+</code></pre>
+<h3>3.2 Documentación de API</h3>
+<p>Total de endpoints detectados: <strong>3</strong></p>
+<h4>Módulo: <code>backend/server.js</code></h4>
+<h5>[GET] <code>GET /health</code></h5>
+<ul>
+<li><strong>Framework</strong>: Express.js</li>
+<li><strong>Archivo</strong>: <code>backend/server.js</code></li>
+</ul>
+<blockquote>
+<p><strong>Descripción del Endpoint /health</strong></p>
+</blockquote>
+<p><strong>1. Propósito del endpoint:</strong>
+El propósito de este endpoint es verificar si el servidor que lo ejecuta está funcionando correctamente. Piensa en ello como un "pulso" que se le toma al servidor para asegurarse de que esté vivo y listo para recibir solicitudes.</p>
+<p><strong>2. Funcionalidad:</strong>
+Cuando se accede a este endpoint, el servidor realiza una serie de comprobaciones internas para asegurarse de que todos los componentes críticos estén funcionando como se espera. Es como hacer una revisión rápida de un vehículo antes de salir a la carretera para asegurarse de que todo esté en orden.</p>
+<p><strong>3. Información necesaria:</strong>
+Para que este endpoint funcione, no se necesita proporcionar ninguna información adicional. Simplemente se accede a la ruta <code>/health</code> y el servidor se encarga del resto. Es como visitar una página web; solo necesitas saber la dirección (la ruta) para llegar allí.</p>
+<p><strong>4. Resultado:</strong>
+El resultado de acceder a este endpoint es una respuesta que indica si el servidor está funcionando correctamente o no. Si todo está bien, el servidor devuelve un mensaje que dice algo así como "Estoy funcionando correctamente" o un código que indica éxito. Si hay algún problema, el servidor puede devolver un mensaje de error o un código que</p>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /rooms</code></h5>
+<ul>
+<li><strong>Framework</strong>: Express.js</li>
+<li><strong>Archivo</strong>: <code>backend/server.js</code></li>
+</ul>
+<blockquote>
+<p><strong>Descripción del Endpoint de API: /rooms</strong></p>
+</blockquote>
+<h3>1. Propósito del Endpoint</h3>
+<p>El propósito de este endpoint es permitir a los usuarios crear nuevas "salas" o "espacios" dentro de una aplicación o plataforma. Piensa en una sala como un lugar donde las personas pueden reunirse, charlar o compartir información.</p>
+<h3>2. Funcionalidad</h3>
+<p>Cuando se utiliza este endpoint, se envía una solicitud a la aplicación para crear una nueva sala. La aplicación then procesa esta solicitud y crea la sala con la información proporcionada. Es como cuando creas un nuevo grupo en una aplicación de mensajería para hablar con tus amigos o familiares.</p>
+<h3>3. Información Necesaria</h3>
+<p>Para que este endpoint funcione, necesitas proporcionar algunos datos básicos sobre la sala que deseas crear. Esto puede incluir:</p>
+<ul>
+<li>El nombre de la sala</li>
+<li>Una descripción breve de la sala</li>
+<li>Quizás algunos ajustes de privacidad o configuraciones específicas</li>
+</ul>
+<p>Es como cuando creas un nuevo evento en una red social y necesitas darle un nombre, describir qué es y decidir quién puede asistir.</p>
+<h3>4. Resultado</h3>
+<p>Una vez que se crea la sala, el endpoint devuelve una respuesta que confirma que la sala ha sido creada con éxito. Esta respuesta puede incluir detalles como el ID único de la sala, su nombre y cualquier otra información relevante</p>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /rooms/:code/join</code></h5>
+<ul>
+<li><strong>Framework</strong>: Express.js</li>
+<li><strong>Archivo</strong>: <code>backend/server.js</code></li>
+</ul>
+<blockquote>
+<p><strong>Descripción del Endpoint</strong></p>
+</blockquote>
+<p><strong>Propósito:</strong> El propósito de este endpoint es permitir que los usuarios se unan a una sala de reuniones o conferencia en línea.</p>
+<p><strong>Funcionalidad:</strong> Este endpoint se utiliza para conectar a un usuario a una sala de reuniones específica. Cuando se envía una solicitud al servidor, el endpoint verifica si la sala existe y si el usuario tiene permiso para unirse. Si todo está en orden, el usuario se une a la sala y puede interactuar con los demás participantes.</p>
+<p><strong>Información necesaria:</strong> Para que este endpoint funcione, se necesita proporcionar el código de la sala de reuniones a la que se desea unir. Este código es como una llave que abre la puerta a la sala. Además, es posible que se requiera información adicional, como el nombre del usuario o una contraseña, para garantizar que solo las personas autorizadas puedan unirse a la sala.</p>
+<p><strong>Resultado:</strong> Cuando se une a una sala, el servidor devuelve una respuesta que indica si la operación fue exitosa o no. Si todo salió bien, el usuario podrá ver y interactuar con los demás participantes en la sala. Si hubo un problema, el servidor puede devolver un mensaje de error que explique qué salió mal.</p>
+<p><strong>Uso en la vida real:</strong> En la vida real, este endpoint se puede utilizar en aplicaciones de videoconferencia,</p>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h3>3.3 Estado de Comentarios y Docstrings</h3>
+<p><strong>Total de funciones:</strong> 42</p>
+<ul>
+<li><strong>[OK] Documentadas:</strong> 0 (0%)</li>
+<li><strong>[X] Sin documentar:</strong> 42 (100%)</li>
+</ul>
+<p><strong>Visualización de documentación:</strong></p>
+<pre><code class="language-text">[░░░░░░░░░░░░░░░░░░░░]
+0% documentado
+</code></pre>
+<p><strong>Funciones que requieren documentación:</strong></p>
+<ul>
+<li><code>generateRoomCode()</code> en <code>backend/server.js</code></li>
+<li><code>getRoomByCode(code)</code> en <code>backend/server.js</code></li>
+<li><code>getUsedWords(roomId)</code> en <code>backend/server.js</code></li>
+<li><code>maskWord(word, guessedLetters)</code> en <code>backend/server.js</code></li>
+<li><code>checkWin(word, guessedLetters)</code> en <code>backend/server.js</code></li>
+<li>... y 37 más</li>
+</ul>
+<h3>3.4 Planes de Prueba (Testing)</h3>
+<p>Se detectaron <strong>1 funciones de prueba</strong>:</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función de Test</th>
+<th>Archivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>testConnection</code></td>
+<td><code>backend/test.js</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec7">4. Clases</h2>
+<p>No se detectaron clases en este proyecto.</p>
+<hr />
+<h2 id="sec8">5. Documentación de Funciones</h2>
+<p>Total: <strong>42 funciones</strong></p>
+<h3>Módulo: <code>backend/server.js</code></h3>
+<p><strong><code>generateRoomCode</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "generateRoomCode" crea un código único para una sala virtual. </p>
+</blockquote>
+<p>Necesita información para generar el código. </p>
+<p>El resultado es un código que identifica la sala. </p>
+<p>En la vida real, se usa para crear reuniones o salas de juego en línea. </p>
+<p>Es importante porque permite a los usuarios unirse a la sala correcta de manera segura.</p>
+<p><strong><code>async getRoomByCode</code></strong></p>
+<ul>
+<li>Parámetros: <code>code</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "getRoomByCode" busca una sala en un sistema según un código único. Para funcionar, necesita saber el código de la sala. Luego, encuentra y devuelve la información de esa sala. En la vida real, se usa para identificar y acceder a salas virtuales o físicas, como en plataformas de reuniones en línea o sistemas de gestión de espacios. Esta función es importante porque permite a los usuarios encontrar y unir salas de manera rápida y precisa, lo que facilita la comunicación y la organización en el sistema.</p>
+</blockquote>
+<p><strong><code>async getUsedWords</code></strong></p>
+<ul>
+<li>Parámetros: <code>roomId</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "getUsedWords" ayuda a obtener las palabras utilizadas en una habitación específica. Necesita saber el identificador de la habitación (roomId) para funcionar. Una vez que lo recibe, devuelve una lista de palabras que se han utilizado en esa habitación. En la vida real, se puede utilizar para analizar conversaciones en chats o foros en línea. Es importante porque permite entender qué temas se discuten en una habitación, ayudando a moderar o mejorar la experiencia del usuario. En resumen, esta función es clave para el análisis de contenido en plataformas de comunicación en línea.</p>
+</blockquote>
+<p><strong><code>maskWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>word, guessedLetters</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "maskWord" sirve para ocultar letras de una palabra que no han sido adivinadas. </p>
+</blockquote>
+<p>Necesita saber la palabra original y qué letras han sido adivinadas. </p>
+<p>Produce una versión de la palabra con las letras no adivinadas ocultas. </p>
+<p>Se usa en juegos de adivinanza de palabras, como "Ahorcado", para mostrar el progreso del jugador. </p>
+<p>Es importante porque permite al jugador ver qué letras ya han sido encontradas y qué letras faltan por descubrir, haciendo el juego más emocionante y desafiante.</p>
+<p><strong><code>checkWin</code></strong></p>
+<ul>
+<li>Parámetros: <code>word, guessedLetters</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "checkWin" determina si se ha ganado un juego. Necesita saber la palabra secreta ("word") y las letras adivinadas ("guessedLetters"). Devuelve un resultado que indica si se ha ganado o no. En la vida real, se usa en juegos de adivinanza de palabras, como el ahorcado. Esta función es crucial para determinar el fin del juego y anunciar al ganador. Su importancia radica en proporcionar un resultado justo y preciso, asegurando la integridad del juego.</p>
+</blockquote>
+<p><strong><code>serializeRoom</code></strong></p>
+<ul>
+<li>Parámetros: <code>room</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async startRound</code></strong></p>
+<ul>
+<li>Parámetros: <code>roomCode</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>backend/words.js</code></h3>
+<p><strong><code>isValidWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>word</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>normalizeWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>word</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async fetchFromPalabrasDev</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async fetchBatchFromPalabrasDev</code></strong></p>
+<ul>
+<li>Parámetros: <code>count = 5</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async getRandomWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>usedWords = []</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>backend/test.js</code></h3>
+<p><strong><code>async testConnection</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/App.js</code></h3>
+<p><strong><code>App</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/components/HangmanDrawing.js</code></h3>
+<p><strong><code>HangmanDrawing</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ wrongAttempts, size = 200 }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/components/Keyboard.js</code></h3>
+<p><strong><code>Keyboard</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ guessedLetters, onGuess, disabled, currentWord }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>getLetterStatus</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>renderKey</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/app/GameScreen.js</code></h3>
+<p><strong><code>useSounds</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>buildInitialSPState</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ word, playerName, difficulty, hintsCount, playerWins }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>GameScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ route, navigation }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>clearTimerInterval</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>resetTimer</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>startTimer</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>StatCell</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ icon, color, label, value }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>shakeScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>bounceWin</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>flashLoss</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>pulseLetter</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>handleHint</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>processGuess</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter, isHint = false</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>handleGuess</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>handleExit</code></strong></p>
+<ul>
+<li>Parámetros: <code>confirmed = false</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async handleNewGame</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/app/HomeScreen.js</code></h3>
+<p><strong><code>HomeScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ route, navigation }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async createRoom</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async joinRoom</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/app/WaitingScreen.js</code></h3>
+<p><strong><code>WaitingScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ route, navigation }</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async shareCode</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/data/words.js</code></h3>
+<p><strong><code>async getRandomWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>usedWords = []</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>getRandomWordFallback</code></strong></p>
+<ul>
+<li>Parámetros: <code>usedWords = []</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>mobile/hooks/useSocket.js</code></h3>
+<p><strong><code>useSocket</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec9">6. Modelos de Datos</h2>
+<p>No se detectaron clases con nombres de modelo explícitos.</p>
+<h3>Esquema General Inferido</h3>
+<p>Basado en el análisis del código, las entidades principales son:</p>
+<ul>
+<li>No se pudieron inferir entidades del código fuente.</li>
+</ul>
+<hr />
+<h2 id="sec10">7. Guía de Despliegue y Mantenimiento</h2>
+<h3>7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: JavaScript</li>
+<li><strong>Archivos detectados</strong>: 21</li>
+</ul>
+<h3>7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+npm start
+</code></pre>
+<h3>7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM node:20-slim
+
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 8000
+CMD [&quot;node index.js&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3>7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3>7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3>7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-07-07
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec11">8. Reporte de Calidad del Código</h2>
+<h3>8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 71/100 (Bueno [YELLOW])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 0/42 (0%)
+- Clases documentadas: 0/0</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 1.0
+- Complejidad máxima: 1
+- Funciones con alta complejidad (&gt;10): 0</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: ↓ Baja
+</code></pre>
+<h3>8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<p>No hay funciones con complejidad &gt; 10. [OK]</p>
+<h3>8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 42 funciones sin documentar</li>
+</ul>
+<h3>8.4 Errores de Análisis</h3>
+<p>Sin errores detectados. [OK]</p>
+<hr />
+<h2 id="sec12">9. Análisis de Datos del Proyecto</h2>
+<h3>9.1 Tipos y Fuentes de Datos Detectados</h3>
+<p><strong>Datos Estructurados:</strong> 0 archivos</p>
+<p><strong>Datos Semi-estructurados:</strong> 0 archivos</p>
+<p><strong>Datos No Estructurados:</strong> 0 archivos</p>
+<h3>9.2 Esquema de Data Warehouse Inferido</h3>
+<p>No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.</p>
+<h3>9.3 Reporte de Calidad de Datos</h3>
+<p><strong>Problemas Detectados en el Código:</strong></p>
+<ul>
+<li><strong>Funciones sin documentar:</strong> 42</li>
+<li><code>generateRoomCode</code> en <code>backend/server.js</code></li>
+<li><code>getRoomByCode</code> en <code>backend/server.js</code></li>
+<li><code>getUsedWords</code> en <code>backend/server.js</code></li>
+<li><code>maskWord</code> en <code>backend/server.js</code></li>
+<li><code>checkWin</code> en <code>backend/server.js</code></li>
+<li>... y 37 más</li>
+</ul>
+<h3>9.4 Minería de Datos Aplicada al Código</h3>
+<p><em>Análisis automático realizado sobre las funciones y clases extraídas del proyecto.</em></p>
+<h4>A) Funciones de Alta Complejidad Ciclomática</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Umbral</th>
+<th>Cantidad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Alta</td>
+<td>&gt; 5</td>
+<td>0</td>
+<td>Requieren refactorización urgente</td>
+</tr>
+<tr>
+<td>🟡 Media</td>
+<td>4–5</td>
+<td>0</td>
+<td>Candidatas a simplificación</td>
+</tr>
+<tr>
+<td>🟢 Baja</td>
+<td>≤ 3</td>
+<td>42</td>
+<td>Complejidad aceptable</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.</p>
+</blockquote>
+<h4>B) Funciones Sin Documentación</h4>
+<p><strong>42 de 42 funciones</strong> carecen de docstring (100%).</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generateRoomCode</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRoomByCode</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getUsedWords</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>maskWord</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>checkWin</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>serializeRoom</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>startRound</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>isValidWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>normalizeWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>fetchFromPalabrasDev</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>fetchBatchFromPalabrasDev</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>testConnection</code></td>
+<td><code>backend/test.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>App</code></td>
+<td><code>mobile/App.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>HangmanDrawing</code></td>
+<td><code>mobile/components/HangmanDrawing.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>Keyboard</code></td>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getLetterStatus</code></td>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>renderKey</code></td>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>useSounds</code></td>
+<td><code>mobile/app/GameScreen.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>buildInitialSPState</code></td>
+<td><code>mobile/app/GameScreen.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><em>... y 22 funciones más sin documentar.</em></p>
+<p>💡 <strong>Sugerencia:</strong> Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.</p>
+<h4>C) Detección de Funciones con Nombres Similares (Posibles Duplicados)</h4>
+<p><em>Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse.</em></p>
+<p>Se detectaron <strong>1 grupos de funciones con nombres similares</strong> repartidas en distintos archivos:</p>
+<p><strong>Patrón: <code>*_getrandomword</code> / <code>getrandomword_*</code></strong> — aparece en 2 archivos distintos</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>mobile/data/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>getRandomWord</code> y <code>getRandomWord</code> realizan operaciones similares (<code>getrandomword</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/getrandomword.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>backend/words.js</code>, <code>mobile/data/words.js</code>).</p>
+<hr />
+<h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Funciones</th>
+<th>Complejidad Promedio</th>
+<th>Documentadas</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mobile/app/GameScreen.js</code></td>
+<td>16</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟡 Revisar</td>
+</tr>
+<tr>
+<td><code>backend/server.js</code></td>
+<td>7</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>backend/words.js</code></td>
+<td>5</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/app/HomeScreen.js</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/app/WaitingScreen.js</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/data/words.js</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>backend/test.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/App.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/components/HangmanDrawing.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/hooks/useSocket.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong><code>mobile/app/GameScreen.js</code></strong> tiene 16 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).</p>
+<h4>E) Patrones Frecuentes Adicionales (Análisis IA)</h4>
+<ul>
+<li><strong>get</strong>: 5 ocurrencias</li>
+<li>Ejemplos: ['getRoomByCode', 'getUsedWords', 'getLetterStatus']</li>
+<li><strong>fetch</strong>: 2 ocurrencias</li>
+<li>Ejemplos: ['fetchFromPalabrasDev', 'fetchBatchFromPalabrasDev']</li>
+</ul>
+<h3>9.5 Pipeline ETL Utilizado</h3>
+<p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Fases del Pipeline:</strong></p>
+<ul>
+<li><strong>Extract:</strong> Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales</li>
+<li><strong>Transform:</strong> Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones</li>
+<li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
+</ul>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-07-07 04:11 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">Fbfbfb</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">21</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">0</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">42</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">3</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#10b981">71/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">07/07/2026 04:12 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>

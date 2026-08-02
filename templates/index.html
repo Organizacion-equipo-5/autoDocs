@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoDocs AI — Documentación Inteligente</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "var(--color-background)",
+                        "surface": "var(--color-surface)",
+                        "surface-container": "var(--color-surface-container)",
+                        "surface-container-high": "var(--color-surface-container-high)",
+                        "on-surface": "var(--color-on-surface)",
+                        "on-surface-variant": "var(--color-on-surface-variant)",
+                        "primary": "var(--color-primary)",
+                        "secondary": "var(--color-secondary)",
+                        "outline-variant": "var(--color-outline-variant)",
+                        "error": "var(--color-error)",
+                        "green-accent": "var(--color-green-accent)",
+                        "tertiary": "var(--color-tertiary)",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ====== TEMA OSCURO (por defecto) ====== */
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;
+            --color-surface: rgba(27,32,36,0.4);
+            --color-surface-container: #1b2024;
+            --color-surface-container-high: #252b2e;
+            --color-on-surface: #dee3e8;
+            --color-on-surface-variant: #bdc8d1;
+            --color-primary: #39b2f8;
+            --color-secondary: #c0c1ff;
+            --color-outline-variant: #3e484f;
+            --color-error: #ffb4ab;
+            --color-green-accent: #10b981;
+            --color-tertiary: #ffc176;
+            --glass-border: rgba(123,208,255,0.1);
+            --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --glass-hover-border: rgba(123,208,255,0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --particle-color-1: rgba(142,213,255,0.4);
+            --particle-color-2: rgba(192,193,255,0.2);
+            --particle-line: rgba(142,213,255,0.12);
+        }
+
+        /* ====== TEMA CLARO ====== */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;
+            --color-surface: rgba(255,255,255,0.7);
+            --color-surface-container: #ffffff;
+            --color-surface-container-high: #e2e8f0;
+            --color-on-surface: #0f172a;
+            --color-on-surface-variant: #334155;
+            --color-primary: #38bdf8;
+            --color-secondary: #818cf8;
+            --color-outline-variant: #cbd5e1;
+            --color-error: #ba1a1a;
+            --color-green-accent: #10b981;
+            --color-tertiary: #7c5800;
+            --glass-border: rgba(0,0,0,0.04);
+            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            --glass-hover-border: rgba(56,189,248,0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            --particle-color-1: rgba(56,189,248,0.25);
+            --particle-color-2: rgba(129,140,248,0.2);
+            --particle-line: rgba(56,189,248,0.12);
+        }
+
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transform: translate3d(0, 0, 0);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+        }
+
+        .glow-cyan { text-shadow: 0 0 12px var(--color-primary); }
+        .glow-violet { text-shadow: 0 0 12px var(--color-secondary); }
+
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(20px) translate3d(0,0,0);
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+        }
+
+        .tilt-card { perspective: 1000px; }
+
+        /* Modal overlay styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(15, 20, 24, 0.6);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+        }
+        body[data-theme="light"] .modal-overlay {
+            background: rgba(241, 245, 249, 0.7);
+        }
+        body[data-theme="dark"] .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+
+        .cursor-blink {
+            display: inline-block; width: 8px; height: 16px;
+            background: var(--color-primary); vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-anim { animation: fadeDown 0.2s ease; }
+
+        .theme-float-switch {
+            position: fixed; bottom: 2.5rem; right: 2.5rem; z-index: 2000;
+            border-radius: 50%; box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+            padding: 0.5rem; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, border 0.2s;
+        }
+        .theme-float-switch:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="font-body-md selection:bg-primary/20 selection:text-on-surface" data-theme="dark">
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navegación -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-outline-variant/20 px-6 py-4 flex items-center justify-between transition-colors">
+        <a href="/" class="font-code-md text-xl font-bold text-on-surface glow-cyan no-underline flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">terminal</span>
+            Auto<span class="text-primary">Docs</span> AI
+        </a>
+        <div class="flex gap-6 items-center">
+            <a href="#features" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Funciones</a>
+            <a href="#how" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Cómo funciona</a>
+            <a href="#stack" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Stack</a>
+            <a href="#pricing" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Planes</a>
+            <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary bg-transparent hover:bg-primary/5 transition-all" onclick="openModal()">Iniciar sesión</button>
+            <button class="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95" onclick="openModal('register')">Comenzar gratis</button>
+        </div>
+    </nav>
+
+    <!-- Botón flotante de tema -->
+    <div class="theme-float-switch glass">
+        <button id="themeButton" type="button" aria-label="Alternar tema" class="bg-transparent border-0 p-0 cursor-pointer text-2xl">
+            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+        </button>
+    </div>
+
+    <!-- Hero -->
+    <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-8 pt-28 pb-16 z-10">
+        <div class="stagger-in" style="animation-delay: 0.1s;">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-xs font-code-md text-primary border border-primary/20 mb-8">
+                <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span> Powered by Python + AI Analysis
+            </span>
+        </div>
+        <h1 class="stagger-in font-display-lg text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight tracking-tight text-on-surface mb-6" style="animation-delay: 0.15s;">
+            Documenta tu código<br /><span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">automáticamente</span>
+        </h1>
+        <p class="stagger-in text-lg text-on-surface-variant/70 max-w-xl mb-10" style="animation-delay: 0.2s;">
+            AutoDocs AI analiza tu proyecto, detecta funciones, clases y endpoints, y genera documentación técnica profesional en segundos.
+        </p>
+        <div class="stagger-in flex gap-4 flex-wrap justify-center" style="animation-delay: 0.3s;">
+            <button class="px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
+                Empieza ahora — gratis
+            </button>
+            <a href="#how" class="px-8 py-3.5 glass rounded-xl font-semibold text-on-surface-variant hover:text-primary border border-outline-variant/20 transition-all text-lg no-underline">
+                Ver cómo funciona
+            </a>
+        </div>
+
+        <!-- Terminal mockup -->
+        <div class="stagger-in mt-20 w-full max-w-3xl glass rounded-3xl overflow-hidden shadow-[0_20px_60px_var(--color-primary)] border border-outline-variant/20" style="animation-delay: 0.4s;">
+            <div class="bg-surface-container/20 backdrop-blur-md px-6 py-3 border-b border-outline-variant/10 flex items-center gap-3">
+                <div class="flex gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-400/60"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-400/60"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-400/60"></div>
+                </div>
+                <span class="ml-auto mr-auto font-code-md text-xs text-on-surface-variant/50 uppercase tracking-widest">autodocs — análisis en curso</span>
+            </div>
+            <div class="p-6 font-code-md text-sm space-y-2 text-on-surface-variant/80">
+                <div><span class="text-green-accent font-bold">$</span> <span class="text-on-surface">autodocs analyze ./mi-proyecto</span></div>
+                <div class="pl-6"> Escaneando estructura del proyecto...</div>
+                <div class="pl-6"><span class="text-green-accent">✓</span> <span class="text-primary">47 archivos</span> detectados en 12 directorios</div>
+                <div class="pl-6"><span class="text-green-accent">✓</span> Lenguaje principal: <span class="text-primary">Python</span> · secundario: <span class="text-secondary">JavaScript</span></div>
+                <div class="pl-6"><span class="text-green-accent">✓</span> <span class="text-primary">134 funciones</span> · <span class="text-primary">23 clases</span> · <span class="text-secondary">18 endpoints API</span></div>
+                <div class="pl-6"><span class="text-green-accent">✓</span> Score de calidad: <span class="text-primary">87/100</span></div>
+                <div class="pl-6"><span class="text-green-accent">✓</span> Documentación generada → <span class="text-secondary">README.md · API.md · docs/</span></div>
+                <div class="mt-3"><span class="text-green-accent font-bold">$</span> <span class="cursor-blink"></span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats bar -->
+    <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-outline-variant/20 border-y border-outline-variant/20 stagger-in" style="animation-delay: 0.5s;">
+        <div class="glass text-center py-10 rounded-none border-none">
+            <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">12<span class="text-primary">+</span></span>
+            <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Lenguajes soportados</p>
+        </div>
+        <div class="glass text-center py-10 rounded-none border-none">
+            <span class="font-code-md text-5xl font-bold glow-violet text-on-surface">3<span class="text-secondary">×</span></span>
+            <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Formatos de exportación</p>
+        </div>
+        <div class="glass text-center py-10 rounded-none border-none">
+            <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">100<span class="text-primary">%</span></span>
+            <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Código abierto-listo</p>
+        </div>
+        <div class="glass text-center py-10 rounded-none border-none">
+            <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">&lt;30<span class="text-primary">s</span></span>
+            <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Análisis completo</p>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <section id="features" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
+        <div class="stagger-in text-center mb-16">
+            <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// funcionalidades</span>
+            <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Todo lo que necesitas para documentar</h2>
+            <p class="text-on-surface-variant/60 max-w-lg mx-auto">De subir un .zip a tener documentación completa lista para entregar.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="tilt-card stagger-in" style="animation-delay: 0.2s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">search</span>
+                <h3 class="text-xl font-bold text-on-surface mb-2">Escaneo automático</h3>
+                <p class="text-on-surface-variant/70 text-sm">Analiza tu árbol de archivos, detecta el lenguaje primario y extrae funciones, clases e imports con AST.</p>
+                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">ast · regex · pathlib</span>
+            </div></div>
+            <div class="tilt-card stagger-in" style="animation-delay: 0.25s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">api</span>
+                <h3 class="text-xl font-bold text-on-surface mb-2">Detección de endpoints API</h3>
+                <p class="text-on-surface-variant/70 text-sm">Encuentra rutas Flask, FastAPI, Django REST y Express.js automáticamente y las documenta como OpenAPI.</p>
+                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Flask · FastAPI · Express</span>
+            </div></div>
+            <div class="tilt-card stagger-in" style="animation-delay: 0.3s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">description</span>
+                <h3 class="text-xl font-bold text-on-surface mb-2">Generación de README</h3>
+                <p class="text-on-surface-variant/70 text-sm">README profesional con estadísticas del proyecto, instrucciones de instalación y estructura generado en segundos.</p>
+                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Markdown · AI</span>
+            </div></div>
+            <div class="tilt-card stagger-in" style="animation-delay: 0.35s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">analytics</span>
+                <h3 class="text-xl font-bold text-on-surface mb-2">Dashboard de calidad</h3>
+                <p class="text-on-surface-variant/70 text-sm">Score de calidad, complejidad ciclomática, porcentaje de funciones documentadas y detección de code smells.</p>
+                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">McCabe · métricas</span>
+            </div></div>
+            <div class="tilt-card stagger-in" style="animation-delay: 0.4s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">file_save</span>
+                <h3 class="text-xl font-bold text-on-surface mb-2">Exportación profesional</h3>
+                <p class="text-on-surface-variant/70 text-sm">Exporta tu documentación en PDF, Markdown o HTML listo para GitHub Pages o entrega universitaria.</p>
+                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">PDF · Markdown · HTML</span>
+            </div></div>
+            <div class="tilt-card stagger-in" style="animation-delay: 0.45s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">link</span>
+                <h3 class="text-xl font-bold text-on-surface mb-2">Integración GitHub</h3>
+                <p class="text-on-surface-variant/70 text-sm">Conecta directamente tu repositorio de GitHub y analiza el código sin necesidad de descargar nada.</p>
+                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">GitHub API · OAuth</span>
+            </div></div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="relative z-10 glass rounded-3xl max-w-6xl mx-auto py-24 px-8 my-16">
+        <div class="text-center mb-16 stagger-in">
+            <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// flujo del sistema</span>
+            <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Cómo funciona</h2>
+            <p class="text-on-surface-variant/60 max-w-lg mx-auto">Arquitectura moderna y desacoplada. Desde el upload hasta el PDF en 5 pasos.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            <div class="text-center stagger-in" style="animation-delay: 0.1s;">
+                <span class="font-code-md text-5xl font-bold text-primary/20">01</span>
+                <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Subir proyecto</h3>
+                <p class="text-on-surface-variant/60 text-sm">Sube un .zip, .tar.gz o conecta tu repo de GitHub directamente desde el dashboard.</p>
+            </div>
+            <div class="text-center stagger-in" style="animation-delay: 0.2s;">
+                <span class="font-code-md text-5xl font-bold text-primary/20">02</span>
+                <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Análisis estático</h3>
+                <p class="text-on-surface-variant/60 text-sm">El motor Python usa AST para analizar funciones, clases, imports y detectar endpoints de API.</p>
+            </div>
+            <div class="text-center stagger-in" style="animation-delay: 0.3s;">
+                <span class="font-code-md text-5xl font-bold text-primary/20">03</span>
+                <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Generación de docs</h3>
+                <p class="text-on-surface-variant/60 text-sm">DocGenerator produce README, referencia de API, documentación de clases y arquitectura del proyecto.</p>
+            </div>
+            <div class="text-center stagger-in" style="animation-delay: 0.4s;">
+                <span class="font-code-md text-5xl font-bold text-primary/20">04</span>
+                <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Dashboard visual</h3>
+                <p class="text-on-surface-variant/60 text-sm">React muestra métricas de calidad, diagramas de estructura y la documentación navegable.</p>
+            </div>
+            <div class="text-center stagger-in" style="animation-delay: 0.5s;">
+                <span class="font-code-md text-5xl font-bold text-primary/20">05</span>
+                <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Exportar</h3>
+                <p class="text-on-surface-variant/60 text-sm">Descarga PDF, Markdown o HTML en un clic, listo para entregar o publicar en GitHub Pages.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stack -->
+    <section id="stack" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
+        <div class="text-center mb-16 stagger-in">
+            <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// tecnologías</span>
+            <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Stack tecnológico</h2>
+            <p class="text-on-surface-variant/60 max-w-lg mx-auto">Herramientas modernas y probadas en producción.</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🐍</span><span class="font-code-md font-bold text-on-surface">Python</span><p class="text-xs text-on-surface-variant/50 mt-1">Backend · Análisis</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">⚡</span><span class="font-code-md font-bold text-on-surface">Flask</span><p class="text-xs text-on-surface-variant/50 mt-1">API REST</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🌐</span><span class="font-code-md font-bold text-on-surface">HTML/CSS/JS</span><p class="text-xs text-on-surface-variant/50 mt-1">Frontend</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🍃</span><span class="font-code-md font-bold text-on-surface">MongoDB</span><p class="text-xs text-on-surface-variant/50 mt-1">Base de datos</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🐳</span><span class="font-code-md font-bold text-on-surface">Docker</span><p class="text-xs text-on-surface-variant/50 mt-1">Contenedores</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🔐</span><span class="font-code-md font-bold text-on-surface">JWT</span><p class="text-xs text-on-surface-variant/50 mt-1">Autenticación</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">📦</span><span class="font-code-md font-bold text-on-surface">PyMongo</span><p class="text-xs text-on-surface-variant/50 mt-1">ORM NoSQL</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🔬</span><span class="font-code-md font-bold text-on-surface">AST</span><p class="text-xs text-on-surface-variant/50 mt-1">Análisis código</p></div>
+        </div>
+    </section>
+
+    <!-- Planes Promocionales -->
+    <section id="pricing" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
+        <div class="text-center mb-16 stagger-in">
+            <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// planes</span>
+            <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Elige tu plan</h2>
+            <p class="text-on-surface-variant/60 max-w-lg mx-auto">Comienza gratis y escala cuando lo necesites.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Plan Gratuito -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Gratuito</h3>
+                    <p class="text-4xl font-bold text-primary mb-1">$0<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> 3 proyectos</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis básico</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Exportación PDF</li>
+                </ul>
+                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register')">Empezar gratis</button>
+            </div>
+            <!-- Plan Pro -->
+            <div class="glass rounded-3xl p-8 border border-primary/40 plan-featured stagger-in relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Pro</h3>
+                    <p class="text-4xl font-bold text-primary mb-1">$350<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Proyectos ilimitados</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis avanzado</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Exportación HTML</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario</li>
+                </ul>
+                <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register')">Comenzar</button>
+            </div>
+            <!-- Plan Enterprise -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Enterprise</h3>
+                    <p class="text-4xl font-bold text-secondary mb-1">$850<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Todo en Pro</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> API dedicada</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Integración personalizada</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Soporte 24/7</li>
+                </ul>
+                <button class="w-full py-3 bg-secondary text-white rounded-xl hover:bg-secondary/80 transition-all font-semibold" onclick="openModal('register')">Comenzar</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="relative z-10 max-w-6xl mx-auto py-16 px-8">
+        <div class="glass rounded-3xl p-16 text-center relative overflow-hidden shadow-[0_0_80px_var(--color-primary)] stagger-in">
+            <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/5 blur-[100px] pointer-events-none"></div>
+            <h2 class="text-4xl font-bold text-on-surface relative z-10 mb-4">Empieza a documentar en 30 segundos</h2>
+            <p class="text-on-surface-variant/60 relative z-10 mb-8">Crea tu cuenta gratis y analiza tu primer proyecto hoy mismo.</p>
+            <button class="relative z-10 px-10 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
+                Crear cuenta gratuita →
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 glass border-t border-outline-variant/20 py-10 text-center">
+        <p class="text-on-surface-variant/50 text-sm font-code-md">
+            AutoDocs AI — construido con <span class="text-primary">BIBFUJ</span> usando Python + Flask + HTML · 2026
+        </p>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="authModal" onclick="if(event.target===this)closeModal()">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">AutoDocs AI</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Accede a tu cuenta o crea una nueva</p>
+            <div class="flex gap-0 mb-6">
+                <button class="flex-1 py-2.5 bg-primary text-white font-bold border border-primary rounded-l-xl transition-all active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</button>
+                <button class="flex-1 py-2.5 bg-transparent text-on-surface-variant border border-outline-variant/20 rounded-r-xl transition-all" id="tab-register" onclick="switchTab('register')">Registrarse</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="form-login">
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
+                    <input type="email" id="login-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                        <button type="button" onclick="togglePassword('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="text-error text-xs font-code-md mb-2 hidden" id="login-error">Credenciales inválidas. Intenta de nuevo.</div>
+                <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleLogin()">Iniciar sesión</button>
+                <div class="text-center mt-3">
+                    <button onclick="showForgotPassword()" class="text-xs text-primary hover:text-primary/80 transition-colors">¿Olvidaste tu contraseña?</button>
+                </div>
+                <div class="text-green-accent text-sm text-center mt-4 hidden" id="login-success">¡Bienvenido! Redirigiendo...</div>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="form-register" style="display:none;">
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre completo</label>
+                    <input type="text" id="reg-name" placeholder="Tu nombre" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
+                    <input type="email" id="reg-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" oninput="checkPasswordStrength(this.value)" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                        <button type="button" onclick="togglePassword('reg-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                    <!-- Indicador de fortaleza de contraseña -->
+                    <div id="pwd-strength-bar" class="hidden mt-2">
+                        <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
+                            <div id="pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                        </div>
+                        <p id="pwd-strength-label" class="text-xs mt-1 font-semibold"></p>
+                        <ul id="pwd-requirements" class="text-xs mt-1 space-y-0.5 text-on-surface-variant/70">
+                            <li id="req-length">✗ Mínimo 8 caracteres</li>
+                            <li id="req-upper">✗ Al menos 1 mayúscula</li>
+                            <li id="req-lower">✗ Al menos 1 minúscula</li>
+                            <li id="req-number">✗ Al menos 1 número</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-error text-xs font-code-md mb-2 hidden" id="reg-error">Error al registrar. Intenta de nuevo.</div>
+                <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleRegister()">Crear cuenta</button>
+                <div class="text-green-accent text-sm text-center mt-4 hidden" id="reg-success">¡Cuenta creada! Redirigiendo...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="forgotModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Recuperar contraseña</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu correo para recibir un código de recuperación</p>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
+                <input type="email" id="forgot-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+            </div>
+            <div class="text-error text-xs font-code-md mb-2 hidden" id="forgot-error">Error al enviar código. Intenta de nuevo.</div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleForgotPassword()">Enviar código</button>
+            <div class="text-green-accent text-sm text-center mt-4 hidden" id="forgot-success">Código enviado. Revisa tu correo.</div>
+        </div>
+    </div>
+
+    <!-- Verify Code Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="verifyModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Verificar código</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa el código de 6 dígitos que recibiste en tu correo</p>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Código de recuperación</label>
+                <input type="text" id="verify-code" placeholder="123456" maxlength="6" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors text-center text-2xl tracking-widest font-code-md" />
+            </div>
+            <div class="text-error text-xs font-code-md mb-2 hidden" id="verify-error">Código inválido o expirado. Intenta de nuevo.</div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleVerifyCode()">Verificar código</button>
+            <div class="text-center mt-3">
+                <button onclick="showForgotPassword()" class="text-xs text-primary hover:text-primary/80 transition-colors">Volver a enviar código</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="resetModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeResetModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Nueva contraseña</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu nueva contraseña</p>
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nueva contraseña</label>
+                <div class="relative">
+                    <input type="password" id="reset-password" placeholder="Mínimo 8 caracteres" oninput="checkResetPasswordStrength(this.value)" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
+                    <button type="button" onclick="togglePassword('reset-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                </div>
+                <!-- Indicador de fortaleza de contraseña -->
+                <div id="reset-pwd-strength-bar" class="hidden mt-2">
+                    <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
+                        <div id="reset-pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                    </div>
+                    <p id="reset-pwd-strength-label" class="text-xs mt-1 font-semibold"></p>
+                    <ul id="reset-pwd-requirements" class="text-xs mt-1 space-y-0.5 text-on-surface-variant/70">
+                        <li id="reset-req-length">✗ Mínimo 8 caracteres</li>
+                        <li id="reset-req-upper">✗ Al menos 1 mayúscula</li>
+                        <li id="reset-req-lower">✗ Al menos 1 minúscula</li>
+                        <li id="reset-req-number">✗ Al menos 1 número</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-error text-xs font-code-md mb-2 hidden" id="reset-error">Error al cambiar contraseña. Intenta de nuevo.</div>
+            <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleResetPassword()">Cambiar contraseña</button>
+            <div class="text-green-accent text-sm text-center mt-4 hidden" id="reset-success">¡Contraseña cambiada! Redirigiendo al login...</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== LÓGICA DE AUTENTICACIÓN ====================
+        function openModal(tab = 'login') {
+            document.getElementById('authModal').classList.add('flex');
+            document.getElementById('authModal').classList.remove('hidden');
+            switchTab(tab);
+        }
+        function closeModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('flex');
+        }
+        document.getElementById('authModal').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
+        let forgotEmail = '';
+
+        function showForgotPassword() {
+            closeModal();
+            document.getElementById('forgotModal').classList.add('flex');
+            document.getElementById('forgotModal').classList.remove('hidden');
+            document.getElementById('forgot-email').value = document.getElementById('login-email').value;
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.add('hidden');
+            document.getElementById('forgotModal').classList.remove('flex');
+            document.getElementById('forgot-error').classList.add('hidden');
+            document.getElementById('forgot-success').classList.add('hidden');
+        }
+
+        function showVerifyModal(email) {
+            forgotEmail = email;
+            closeForgotModal();
+            document.getElementById('verifyModal').classList.add('flex');
+            document.getElementById('verifyModal').classList.remove('hidden');
+            document.getElementById('verify-code').value = '';
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('verifyModal').classList.add('hidden');
+            document.getElementById('verifyModal').classList.remove('flex');
+            document.getElementById('verify-error').classList.add('hidden');
+        }
+
+        function showResetModal() {
+            closeVerifyModal();
+            document.getElementById('resetModal').classList.add('flex');
+            document.getElementById('resetModal').classList.remove('hidden');
+            document.getElementById('reset-password').value = '';
+            document.getElementById('reset-pwd-strength-bar').classList.add('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+            document.getElementById('resetModal').classList.remove('flex');
+            document.getElementById('reset-error').classList.add('hidden');
+            document.getElementById('reset-success').classList.add('hidden');
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('forgot-email').value;
+            const errEl = document.getElementById('forgot-error');
+            const succEl = document.getElementById('forgot-success');
+            errEl.classList.add('hidden');
+            succEl.classList.add('hidden');
+
+            if (!email) {
+                errEl.textContent = 'Ingresa tu correo electrónico';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Error al enviar código';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                succEl.classList.remove('hidden');
+                setTimeout(() => showVerifyModal(email), 1500);
+            } catch(e) {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleVerifyCode() {
+            const code = document.getElementById('verify-code').value;
+            const errEl = document.getElementById('verify-error');
+            errEl.classList.add('hidden');
+
+            if (!code || code.length !== 6) {
+                errEl.textContent = 'Ingresa el código de 6 dígitos';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/verify-code', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: forgotEmail, code})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Código inválido';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                showResetModal();
+            } catch(e) {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleResetPassword() {
+            const newPassword = document.getElementById('reset-password').value;
+            const errEl = document.getElementById('reset-error');
+            const succEl = document.getElementById('reset-success');
+            errEl.classList.add('hidden');
+            succEl.classList.add('hidden');
+
+            if (!newPassword) {
+                errEl.textContent = 'Ingresa tu nueva contraseña';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: forgotEmail, code: document.getElementById('verify-code').value, new_password: newPassword})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Error al cambiar contraseña';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                succEl.classList.remove('hidden');
+                setTimeout(() => {
+                    closeResetModal();
+                    openModal('login');
+                }, 2000);
+            } catch(e) {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function checkResetPasswordStrength(password) {
+            const bar = document.getElementById('reset-pwd-strength-bar');
+            const fill = document.getElementById('reset-pwd-strength-fill');
+            const label = document.getElementById('reset-pwd-strength-label');
+            const reqLength = document.getElementById('reset-req-length');
+            const reqUpper = document.getElementById('reset-req-upper');
+            const reqLower = document.getElementById('reset-req-lower');
+            const reqNumber = document.getElementById('reset-req-number');
+
+            if (!password) {
+                bar.classList.add('hidden');
+                return;
+            }
+
+            bar.classList.remove('hidden');
+
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            reqLength.innerHTML = hasLength ? '✓ Mínimo 8 caracteres' : '✗ Mínimo 8 caracteres';
+            reqLength.style.color = hasLength ? '#10b981' : '';
+            reqUpper.innerHTML = hasUpper ? '✓ Al menos 1 mayúscula' : '✗ Al menos 1 mayúscula';
+            reqUpper.style.color = hasUpper ? '#10b981' : '';
+            reqLower.innerHTML = hasLower ? '✓ Al menos 1 minúscula' : '✗ Al menos 1 minúscula';
+            reqLower.style.color = hasLower ? '#10b981' : '';
+            reqNumber.innerHTML = hasNumber ? '✓ Al menos 1 número' : '✗ Al menos 1 número';
+            reqNumber.style.color = hasNumber ? '#10b981' : '';
+
+            const strength = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+            const percentage = (strength / 4) * 100;
+            fill.style.width = percentage + '%';
+
+            if (strength <= 1) {
+                fill.style.background = '#ef4444';
+                label.textContent = 'Débil';
+                label.style.color = '#ef4444';
+            } else if (strength <= 2) {
+                fill.style.background = '#f97316';
+                label.textContent = 'Media';
+                label.style.color = '#f97316';
+            } else if (strength <= 3) {
+                fill.style.background = '#eab308';
+                label.textContent = 'Buena';
+                label.style.color = '#eab308';
+            } else {
+                fill.style.background = '#10b981';
+                label.textContent = 'Fuerte';
+                label.style.color = '#10b981';
+            }
+        }
+        function switchTab(tab) {
+            document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            if (tab === 'login') {
+                tabLogin.classList.add('bg-primary', 'text-white', 'border-primary');
+                tabLogin.classList.remove('bg-transparent', 'text-on-surface-variant', 'border-outline-variant/20');
+                tabRegister.classList.add('bg-transparent', 'text-on-surface-variant', 'border-outline-variant/20');
+                tabRegister.classList.remove('bg-primary', 'text-white', 'border-primary');
+            } else {
+                tabRegister.classList.add('bg-primary', 'text-white', 'border-primary');
+                tabRegister.classList.remove('bg-transparent', 'text-on-surface-variant', 'border-outline-variant/20');
+                tabLogin.classList.add('bg-transparent', 'text-on-surface-variant', 'border-outline-variant/20');
+                tabLogin.classList.remove('bg-primary', 'text-white', 'border-primary');
+            }
+        }
+
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        // Event listener para Enter en login
+        document.getElementById('login-email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('login-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // Event listener para Enter en registro
+        document.getElementById('reg-name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
+        document.getElementById('reg-email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
+        document.getElementById('reg-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errEl = document.getElementById('login-error');
+            const succEl = document.getElementById('login-success');
+            errEl.classList.add('hidden');
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                if (!res.ok) { errEl.classList.remove('hidden'); return; }
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                succEl.classList.remove('hidden');
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => {
+                    document.getElementById('login-email').value = '';
+                    document.getElementById('login-password').value = '';
+                    window.location.href = redirectUrl;
+                }, 1000);
+            } catch { errEl.classList.remove('hidden'); }
+        }
+
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('pwd-strength-bar');
+            const fill = document.getElementById('pwd-strength-fill');
+            const label = document.getElementById('pwd-strength-label');
+
+            if (!password) { bar.classList.add('hidden'); return; }
+            bar.classList.remove('hidden');
+
+            const hasLength = password.length >= 8;
+            const hasUpper  = /[A-Z]/.test(password);
+            const hasLower  = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            const mark = (id, ok) => {
+                const el = document.getElementById(id);
+                el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
+                el.style.color = ok ? 'var(--md-sys-color-tertiary, #4caf50)' : '';
+            };
+            mark('req-length', hasLength);
+            mark('req-upper',  hasUpper);
+            mark('req-lower',  hasLower);
+            mark('req-number', hasNumber);
+
+            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+
+            if (score <= 1) {
+                fill.style.width = '25%';
+                fill.style.background = '#ef4444';
+                label.textContent = 'Contraseña débil';
+                label.style.color = '#ef4444';
+            } else if (score === 2 || score === 3) {
+                fill.style.width = '60%';
+                fill.style.background = '#f97316';
+                label.textContent = 'Contraseña media';
+                label.style.color = '#f97316';
+            } else {
+                fill.style.width = '100%';
+                fill.style.background = '#22c55e';
+                label.textContent = 'Contraseña segura';
+                label.style.color = '#22c55e';
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const errEl = document.getElementById('reg-error');
+            const succEl = document.getElementById('reg-success');
+            errEl.classList.add('hidden');
+
+            // Validación de contraseña
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                errEl.textContent = 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, email, password})
+                });
+                const data = await res.json();
+                if (!res.ok) { errEl.textContent = data.error || 'Error al registrar'; errEl.classList.remove('hidden'); return; }
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                succEl.classList.remove('hidden');
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => {
+                    document.getElementById('reg-name').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-password').value = '';
+                    document.getElementById('pwd-strength-bar').classList.add('hidden');
+                    window.location.href = redirectUrl;
+                }, 1000);
+            } catch { errEl.classList.remove('hidden'); }
+        }
+
+        // ==================== PARTÍCULAS ====================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+        const particleCount = 80;
+        const repulsionRadius = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < repulsionRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (repulsionRadius - distance) / repulsionRadius;
+                        this.x -= Math.cos(angle) * force * 2;
+                        this.y -= Math.sin(angle) * force * 2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                const style = getComputedStyle(document.body);
+                const color1 = style.getPropertyValue('--particle-color-1').trim();
+                const color2 = style.getPropertyValue('--particle-color-2').trim();
+                const lineColor = style.getPropertyValue('--particle-line').trim();
+                ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    const d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = lineColor;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        function initTilt() {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                if (card.hasTilt) return;
+                card.hasTilt = true;
+                card.addEventListener('mousemove', (e) => {
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 40;
+                    const rotateY = (centerX - x) / 40;
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    const target = card.querySelector('.card-interaction');
+                    if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animate();
+            initTilt();
+        });
+    </script>
+    <script src="/static/theme.js"></script>
+</body>
+</html>

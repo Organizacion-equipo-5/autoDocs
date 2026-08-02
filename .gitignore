@@ -1,0 +1,26 @@
+# Expo / React Native
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# Build Android/iOS
+android/app/build/
+android/build/
+ios/build/
+
+# Archivos de entorno
+.env
+.env.local
+.env.production
+
+# Uploads y temporales
+uploads/
+services/exports/
+
+# Cache Expo
+.metro-health-check*
+
+# Python
+__pycache__/
+*.pyc

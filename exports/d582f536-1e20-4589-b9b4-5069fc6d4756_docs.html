@@ -1,0 +1,5141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fgfhfh — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.7; }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+  .doc-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; }
+  .doc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .doc-header .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat .val { font-size: 1.8rem; font-weight: 800; color: var(--white); }
+  .stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .quality-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #f59e0b; margin-top: 1rem; }
+  h1 { font-size: 1.8rem; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  h2 { font-size: 1.4rem; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }
+  h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 1rem; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  p { margin: 0.75rem 0; }
+  code { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.15); padding: 0.15rem 0.45rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+  pre { background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; border: none; padding: 0; color: #a8d8f0; font-size: 0.85rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .report-table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }
+  .report-table thead tr { background: rgba(56,189,248,0.08); }
+  .report-table th, .report-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); }
+  .report-table th { color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .report-table td { color: var(--text); }
+  th { background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  blockquote { border-left: 3px solid var(--accent3); padding: 0.75rem 1rem; background: rgba(52,211,153,0.05); border-radius: 0 8px 8px 0; margin: 1rem 0; color: var(--accent3); font-style: italic; }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc ol { padding-left: 1.5rem; }
+  .toc li { margin: 0.4rem 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .doc-footer { margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; }
+  /* Page numbers for print/PDF export */
+  @media print {
+    @page { margin: 2cm; @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; } }
+    .doc-header { page-break-after: avoid; }
+    .toc { page-break-after: always; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .diagram-section { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <h1><span class="material-icons">description</span> fgfhfh</h1>
+    <div class="subtitle">Documentación Técnica Profesional · Generado 30/05/2026 23:11 UTC</div>
+    <div class="quality-badge">Score de Calidad: 60/100</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">241</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">392</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">3</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">35</div><div class="lbl">Endpoints</div></div>
+    </div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ol>
+      <li><a href="#sec1">Resumen del Proyecto</a></li>
+      <li><a href="#sec2">Arquitectura y Diseño</a></li>
+      <li><a href="#sec3">Documentación de API</a></li>
+      <li><a href="#sec4">Clases y Objetos</a></li>
+      <li><a href="#sec5">Funciones</a></li>
+      <li><a href="#sec6">Modelos de Datos</a></li>
+      <li><a href="#sec7">Guía de Despliegue</a></li>
+      <li><a href="#sec8">Reporte de Calidad</a></li>
+    </ol>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-05-30 23:10 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>JavaScript</strong> y cuenta con
+241 archivos fuente, 392 funciones, 3 clases y
+35 endpoints de API documentados. El score de calidad del código es
+<strong>60/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>19 archivos</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>5 archivos</td>
+</tr>
+<tr>
+<td>YAML</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>16 archivos</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>24 archivos</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td>26 archivos</td>
+</tr>
+<tr>
+<td>SCSS</td>
+<td>149 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>241</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>392</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>35</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>60/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>123 / 392</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3>2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── (raíz)/
+├── .github/
+├── email_config/
+├── etc/
+├── services/
+├── static/
+</code></pre>
+<h3>2.2 Distribución por Capas</h3>
+<ul>
+<li><strong><code>(raíz)/</code></strong> — 14 archivos [.gitignore(1), .py(6), .cfg(1), .txt(1), .properties(1), .pdf(1), .sql(1), .xlsx(1), .json(1)]</li>
+<li><strong><code>.github/</code></strong> — 1 archivos [.yml(1)]</li>
+<li><strong><code>email_config/</code></strong> — 1 archivos [.json(1)]</li>
+<li><strong><code>etc/</code></strong> — 1 archivos [.sin ext(1)]</li>
+<li><strong><code>services/</code></strong> — 13 archivos [.py(13)]</li>
+<li><strong><code>static/</code></strong> — 270 archivos [.css(16), .js(24), .json(3), .DS_Store(15), .map(3), .html(5), .eot(6), .svg(6), .ttf(6), .woff(6), .woff2(2), .txt(3), .png(5), .jpeg(24), .gif(2), .jpg(2), .scss(129), ._tasty(1), ._css(1), ._fonts(2), ._images(1), ._js(1), ._sass(1), ._bootstrap(2), ._icomoon(2), ._demo-files(1), ._mixins(1)]</li>
+</ul>
+<h3>2.3 Distribución de Lenguajes</h3>
+<ul>
+<li>SCSS: 149 archivos (62%)</li>
+<li>HTML: 26 archivos (11%)</li>
+<li>JavaScript: 24 archivos (10%)</li>
+<li>Python: 19 archivos (8%)</li>
+<li>CSS: 16 archivos (7%)</li>
+<li>JSON: 5 archivos (2%)</li>
+<li>SQL: 1 archivos (0%)</li>
+<li>YAML: 1 archivos (0%)</li>
+</ul>
+<h3>2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3>2.5 Diagrama de Casos de Uso</h3>
+<h3>2.6 Diagrama de Clases</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<blockquote>
+<p>⚠️ <strong>Clases con información incompleta:</strong> Las siguientes clases aparecen sin métodos ni atributos documentados: <code>I18n</code>, <code>on</code>, <code>datetimepicker</code>. Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.</p>
+</blockquote>
+<h3>2.7 Patrones Detectados</h3>
+<ul>
+<li><strong>API REST</strong>: 35 endpoints detectados (Flask)</li>
+<li><strong>Testing</strong>: 1 funciones de prueba detectadas</li>
+</ul>
+<h3>2.8 Insights de Arquitectura (IA)</h3>
+<p>No se pudieron generar insights de arquitectura</p>
+<hr />
+<h2 id="sec6">3. Documentación Técnica de Código</h2>
+<h3>3.1 Guía de Configuración del Entorno de Desarrollo</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Crear entorno virtual (recomendado para Python)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# 3. Instalar dependencias
+npm install
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores locales
+
+# 5. Ejecutar en modo desarrollo
+python app.py  # o npm run dev
+</code></pre>
+<h3>3.2 Documentación de API</h3>
+<p>Total de endpoints detectados: <strong>35</strong></p>
+<h4>Módulo: <code>app.py</code></h4>
+<h5>[GET] <code>GET /</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint GET /</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /ndc</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /ndc</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /logout</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint GET /logout</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /logout</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /logout</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /ventas/nueva</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint GET /ventas/nueva</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /ventas/nueva</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /ventas/nueva</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /ventas/historial</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /ventas/historial</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /perfil/cambiar-foto</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /perfil/cambiar-foto</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /perfil/cambiar-password</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /perfil/cambiar-password</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /perfil/preferencias</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /perfil/preferencias</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /regresion-multiple</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint GET /regresion-multiple</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /regresion-multiple</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /regresion-multiple</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /respaldos</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/info</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint POST /respaldos/info</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/ejecutar-ahora</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/estadisticas</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/ejecutar-ahora</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/archivos</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/limpiar-antiguos</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/forzar-ejecucion</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /regresion-polinomica</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /regresion-polinomica</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /respaldos/api/estadisticas</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /respaldos/api/proximos-respaldos</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /respaldos/api/historial-reciente</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /respaldos/api/archivos-recientes</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>GET /respaldos/api/config-email</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/api/config-email/guardar</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/api/email/prueba</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /respaldos/ejecutar-prueba</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /recuperar-password</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /restablecer-password</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /cancelar-recuperacion</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /restaurar/historial</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud</li>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h3>3.3 Estado de Comentarios y Docstrings</h3>
+<p><strong>Total de funciones:</strong> 392</p>
+<ul>
+<li><strong>[OK] Documentadas:</strong> 123 (31%)</li>
+<li><strong>[X] Sin documentar:</strong> 269 (69%)</li>
+</ul>
+<p><strong>Visualización de documentación:</strong></p>
+<pre><code class="language-text">[██████░░░░░░░░░░░░░]
+31% documentado
+</code></pre>
+<p><strong>Ejemplo de docstrings detectados:</strong></p>
+<pre><code class="language-python">def ndc_home():
+    &quot;&quot;&quot;
+    Página principal para usuarios normales (no admin)
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<pre><code class="language-python">def menu():
+    &quot;&quot;&quot;
+    Página del menú
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<pre><code class="language-python">def about():
+    &quot;&quot;&quot;
+    Página about
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<p><strong>Funciones que requieren documentación:</strong></p>
+<ul>
+<li><code>index()</code> en <code>app.py</code></li>
+<li><code>login()</code> en <code>app.py</code></li>
+<li><code>register()</code> en <code>app.py</code></li>
+<li><code>logout()</code> en <code>app.py</code></li>
+<li><code>dashboard()</code> en <code>app.py</code></li>
+<li>... y 264 más</li>
+</ul>
+<h3>3.4 Planes de Prueba (Testing)</h3>
+<p>Se detectaron <strong>1 funciones de prueba</strong>:</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función de Test</th>
+<th>Archivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>updateTest</code></td>
+<td><code>static\fonts\icomoon\icomoon\demo-files\demo.js</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec7">4. Documentación de Clases</h2>
+<p>Total: <strong>3 clases</strong></p>
+<h3><code>I18n</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>static\i18n.js</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p>Clase I18n</p>
+</blockquote>
+<hr />
+<h3><code>on</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>static\js\bootstrap-datetimepicker.js</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p>Clase on</p>
+</blockquote>
+<hr />
+<h3><code>datetimepicker</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>static\js\bootstrap-datetimepicker.js</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p>Clase datetimepicker</p>
+</blockquote>
+<hr />
+<hr />
+<h2 id="sec8">5. Documentación de Funciones</h2>
+<p>Total: <strong>392 funciones</strong></p>
+<h3>Módulo: <code>app.py</code></h3>
+<p><strong><code>index</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función index</p>
+</blockquote>
+<p><strong><code>login</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función login</p>
+</blockquote>
+<p><strong><code>ndc_home</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página principal para usuarios normales (no admin)</p>
+</blockquote>
+<p><strong><code>menu</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página del menú</p>
+</blockquote>
+<p><strong><code>about</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página about</p>
+</blockquote>
+<p><strong><code>contact</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página de contacto</p>
+</blockquote>
+<p><strong><code>gallery</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página de galería</p>
+</blockquote>
+<p><strong><code>reservation</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página de reservaciones</p>
+</blockquote>
+<p><strong><code>register</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función register</p>
+</blockquote>
+<p><strong><code>logout</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función logout</p>
+</blockquote>
+<p><strong><code>dashboard</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función dashboard</p>
+</blockquote>
+<p><strong><code>ventas_dashboard</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función ventas_dashboard</p>
+</blockquote>
+<p><strong><code>analisis</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función analisis</p>
+</blockquote>
+<p><strong><code>regresion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función regresion</p>
+</blockquote>
+<p><strong><code>registrar_venta</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función registrar_venta</p>
+</blockquote>
+<p><strong><code>historial</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función historial</p>
+</blockquote>
+<p><strong><code>perfil</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función perfil</p>
+</blockquote>
+<p><strong><code>actualizar_perfil</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función actualizar_perfil</p>
+</blockquote>
+<p><strong><code>cambiar_foto_perfil</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función cambiar_foto_perfil</p>
+</blockquote>
+<p><strong><code>cambiar_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función cambiar_password</p>
+</blockquote>
+<p><strong><code>guardar_preferencias_usuario</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>regresion_multiple</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página principal de respaldos</p>
+</blockquote>
+<p><strong><code>generar_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 10</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera y descarga un respaldo según los parámetros</p>
+</blockquote>
+<p><strong><code>info_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Retorna información de respaldos en JSON (para AJAX)</p>
+</blockquote>
+<p><strong><code>ejecutar_respaldo_manual</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 13</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Ejecuta un respaldo manual y lo descarga inmediatamente</p>
+</blockquote>
+<p><strong><code>estadisticas_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Retorna estadísticas de respaldos en JSON</p>
+</blockquote>
+<p><strong><code>centro_descargas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Centro de descargas - Muestra archivos listos para descargar</p>
+</blockquote>
+<p><strong><code>configuracion_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>guardar_configuracion_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda la configuración de respaldos automáticos</p>
+</blockquote>
+<p><strong><code>ejecutar_respaldo_manual_ahora</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 13</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Ejecuta un respaldo manual inmediatamente y guarda los archivos en el servidor</p>
+</blockquote>
+<p><strong><code>ver_archivos_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página para ver y descargar archivos de respaldos guardados</p>
+</blockquote>
+<p><strong><code>descargar_archivo_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>filename</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 8</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Descarga un archivo de respaldo específico</p>
+</blockquote>
+<p><strong><code>eliminar_archivo_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>filename</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Elimina un archivo de respaldo específico</p>
+</blockquote>
+<p><strong><code>limpiar_archivos_antiguos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Limpia archivos antiguos manualmente</p>
+</blockquote>
+<p><strong><code>forzar_ejecucion_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Fuerza la ejecución del respaldo automático inmediatamente (simula el scheduler)</p>
+</blockquote>
+<p><strong><code>api_estadisticas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>API para obtener estadísticas en tiempo real</p>
+</blockquote>
+<p><strong><code>api_proximos_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>API para obtener próximos respaldos programados</p>
+</blockquote>
+<p><strong><code>api_historial_reciente</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>API para obtener historial reciente</p>
+</blockquote>
+<p><strong><code>api_archivos_recientes</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>API para obtener archivos recientes</p>
+</blockquote>
+<p><strong><code>get_config_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene la configuración de email (sin mostrar credenciales)</p>
+</blockquote>
+<p><strong><code>guardar_config_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda la configuración de email</p>
+</blockquote>
+<p><strong><code>enviar_prueba_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Envía un correo de prueba</p>
+</blockquote>
+<p><strong><code>ejecutar_prueba_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Ejecuta un respaldo de prueba y lo envía por correo si está configurado</p>
+</blockquote>
+<p><strong><code>recuperar_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Solicita un código de recuperación</p>
+</blockquote>
+<p><strong><code>restablecer_password_route</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Restablece la contraseña con el código</p>
+</blockquote>
+<p><strong><code>cancelar_recuperacion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Cancela el proceso de recuperación y limpia la sesión</p>
+</blockquote>
+<p><strong><code>restaurar_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Página de restauración de respaldos</p>
+</blockquote>
+<p><strong><code>subir_archivo_restauracion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 14</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Procesa el archivo de restauración subido</p>
+</blockquote>
+<p><strong><code>historial_restauraciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Retorna el historial completo de restauraciones en JSON</p>
+</blockquote>
+<p><strong><code>limpiar_historial_restauraciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Limpia completamente el historial de restauraciones</p>
+</blockquote>
+<hr />
+<h4><code>ndc_home()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página principal para usuarios normales (no admin)</p>
+</blockquote>
+<h4><code>menu()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página del menú</p>
+</blockquote>
+<h4><code>about()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página about</p>
+</blockquote>
+<h4><code>contact()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página de contacto</p>
+</blockquote>
+<h4><code>gallery()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página de galería</p>
+</blockquote>
+<h4><code>reservation()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página de reservaciones</p>
+</blockquote>
+<h4><code>respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página principal de respaldos</p>
+</blockquote>
+<h4><code>generar_respaldo()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Genera y descarga un respaldo según los parámetros</p>
+</blockquote>
+<h4><code>info_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Retorna información de respaldos en JSON (para AJAX)</p>
+</blockquote>
+<h4><code>ejecutar_respaldo_manual()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Ejecuta un respaldo manual y lo descarga inmediatamente</p>
+</blockquote>
+<h4><code>estadisticas_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Retorna estadísticas de respaldos en JSON</p>
+</blockquote>
+<h4><code>centro_descargas()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Centro de descargas - Muestra archivos listos para descargar</p>
+</blockquote>
+<h4><code>guardar_configuracion_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Guarda la configuración de respaldos automáticos</p>
+</blockquote>
+<h4><code>ejecutar_respaldo_manual_ahora()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Ejecuta un respaldo manual inmediatamente y guarda los archivos en el servidor</p>
+</blockquote>
+<h4><code>ver_archivos_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página para ver y descargar archivos de respaldos guardados</p>
+</blockquote>
+<h4><code>descargar_archivo_respaldo(filename)</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Descarga un archivo de respaldo específico</p>
+</blockquote>
+<h4><code>eliminar_archivo_respaldo(filename)</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Elimina un archivo de respaldo específico</p>
+</blockquote>
+<h4><code>limpiar_archivos_antiguos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Limpia archivos antiguos manualmente</p>
+</blockquote>
+<h4><code>forzar_ejecucion_respaldo()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Fuerza la ejecución del respaldo automático inmediatamente (simula el scheduler)</p>
+</blockquote>
+<h4><code>api_estadisticas()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>API para obtener estadísticas en tiempo real</p>
+</blockquote>
+<h4><code>api_proximos_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>API para obtener próximos respaldos programados</p>
+</blockquote>
+<h4><code>api_historial_reciente()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>API para obtener historial reciente</p>
+</blockquote>
+<h4><code>api_archivos_recientes()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>API para obtener archivos recientes</p>
+</blockquote>
+<h4><code>get_config_email()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Obtiene la configuración de email (sin mostrar credenciales)</p>
+</blockquote>
+<h4><code>guardar_config_email()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Guarda la configuración de email</p>
+</blockquote>
+<h4><code>enviar_prueba_email()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Envía un correo de prueba</p>
+</blockquote>
+<h4><code>ejecutar_prueba_respaldo()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Ejecuta un respaldo de prueba y lo envía por correo si está configurado</p>
+</blockquote>
+<h4><code>recuperar_password()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Solicita un código de recuperación</p>
+</blockquote>
+<h4><code>restablecer_password_route()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Restablece la contraseña con el código</p>
+</blockquote>
+<h4><code>cancelar_recuperacion()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Cancela el proceso de recuperación y limpia la sesión</p>
+</blockquote>
+<h4><code>restaurar_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Página de restauración de respaldos</p>
+</blockquote>
+<h4><code>subir_archivo_restauracion()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Procesa el archivo de restauración subido</p>
+</blockquote>
+<h4><code>historial_restauraciones()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Retorna el historial completo de restauraciones en JSON</p>
+</blockquote>
+<h4><code>limpiar_historial_restauraciones()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Limpia completamente el historial de restauraciones</p>
+</blockquote>
+<h3>Módulo: <code>cleanup_tokens.py</code></h3>
+<p><strong><code>job</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>job</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>spark_session.py</code></h3>
+<p><strong><code>get_spark</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Crea y devuelve una instancia de SparkSession, cacheada por Streamlit.</p>
+</blockquote>
+<p><strong><code>stop_spark</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Detiene la sesión Spark si está activa.</p>
+</blockquote>
+<hr />
+<h4><code>get_spark()</code></h4>
+<p><strong>Ubicación:</strong> <code>spark_session.py</code></p>
+<blockquote>
+<p>Crea y devuelve una instancia de SparkSession, cacheada por Streamlit.</p>
+</blockquote>
+<h4><code>stop_spark()</code></h4>
+<p><strong>Ubicación:</strong> <code>spark_session.py</code></p>
+<blockquote>
+<p>Detiene la sesión Spark si está activa.</p>
+</blockquote>
+<h3>Módulo: <code>services\analisis_service.py</code></h3>
+<p><strong><code>analizar_datos_con_spark</code></strong></p>
+<ul>
+<li>Parámetros: <code>pd_ventas</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 14</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Realiza un análisis estadístico utilizando Pandas.
+Si no se pasa pd_ventas, lo obtiene directamente de MongoDB.
+Devuelve:
+- pd_ventas (o None si no hay datos)
+- un diccionario con el resumen para mostrar en HTML</p>
+</blockquote>
+<p><strong><code>obtener_resumen_ventas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Función simplificada que solo retorna el resumen de análisis.
+Útil para la ruta /analisis</p>
+</blockquote>
+<hr />
+<h4><code>analizar_datos_con_spark(pd_ventas)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\analisis_service.py</code></p>
+<blockquote>
+<p>Realiza un análisis estadístico utilizando Pandas.
+Si no se pasa pd_ventas, lo obtiene directamente de MongoDB.
+Devuelve:
+- pd_ventas (o None si no hay datos)
+- un diccionario con el resumen para mostrar en HTML</p>
+</blockquote>
+<h4><code>obtener_resumen_ventas()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\analisis_service.py</code></p>
+<blockquote>
+<p>Función simplificada que solo retorna el resumen de análisis.
+Útil para la ruta /analisis</p>
+</blockquote>
+<h3>Módulo: <code>services\auth_service.py</code></h3>
+<p><strong><code>verificar_usuario</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Verifica credenciales y retorna el objeto usuario o None</p>
+</blockquote>
+<p><strong><code>registrar_usuario</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Registra un nuevo usuario con rol por defecto</p>
+</blockquote>
+<p><strong><code>obtener_usuario_por_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene un usuario por su correo</p>
+</blockquote>
+<p><strong><code>generar_codigo_recuperacion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un código de 6 dígitos aleatorio</p>
+</blockquote>
+<p><strong><code>crear_codigo_recuperacion</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Crea un código de recuperación para el usuario
+Retorna: (success: bool, codigo: str, mensaje: str)</p>
+</blockquote>
+<p><strong><code>verificar_codigo_recuperacion</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, codigo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Verifica si el código es válido
+Retorna: (success: bool, mensaje: str)</p>
+</blockquote>
+<p><strong><code>restablecer_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, codigo, nueva_password</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Restablece la contraseña del usuario
+Retorna: (success: bool, mensaje: str)</p>
+</blockquote>
+<p><strong><code>limpiar_codigos_expirados</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Elimina códigos de recuperación expirados (tarea de limpieza)</p>
+</blockquote>
+<hr />
+<h4><code>verificar_usuario(correo, password)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Verifica credenciales y retorna el objeto usuario o None</p>
+</blockquote>
+<h4><code>registrar_usuario(correo, password)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Registra un nuevo usuario con rol por defecto</p>
+</blockquote>
+<h4><code>obtener_usuario_por_email(correo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Obtiene un usuario por su correo</p>
+</blockquote>
+<h4><code>generar_codigo_recuperacion()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Genera un código de 6 dígitos aleatorio</p>
+</blockquote>
+<h4><code>crear_codigo_recuperacion(correo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Crea un código de recuperación para el usuario
+Retorna: (success: bool, codigo: str, mensaje: str)</p>
+</blockquote>
+<h4><code>verificar_codigo_recuperacion(correo, codigo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Verifica si el código es válido
+Retorna: (success: bool, mensaje: str)</p>
+</blockquote>
+<h4><code>restablecer_password(correo, codigo, nueva_password)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Restablece la contraseña del usuario
+Retorna: (success: bool, mensaje: str)</p>
+</blockquote>
+<h4><code>limpiar_codigos_expirados()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auth_service.py</code></p>
+<blockquote>
+<p>Elimina códigos de recuperación expirados (tarea de limpieza)</p>
+</blockquote>
+<h3>Módulo: <code>services\auto_backup_service.py</code></h3>
+<p><strong><code>obtener_todas_colecciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 9</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene todas las colecciones de la base de datos
+Retorna: diccionario con {nombre_coleccion: datos}</p>
+</blockquote>
+<p><strong><code>cargar_config</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga la configuración de respaldos automáticos</p>
+</blockquote>
+<p><strong><code>guardar_config</code></strong></p>
+<ul>
+<li>Parámetros: <code>config</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda la configuración</p>
+</blockquote>
+<p><strong><code>cargar_historial</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga el historial de respaldos automáticos</p>
+</blockquote>
+<p><strong><code>guardar_historial</code></strong></p>
+<ul>
+<li>Parámetros: <code>historial</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda el historial</p>
+</blockquote>
+<p><strong><code>agregar_historial</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_respaldo, formato, cantidad_registros, colecciones_respaldadas, archivos_generados, estado</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Agrega una entrada al historial</p>
+</blockquote>
+<p><strong><code>obtener_proximos_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 20</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Calcula las próximas 5 ejecuciones programadas</p>
+</blockquote>
+<p><strong><code>ejecutar_respaldo_programado</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 19</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Función que se ejecuta automáticamente según el horario.
+Genera archivos, los guarda en el servidor Y los envía por correo si está configurado.</p>
+</blockquote>
+<p><strong><code>limpiar_backups_antiguos</code></strong></p>
+<ul>
+<li>Parámetros: <code>dias_retener</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Elimina archivos de respaldo más antiguos que el número de días especificado</p>
+</blockquote>
+<p><strong><code>listar_archivos_guardados</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 15</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Lista todos los archivos de respaldo guardados con su información.
+Solo muestra archivos que realmente existen en el disco.</p>
+</blockquote>
+<p><strong><code>eliminar_archivo</code></strong></p>
+<ul>
+<li>Parámetros: <code>filename</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Elimina un archivo de respaldo específico</p>
+</blockquote>
+<p><strong><code>obtener_estadisticas_storage</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene estadísticas del almacenamiento de respaldos.
+Solo cuenta archivos que realmente existen.</p>
+</blockquote>
+<p><strong><code>configurar_scheduler</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Configura el scheduler según la configuración guardada</p>
+</blockquote>
+<p><strong><code>obtener_estadisticas_historial</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene estadísticas del historial</p>
+</blockquote>
+<p><strong><code>obtener_colecciones_actuales</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene las colecciones actuales en la base de datos</p>
+</blockquote>
+<p><strong><code>ejecutar_respaldo_prueba</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 24</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Ejecuta un respaldo de prueba y lo envía por correo si está configurado.
+Similar a ejecutar_respaldo_programado pero específicamente para pruebas.</p>
+</blockquote>
+<hr />
+<h4><code>obtener_todas_colecciones()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Obtiene todas las colecciones de la base de datos
+Retorna: diccionario con {nombre_coleccion: datos}</p>
+</blockquote>
+<h4><code>cargar_config()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Carga la configuración de respaldos automáticos</p>
+</blockquote>
+<h4><code>guardar_config(config)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Guarda la configuración</p>
+</blockquote>
+<h4><code>cargar_historial()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Carga el historial de respaldos automáticos</p>
+</blockquote>
+<h4><code>guardar_historial(historial)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Guarda el historial</p>
+</blockquote>
+<h4><code>agregar_historial(tipo_respaldo, formato, cantidad_registros, colecciones_respaldadas, archivos_generados, estado)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Agrega una entrada al historial</p>
+</blockquote>
+<h4><code>obtener_proximos_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Calcula las próximas 5 ejecuciones programadas</p>
+</blockquote>
+<h4><code>ejecutar_respaldo_programado()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Función que se ejecuta automáticamente según el horario.
+Genera archivos, los guarda en el servidor Y los envía por correo si está configurado.</p>
+</blockquote>
+<h4><code>limpiar_backups_antiguos(dias_retener)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Elimina archivos de respaldo más antiguos que el número de días especificado</p>
+</blockquote>
+<h4><code>listar_archivos_guardados()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Lista todos los archivos de respaldo guardados con su información.
+Solo muestra archivos que realmente existen en el disco.</p>
+</blockquote>
+<h4><code>eliminar_archivo(filename)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Elimina un archivo de respaldo específico</p>
+</blockquote>
+<h4><code>obtener_estadisticas_storage()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Obtiene estadísticas del almacenamiento de respaldos.
+Solo cuenta archivos que realmente existen.</p>
+</blockquote>
+<h4><code>configurar_scheduler()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Configura el scheduler según la configuración guardada</p>
+</blockquote>
+<h4><code>obtener_estadisticas_historial()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Obtiene estadísticas del historial</p>
+</blockquote>
+<h4><code>obtener_colecciones_actuales()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Obtiene las colecciones actuales en la base de datos</p>
+</blockquote>
+<h4><code>ejecutar_respaldo_prueba()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\auto_backup_service.py</code></p>
+<blockquote>
+<p>Ejecuta un respaldo de prueba y lo envía por correo si está configurado.
+Similar a ejecutar_respaldo_programado pero específicamente para pruebas.</p>
+</blockquote>
+<h3>Módulo: <code>services\backup_avanzado_service.py</code></h3>
+<p><strong><code>obtener_ultima_fecha_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_respaldo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene la fecha del último respaldo realizado de un tipo específico.
+Se usa para respaldos incrementales y diferenciales.</p>
+</blockquote>
+<p><strong><code>registrar_respaldo_realizado</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_respaldo, tipo_formato, total_registros</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Registra el respaldo en el historial</p>
+</blockquote>
+<p><strong><code>obtener_datos_completos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 10</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene TODOS los datos de TODAS las colecciones de la base de datos.</p>
+</blockquote>
+<p><strong><code>obtener_datos_incremental</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 14</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene solo los datos NUEVOS desde el último respaldo incremental.</p>
+</blockquote>
+<p><strong><code>obtener_datos_diferencial</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 14</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene datos modificados desde el último respaldo COMPLETO.</p>
+</blockquote>
+<p><strong><code>exportar_pdf_completo</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_respaldo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 19</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Exporta TODA la base de datos a PDF según el tipo de respaldo.</p>
+</blockquote>
+<p>Args:
+    tipo_respaldo: "completo", "incremental", "diferencial"</p>
+<p><strong><code>exportar_excel_completo</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_respaldo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 12</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Exporta TODA la base de datos a Excel según el tipo de respaldo.</p>
+</blockquote>
+<p><strong><code>exportar_sql_completo</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_respaldo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 15</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Exporta TODA la base de datos a SQL según el tipo de respaldo.</p>
+</blockquote>
+<hr />
+<h4><code>obtener_ultima_fecha_respaldo(tipo_respaldo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Obtiene la fecha del último respaldo realizado de un tipo específico.
+Se usa para respaldos incrementales y diferenciales.</p>
+</blockquote>
+<h4><code>registrar_respaldo_realizado(tipo_respaldo, tipo_formato, total_registros)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Registra el respaldo en el historial</p>
+</blockquote>
+<h4><code>obtener_datos_completos()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Obtiene TODOS los datos de TODAS las colecciones de la base de datos.</p>
+</blockquote>
+<h4><code>obtener_datos_incremental()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Obtiene solo los datos NUEVOS desde el último respaldo incremental.</p>
+</blockquote>
+<h4><code>obtener_datos_diferencial()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Obtiene datos modificados desde el último respaldo COMPLETO.</p>
+</blockquote>
+<h4><code>exportar_pdf_completo(tipo_respaldo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Exporta TODA la base de datos a PDF según el tipo de respaldo.</p>
+</blockquote>
+<p>Args:
+    tipo_respaldo: "completo", "incremental", "diferencial"</p>
+<h4><code>exportar_excel_completo(tipo_respaldo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Exporta TODA la base de datos a Excel según el tipo de respaldo.</p>
+</blockquote>
+<h4><code>exportar_sql_completo(tipo_respaldo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_avanzado_service.py</code></p>
+<blockquote>
+<p>Exporta TODA la base de datos a SQL según el tipo de respaldo.</p>
+</blockquote>
+<h3>Módulo: <code>services\backup_service.py</code></h3>
+<p><strong><code>cargar_metadata</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga el metadata de respaldos anteriores</p>
+</blockquote>
+<p><strong><code>guardar_metadata</code></strong></p>
+<ul>
+<li>Parámetros: <code>metadata</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda el metadata de respaldos</p>
+</blockquote>
+<p><strong><code>obtener_todas_colecciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 9</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene todas las colecciones de la base de datos
+Retorna: diccionario con {nombre_coleccion: datos}</p>
+</blockquote>
+<p><strong><code>generar_backup_completo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un respaldo completo de toda la base de datos</p>
+</blockquote>
+<p><strong><code>generar_backup_incremental</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 16</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un respaldo incremental</p>
+</blockquote>
+<p><strong><code>generar_backup_diferencial</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 14</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un respaldo diferencial</p>
+</blockquote>
+<p><strong><code>generar_excel</code></strong></p>
+<ul>
+<li>Parámetros: <code>colecciones, tipo_respaldo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 18</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un archivo Excel con todas las colecciones
+✅ VERSIÓN CORREGIDA - Funciona correctamente</p>
+</blockquote>
+<p><strong><code>generar_pdf</code></strong></p>
+<ul>
+<li>Parámetros: <code>colecciones, tipo_backup</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 15</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un archivo PDF con resumen de todas las colecciones</p>
+</blockquote>
+<p><strong><code>generar_sql</code></strong></p>
+<ul>
+<li>Parámetros: <code>colecciones, tipo_backup</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 9</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Genera un archivo SQL con los datos de respaldo
+✅ VERSIÓN CORREGIDA - Genera SQL válido</p>
+</blockquote>
+<p><strong><code>obtener_info_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Retorna información sobre los respaldos realizados</p>
+</blockquote>
+<hr />
+<h4><code>cargar_metadata()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Carga el metadata de respaldos anteriores</p>
+</blockquote>
+<h4><code>guardar_metadata(metadata)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Guarda el metadata de respaldos</p>
+</blockquote>
+<h4><code>obtener_todas_colecciones()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Obtiene todas las colecciones de la base de datos
+Retorna: diccionario con {nombre_coleccion: datos}</p>
+</blockquote>
+<h4><code>generar_backup_completo()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Genera un respaldo completo de toda la base de datos</p>
+</blockquote>
+<h4><code>generar_backup_incremental()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Genera un respaldo incremental</p>
+</blockquote>
+<h4><code>generar_backup_diferencial()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Genera un respaldo diferencial</p>
+</blockquote>
+<h4><code>generar_excel(colecciones, tipo_respaldo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Genera un archivo Excel con todas las colecciones
+✅ VERSIÓN CORREGIDA - Funciona correctamente</p>
+</blockquote>
+<h4><code>generar_pdf(colecciones, tipo_backup)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Genera un archivo PDF con resumen de todas las colecciones</p>
+</blockquote>
+<h4><code>generar_sql(colecciones, tipo_backup)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Genera un archivo SQL con los datos de respaldo
+✅ VERSIÓN CORREGIDA - Genera SQL válido</p>
+</blockquote>
+<h4><code>obtener_info_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\backup_service.py</code></p>
+<blockquote>
+<p>Retorna información sobre los respaldos realizados</p>
+</blockquote>
+<h3>Módulo: <code>services\email_service.py</code></h3>
+<p><strong><code>cargar_config_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga la configuración de email</p>
+</blockquote>
+<p><strong><code>guardar_config_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>config</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda la configuración de email</p>
+</blockquote>
+<p><strong><code>validar_configuracion_email</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Valida que la configuración de email esté completa</p>
+</blockquote>
+<p><strong><code>enviar_email_respaldo</code></strong></p>
+<ul>
+<li>Parámetros: <code>archivos_paths, tipo_respaldo, cantidad_registros, colecciones_info</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 11</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Envía un correo con los archivos de respaldo adjuntos</p>
+</blockquote>
+<p><strong><code>enviar_codigo_recuperacion</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo_destino, codigo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Envía un código de recuperación de contraseña por correo
+Args:
+    correo_destino: Email del usuario
+    codigo: Código de 6 dígitos
+Returns:
+    (success: bool, mensaje: str)</p>
+</blockquote>
+<p><strong><code>enviar_correo_prueba</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Envía un correo de prueba para verificar la configuración</p>
+</blockquote>
+<hr />
+<h4><code>cargar_config_email()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\email_service.py</code></p>
+<blockquote>
+<p>Carga la configuración de email</p>
+</blockquote>
+<h4><code>guardar_config_email(config)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\email_service.py</code></p>
+<blockquote>
+<p>Guarda la configuración de email</p>
+</blockquote>
+<h4><code>validar_configuracion_email()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\email_service.py</code></p>
+<blockquote>
+<p>Valida que la configuración de email esté completa</p>
+</blockquote>
+<h4><code>enviar_email_respaldo(archivos_paths, tipo_respaldo, cantidad_registros, colecciones_info)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\email_service.py</code></p>
+<blockquote>
+<p>Envía un correo con los archivos de respaldo adjuntos</p>
+</blockquote>
+<h4><code>enviar_codigo_recuperacion(correo_destino, codigo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\email_service.py</code></p>
+<blockquote>
+<p>Envía un código de recuperación de contraseña por correo
+Args:
+    correo_destino: Email del usuario
+    codigo: Código de 6 dígitos
+Returns:
+    (success: bool, mensaje: str)</p>
+</blockquote>
+<h4><code>enviar_correo_prueba()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\email_service.py</code></p>
+<blockquote>
+<p>Envía un correo de prueba para verificar la configuración</p>
+</blockquote>
+<h3>Módulo: <code>services\perfil_service.py</code></h3>
+<p><strong><code>allowed_file</code></strong></p>
+<ul>
+<li>Parámetros: <code>filename</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>actualizar_datos_usuario</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, nombre, nuevo_correo, telefono</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Actualiza la información personal del usuario.</p>
+</blockquote>
+<p><strong><code>cambiar_password_usuario</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, password_actual, password_nueva</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 8</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Cambia la contraseña del usuario.</p>
+</blockquote>
+<p><strong><code>guardar_avatar</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, file</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda la foto de perfil del usuario.</p>
+</blockquote>
+<p><strong><code>obtener_datos_usuario</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene los datos del usuario para mostrar en el perfil.</p>
+</blockquote>
+<p><strong><code>guardar_preferencias</code></strong></p>
+<ul>
+<li>Parámetros: <code>correo, tema, idioma</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda las preferencias del usuario.</p>
+</blockquote>
+<hr />
+<h4><code>actualizar_datos_usuario(correo, nombre, nuevo_correo, telefono)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\perfil_service.py</code></p>
+<blockquote>
+<p>Actualiza la información personal del usuario.</p>
+</blockquote>
+<h4><code>cambiar_password_usuario(correo, password_actual, password_nueva)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\perfil_service.py</code></p>
+<blockquote>
+<p>Cambia la contraseña del usuario.</p>
+</blockquote>
+<h4><code>guardar_avatar(correo, file)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\perfil_service.py</code></p>
+<blockquote>
+<p>Guarda la foto de perfil del usuario.</p>
+</blockquote>
+<h4><code>obtener_datos_usuario(correo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\perfil_service.py</code></p>
+<blockquote>
+<p>Obtiene los datos del usuario para mostrar en el perfil.</p>
+</blockquote>
+<h4><code>guardar_preferencias(correo, tema, idioma)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\perfil_service.py</code></p>
+<blockquote>
+<p>Guarda las preferencias del usuario.</p>
+</blockquote>
+<h3>Módulo: <code>services\regresion_multiple_service.py</code></h3>
+<p><strong><code>obtener_datos_ventas_multiple</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene datos de ventas de MongoDB para regresión múltiple</p>
+</blockquote>
+<p><strong><code>entrenar_modelo_multiple</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Entrena un modelo de regresión lineal múltiple con datos reales de ventas</p>
+</blockquote>
+<p><strong><code>predecir_total_venta</code></strong></p>
+<ul>
+<li>Parámetros: <code>cantidad, tipo_producto, dia_semana, modelo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Predice el total de una venta basándose en cantidad, tipo y día de la semana</p>
+</blockquote>
+<hr />
+<h4><code>obtener_datos_ventas_multiple()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_multiple_service.py</code></p>
+<blockquote>
+<p>Obtiene datos de ventas de MongoDB para regresión múltiple</p>
+</blockquote>
+<h4><code>entrenar_modelo_multiple()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_multiple_service.py</code></p>
+<blockquote>
+<p>Entrena un modelo de regresión lineal múltiple con datos reales de ventas</p>
+</blockquote>
+<h4><code>predecir_total_venta(cantidad, tipo_producto, dia_semana, modelo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_multiple_service.py</code></p>
+<blockquote>
+<p>Predice el total de una venta basándose en cantidad, tipo y día de la semana</p>
+</blockquote>
+<h3>Módulo: <code>services\regresion_polinomica_service.py</code></h3>
+<p><strong><code>obtener_datos_ventas_polinomica</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene datos de ventas de MongoDB para regresión polinómica</p>
+</blockquote>
+<p><strong><code>entrenar_modelo_polinomico</code></strong></p>
+<ul>
+<li>Parámetros: <code>grado</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 11</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Entrena un modelo de regresión polinómica</p>
+</blockquote>
+<hr />
+<h4><code>obtener_datos_ventas_polinomica()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_polinomica_service.py</code></p>
+<blockquote>
+<p>Obtiene datos de ventas de MongoDB para regresión polinómica</p>
+</blockquote>
+<h4><code>entrenar_modelo_polinomico(grado)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_polinomica_service.py</code></p>
+<blockquote>
+<p>Entrena un modelo de regresión polinómica</p>
+</blockquote>
+<h3>Módulo: <code>services\regresion_service.py</code></h3>
+<p><strong><code>obtener_datos_ventas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 10</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene datos de ventas de la base de datos para regresión - OPTIMIZADO</p>
+</blockquote>
+<p><strong><code>entrenar_modelo_regresion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Entrena un modelo de regresión lineal simple - OPTIMIZADO</p>
+</blockquote>
+<p><strong><code>predecir_total</code></strong></p>
+<ul>
+<li>Parámetros: <code>cantidad, modelo</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Hace una predicción basada en el modelo entrenado</p>
+</blockquote>
+<hr />
+<h4><code>obtener_datos_ventas()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_service.py</code></p>
+<blockquote>
+<p>Obtiene datos de ventas de la base de datos para regresión - OPTIMIZADO</p>
+</blockquote>
+<h4><code>entrenar_modelo_regresion()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_service.py</code></p>
+<blockquote>
+<p>Entrena un modelo de regresión lineal simple - OPTIMIZADO</p>
+</blockquote>
+<h4><code>predecir_total(cantidad, modelo)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\regresion_service.py</code></p>
+<blockquote>
+<p>Hace una predicción basada en el modelo entrenado</p>
+</blockquote>
+<h3>Módulo: <code>services\restore_service.py</code></h3>
+<p><strong><code>cargar_historial_restauraciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga el historial de restauraciones</p>
+</blockquote>
+<p><strong><code>guardar_historial_restauraciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>historial</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda el historial de restauraciones</p>
+</blockquote>
+<p><strong><code>agregar_historial_restauracion</code></strong></p>
+<ul>
+<li>Parámetros: <code>tipo_archivo, colecciones_restauradas, registros_totales, estado, error</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Agrega una entrada al historial de restauraciones</p>
+</blockquote>
+<p><strong><code>validar_archivo_restauracion</code></strong></p>
+<ul>
+<li>Parámetros: <code>filename</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Valida que el archivo tenga una extensión permitida
+Retorna: (valido: bool, extension: str, mensaje: str)</p>
+</blockquote>
+<p><strong><code>restaurar_desde_sql</code></strong></p>
+<ul>
+<li>Parámetros: <code>file_content</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 23</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Restaura la base de datos desde un archivo SQL
+Retorna: (success: bool, mensaje: str, stats: dict)</p>
+</blockquote>
+<p><strong><code>restaurar_desde_excel</code></strong></p>
+<ul>
+<li>Parámetros: <code>file_content</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 29</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Restaura la base de datos desde un archivo Excel
+Retorna: (success: bool, mensaje: str, stats: dict)</p>
+</blockquote>
+<p><strong><code>restaurar_desde_json</code></strong></p>
+<ul>
+<li>Parámetros: <code>file_content</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 15</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Restaura la base de datos desde un archivo JSON
+Retorna: (success: bool, mensaje: str, stats: dict)</p>
+</blockquote>
+<p><strong><code>obtener_estadisticas_restauraciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene estadísticas del historial de restauraciones</p>
+</blockquote>
+<hr />
+<h4><code>cargar_historial_restauraciones()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Carga el historial de restauraciones</p>
+</blockquote>
+<h4><code>guardar_historial_restauraciones(historial)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Guarda el historial de restauraciones</p>
+</blockquote>
+<h4><code>agregar_historial_restauracion(tipo_archivo, colecciones_restauradas, registros_totales, estado, error)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Agrega una entrada al historial de restauraciones</p>
+</blockquote>
+<h4><code>validar_archivo_restauracion(filename)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Valida que el archivo tenga una extensión permitida
+Retorna: (valido: bool, extension: str, mensaje: str)</p>
+</blockquote>
+<h4><code>restaurar_desde_sql(file_content)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Restaura la base de datos desde un archivo SQL
+Retorna: (success: bool, mensaje: str, stats: dict)</p>
+</blockquote>
+<h4><code>restaurar_desde_excel(file_content)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Restaura la base de datos desde un archivo Excel
+Retorna: (success: bool, mensaje: str, stats: dict)</p>
+</blockquote>
+<h4><code>restaurar_desde_json(file_content)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Restaura la base de datos desde un archivo JSON
+Retorna: (success: bool, mensaje: str, stats: dict)</p>
+</blockquote>
+<h4><code>obtener_estadisticas_restauraciones()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\restore_service.py</code></p>
+<blockquote>
+<p>Obtiene estadísticas del historial de restauraciones</p>
+</blockquote>
+<h3>Módulo: <code>services\scheduler_service.py</code></h3>
+<p><strong><code>realizar_respaldo_automatico</code></strong></p>
+<ul>
+<li>Parámetros: <code>formato</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 12</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Realiza un respaldo automático en el formato especificado.
+Usa las funciones avanzadas que permiten elegir tipo de respaldo.</p>
+</blockquote>
+<p>Args:
+    formato (str): "excel", "pdf", "sql" o "todos"</p>
+<p><strong><code>registrar_respaldo_en_db</code></strong></p>
+<ul>
+<li>Parámetros: <code>timestamp, formato</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Registra el respaldo realizado en la base de datos</p>
+</blockquote>
+<p><strong><code>limpiar_respaldos_antiguos</code></strong></p>
+<ul>
+<li>Parámetros: <code>dias</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Elimina respaldos automáticos con más de X días de antigüedad.</p>
+</blockquote>
+<p>Args:
+    dias (int): Número de días a mantener</p>
+<p><strong><code>configurar_respaldos_automaticos</code></strong></p>
+<ul>
+<li>Parámetros: <code>config</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Configura los respaldos automáticos según la configuración proporcionada.</p>
+</blockquote>
+<p>Args:
+    config (dict): Diccionario con la configuración
+        {
+            "activo": True/False,
+            "hora": "14:30",  # Formato 24h
+            "frecuencia": "diario",  # "diario", "semanal", "mensual"
+            "dia_semana": "monday",  # Para frecuencia semanal
+            "dia_mes": 1,  # Para frecuencia mensual
+            "formato": "todos",  # "excel", "pdf", "sql", "todos"
+            "limpiar_antiguos": True,
+            "dias_retener": 30
+        }</p>
+<p><strong><code>verificar_respaldo_mensual</code></strong></p>
+<ul>
+<li>Parámetros: <code>config</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Verifica si hoy es el día del mes configurado para hacer respaldo</p>
+</blockquote>
+<p><strong><code>ejecutar_scheduler</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Ejecuta el scheduler en un hilo separado</p>
+</blockquote>
+<p><strong><code>iniciar_scheduler</code></strong></p>
+<ul>
+<li>Parámetros: <code>config</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Inicia el scheduler en un hilo separado.</p>
+</blockquote>
+<p>Args:
+    config (dict): Configuración de respaldos automáticos</p>
+<p><strong><code>detener_scheduler</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Detiene el scheduler</p>
+</blockquote>
+<p><strong><code>obtener_proximos_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [HIGH] 11</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Retorna información sobre los próximos respaldos programados</p>
+</blockquote>
+<p><strong><code>obtener_historial_respaldos</code></strong></p>
+<ul>
+<li>Parámetros: <code>limite</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Obtiene el historial de respaldos automáticos realizados</p>
+</blockquote>
+<p><strong><code>guardar_configuracion</code></strong></p>
+<ul>
+<li>Parámetros: <code>config</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda la configuración de respaldos en la base de datos</p>
+</blockquote>
+<p><strong><code>cargar_configuracion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga la configuración de respaldos desde la base de datos</p>
+</blockquote>
+<p><strong><code>get_configuracion_default</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Retorna la configuración por defecto</p>
+</blockquote>
+<hr />
+<h4><code>realizar_respaldo_automatico(formato)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Realiza un respaldo automático en el formato especificado.
+Usa las funciones avanzadas que permiten elegir tipo de respaldo.</p>
+</blockquote>
+<p>Args:
+    formato (str): "excel", "pdf", "sql" o "todos"</p>
+<h4><code>registrar_respaldo_en_db(timestamp, formato)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Registra el respaldo realizado en la base de datos</p>
+</blockquote>
+<h4><code>limpiar_respaldos_antiguos(dias)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Elimina respaldos automáticos con más de X días de antigüedad.</p>
+</blockquote>
+<p>Args:
+    dias (int): Número de días a mantener</p>
+<h4><code>configurar_respaldos_automaticos(config)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Configura los respaldos automáticos según la configuración proporcionada.</p>
+</blockquote>
+<p>Args:
+    config (dict): Diccionario con la configuración
+        {
+            "activo": True/False,
+            "hora": "14:30",  # Formato 24h
+            "frecuencia": "diario",  # "diario", "semanal", "mensual"
+            "dia_semana": "monday",  # Para frecuencia semanal
+            "dia_mes": 1,  # Para frecuencia mensual
+            "formato": "todos",  # "excel", "pdf", "sql", "todos"
+            "limpiar_antiguos": True,
+            "dias_retener": 30
+        }</p>
+<h4><code>verificar_respaldo_mensual(config)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Verifica si hoy es el día del mes configurado para hacer respaldo</p>
+</blockquote>
+<h4><code>ejecutar_scheduler()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Ejecuta el scheduler en un hilo separado</p>
+</blockquote>
+<h4><code>iniciar_scheduler(config)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Inicia el scheduler en un hilo separado.</p>
+</blockquote>
+<p>Args:
+    config (dict): Configuración de respaldos automáticos</p>
+<h4><code>detener_scheduler()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Detiene el scheduler</p>
+</blockquote>
+<h4><code>obtener_proximos_respaldos()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Retorna información sobre los próximos respaldos programados</p>
+</blockquote>
+<h4><code>obtener_historial_respaldos(limite)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Obtiene el historial de respaldos automáticos realizados</p>
+</blockquote>
+<h4><code>guardar_configuracion(config)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Guarda la configuración de respaldos en la base de datos</p>
+</blockquote>
+<h4><code>cargar_configuracion()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Carga la configuración de respaldos desde la base de datos</p>
+</blockquote>
+<h4><code>get_configuracion_default()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\scheduler_service.py</code></p>
+<blockquote>
+<p>Retorna la configuración por defecto</p>
+</blockquote>
+<h3>Módulo: <code>services\ventas_service.py</code></h3>
+<p><strong><code>normalizar_df</code></strong></p>
+<ul>
+<li>Parámetros: <code>df</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Asegura que el DataFrame tenga todas las columnas necesarias y en orden.</p>
+</blockquote>
+<p><strong><code>cargar_y_analizar_ventas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 10</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Carga ventas desde MongoDB, procesa en Spark, convierte fechas,
+y devuelve:
+- DataFrame Pandas completo
+- Lista resumen para gráficas (ventas totales por tipo)</p>
+</blockquote>
+<p><strong><code>guardar_venta_mongo</code></strong></p>
+<ul>
+<li>Parámetros: <code>venta</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Guarda una venta en MongoDB.
+En Flask no se usan toasts, solo raise en caso de error.</p>
+</blockquote>
+<hr />
+<h4><code>normalizar_df(df)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\ventas_service.py</code></p>
+<blockquote>
+<p>Asegura que el DataFrame tenga todas las columnas necesarias y en orden.</p>
+</blockquote>
+<h4><code>cargar_y_analizar_ventas()</code></h4>
+<p><strong>Ubicación:</strong> <code>services\ventas_service.py</code></p>
+<blockquote>
+<p>Carga ventas desde MongoDB, procesa en Spark, convierte fechas,
+y devuelve:
+- DataFrame Pandas completo
+- Lista resumen para gráficas (ventas totales por tipo)</p>
+</blockquote>
+<h4><code>guardar_venta_mongo(venta)</code></h4>
+<p><strong>Ubicación:</strong> <code>services\ventas_service.py</code></p>
+<blockquote>
+<p>Guarda una venta en MongoDB.
+En Flask no se usan toasts, solo raise en caso de error.</p>
+</blockquote>
+<h3>Módulo: <code>static\fonts\icomoon\icomoon\demo-files\demo.js</code></h3>
+<p><strong><code>updateTest</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>updateSize</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>static\js\bootstrap-datetimepicker.js</code></h3>
+<p><strong><code>dateTimePicker</code></strong></p>
+<ul>
+<li>Parámetros: <code>element, options</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>static\js\jquery.min.js</code></h3>
+<p><strong><code>ga</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ha</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ia</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ja</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ka</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>la</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ma</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>na</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>oa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>pa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>qa</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ra</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ta</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ua</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>va</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>wa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e, f</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>xa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ya</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ja</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ka</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>la</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ma</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>na</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>oa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>pa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sa</code></strong></p>
+<ul>
+<li>Parámetros: <code>b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ta</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>xa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ya</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Fa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ga</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ha</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ia</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ja</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ka</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Sa</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ta</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ua</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Va</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Wa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Xa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>qb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>rb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>tb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ub</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ab</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Jb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>static\js\main.js</code></h3>
+<p><strong><code>openCallback</code></strong></p>
+<ul>
+<li>Parámetros: <code>el</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>closeCallback</code></strong></p>
+<ul>
+<li>Parámetros: <code>el</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>beforeOpenCallback</code></strong></p>
+<ul>
+<li>Parámetros: <code>el</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>beforeCloseCallback</code></strong></p>
+<ul>
+<li>Parámetros: <code>el</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>mobileMenuOutsideClick</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>offcanvasMenu</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>burgerMenu</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>fullHeight</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>contentWayPoint</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>dropdown</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>goToTop</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>loaderPage</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>counterWayPoint</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sliderMain</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>parallax</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>DateTimePickerFunc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>zoomFunc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>static\js\moment.min.js</code></h3>
+<p><strong><code>aa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ba</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ca</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>da</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ea</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>fa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ga</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ha</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ia</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ja</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ka</code></strong></p>
+<ul>
+<li>Parámetros: <code>b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>la</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ma</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>na</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>oa</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>pa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>qa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ra</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e, f, g</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ta</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ua</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>va</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>wa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>xa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ya</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>za</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Aa</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ba</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ca</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Da</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ea</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Fa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ga</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ha</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ia</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ja</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ka</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>La</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ma</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Na</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Oa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Pa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Qa</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ra</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Sa</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ta</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ua</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Va</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Wa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Xa</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ya</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Za</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>_a</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ab</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>bb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>cb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>db</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>eb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>fb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>gb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>hb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ib</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>jb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>kb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>lb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>mb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>nb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ob</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>pb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>qb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>rb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, f, g, h</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>tb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ub</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>vb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>wb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>xb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>yb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>zb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ab</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Bb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Cb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Db</code></strong></p>
+<ul>
+<li>Parámetros: <code>b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Eb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Fb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Gb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Hb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ib</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Jb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Kb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Lb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Mb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Nb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ob</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Pb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Qb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Rb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Sb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Tb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ub</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Vb</code></strong></p>
+<ul>
+<li>Parámetros: <code>b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Wb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Xb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Yb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Zb</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>_b</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ac</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>bc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>cc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>dc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ec</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>fc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>gc</code></strong></p>
+<ul>
+<li>Parámetros: <code>b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>hc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ic</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>jc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>kc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>lc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>mc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>nc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>oc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>pc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>qc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>rc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>tc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>uc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>vc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>wc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>xc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>yc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>zc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ac</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Bc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Cc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Dc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ec</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Fc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Gc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Hc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Ic</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Jc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Kc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Lc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Mc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Nc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Oc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Pc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Qc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Rc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Sc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Tc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Uc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Vc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Wc</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Xc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Yc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>Zc</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>_c</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ad</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>bd</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>cd</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>dd</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ed</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>fd</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>gd</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>hd</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>id</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c, d, e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>jd</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b, c</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>kd</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>ld</code></strong></p>
+<ul>
+<li>Parámetros: <code>a, b</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>md</code></strong></p>
+<ul>
+<li>Parámetros: <code>a</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>nd</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3>Módulo: <code>static\js\zoomerang.js</code></h3>
+<p><strong><code>setStyle</code></strong></p>
+<ul>
+<li>Parámetros: <code>el, styles, remember</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>sniffTransition</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>checkTrans</code></strong></p>
+<ul>
+<li>Parámetros: <code>styles</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>copy</code></strong></p>
+<ul>
+<li>Parámetros: <code>el, box</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>onEnd</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>onEnd</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>listen</code></strong></p>
+<ul>
+<li>Parámetros: <code>el</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec9">6. Modelos de Datos</h2>
+<p>No se detectaron clases con nombres de modelo explícitos.</p>
+<h3>Esquema General Inferido</h3>
+<p>Basado en el análisis del código, las entidades principales son:</p>
+<ul>
+<li><strong>Configuracion Default</strong></li>
+<li><strong>Spark</strong></li>
+<li><strong>Config Email</strong></li>
+</ul>
+<hr />
+<h2 id="sec10">7. Guía de Despliegue y Mantenimiento</h2>
+<h3>7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: JavaScript</li>
+<li><strong>Archivos detectados</strong>: 241</li>
+</ul>
+<h3>7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+npm start
+</code></pre>
+<h3>7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM node:20-slim
+
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 8000
+CMD [&quot;node index.js&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3>7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3>7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3>7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-05-30
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec11">8. Reporte de Calidad del Código</h2>
+<h3>8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 60/100 (Bueno [YELLOW])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 123/392 (31%)
+- Clases documentadas: 0/3</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 2.79
+- Complejidad máxima: 29
+- Funciones con alta complejidad (&gt;10): 24</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: → Estable
+</code></pre>
+<h3>8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<ul>
+<li><code>ejecutar_respaldo_manual</code> en <code>app.py</code> — complejidad: <strong>13</strong></li>
+<li><code>ejecutar_respaldo_manual_ahora</code> en <code>app.py</code> — complejidad: <strong>13</strong></li>
+<li><code>subir_archivo_restauracion</code> en <code>app.py</code> — complejidad: <strong>14</strong></li>
+<li><code>analizar_datos_con_spark</code> en <code>services\analisis_service.py</code> — complejidad: <strong>14</strong></li>
+<li><code>obtener_proximos_respaldos</code> en <code>services\auto_backup_service.py</code> — complejidad: <strong>20</strong></li>
+<li><code>ejecutar_respaldo_programado</code> en <code>services\auto_backup_service.py</code> — complejidad: <strong>19</strong></li>
+<li><code>listar_archivos_guardados</code> en <code>services\auto_backup_service.py</code> — complejidad: <strong>15</strong></li>
+<li><code>ejecutar_respaldo_prueba</code> en <code>services\auto_backup_service.py</code> — complejidad: <strong>24</strong></li>
+<li><code>obtener_datos_incremental</code> en <code>services\backup_avanzado_service.py</code> — complejidad: <strong>14</strong></li>
+<li><code>obtener_datos_diferencial</code> en <code>services\backup_avanzado_service.py</code> — complejidad: <strong>14</strong></li>
+</ul>
+<h3>8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 269 funciones sin documentar</li>
+<li>Refactorizar funciones con alta complejidad: <code>ejecutar_respaldo_manual</code>, <code>ejecutar_respaldo_manual_ahora</code>, <code>subir_archivo_restauracion</code>, <code>analizar_datos_con_spark</code>, <code>obtener_proximos_respaldos</code></li>
+</ul>
+<h3>8.4 Errores de Análisis</h3>
+<p>Sin errores detectados. [OK]</p>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-05-30 23:10 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">fgfhfh</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">241</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">3</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">392</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">35</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#f59e0b">60/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">30/05/2026 23:11 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>

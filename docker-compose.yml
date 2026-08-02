@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  app:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_DEBUG=False
+      - MONGO_URI=mongodb://mongo:27017/autodocs_ai
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-change-me}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+      - exports_data:/app/exports
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  uploads_data:
+  exports_data:
