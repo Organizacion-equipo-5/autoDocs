@@ -1,0 +1,22 @@
+@startuml
+skinparam componentStyle rectangle
+package "Cliente / Frontend" {
+  [Navegador] as browser
+  [App Móvil] as mobile
+  [CLI] as cli
+}
+package "API / Backend" {
+  [Rutas] as routes
+  [Lógica de Negocio] as logic
+  routes --> logic
+}
+database "Base de Datos" as db
+database "Caché" as cache
+[Servicios Ext.] as ext
+logic --> db
+logic --> cache
+logic --> ext
+browser --> routes
+mobile --> routes
+cli --> routes
+@enduml
