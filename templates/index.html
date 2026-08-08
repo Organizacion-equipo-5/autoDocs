@@ -1418,58 +1418,69 @@
          * @param {string} password - Contraseña a evaluar
          */
         function checkPasswordStrength(password) {
-            const bar = document.getElementById('pwd-strength-bar');
-            const fill = document.getElementById('pwd-strength-fill');
-            const label = document.getElementById('pwd-strength-label');
+    const bar = document.getElementById('pwd-strength-bar');
+    const fill = document.getElementById('pwd-strength-fill');
+    const label = document.getElementById('pwd-strength-label');
 
-            if (!password) {
-                bar.classList.add('hidden');
-                return;
-            }
-            bar.classList.remove('hidden');
+    if (!password) {
+        bar.classList.add('hidden');
+        return;
+    }
+    bar.classList.remove('hidden');
 
-            // Evaluar criterios de seguridad
-            const hasLength = password.length >= 8;
-            const hasUpper = /[A-Z]/.test(password);
-            const hasLower = /[a-z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
 
-            // Actualizar visualmente cada requisito
-            const updateReq = (id, ok) => {
-                const el = document.getElementById(id);
-                el.innerHTML = (ok ? '<span class="material-symbols-outlined text-green-accent text-sm">check</span>' : '✗') + ' ' + el.textContent.slice(2);
-                el.classList.toggle('met', ok);
-            };
-            updateReq('req-length', hasLength);
-            updateReq('req-upper', hasUpper);
-            updateReq('req-lower', hasLower);
-            updateReq('req-number', hasNumber);
+    // Guardar los textos base en atributos data si no existen
+    const reqLength = document.getElementById('req-length');
+    const reqUpper = document.getElementById('req-upper');
+    const reqLower = document.getElementById('req-lower');
+    const reqNumber = document.getElementById('req-number');
 
-            // Calcular puntaje y mostrar barra de progreso
-            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
-            const percentage = (score / 4) * 100;
-            fill.style.width = percentage + '%';
+    // Almacenar el texto base solo una vez
+    if (!reqLength.dataset.baseText) {
+        reqLength.dataset.baseText = 'Mínimo 8 caracteres';
+        reqUpper.dataset.baseText = 'Al menos 1 mayúscula';
+        reqLower.dataset.baseText = 'Al menos 1 minúscula';
+        reqNumber.dataset.baseText = 'Al menos 1 número';
+    }
 
-            // Asignar color y texto según el nivel
-            if (score <= 1) {
-                fill.style.background = '#ef4444';
-                label.textContent = 'Contraseña débil';
-                label.style.color = '#ef4444';
-            } else if (score <= 2) {
-                fill.style.background = '#f97316';
-                label.textContent = 'Contraseña media';
-                label.style.color = '#f97316';
-            } else if (score <= 3) {
-                fill.style.background = '#eab308';
-                label.textContent = 'Contraseña buena';
-                label.style.color = '#eab308';
-            } else {
-                fill.style.background = '#10b981';
-                label.textContent = 'Contraseña segura';
-                label.style.color = '#10b981';
-            }
-        }
+    const updateReq = (el, ok) => {
+        const icon = ok ? '✓' : '✗';
+        el.textContent = `${icon} ${el.dataset.baseText}`;
+        el.classList.toggle('met', ok);
+    };
+    
+    updateReq(reqLength, hasLength);
+    updateReq(reqUpper, hasUpper);
+    updateReq(reqLower, hasLower);
+    updateReq(reqNumber, hasNumber);
 
+    // Calcular puntaje y mostrar barra de progreso
+    const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+    const percentage = (score / 4) * 100;
+    fill.style.width = percentage + '%';
+
+    if (score <= 1) {
+        fill.style.background = '#ef4444';
+        label.textContent = 'Contraseña débil';
+        label.style.color = '#ef4444';
+    } else if (score <= 2) {
+        fill.style.background = '#f97316';
+        label.textContent = 'Contraseña media';
+        label.style.color = '#f97316';
+    } else if (score <= 3) {
+        fill.style.background = '#eab308';
+        label.textContent = 'Contraseña buena';
+        label.style.color = '#eab308';
+    } else {
+        fill.style.background = '#10b981';
+        label.textContent = 'Contraseña segura';
+        label.style.color = '#10b981';
+    }
+}
         /**
          * Verifica la fortaleza de la contraseña en el restablecimiento
          * @param {string} password - Contraseña a evaluar
