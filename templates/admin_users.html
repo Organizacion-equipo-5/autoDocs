@@ -1,94 +1,446 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Usuarios — AutoDocs AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <style>
-    /* Minimal styles copied from admin_dashboard to match theme */
-    :root{--bg:#040d1a;--bg2:#060f22;--surface:#0a1628;--border:#112240;--accent:#00d4ff;--accent2:#7c3aed;--text:#ccd6f6;--muted:#8892b0;--white:#e6f1ff;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif}
-    body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;min-height:100vh;margin:0}
-    .sidebar{width:260px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;position:fixed}
-    .logo{font-family:var(--mono);font-size:.95rem;color:var(--white);margin-bottom:2rem}
-    .nav-item{display:block;color:var(--muted);padding:.6rem;border-radius:8px;text-decoration:none;margin-bottom:.35rem}
-    .nav-item.active{background:rgba(0,212,255,0.08);color:var(--accent)}
-    .main{margin-left:260px;flex:1;padding:2rem}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
-    .table-overflow{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:.9rem}
-    th,td{padding:.7rem .8rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
-    th{color:var(--muted);font-family:var(--mono);font-size:.75rem}
-    .btn{background:var(--accent);color:var(--bg);padding:.6rem .9rem;border-radius:8px;border:none;cursor:pointer}
-    .table-button{background:rgba(255,255,255,0.04);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.4rem .6rem;cursor:pointer}
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,13,26,0.85);align-items:center;justify-content:center}
-    .modal-overlay.active{display:flex}
-    .modal{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1rem;width:min(720px,96%)}
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — Usuarios — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--color-background)',
+                        surface: 'var(--color-surface)',
+                        'surface-container': 'var(--color-surface-container)',
+                        'surface-container-high': 'var(--color-surface-container-high)',
+                        'on-surface': 'var(--color-on-surface)',
+                        'on-surface-variant': 'var(--color-on-surface-variant)',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        'outline-variant': 'var(--color-outline-variant)',
+                        error: 'var(--color-error)',
+                        'green-accent': 'var(--color-green-accent)',
+                        tertiary: 'var(--color-tertiary)',
+                    },
+                    fontFamily: {
+                        body: ['Geist', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;
+            --color-surface: rgba(27, 32, 36, 0.4);
+            --color-surface-container: #1b2024;
+            --color-surface-container-high: #252b2e;
+            --color-on-surface: #dee3e8;
+            --color-on-surface-variant: #bdc8d1;
+            --color-primary: #8ed5ff;
+            --color-secondary: #c0c1ff;
+            --color-outline-variant: #3e484f;
+            --color-error: #ffb4ab;
+            --color-green-accent: #10b981;
+            --color-tertiary: #ffc176;
+            --glass-border: rgba(123, 208, 255, 0.1);
+            --glass-shadow: 0 0 40px rgba(123, 208, 255, 0.1);
+            --glass-hover-border: rgba(123, 208, 255, 0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123, 208, 255, 0.1);
+            --particle-color-1: rgba(142, 213, 255, 0.4);
+            --particle-color-2: rgba(192, 193, 255, 0.2);
+            --particle-line: rgba(142, 213, 255, 0.12);
+        }
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;
+            --color-surface: rgba(255, 255, 255, 0.7);
+            --color-surface-container: #ffffff;
+            --color-surface-container-high: #e2e8f0;
+            --color-on-surface: #0f172a;
+            --color-on-surface-variant: #334155;
+            --color-primary: #38bdf8;
+            --color-secondary: #818cf8;
+            --color-outline-variant: #cbd5e1;
+            --color-error: #ba1a1a;
+            --color-green-accent: #10b981;
+            --color-tertiary: #7c5800;
+            --glass-border: rgba(0, 0, 0, 0.04);
+            --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            --glass-hover-border: rgba(56, 189, 248, 0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+            --particle-color-1: rgba(56, 189, 248, 0.25);
+            --particle-color-2: rgba(129, 140, 248, 0.2);
+            --particle-line: rgba(56, 189, 248, 0.12);
+        }
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            font-family: 'Geist', sans-serif;
+            transition: background 0.25s ease, color 0.25s ease;
+            overflow-x: hidden;
+        }
+        #particle-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 80%; z-index: 0; pointer-events: none;
+        }
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
+        }
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+            transform: translateY(-2px);
+        }
+        .glass input, .glass select, .glass textarea { color: #0f1418; }
+        .sidebar { background: var(--color-surface-container); backdrop-filter: blur(8px); border-right: 1px solid var(--glass-border); }
+        .btn-primary { background: var(--color-primary); color: #0f1418; font-weight: 700; transition: all 0.2s; }
+        .btn-primary:hover { filter: brightness(1.05); transform: scale(0.98); }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.65rem; border-radius: 999px;
+            font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+        }
+        .badge.completed { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge.pending { background: rgba(136, 146, 176, 0.2); color: var(--color-on-surface-variant); border: 1px solid rgba(136, 146, 176, 0.2); }
+        .badge.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .modal-anim { animation: fadeDown 0.2s ease; }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+        .stagger-in { opacity: 0; transform: translateY(16px); animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in, .glass-hover { animation: none !important; transition: none !important; transform: none !important; opacity: 1 !important; }
+        }
+        .action-icon {
+            cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center;
+            padding: 0.25rem; border-radius: 0.375rem; color: var(--color-on-surface-variant);
+        }
+        .action-icon:hover { background: var(--color-outline-variant); color: var(--color-primary); }
+        .section-title { display: flex; align-items: center; gap: 0.5rem; }
+        .section-title .material-symbols-outlined { color: var(--color-primary); font-size: 22px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+        .sidebar-shell { width: 72px; transition: width 0.3s ease; overflow: hidden; flex-shrink: 0; }
+        @media (min-width: 1024px) {
+            .sidebar-shell:hover { width: 240px; }
+            .sidebar-shell:hover .nav-label, .sidebar-shell:hover .nav-badge,
+            .sidebar-shell:hover .sidebar-user-info, .sidebar-shell:hover .sidebar-brand-label { opacity: 1; }
+        }
+        .nav-label, .nav-badge, .sidebar-user-info, .sidebar-brand-label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0 8px; }
+        .sidebar-nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px;
+            color: var(--color-on-surface-variant); text-decoration: none; transition: all 0.2s;
+            font-size: 0.85rem; font-weight: 500; position: relative; width: 100%; background: transparent;
+            border: none; cursor: pointer; text-align: left;
+        }
+        .sidebar-nav-item:hover { background: rgba(142, 213, 255, 0.08); color: var(--color-primary); }
+        .sidebar-nav-item.active { background: rgba(142, 213, 255, 0.12); color: var(--color-primary); font-weight: 700; }
+        .sidebar-nav-item .material-symbols-outlined { font-size: 1.3rem; flex-shrink: 0; }
+        .sidebar-nav-item .nav-badge {
+            margin-left: auto; font-size: 0.6rem; padding: 2px 8px; border-radius: 20px;
+            background: rgba(142, 213, 255, 0.15); color: var(--color-primary); font-weight: 700;
+        }
+    </style>
 </head>
-<body>
-  <aside class="sidebar">
-    <div class="logo">Auto<span style="color:var(--accent)">Docs</span> AI</div>
-    <a href="/admin" class="nav-item">Overview</a>
-    <a href="/admin/users" class="nav-item active">Usuarios</a>
-    <a href="/admin/projects" class="nav-item">Proyectos</a>
-    <div style="margin-top:auto"><a href="/" class="nav-item" onclick="logout()">Cerrar sesión</a></div>
-  </aside>
+<body data-theme="dark">
+    <canvas id="particle-canvas"></canvas>
 
-  <main class="main">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <h2 style="margin:0">Usuarios</h2>
-        <button class="btn" onclick="openModal('user')">Nuevo usuario</button>
-      </div>
-      <div class="table-overflow">
-        <table>
-          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Proyectos</th><th>Creado</th><th>Acciones</th></tr></thead>
-          <tbody id="table-users"></tbody>
-        </table>
-      </div>
+    <div class="flex min-h-screen w-full relative z-10">
+        <!-- Sidebar -->
+        <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
+            <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
+                <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
+                </div>
+                <span class="sidebar-brand-label font-mono text-lg font-bold">Auto<span class="text-primary">Docs</span></span>
+            </div>
+
+            <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
+                <div class="sidebar-nav">
+                    <a href="/admin" id="nav-resumen" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">shield_person</span>
+                        <span class="nav-label">Admin</span>
+                    </a>
+                    <a href="/admin/users" id="nav-users" class="sidebar-nav-item active">
+                        <span class="material-symbols-outlined">group</span>
+                        <span class="nav-label">Usuarios</span>
+                        <span class="nav-badge" id="sidebar-user-count">0</span>
+                    </a>
+                    <a href="/admin/projects" id="nav-projects" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        <span class="nav-label">Proyectos</span>
+                        <span class="nav-badge" id="sidebar-project-count">0</span>
+                    </a>
+                    <a href="/admin/pca" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">scatter_plot</span>
+                        <span class="nav-label">Análisis PCA</span>
+                    </a>
+                    <!-- <a href="/admin#classification" id="nav-classification" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">category</span>
+                        <span class="nav-label">Clasificación</span>
+                    </a> -->
+                </div>
+            </nav>
+
+            <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+                <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background flex-shrink-0" id="user-avatar">A</div>
+                    <div class="sidebar-user-info min-w-0">
+                        <div class="font-bold text-sm truncate" id="user-name">Administrador</div>
+                        <div class="text-xs text-on-surface-variant/70 truncate" id="user-role">Admin</div>
+                    </div>
+                </a>
+                <button onclick="logout()" class="sidebar-nav-item mt-2" style="justify-content:flex-start;">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="nav-label">Cerrar sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 p-8 relative z-10 overflow-x-hidden">
+            <div class="flex justify-between items-center mb-8 stagger-in" style="animation-delay:0.1s;">
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight">Usuarios</h1>
+                    <p class="text-on-surface-variant/60">Gestión de cuentas y roles del sistema</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="themeButton" class="glass glass-hover p-2 rounded-full w-10 h-10 flex items-center justify-center">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="users-section" class="mb-12 stagger-in" style="animation-delay:0.15s;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold section-title">
+                        <span class="material-symbols-outlined">group</span>
+                        Usuarios
+                    </h2>
+                    <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo usuario</button>
+                </div>
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="border-b border-outline-variant/30 bg-surface-container/30">
+                                <tr class="text-on-surface-variant/70 text-sm">
+                                    <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Plan</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-  </main>
 
-  <div id="adminModal" class="modal-overlay">
-    <div class="modal">
-      <button style="float:right" onclick="closeModal()">✕</button>
-      <h3 id="modal-title">Nuevo usuario</h3>
-      <div id="modal-content"></div>
-      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
-        <button class="table-button" onclick="closeModal()">Cancelar</button>
-        <button class="btn" id="modal-submit" onclick="submitModal()">Guardar</button>
-      </div>
+    <!-- MODAL USUARIO -->
+    <div id="userModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeUserModal()" style="background:rgba(0,0,0,0.5);">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeUserModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1" id="userModalTitle">Agregar Usuario</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Administra los usuarios del sistema</p>
+            <input type="hidden" id="userId">
+            <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre</label><input id="userName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+            <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Email</label><input id="userEmail" type="email" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+            <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña (solo para nuevo)</label><input id="userPassword" type="password" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
+            <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
+                <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl transition-all">Guardar</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const token = localStorage.getItem('token'); if(!token) window.location.href = '/';
-    const user = JSON.parse(localStorage.getItem('user')||'{}'); if(user.role!=='admin'&&user.role!=='superadmin') window.location.href='/dashboard';
-    function authHeaders(){return {'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}}
-    let usersData = [];
-    let currentModalType=null,currentModalId=null;
+    <script>
+        // ====== AUTH ======
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/';
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.role !== 'admin') window.location.href = '/dashboard';
+        document.getElementById('user-name').innerText = user.name || 'Admin';
+        document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
 
-    function openModal(type,item=null){currentModalType=type;currentModalId=item?item._id:null;document.getElementById('modal-title').textContent=item? 'Editar usuario':'Nuevo usuario';
-      const content=document.getElementById('modal-content');content.innerHTML='';
-      content.innerHTML += `<label>Nombre</label><input id="modal-name" value="${item?item.name:''}" />`;
-      content.innerHTML += `<label>Email</label><input id="modal-email" value="${item?item.email:''}" />`;
-      content.innerHTML += `<label>Rol</label><select id="modal-role"><option value="user">user</option><option value="admin">admin</option><option value="superadmin">superadmin</option></select>`;
-      document.getElementById('modal-role').value = item?item.role||'user':'user';
-      content.innerHTML += `<label>Contraseña</label><input id="modal-password" type="password" placeholder="Dejar en blanco para no cambiar"/>`;
-      document.getElementById('adminModal').classList.add('active');
-    }
-    function closeModal(){document.getElementById('adminModal').classList.remove('active');currentModalType=null;currentModalId=null}
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
 
-    async function submitModal(){const data={};data.name=document.getElementById('modal-name').value;data.email=document.getElementById('modal-email').value;data.role=document.getElementById('modal-role').value;const pwd=document.getElementById('modal-password').value;if(pwd) data.password=pwd;const url=`/api/admin/users${currentModalId?'/'+currentModalId:''}`;const method=currentModalId?'PUT':'POST';const res=await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(data)});if(!res.ok){alert('Error al guardar');return;}closeModal();loadUsersTable();}
+        // ====== CARGA DE CONTADORES DEL SIDEBAR ======
+        async function loadSidebarCounts() {
+            try {
+                const res = await fetch('/api/admin/overview', { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                document.getElementById('sidebar-user-count').innerText = data.stats?.total_users || 0;
+                document.getElementById('sidebar-project-count').innerText = data.stats?.total_projects || 0;
+            } catch (e) { console.warn('No se pudieron cargar los contadores', e); }
+        }
 
-    async function loadUsersTable(){try{const res=await fetch('/api/admin/users',{headers:authHeaders()});if(!res.ok) return;usersData=await res.json();document.getElementById('table-users').innerHTML = usersData.map(u=>`<tr><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td><td>${u.projects_count}</td><td>${u.created_at?new Date(u.created_at).toLocaleDateString():'-'}</td><td><button class="table-button" onclick='openModal("user", ${JSON.stringify(u).replace(/'/g,"\\'")})'>Editar</button> <button class="table-button" onclick="deleteRecord('user','${u._id}')">Eliminar</button></td></tr>`).join('');}catch(e){console.error(e)}}
+        // ====== CRUD Usuarios ======
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users', { headers: authHeaders() });
+            if (!res.ok) return;
+            const users = await res.json();
+            const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
+            const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
+            document.getElementById('users-table').innerHTML = users.map(u => `
+                        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+                            <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
+                            <td class="p-4"><span class="badge ${planColors[u.plan] || 'pending'}">${planNames[u.plan] || u.plan || 'Gratuito'}</span></td>
+                            <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
+                            <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
+                        </tr>
+                    `).join('');
+        }
 
-    async function deleteRecord(type,id){if(!confirm('¿Eliminar?')) return;const res=await fetch(`/api/admin/${type==='user'?'users':type==='project'?'projects':'documents'}/${id}`,{method:'DELETE',headers:authHeaders()});if(!res.ok){alert('Error');return;}loadUsersTable();}
+        function openUserModal(edit = false) {
+            const modal = document.getElementById('userModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (!edit) {
+                document.getElementById('userModalTitle').innerText = 'Agregar Usuario';
+                document.getElementById('userId').value = '';
+                document.getElementById('userName').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('userPassword').value = '';
+                document.getElementById('userRole').value = 'user';
+            }
+        }
 
-    function logout(){localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='/'}
+        function closeUserModal() {
+            const modal = document.getElementById('userModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        window.editUser = (id, name, email, role) => {
+            document.getElementById('userModalTitle').innerText = 'Editar Usuario';
+            document.getElementById('userId').value = id;
+            document.getElementById('userName').value = name;
+            document.getElementById('userEmail').value = email;
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userRole').value = role;
+            openUserModal(true);
+        };
+        async function saveUser() {
+            const id = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
+            const body = { name, email, role };
+            if (password) body.password = password;
+            const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+            if (res.ok) { closeUserModal(); loadUsers(); loadSidebarCounts(); } else alert('Error al guardar usuario');
+        }
+        window.deleteUser = async (id) => {
+            if (confirm('¿Eliminar usuario permanentemente?')) {
+                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: authHeaders() });
+                if (res.ok) { loadUsers(); loadSidebarCounts(); }
+            }
+        };
 
-    loadUsersTable();
-  </script>
+        // ====== UTILS ======
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;'; return m; });
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        // ====== TEMA ======
+        const themeBtn = document.getElementById('themeButton');
+        const themeIcon = document.getElementById('themeIcon');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
+            localStorage.setItem('theme', theme);
+        }
+        applyTheme(savedTheme);
+        themeBtn?.addEventListener('click', () => {
+            const cur = document.body.getAttribute('data-theme');
+            applyTheme(cur === 'light' ? 'dark' : 'light');
+        });
+
+        // ====== PARTÍCULAS ======
+        const canvas = document.getElementById('particle-canvas');
+        let ctx = canvas.getContext('2d');
+        let particles = [], mouse = { x: null, y: null };
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (mouse.x) {
+                    let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy);
+                    if (d < 150) {
+                        let angle = Math.atan2(dy, dx), force = (150 - d) / 150;
+                        this.x -= Math.cos(angle) * force * 1.2;
+                        this.y -= Math.sin(angle) * force * 1.2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                const style = getComputedStyle(document.body);
+                const c1 = style.getPropertyValue('--particle-color-1').trim();
+                const c2 = style.getPropertyValue('--particle-color-2').trim();
+                ctx.fillStyle = Math.random() > 0.7 ? c1 : c2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    if (Math.hypot(this.x - p.x, this.y - p.y) < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.strokeStyle = style.getPropertyValue('--particle-line').trim();
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function initParticles() { particles = []; for (let i = 0; i < 70; i++) particles.push(new Particle()); }
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        resizeCanvas();
+        initParticles();
+        animate();
+
+        // ====== CARGA INICIAL ======
+        loadUsers();
+        loadSidebarCounts();
+    </script>
 </body>
 </html>

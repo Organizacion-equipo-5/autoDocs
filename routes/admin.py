@@ -328,6 +328,11 @@ def admin_create_project():
     if not user:
         return jsonify({"error": "Owner user not found"}), 404
 
+    # Check for duplicate project name globally (all users)
+    existing_project = db.projects.find_one({"name": name})
+    if existing_project:
+        return jsonify({"error": f"Ya existe un proyecto con el nombre '{name}'. Por favor usa un nombre diferente."}), 400
+
     project = {
         "_id": str(uuid.uuid4()),
         "name": name,

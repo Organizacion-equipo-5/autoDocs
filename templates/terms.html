@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Términos y Condiciones — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "var(--color-background)",
+                        "surface": "var(--color-surface)",
+                        "surface-container": "var(--color-surface-container)",
+                        "surface-container-high": "var(--color-surface-container-high)",
+                        "on-surface": "var(--color-on-surface)",
+                        "on-surface-variant": "var(--color-on-surface-variant)",
+                        "primary": "var(--color-primary)",
+                        "secondary": "var(--color-secondary)",
+                        "outline-variant": "var(--color-outline-variant)",
+                        "error": "var(--color-error)",
+                        "green-accent": "var(--color-green-accent)",
+                        "tertiary": "var(--color-tertiary)",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ====== TEMA OSCURO (por defecto) ====== */
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;
+            --color-surface: rgba(27,32,36,0.4);
+            --color-surface-container: #1b2024;
+            --color-surface-container-high: #252b2e;
+            --color-on-surface: #dee3e8;
+            --color-on-surface-variant: #bdc8d1;
+            --color-primary: #39b2f8;
+            --color-secondary: #c0c1ff;
+            --color-outline-variant: #3e484f;
+            --color-error: #ffb4ab;
+            --color-green-accent: #10b981;
+            --color-tertiary: #ffc176;
+            --glass-border: rgba(123,208,255,0.1);
+            --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --glass-hover-border: rgba(123,208,255,0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --particle-color-1: rgba(142,213,255,0.4);
+            --particle-color-2: rgba(192,193,255,0.2);
+            --particle-line: rgba(142,213,255,0.12);
+        }
+
+        /* ====== TEMA CLARO ====== */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;
+            --color-surface: rgba(255,255,255,0.7);
+            --color-surface-container: #ffffff;
+            --color-surface-container-high: #e2e8f0;
+            --color-on-surface: #0f172a;
+            --color-on-surface-variant: #334155;
+            --color-primary: #38bdf8;
+            --color-secondary: #818cf8;
+            --color-outline-variant: #cbd5e1;
+            --color-error: #ba1a1a;
+            --color-green-accent: #10b981;
+            --color-tertiary: #7c5800;
+            --glass-border: rgba(0,0,0,0.04);
+            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            --glass-hover-border: rgba(56,189,248,0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            --particle-color-1: rgba(56,189,248,0.25);
+            --particle-color-2: rgba(129,140,248,0.2);
+            --particle-line: rgba(56,189,248,0.12);
+        }
+
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transform: translate3d(0, 0, 0);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+        }
+
+        .glow-cyan { text-shadow: 0 0 12px var(--color-primary); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+
+        .theme-float-switch {
+            position: fixed; bottom: 2.5rem; right: 2.5rem; z-index: 2000;
+            border-radius: 50%; box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+            padding: 0.5rem; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, border 0.2s;
+        }
+        .theme-float-switch:hover { transform: scale(1.05); }
+
+        .terms-content h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-on-surface);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .terms-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-on-surface);
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .terms-content p, .terms-content li {
+            color: var(--color-on-surface-variant);
+            line-height: 1.7;
+        }
+        .terms-content ul {
+            list-style: disc;
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .terms-content ul li {
+            margin-bottom: 0.25rem;
+        }
+        .terms-content .highlight-box {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid var(--color-primary);
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        .terms-content .highlight-box p {
+            margin: 0;
+        }
+        .terms-content .badge-mx {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--color-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body class="font-body-md" data-theme="dark">
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Botón flotante de tema -->
+    <div class="theme-float-switch glass">
+        <button id="themeButton" type="button" aria-label="Alternar tema" class="bg-transparent border-0 p-0 cursor-pointer text-2xl">
+            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+        </button>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto py-16 px-6">
+        <!-- Cabecera -->
+        <div class="glass rounded-3xl p-8 mb-8 border border-outline-variant/20">
+            <a href="/" class="text-primary hover:text-primary/80 transition-colors font-semibold text-sm flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">arrow_back</span> Volver al inicio
+            </a>
+            <div class="flex items-center gap-3 mt-4">
+                <h1 class="text-4xl lg:text-5xl font-bold text-on-surface">
+                    Términos y <span class="text-primary">Condiciones</span>
+                </h1>
+                <span class="badge-mx">🇲🇽 México</span>
+            </div>
+            <p class="text-on-surface-variant/60 text-sm font-code-md mt-2">
+                Última actualización: <span class="text-primary">agosto 2026</span>
+            </p>
+        </div>
+
+        <!-- Contenido -->
+        <div class="glass rounded-3xl p-8 lg:p-12 border border-outline-variant/20 terms-content">
+
+            <div class="highlight-box">
+                <p><strong>Jurisdicción:</strong> Estos Términos y Condiciones se rigen por las leyes de los <strong>Estados Unidos Mexicanos</strong>. Cualquier controversia será resuelta por los tribunales competentes de la <strong>Ciudad de México</strong>.</p>
+            </div>
+
+            <section>
+                <h2>1. Aceptación de los términos</h2>
+                <p>Al crear una cuenta en AutoDocs AI, utilizar el servicio o acceder a la plataforma, aceptas estos Términos y Condiciones en su totalidad. Si no estás de acuerdo con alguna de las disposiciones aquí establecidas, no debes utilizar el servicio.</p>
+                <p class="mt-2">Los presentes términos constituyen un acuerdo legal vinculante entre tú (el "Usuario") y AutoDocs AI (el "Proveedor"), con domicilio en la Ciudad de México, México. Al registrarte, declaras que tienes la capacidad legal suficiente para celebrar este acuerdo de conformidad con el <strong>Código Civil Federal</strong> y el <strong>Código de Comercio</strong> de los Estados Unidos Mexicanos.</p>
+            </section>
+
+            <section>
+                <h2>2. Descripción del servicio</h2>
+                <p>AutoDocs AI es una plataforma tecnológica que ofrece análisis automatizado de código fuente para generar documentación técnica profesional. El servicio incluye:</p>
+                <ul>
+                    <li>Análisis estático de repositorios de código (Python, JavaScript, TypeScript, Java, etc.)</li>
+                    <li>Detección automática de funciones, clases, métodos y endpoints de API</li>
+                    <li>Generación de documentación en múltiples formatos (Markdown, PDF, HTML)</li>
+                    <li>Dashboards interactivos con métricas de calidad de código</li>
+                    <li>Integración con GitHub y otros sistemas de control de versiones</li>
+                </ul>
+                <p class="mt-2">El servicio se proporciona "tal cual" y "según disponibilidad", con el objetivo de facilitar la documentación técnica, pero sin garantizar resultados libres de errores u omisiones, de acuerdo con lo establecido en el <strong>Código de Comercio</strong> y la <strong>Ley Federal de Protección al Consumidor</strong>.</p>
+            </section>
+
+            <section>
+                <h2>3. Planes y suscripciones</h2>
+                
+                <h3>3.1 Planes disponibles</h3>
+                <ul>
+                    <li><strong>Plan Gratuito:</strong> Acceso limitado a 3 proyectos, análisis básico y exportación PDF.</li>
+                    <li><strong>Plan Pro:</strong> 20 proyectos, análisis avanzado, documentación con IA y soporte prioritario. Precio: $350/mes.</li>
+                    <li><strong>Plan Enterprise:</strong> Proyectos ilimitados, análisis ilimitado, API dedicada y soporte 24/7. Precio: $850/mes.</li>
+                </ul>
+
+                <h3>3.2 Facturación y pagos</h3>
+                <p>Los planes de pago se facturan mensualmente a través de Mercado Pago, nuestro procesador de pagos certificado con presencia en México. Al suscribirte a un plan de pago, autorizas el cobro automático en tu método de pago registrado.</p>
+                <ul>
+                    <li>El cargo se realiza el día de la suscripción y luego mensualmente en la misma fecha.</li>
+                    <li>Puedes cancelar tu suscripción en cualquier momento desde el panel de administración de tu cuenta.</li>
+                    <li>La cancelación detiene la renovación automática, pero no genera reembolsos de periodos ya facturados, conforme a lo dispuesto en la <strong>Ley Federal de Protección al Consumidor</strong>.</li>
+                    <li>En caso de fallo en el pago, el acceso al servicio se suspenderá hasta regularizar la situación.</li>
+                    <li>Los precios se expresan en dólares estadounidenses (USD) y pueden estar sujetos a impuestos aplicables en México.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>4. Propiedad del código y datos</h2>
+                <p>AutoDocs AI respeta y protege la propiedad intelectual de sus usuarios. Al utilizar el servicio, aceptas que:</p>
+                <ul>
+                    <li>El código fuente que subas o conectes a la plataforma sigue siendo de tu propiedad exclusiva, protegido por la <strong>Ley Federal de Protección a la Propiedad Industrial</strong> y la <strong>Ley Federal de Derechos de Autor</strong>.</li>
+                    <li>Utilizamos tu código únicamente con el propósito de realizar el análisis y generar la documentación solicitada.</li>
+                    <li>No compartimos, vendemos ni distribuimos tu código o sus análisis a terceros sin tu consentimiento explícito.</li>
+                    <li>Los resultados del análisis (documentación generada) pueden ser utilizados por AutoDocs AI para mejorar el servicio de forma agregada y anónima.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>5. Privacidad y protección de datos personales</h2>
+                <p>AutoDocs AI cumple con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento. Para más detalles sobre cómo tratamos tus datos personales, consulta nuestra <a href="/privacy" class="text-primary hover:underline">Política de Privacidad</a>.</p>
+                <ul>
+                    <li>Recopilamos información personal necesaria para la prestación del servicio (nombre, correo electrónico, datos de facturación).</li>
+                    <li>Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos, conforme al <strong>Reglamento de la LFPDPPP</strong>.</li>
+                    <li>Tienes derecho a acceder, rectificar, cancelar y oponerte al tratamiento de tus datos personales (Derechos ARCO).</li>
+                    <li>Conservamos tus datos mientras mantengas una cuenta activa, o hasta que solicites su eliminación.</li>
+                    <li>Puedes ejercer tus derechos ARCO contactándonos a <a href="mailto:privacy@autodocs.ai" class="text-primary hover:underline">privacy@autodocs.ai</a>.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>6. Uso aceptable del servicio</h2>
+                <p>Como usuario de AutoDocs AI, te comprometes a:</p>
+                <ul>
+                    <li>No utilizar el servicio para analizar código malicioso, ilegal o que infrinja derechos de terceros.</li>
+                    <li>No intentar eludir las medidas de seguridad de la plataforma.</li>
+                    <li>No utilizar el servicio para realizar ataques de denegación de servicio o cualquier actividad que comprometa la integridad del sistema.</li>
+                    <li>No compartir tus credenciales de acceso con terceros no autorizados.</li>
+                    <li>Utilizar el servicio de acuerdo con las leyes y regulaciones aplicables en México.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>7. Limitación de responsabilidad</h2>
+                <p>AutoDocs AI proporciona el servicio con el mayor cuidado y profesionalismo posible. Sin embargo:</p>
+                <ul>
+                    <li>La documentación generada automáticamente puede contener errores, omisiones o inexactitudes. Es tu responsabilidad revisar, validar y corregir la documentación antes de su uso o publicación.</li>
+                    <li>No garantizamos que el servicio esté libre de interrupciones, errores o vulnerabilidades de seguridad.</li>
+                    <li>En ningún caso AutoDocs AI será responsable por daños directos, indirectos, incidentales o consecuentes derivados del uso del servicio, conforme a lo establecido en el <strong>Código Civil Federal</strong>.</li>
+                    <li>La responsabilidad máxima de AutoDocs AI se limita al monto total pagado por el servicio en los últimos 12 meses.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>8. Cancelación y suspensión</h2>
+                <p>AutoDocs AI se reserva el derecho de:</p>
+                <ul>
+                    <li>Suspender o cancelar tu cuenta si se detecta una violación de estos términos.</li>
+                    <li>Modificar o discontinuar el servicio en cualquier momento, con notificación previa siempre que sea razonablemente posible.</li>
+                    <li>Eliminar cuentas inactivas por un período superior a 12 meses.</li>
+                </ul>
+                <p class="mt-2">La cancelación de tu cuenta implica la eliminación de tus datos de la plataforma, de acuerdo con nuestra Política de Privacidad y la <strong>LFPDPPP</strong>.</p>
+            </section>
+
+            <section>
+                <h2>9. Modificaciones de los términos</h2>
+                <p>AutoDocs AI se reserva el derecho de actualizar estos Términos y Condiciones en cualquier momento. Las modificaciones serán efectivas inmediatamente después de su publicación en la plataforma.</p>
+                <ul>
+                    <li>Notificaremos cambios significativos a través de la plataforma o por correo electrónico.</li>
+                    <li>El uso continuado del servicio después de las modificaciones constituye tu aceptación de los nuevos términos.</li>
+                    <li>Si no estás de acuerdo con los cambios, puedes cancelar tu cuenta.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>10. Ley aplicable y jurisdicción</h2>
+                <p>Estos términos se rigen por las leyes de los <strong>Estados Unidos Mexicanos</strong>.</p>
+                <ul>
+                    <li>Para asuntos relacionados con la protección de datos personales, se aplica la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento.</li>
+                    <li>Para asuntos comerciales y de contratación, se aplica el <strong>Código de Comercio</strong>.</li>
+                    <li>Para asuntos civiles, se aplica el <strong>Código Civil Federal</strong>.</li>
+                    <li>Para la protección del consumidor, se aplica la <strong>Ley Federal de Protección al Consumidor</strong>.</li>
+                    <li>Cualquier disputa relacionada con estos términos o el uso del servicio será resuelta por los tribunales competentes de la <strong>Ciudad de México</strong>.</li>
+                    <li>Si alguna disposición de estos términos resulta inválida o inaplicable, las disposiciones restantes permanecerán en pleno vigor.</li>
+                </ul>
+                <div class="highlight-box">
+                    <p><strong>Protección al consumidor:</strong> AutoDocs AI se compromete a cumplir con la <strong>Ley Federal de Protección al Consumidor</strong>, garantizando información veraz, clara y suficiente sobre los servicios ofrecidos.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>11. Contacto</h2>
+                <p>Si tienes preguntas, comentarios o inquietudes sobre estos Términos y Condiciones, puedes contactarnos a través de:</p>
+                <ul>
+                    <li><strong>Correo electrónico:</strong> <a href="mailto:legal@autodocs.ai" class="text-primary hover:underline">legal@autodocs.ai</a></li>
+                    <li><strong>Teléfono:</strong> +52 55 1234-5678</li>
+                    <li><strong>Dirección:</strong> Ciudad de México, México</li>
+                    <li><strong>Horario de atención:</strong> Lunes a viernes, 9:00 AM - 6:00 PM (CST)</li>
+                </ul>
+                <p class="mt-2">Para ejercer tus derechos ARCO (Acceso, Rectificación, Cancelación y Oposición) en materia de protección de datos personales, contáctanos a <a href="mailto:privacy@autodocs.ai" class="text-primary hover:underline">privacy@autodocs.ai</a>.</p>
+            </section>
+
+            <div class="mt-8 pt-6 border-t border-outline-variant/20 text-on-surface-variant/50 text-xs font-code-md">
+                <p>AutoDocs AI — Términos y Condiciones v2.0 · agosto 2026 · 🇲🇽 <span class="text-primary">Aplicable en México</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== TEMA ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        });
+
+        document.getElementById('themeButton').addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+
+        // ==================== PARTÍCULAS ====================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+        const particleCount = 60;
+        const repulsionRadius = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < repulsionRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (repulsionRadius - distance) / repulsionRadius;
+                        this.x -= Math.cos(angle) * force * 2;
+                        this.y -= Math.sin(angle) * force * 2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                const style = getComputedStyle(document.body);
+                const color1 = style.getPropertyValue('--particle-color-1').trim() || 'rgba(56,189,248,0.25)';
+                const color2 = style.getPropertyValue('--particle-color-2').trim() || 'rgba(129,140,248,0.2)';
+                const lineColor = style.getPropertyValue('--particle-line').trim() || 'rgba(56,189,248,0.12)';
+                ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    const d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = lineColor;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animate();
+        });
+    </script>
+</body>
+</html>

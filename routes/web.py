@@ -7,6 +7,14 @@ web_bp = Blueprint('web', __name__)
 def pricing():
     return render_template('pricing.html')
 
+@web_bp.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@web_bp.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+    
 @web_bp.route('/')
 def index():
     return render_template('index.html')
@@ -34,7 +42,10 @@ def analytics():
 @web_bp.route('/admin')
 def admin():
     return render_template('admin_dashboard.html')
-
+@web_bp.route('/admin/pca')
+def admin_pca():
+    return render_template('admin_pca.html')
+    
 @web_bp.route('/admin/users')
 def admin_users():
     return render_template('admin_users.html')
@@ -62,3 +73,4 @@ def ml_predictions():
 @web_bp.route('/plan-recommendation')
 def plan_recommendation():
     return render_template('plan_recommendation.html')
+

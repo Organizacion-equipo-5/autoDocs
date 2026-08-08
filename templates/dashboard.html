@@ -1,17 +1,42 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     DASHBOARD - AutoDocs AI
+     
+     Panel principal de usuario para gestion de proyectos
+     Incluye estadisticas, lista de proyectos, modales y funcionalidades de edicion
+     Soporta temas claro/oscuro y modo responsive
+     ============================================================ -->
 <html class="light" lang="es">
 <head>
+    <!-- ============================================================
+         METADATOS Y CONFIGURACION DEL DOCUMENTO
+         ============================================================ -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard — AutoDocs AI</title>
+    
+    <!-- ============================================================
+         LIBRERIAS EXTERNAS
+         ============================================================ -->
+    <!-- Tailwind CSS: Framework utilitario para estilos rapidos y responsive -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Fuentes de Google: JetBrains Mono para codigo, Geist para UI -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Material Symbols: Sistema de iconos de Google Material Design -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- ============================================================
+         CONFIGURACION DE TAILWIND
+         ============================================================ -->
     <script id="tailwind-config">
+        // Extiende la configuracion de Tailwind con colores personalizados del tema Material Design
         tailwind.config = {
-            darkMode: "class",
+            darkMode: "class", // Habilita el modo oscuro basado en clases CSS
             theme: {
                 extend: {
+                    // Paleta de colores completa siguiendo el sistema de diseno Material Design
                     colors: {
                         "on-primary-container": "#001f2b",
                         "tertiary-container": "#ffdbb7",
@@ -61,24 +86,32 @@
                         "on-secondary": "#ffffff",
                         "inverse-surface": "#1e293b"
                     },
+                    // Bordes redondeados personalizados
                     borderRadius: {
                         "DEFAULT": "0.125rem",
                         "lg": "0.25rem",
                         "xl": "0.5rem",
                         "full": "0.75rem"
                     },
+                    // Fuentes personalizadas para diferentes contextos
                     fontFamily: {
-                        "body-md": ["Geist"],
-                        "headline-lg": ["Geist"],
-                        "display-lg": ["Geist"],
-                        "code-md": ["JetBrains Mono"],
-                        "label-caps": ["Geist"]
+                        "body-md": ["Geist"],        // Texto general
+                        "headline-lg": ["Geist"],    // Titulos grandes
+                        "display-lg": ["Geist"],     // Display
+                        "code-md": ["JetBrains Mono"], // Codigo
+                        "label-caps": ["Geist"]      // Etiquetas en mayusculas
                     }
                 },
             },
         }
     </script>
+    
     <style>
+        /* ============================================================
+           ESTILOS GLOBALES Y VARIABLES CSS
+           ============================================================ */
+        
+        /* Estilos base para el body en modo claro */
         body {
             background: #f1f5f9;
             overflow-x: hidden;
@@ -86,22 +119,29 @@
             color: #0f172a;
         }
 
+        /* Estilos para el modo oscuro (se activa con la clase .dark en html) */
         html.dark body {
             background: #0f1418;
             color: #e2e8f0;
         }
 
+        /* Efecto glass en modo oscuro */
         html.dark .glass {
             background: rgba(15, 20, 24, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
+        /* ============================================================
+           ESTILOS PERSONALIZADOS - TEMA OSCURO
+           ============================================================ */
+        /* Hover para elementos glass en modo oscuro */
         html.dark .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.4);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
+        /* Colores de texto en modo oscuro */
         html.dark .text-on-surface { color: #f1f5f9 !important; }
         html.dark .text-on-surface-variant { color: #94a3b8 !important; }
         html.dark .text-primary { color: #38bdf8 !important; }
@@ -110,6 +150,10 @@
         html.dark .bg-primary\/15 { background: rgba(56, 189, 248, 0.15) !important; }
         html.dark .bg-primary\/5 { background: rgba(56, 189, 248, 0.05) !important; }
 
+        /* ============================================================
+           CANVAS DE PARTICULAS (FONDO ANIMADO)
+           ============================================================ */
+        /* Contenedor fijo para el fondo animado de particulas */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -117,12 +161,15 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            pointer-events: none;
+            pointer-events: none; /* Permite hacer clic a traves del canvas */
         }
 
+        /* ============================================================
+           EFECTO GLASS (VIDRIO ESMERILADO)
+           ============================================================ */
         .glass {
             background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px); /* Desenfoque del fondo */
             border: 1px solid rgba(0, 0, 0, 0.04);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
             transform: translate3d(0, 0, 0);
@@ -130,11 +177,16 @@
             will-change: transform, opacity;
         }
 
+        /* Efecto hover para elementos glass */
         .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.3);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
         }
 
+        /* ============================================================
+           ANIMACIONES
+           ============================================================ */
+        /* Animacion de entrada para elementos que aparecen con retraso */
         .stagger-in {
             opacity: 0;
             transform: translateY(20px) translate3d(0,0,0);
@@ -144,6 +196,7 @@
             to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
         }
 
+        /* Desactiva animaciones si el usuario prefiere movimiento reducido */
         @media (prefers-reduced-motion: reduce) {
             .stagger-in, .animate-float, .glass-hover {
                 animation: none !important;
@@ -153,20 +206,26 @@
             }
         }
 
+        /* Anillo de progreso circular */
         .progress-ring { transform: rotate(-90deg); }
 
+        /* Efecto de inclinacion 3D */
         .tilt-card { perspective: 1000px; }
 
+        /* Scrollbar personalizada */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
 
+        /* Animacion de entrada para modales */
         @keyframes fadeDown {
             from { opacity: 0; transform: translateY(-15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .modal-anim { animation: fadeDown 0.2s ease; }
 
-        /* Estilos mejorados para el menú lateral */
+        /* ============================================================
+           ESTILOS DEL MENU LATERAL (SIDEBAR)
+           ============================================================ */
         .sidebar-nav {
             display: flex;
             flex-direction: column;
@@ -224,6 +283,7 @@
             font-weight: 700;
         }
 
+        /* Estilos del sidebar en modo oscuro */
         html.dark .sidebar-nav-item {
             color: #94a3b8;
         }
@@ -238,16 +298,19 @@
             color: #38bdf8;
         }
 
-        /* Sidebar expandida en hover para escritorio */
+        /* Sidebar expandible en hover para escritorio */
         @media (min-width: 1024px) {
+            /* Sidebar colapsado por defecto (solo iconos) */
             aside {
                 width: 72px;
                 transition: width 0.3s ease;
                 overflow: hidden;
             }
+            /* Al hacer hover, se expande a 220px */
             aside:hover {
                 width: 220px;
             }
+            /* Muestra las etiquetas al hacer hover */
             aside:hover .sidebar-nav-item .nav-label {
                 opacity: 1;
             }
@@ -272,7 +335,9 @@
             }
         }
 
-        /* Estilos para la sección de proyectos */
+        /* ============================================================
+           ESTILOS PARA TARJETAS DE PROYECTOS
+           ============================================================ */
         .project-card {
             transition: all 0.3s;
             position: relative;
@@ -284,6 +349,7 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
         }
 
+        /* Badge de estado del proyecto (posicion absoluta en esquina superior derecha) */
         .project-card .status-badge {
             position: absolute;
             top: 12px;
@@ -296,6 +362,7 @@
             letter-spacing: 0.04em;
         }
 
+        /* Estados de los badges */
         .project-card .status-badge.completed {
             background: rgba(16, 185, 129, 0.12);
             color: #10b981;
@@ -320,6 +387,7 @@
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
+        /* Metricas del proyecto en grid de 3 columnas */
         .project-metrics {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -346,11 +414,14 @@
             letter-spacing: 0.04em;
         }
 
+        /* Valores de metricas en modo oscuro */
         html.dark .project-metrics .metric .value {
             color: #f1f5f9;
         }
 
-        /* Modal styles */
+        /* ============================================================
+           ESTILOS PARA MODALES
+           ============================================================ */
         .modal-overlay {
             background: rgba(15, 20, 24, 0.6);
             backdrop-filter: blur(12px);
@@ -360,6 +431,7 @@
             background: rgba(241, 245, 249, 0.7);
         }
 
+        /* Inputs dentro de modales */
         .modal-input {
             width: 100%;
             border-radius: 12px;
@@ -388,6 +460,7 @@
             color: #dee3e8;
         }
 
+        /* Zona de upload (drag & drop) */
         #upload-zone {
             border: 2px dashed rgba(148, 163, 184, 0.4);
             background: rgba(248, 250, 252, 0.5);
@@ -412,151 +485,173 @@
             border-color: #38bdf8;
             background: rgba(56, 189, 248, 0.08);
         }
-        /* ── MODAL INPUTS ── */
-.modal-input {
-    width: 100%;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    background: var(--modal-input-bg, #f8fafc);
-    border: 1px solid var(--modal-input-border, rgba(148, 163, 184, 0.4));
-    color: var(--modal-text, #0f172a);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-    font-family: 'Geist', sans-serif;
-}
-.modal-input::placeholder {
-    color: var(--modal-placeholder, rgba(100, 116, 139, 0.5));
-}
-.modal-input:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-}
-.modal-input[readonly] {
-    opacity: 0.65;
-    cursor: default;
-}
 
-html.dark .modal-input {
-    background: #1b2024;
-    border-color: rgba(62, 72, 79, 0.8);
-    color: #dee3e8;
-}
-html.dark .modal-input::placeholder {
-    color: rgba(189, 200, 209, 0.4);
-}
-html.dark .modal-input:focus {
-    border-color: #8ed5ff;
-    box-shadow: 0 0 0 3px rgba(142, 213, 255, 0.18);
-}
+        /* Inputs de modal con estilo consistente */
+        .modal-input {
+            width: 100%;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            background: var(--modal-input-bg, #f8fafc);
+            border: 1px solid var(--modal-input-border, rgba(148, 163, 184, 0.4));
+            color: var(--modal-text, #0f172a);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            font-family: 'Geist', sans-serif;
+        }
 
-/* ── MODAL OVERLAY ── */
-.modal-overlay {
-    background: rgba(15, 20, 24, 0.6);
-    backdrop-filter: blur(12px);
-}
-html:not(.dark) .modal-overlay {
-    background: rgba(241, 245, 249, 0.7);
-}
+        .modal-input::placeholder {
+            color: var(--modal-placeholder, rgba(100, 116, 139, 0.5));
+        }
 
-/* ── PROGRESS TRACK ── */
-.progress-track {
-    background: rgba(148, 163, 184, 0.2);
-    border-radius: 9999px;
-    height: 0.5rem;
-    overflow: hidden;
-}
-.progress-fill {
-    height: 100%;
-    border-radius: 9999px;
-    background: linear-gradient(90deg, #38bdf8, #818cf8);
-    transition: width 0.6s ease;
-}
+        .modal-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        .modal-input[readonly] {
+            opacity: 0.65;
+            cursor: default;
+        }
+
+        html.dark .modal-input {
+            background: #1b2024;
+            border-color: rgba(62, 72, 79, 0.8);
+            color: #dee3e8;
+        }
+
+        html.dark .modal-input::placeholder {
+            color: rgba(189, 200, 209, 0.4);
+        }
+
+        html.dark .modal-input:focus {
+            border-color: #8ed5ff;
+            box-shadow: 0 0 0 3px rgba(142, 213, 255, 0.18);
+        }
+
+        /* Barra de progreso personalizada */
+        .progress-track {
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 9999px;
+            height: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            transition: width 0.6s ease;
+        }
     </style>
 </head>
+
+<!-- ============================================================
+     CUERPO PRINCIPAL DE LA PAGINA
+     ============================================================ -->
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    
+    <!-- Canvas para particulas de fondo (efecto visual dinamico) -->
     <canvas id="particle-canvas"></canvas>
+    
+    <!-- Contenedor principal con layout flex de pantalla completa -->
     <div class="flex min-h-screen w-full relative z-10">
-        <!-- Sidebar Mejorado -->
+        
+        <!-- ============================================================
+             SIDEBAR (MENU LATERAL)
+             ============================================================ -->
         <aside class="h-screen sticky top-0 flex flex-col items-center py-6 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
-            <!-- Logo -->
+            
+            <!-- Logo de la aplicacion - icono de terminal en circulo con efecto glow -->
             <div class="mb-8 flex-shrink-0">
                 <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
                     <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
                 </div>
             </div>
 
-            <!-- Navegación -->
+            <!-- Navegacion principal del sidebar -->
             <nav class="flex-1 w-full overflow-y-auto">
                 <div class="sidebar-nav">
+                    <!-- Enlace al dashboard (activo por defecto) -->
                     <a href="/dashboard" class="sidebar-nav-item active">
                         <span class="material-symbols-outlined">dashboard</span>
                         <span class="nav-label">Dashboard</span>
                     </a>
+                    <!-- Enlace a la lista de proyectos con badge contador -->
                     <a href="/projects" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">folder_open</span>
                         <span class="nav-label">Proyectos</span>
                         <span class="nav-badge" id="sidebar-project-count">0</span>
                     </a>
+                    <!-- Enlace a analisis de proyectos -->
                     <a href="/analytics" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">analytics</span>
-                        <span class="nav-label">Analytics</span>
+                        <span class="nav-label">Analisis</span>
                     </a>
+                    <!-- Enlace a analisis de base de datos -->
                     <a href="/database-analysis" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">storage</span>
-                        <span class="nav-label">Análisis BD</span>
+                        <span class="nav-label">Analisis BD</span>
                     </a>
+                    <!-- Enlace a predicciones de machine learning -->
                     <a href="/ml-predictions" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">scatter_plot</span>
                         <span class="nav-label">Predicciones ML</span>
                     </a>
-                    <button onclick="openUploadModal()" class="sidebar-nav-item">
-                        <span class="material-symbols-outlined">upload</span>
-                        <span class="nav-label">Nuevo proyecto</span>
-                    </button>
+                    <!-- Boton para abrir el modal de configuracion -->
                     <a onclick="openConfigModal()" class="sidebar-nav-item" style="cursor:pointer;">
-    <span class="material-symbols-outlined">settings</span>
-    <span class="nav-label">Configuración</span>
-</a>
+                        <span class="material-symbols-outlined">settings</span>
+                        <span class="nav-label">Configuracion</span>
+                    </a>
+                    <!-- Boton de cerrar sesion -->
                     <a href="/" onclick="logout()" class="sidebar-nav-item" style="margin-top:8px;border-top:1px solid rgba(148,163,184,0.1);padding-top:12px;">
                         <span class="material-symbols-outlined">logout</span>
-                        <span class="nav-label">Cerrar sesión</span>
+                        <span class="nav-label">Cerrar sesion</span>
                     </a>
                 </div>
             </nav>
 
-            <!-- Perfil -->
-            <!-- Perfil en sidebar -->
-<div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
-    <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
-        <div id="user-avatar-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm flex-shrink-0">U</div>
-        <div class="sidebar-user-info min-w-0">
-            <div class="text-sm font-semibold text-on-surface truncate" id="sidebar-user-name">Usuario</div>
-            <div class="text-xs text-primary" id="sidebar-user-plan">Plan Gratuito</div>
-        </div>
-    </a>
-</div>
+            <!-- Perfil de usuario en la parte inferior del sidebar -->
+            <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+                <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+                    <!-- Avatar del usuario con inicial -->
+                    <div id="user-avatar-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm flex-shrink-0">U</div>
+                    <!-- Informacion del usuario (nombre y plan) -->
+                    <div class="sidebar-user-info min-w-0">
+                        <div class="text-sm font-semibold text-on-surface truncate" id="sidebar-user-name">Usuario</div>
+                        <div class="text-xs text-primary" id="sidebar-user-plan">Plan Gratuito</div>
+                    </div>
+                </a>
+            </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- ============================================================
+             CONTENIDO PRINCIPAL (MAIN CONTENT)
+             ============================================================ -->
         <main class="flex-1 flex flex-col p-6 lg:p-10 gap-8 overflow-y-auto overflow-x-hidden">
-            <!-- Header -->
+            
+            <!-- HEADER DEL DASHBOARD -->
             <header class="flex flex-wrap items-center justify-between gap-4 stagger-in" style="animation-delay: 0.15s;">
+                <!-- Titulo y saludo -->
                 <div>
                     <h1 class="text-3xl lg:text-4xl font-bold text-on-surface">
                         Dashboard <span class="text-primary">AutoDocs</span>
                     </h1>
                     <p class="text-on-surface-variant/60 font-mono text-xs mt-1 uppercase tracking-[0.2em]" id="greeting">Bienvenido de vuelta</p>
                 </div>
+                <!-- Acciones rapidas -->
                 <div class="flex items-center gap-3">
+                    <!-- Badge del plan actual con contador de proyectos -->
                     <div class="glass px-4 py-2 rounded-xl flex items-center gap-3 border border-outline-variant/20">
                         <span class="material-symbols-outlined text-primary text-sm">workspace_premium</span>
                         <span class="text-sm font-semibold text-on-surface" id="plan-name">Free</span>
-                        <span class="text-xs text-on-surface-variant/60" id="project-count">0/3</span>
+                        <span class="text-xs text-on-surface-variant/60" id="project-count" style="color: #BFBDBD;">0/3</span>
                     </div>
+                    <!-- Boton para cambiar entre tema claro/oscuro -->
                     <button id="themeButton" class="p-2.5 glass glass-hover rounded-xl border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
                         <span id="themeIcon" class="material-symbols-outlined text-xl">light_mode</span>
                     </button>
+                    <!-- Boton para crear nuevo proyecto -->
                     <button onclick="openUploadModal()" class="px-5 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all hover:bg-primary/5">
                         <span class="material-symbols-outlined text-lg">add</span>
                         Nuevo
@@ -564,106 +659,140 @@ html:not(.dark) .modal-overlay {
                 </div>
             </header>
 
-            <!-- Stats Cards - Layout más limpio -->
+            <!-- ============================================================
+                 TARJETAS DE ESTADISTICAS (STATS CARDS)
+                 ============================================================ -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-in" style="animation-delay: 0.2s;">
+                <!-- Tarjeta: Total de proyectos -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Proyectos</span>
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold" style="color: #BFBDBD;">Proyectos</span>
                         <span class="material-symbols-outlined text-primary text-xl">description</span>
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-projects">0</div>
                 </div>
+                <!-- Tarjeta: Proyectos completados -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Completados</span>
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold" style="color: #BFBDBD;">Completados</span>
                         <span class="material-symbols-outlined text-green-500 text-xl">check_circle</span>
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-completed">0</div>
                 </div>
+                <!-- Tarjeta: Total de funciones -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Funciones</span>
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold" style="color: #BFBDBD;">Funciones</span>
                         <span class="material-symbols-outlined text-secondary text-xl">functions</span>
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-functions">0</div>
                 </div>
+                <!-- Tarjeta: Total de endpoints -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold">Endpoints</span>
+                        <span class="text-xs uppercase tracking-wider text-on-surface-variant/50 font-bold" style="color: #BFBDBD;">Endpoints</span>
                         <span class="material-symbols-outlined text-primary text-xl">api</span>
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-endpoints">0</div>
                 </div>
             </div>
 
-            <!-- Progress Card -->
+            <!-- ============================================================
+                 TARJETA DE PROGRESO (ANILLO CIRCULAR)
+                 ============================================================ -->
             <div class="glass p-6 rounded-2xl border border-outline-variant/10 stagger-in" style="animation-delay: 0.25s;">
                 <div class="flex items-center gap-6">
+                    <!-- Anillo de progreso SVG -->
                     <div class="relative w-20 h-20 flex-shrink-0">
                         <svg class="progress-ring w-20 h-20">
+                            <!-- Circulo de fondo (track) -->
                             <circle class="text-surface-variant/30 stroke-current" cx="40" cy="40" fill="transparent" r="34" stroke-width="6"></circle>
+                            <!-- Circulo de progreso (relleno dinamico) -->
                             <circle id="progress-circle" class="text-primary stroke-current" cx="40" cy="40" fill="transparent" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" stroke-width="6"></circle>
                         </svg>
+                        <!-- Porcentaje en el centro del anillo -->
                         <div class="absolute inset-0 flex items-center justify-center font-bold text-lg text-on-surface" id="progress-percent">0%</div>
                     </div>
+                    <!-- Informacion de progreso -->
                     <div>
                         <div class="text-sm font-semibold text-on-surface" id="progress-label">Sin proyectos</div>
-                        <div class="text-xs text-on-surface-variant/50">Proyectos finalizados sobre el total</div>
+                        <div class="text-xs text-on-surface-variant/50" style="color: #BFBDBD;">Proyectos finalizados sobre el total</div>
                         <div class="mt-2 flex items-center gap-4 text-xs">
-                            <span class="text-on-surface-variant/60">Completados: <strong id="stat-completed-small" class="text-green-500">0</strong></span>
-                            <span class="text-on-surface-variant/60">Activos: <strong id="stat-active-small" class="text-primary">0</strong></span>
+                            <span class="text-on-surface-variant/60" style="color: #BFBDBD;">Completados: <strong id="stat-completed-small" class="text-green-500">0</strong></span>
+                            <span class="text-on-surface-variant/60" style="color: #BFBDBD;">Activos: <strong id="stat-active-small" class="text-primary">0</strong></span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Projects -->
+            <!-- ============================================================
+                 SECCION DE PROYECTOS RECIENTES
+                 ============================================================ -->
             <section class="stagger-in" style="animation-delay: 0.3s;">
+                <!-- Encabezado de la seccion con enlace "Ver todos" -->
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-on-surface">Proyectos Recientes</h2>
                     <a href="/projects" class="text-xs text-primary hover:underline font-semibold uppercase tracking-wider">Ver todos</a>
                 </div>
+                <!-- Grid de tarjetas de proyectos (se renderiza dinamicamente) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" id="projects-grid"></div>
             </section>
         </main>
     </div>
 
-    <!-- Upload Modal -->
+    <!-- ============================================================
+         MODALES
+         ============================================================ -->
+
+    <!-- ============================================================
+         MODAL DE SUBIDA DE PROYECTO (UPLOAD MODAL)
+         ============================================================ -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <!-- Boton para cerrar el modal -->
             <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            
             <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo Proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6">Sube tu proyecto o clona desde GitHub</p>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Sube tu proyecto o clona desde GitHub</p>
 
+            <!-- Campo: Nombre del proyecto -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
                 <input type="text" id="proj-name" class="modal-input" placeholder="Mi Proyecto" />
             </div>
 
+            <!-- Campo: Descripcion (opcional) -->
             <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-50">(opcional)</span></label>
-                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripción" />
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripcion <span class="opacity-50">(opcional)</span></label>
+                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripcion" />
             </div>
 
+            <!-- Zona de drag & drop para subir archivos -->
             <div id="upload-zone" onclick="document.getElementById('file-input').click()"
                 ondragover="event.preventDefault();this.style.borderColor='#38bdf8'"
                 ondragleave="event.preventDefault();this.style.borderColor=''"
                 ondrop="event.preventDefault();onFileSelect({target:{files:event.dataTransfer.files}})">
+                <!-- Input oculto para seleccionar archivos -->
                 <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
                 <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
                 <p class="text-sm text-on-surface-variant/60">
-                    <strong class="text-primary">Haz clic</strong> o arrastra tu archivo
+                    <strong class="text-primary" style="color: #BFBDBD;">Haz clic</strong> o arrastra tu archivo
                 </p>
-                <p class="text-xs mt-1 text-on-surface-variant/40">ZIP, TAR.GZ, .py, .js — máx. 50 MB</p>
+                <p class="text-xs mt-1 text-on-surface-variant/40" style="color: #BFBDBD;">
+                    ZIP, TAR.GZ, .py, .js — max. 50 MB
+                </p>
             </div>
+            <!-- Mostrar nombre del archivo seleccionado -->
             <div id="file-name" class="hidden mt-3 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
 
+            <!-- Separador "o" -->
             <div class="flex items-center gap-3 my-4">
                 <div class="flex-1 h-px bg-outline-variant/20"></div>
                 <span class="text-xs uppercase tracking-widest text-on-surface-variant/40">o</span>
                 <div class="flex-1 h-px bg-outline-variant/20"></div>
             </div>
 
+            <!-- Campo: URL de GitHub -->
             <div class="mb-6">
                 <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
                     <span class="material-symbols-outlined text-sm align-middle mr-1">code</span>
@@ -672,6 +801,7 @@ html:not(.dark) .modal-overlay {
                 <input type="url" id="proj-github" class="modal-input" placeholder="https://github.com/usuario/repositorio" />
             </div>
 
+            <!-- Boton para crear el proyecto -->
             <button onclick="createProject()" id="modal-submit-btn"
                 class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-lg shadow-primary/25">
                 Crear y analizar
@@ -680,608 +810,800 @@ html:not(.dark) .modal-overlay {
         </div>
     </div>
 
-    <!-- Loading Modal -->
+    <!-- ============================================================
+         MODAL DE CARGA (LOADING MODAL)
+         ============================================================ -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="loadingModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <h3 class="text-2xl font-bold text-on-surface mb-1">Analizando proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6">Procesando código y generando documentación</p>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Procesando codigo y generando documentacion</p>
             <div class="flex flex-col items-center gap-4 py-8">
+                <!-- Spinner de carga animado -->
                 <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin"></div>
                 <p class="text-center text-on-surface-variant/60 text-sm">Esto puede tomar unos segundos...</p>
             </div>
         </div>
     </div>
 
-    <!-- Limit Modal -->
+    <!-- ============================================================
+         MODAL DE LIMITE ALCANZADO (LIMIT MODAL)
+         ============================================================ -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="limitModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeLimitModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-            <h3 class="text-2xl font-bold text-on-surface mb-1">Límite alcanzado</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6">Has alcanzado el límite de proyectos para tu plan actual.</p>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Limite alcanzado</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Has alcanzado el limite de proyectos para tu plan actual.</p>
             <div class="flex flex-col items-center gap-4 py-8">
+                <!-- Icono de bloqueo -->
                 <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center">
                     <span class="material-symbols-outlined text-error text-3xl">block</span>
                 </div>
-                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm">Actualiza tu plan para crear más proyectos.</p>
+                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Has alcanzado tu limite de 3 proyectos en el plan Gratuito. Te recomendamos actualizar al plan Pro para crear hasta 20 proyectos y acceder a mas funciones.</p>
             </div>
             <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
                 Ver planes
             </button>
         </div>
     </div>
-    <!-- ══════════════ CONFIGURATION MODAL ══════════════ -->
-<div id="configModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this)closeConfigModal()">
-    <div class="glass p-0 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-hidden flex flex-col">
-        <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-outline-variant/10 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-primary text-2xl">settings</span>
+
+    <!-- ============================================================
+         MODAL DE NOMBRE DUPLICADO (DUPLICATE MODAL)
+         ============================================================ -->
+    <div class="modal-overlay fixed inset-0 z-[60] hidden items-center justify-center" id="duplicateModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeDuplicateModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Nombre duplicado</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Ya existe un proyecto con este nombre.</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-error text-3xl">error</span>
                 </div>
-                <div>
-                    <h3 class="text-xl font-bold text-on-surface">Configuración</h3>
-                    <p class="text-sm text-on-surface-variant/60">Personaliza tu experiencia en AutoDocs AI</p>
-                </div>
+                <p id="duplicateMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Por favor usa un nombre diferente para tu proyecto.</p>
             </div>
-            <button onclick="closeConfigModal()" class="w-8 h-8 rounded-lg border-none bg-black/5 hover:bg-red-50 hover:text-red-500 text-on-surface-variant cursor-pointer flex items-center justify-center text-xl transition-all">✕</button>
-        </div>
-
-        <!-- Contenido con scroll -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-8">
-            
-            <!-- 1. PERFIL -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">person</span>
-                    Perfil
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nombre de usuario</label>
-                        <input type="text" id="config-username" class="modal-input" placeholder="Usuario" />
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Email</label>
-                        <input type="email" id="config-email" class="modal-input" placeholder="email@ejemplo.com" readonly />
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Bio</label>
-                        <textarea id="config-bio" class="modal-input" rows="2" placeholder="Breve descripción sobre ti..."></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. PREFERENCIAS DE INTERFAZ -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">palette</span>
-                    Apariencia
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('light')">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
-                                <span class="material-symbols-outlined text-gray-600">light_mode</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-on-surface">Claro</div>
-                                <div class="text-xs text-on-surface-variant/50">Modo día</div>
-                            </div>
-                        </div>
-                        <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-light-indicator"></div>
-                    </div>
-                    <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('dark')">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-outline-variant/30 flex items-center justify-center shadow-sm">
-                                <span class="material-symbols-outlined text-primary">dark_mode</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-on-surface">Oscuro</div>
-                                <div class="text-xs text-on-surface-variant/50">Modo noche</div>
-                            </div>
-                        </div>
-                        <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-dark-indicator"></div>
-                    </div>
-                    <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('system')">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-surface-container to-surface-container-high border-2 border-outline-variant/30 flex items-center justify-center shadow-sm">
-                                <span class="material-symbols-outlined text-secondary">auto_awesome</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-on-surface">Sistema</div>
-                                <div class="text-xs text-on-surface-variant/50">Automático</div>
-                            </div>
-                        </div>
-                        <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-system-indicator"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. NOTIFICACIONES -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">notifications</span>
-                    Notificaciones
-                </h4>
-                <div class="space-y-3">
-                    <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-green-500">check_circle</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">Análisis completado</div>
-                                <div class="text-xs text-on-surface-variant/50">Cuando un proyecto termine de analizarse</div>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="notif-completed" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
-                    </label>
-                    <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">upcoming</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">Recordatorios</div>
-                                <div class="text-xs text-on-surface-variant/50">Recordatorios semanales de proyectos</div>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="notif-reminders" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
-                    </label>
-                    <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-secondary">updates</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">Actualizaciones</div>
-                                <div class="text-xs text-on-surface-variant/50">Novedades y mejoras de AutoDocs</div>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="notif-updates" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
-                    </label>
-                </div>
-            </section>
-
-            <!-- 4. PLAN Y FACTURACIÓN -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">credit_card</span>
-                    Plan y Facturación
-                </h4>
-                <div class="glass p-5 rounded-xl border border-outline-variant/10">
-                    <div class="flex items-center justify-between flex-wrap gap-4">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-lg font-bold text-on-surface" id="config-plan-name">Plan Free</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200" id="config-plan-status">Activo</span>
-                            </div>
-                            <p class="text-sm text-on-surface-variant/60 mt-1" id="config-plan-details">3 proyectos · Análisis básico · Documentación automática</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="window.location.href='/plan-recommendation'" class="px-5 py-2 bg-secondary text-white rounded-lg font-semibold text-sm hover:bg-secondary/80 transition-all flex items-center gap-2">
-                                <span class="material-symbols-outlined text-sm">auto_awesome</span>
-                                Ver recomendación
-                            </button>
-                            <button onclick="window.location.href='/pricing'" class="px-5 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar</button>
-                            <button class="px-5 py-2 border border-outline-variant/30 rounded-lg font-semibold text-sm text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all">Gestionar</button>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-outline-variant/10">
-                        <div class="flex items-center gap-6 text-sm flex-wrap">
-                            <span class="text-on-surface-variant/60">Proyectos usados: <strong class="text-on-surface" id="config-projects-used">0</strong> / <strong class="text-on-surface" id="config-projects-limit">3</strong></span>
-                            <span class="text-on-surface-variant/60">Próximo cobro: <strong class="text-on-surface" id="config-next-billing">—</strong></span>
-                        </div>
-                        <div class="mt-3 progress-track">
-                            <div id="config-progress-bar" class="progress-fill" style="width:0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 5. INTEGRACIONES -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">integration_instructions</span>
-                    Integraciones
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">🐙</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">GitHub</div>
-                                <div class="text-xs text-on-surface-variant/50">Conectado</div>
-                            </div>
-                        </div>
-                        <span class="text-xs text-green-600 font-semibold">✓ Activo</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">⬛</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">Slack</div>
-                                <div class="text-xs text-on-surface-variant/50">No conectado</div>
-                            </div>
-                        </div>
-                        <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
-                    </div>
-                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">📘</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">Notion</div>
-                                <div class="text-xs text-on-surface-variant/50">No conectado</div>
-                            </div>
-                        </div>
-                        <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
-                    </div>
-                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">📄</span>
-                            <div>
-                                <div class="text-sm font-medium text-on-surface">Google Docs</div>
-                                <div class="text-xs text-on-surface-variant/50">No conectado</div>
-                            </div>
-                        </div>
-                        <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 6. SEGURIDAD -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">security</span>
-                    Seguridad
-                </h4>
-                <div class="space-y-3">
-                    <button class="w-full text-left p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all flex items-center justify-between" onclick="document.getElementById('config-password-section').classList.toggle('hidden')">
-                        <span class="text-sm text-on-surface">Cambiar contraseña</span>
-                        <span class="material-symbols-outlined text-on-surface-variant/40">chevron_right</span>
-                    </button>
-                    <div id="config-password-section" class="hidden p-4 glass rounded-xl border border-primary/20 space-y-3">
-                        <div>
-                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nueva contraseña</label>
-                            <input type="password" id="config-new-password" class="modal-input" placeholder="••••••••" />
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Confirmar contraseña</label>
-                            <input type="password" id="config-confirm-password" class="modal-input" placeholder="••••••••" />
-                        </div>
-                        <button onclick="updatePassword()" class="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar contraseña</button>
-                    </div>
-                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                        <span class="text-sm text-on-surface">Autenticación de dos factores</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant/20">Desactivado</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                        <span class="text-sm text-on-surface">Sesiones activas</span>
-                        <span class="text-xs text-on-surface-variant/50">1 dispositivo</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 7. EXPORTAR DATOS -->
-            <section>
-                <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-xl">download</span>
-                    Datos
-                </h4>
-                <div class="flex flex-wrap gap-3">
-                    <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">download</span>
-                        Exportar proyectos (JSON)
-                    </button>
-                    <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">download</span>
-                        Exportar documentación (PDF)
-                    </button>
-                    <button class="px-4 py-2 glass rounded-xl border border-red-200 hover:border-red-400 transition-all text-sm text-red-600 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">delete</span>
-                        Eliminar todos los datos
-                    </button>
-                </div>
-            </section>
-        </div>
-
-        <!-- Footer con botones de acción -->
-        <div class="flex items-center justify-between p-6 border-t border-outline-variant/10 flex-shrink-0 bg-surface-container/30">
-            <button onclick="closeConfigModal()" class="px-6 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all font-medium text-sm">
-                Cancelar
-            </button>
-            <button onclick="saveConfig()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-medium text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">save</span>
-                Guardar cambios
+            <button onclick="closeDuplicateModal()" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
+                Aceptar
             </button>
         </div>
     </div>
-</div>
+
+    <!-- ============================================================
+         MODAL DE CONFIRMACION DE SINCRONIZACION (SYNC CONFIRM MODAL)
+         ============================================================ -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="syncConfirmModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeSyncConfirmModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Actualizar proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Deseas sincronizar este proyecto con GitHub?</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-3xl">sync</span>
+                </div>
+                <p id="syncConfirmMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Esto reemplazara los datos actuales con los del repositorio.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeSyncConfirmModal()" class="flex-1 py-3 border border-outline-variant/20 text-on-surface-variant rounded-xl font-semibold hover:border-primary hover:text-primary transition-all">
+                    Cancelar
+                </button>
+                <button id="confirmSyncBtn" onclick="confirmSync()" class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
+                    Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL DE EXITO DE SINCRONIZACION (SYNC SUCCESS MODAL)
+         ============================================================ -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="syncSuccessModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeSyncSuccessModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Actualizado</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Proyecto sincronizado correctamente.</p>
+            <div class="flex flex-col items-center gap-4 py-8">
+                <div class="w-16 h-16 rounded-full bg-green-accent/10 border border-green-accent/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-accent text-3xl">check_circle</span>
+                </div>
+                <p id="syncSuccessMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">El analisis comenzara pronto.</p>
+            </div>
+            <button onclick="closeSyncSuccessModal()" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
+                Aceptar
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL DE EDICION DE PROYECTO (EDIT PROJECT MODAL)
+         ============================================================ -->
+    <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="editModal">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closeEditModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Editar proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Actualiza el nombre y descripcion del proyecto</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-2">Nombre del proyecto</label>
+                    <input type="text" id="editProjectName" class="w-full px-4 py-3 rounded-xl bg-surface-variant/10 border border-outline-variant/20 text-on-surface focus:outline-none focus:border-primary transition-all" placeholder="Nombre del proyecto">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-on-surface mb-2">Descripcion (opcional)</label>
+                    <textarea id="editProjectDescription" rows="3" class="w-full px-4 py-3 rounded-xl bg-surface-variant/10 border border-outline-variant/20 text-on-surface focus:outline-none focus:border-primary transition-all resize-none" placeholder="Descripcion del proyecto"></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeEditModal()" class="flex-1 py-3 border border-outline-variant/20 text-on-surface-variant rounded-xl font-semibold hover:border-primary hover:text-primary transition-all">
+                    Cancelar
+                </button>
+                <button type="button" onclick="saveProjectEdit()" class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
+                    Guardar cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL DE CONFIGURACION (CONFIGURATION MODAL)
+         ============================================================ -->
+    <div id="configModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this)closeConfigModal()">
+        <div class="glass p-0 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-hidden flex flex-col">
+            
+            <!-- HEADER del modal de configuracion -->
+            <div class="flex items-center justify-between p-6 border-b border-outline-variant/10 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-2xl">settings</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-on-surface">Configuracion</h3>
+                        <p class="text-sm text-on-surface-variant/60">Personaliza tu experiencia en AutoDocs AI</p>
+                    </div>
+                </div>
+                <button onclick="closeConfigModal()" class="w-8 h-8 rounded-lg border-none bg-black/5 hover:bg-red-50 hover:text-red-500 text-on-surface-variant cursor-pointer flex items-center justify-center text-xl transition-all">✕</button>
+            </div>
+
+            <!-- CONTENIDO CON SCROLL -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                
+                <!-- 1. SECCION PERFIL -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">person</span>
+                        Perfil
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Campo: Nombre de usuario -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nombre de usuario</label>
+                            <input type="text" id="config-username" class="modal-input" placeholder="Usuario" />
+                        </div>
+                        <!-- Campo: Email (solo lectura) -->
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Email</label>
+                            <input type="email" id="config-email" class="modal-input" placeholder="email@ejemplo.com" readonly />
+                        </div>
+                        <!-- Campo: Bio -->
+                        <div class="md:col-span-2">
+                            <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Bio</label>
+                            <textarea id="config-bio" class="modal-input" rows="2" placeholder="Breve descripcion sobre ti..."></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. SECCION APARIENCIA (TEMA) -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">palette</span>
+                        Apariencia
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Opcion: Tema Claro -->
+                        <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('light')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
+                                    <span class="material-symbols-outlined text-gray-600">light_mode</span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-on-surface">Claro</div>
+                                    <div class="text-xs text-on-surface-variant/50">Modo dia</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-light-indicator"></div>
+                        </div>
+                        <!-- Opcion: Tema Oscuro -->
+                        <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('dark')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-outline-variant/30 flex items-center justify-center shadow-sm">
+                                    <span class="material-symbols-outlined text-primary">dark_mode</span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-on-surface">Oscuro</div>
+                                    <div class="text-xs text-on-surface-variant/50">Modo noche</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-dark-indicator"></div>
+                        </div>
+                        <!-- Opcion: Tema Automatico (Sistema) -->
+                        <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('system')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-surface-container to-surface-container-high border-2 border-outline-variant/30 flex items-center justify-center shadow-sm">
+                                    <span class="material-symbols-outlined text-secondary">auto_awesome</span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-on-surface">Sistema</div>
+                                    <div class="text-xs text-on-surface-variant/50">Automatico</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-system-indicator"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. SECCION NOTIFICACIONES -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">notifications</span>
+                        Notificaciones
+                    </h4>
+                    <div class="space-y-3">
+                        <!-- Notificacion: Analisis completado -->
+                        <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-green-500">check_circle</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">Analisis completado</div>
+                                    <div class="text-xs text-on-surface-variant/50">Cuando un proyecto termine de analizarse</div>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="notif-completed" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
+                        </label>
+                        <!-- Notificacion: Recordatorios -->
+                        <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary">upcoming</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">Recordatorios</div>
+                                    <div class="text-xs text-on-surface-variant/50">Recordatorios semanales de proyectos</div>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="notif-reminders" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
+                        </label>
+                        <!-- Notificacion: Actualizaciones -->
+                        <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-secondary">updates</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">Actualizaciones</div>
+                                    <div class="text-xs text-on-surface-variant/50">Novedades y mejoras de AutoDocs</div>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="notif-updates" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
+                        </label>
+                    </div>
+                </section>
+
+                <!-- 4. SECCION PLAN Y FACTURACION -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">credit_card</span>
+                        Plan y Facturacion
+                    </h4>
+                    <div class="glass p-5 rounded-xl border border-outline-variant/10">
+                        <div class="flex items-center justify-between flex-wrap gap-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg font-bold text-on-surface" id="config-plan-name">Plan Free</span>
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200" id="config-plan-status">Activo</span>
+                                </div>
+                                <p class="text-sm text-on-surface-variant/60 mt-1" id="config-plan-details">3 proyectos · Analisis basico · Documentacion automatica</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="window.location.href='/plan-recommendation'" class="px-5 py-2 bg-secondary text-white rounded-lg font-semibold text-sm hover:bg-secondary/80 transition-all flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-sm">auto_awesome</span>
+                                    Ver recomendacion
+                                </button>
+                                <button onclick="window.location.href='/pricing'" class="px-5 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar</button>
+                                <button class="px-5 py-2 border border-outline-variant/30 rounded-lg font-semibold text-sm text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all">Gestionar</button>
+                            </div>
+                        </div>
+                        <!-- Barra de progreso del plan -->
+                        <div class="mt-4 pt-4 border-t border-outline-variant/10">
+                            <div class="flex items-center gap-6 text-sm flex-wrap">
+                                <span class="text-on-surface-variant/60">Proyectos usados: <strong class="text-on-surface" id="config-projects-used">0</strong> / <strong class="text-on-surface" id="config-projects-limit">3</strong></span>
+                                <span class="text-on-surface-variant/60">Proximo cobro: <strong class="text-on-surface" id="config-next-billing">—</strong></span>
+                            </div>
+                            <div class="mt-3 progress-track">
+                                <div id="config-progress-bar" class="progress-fill" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. SECCION INTEGRACIONES -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">integration_instructions</span>
+                        Integraciones
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Integracion GitHub -->
+                        <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🐙</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">GitHub</div>
+                                    <div class="text-xs text-on-surface-variant/50">Conectado</div>
+                                </div>
+                            </div>
+                            <span class="text-xs text-green-600 font-semibold">✓ Activo</span>
+                        </div>
+                        <!-- Integracion Slack -->
+                        <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">⬛</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">Slack</div>
+                                    <div class="text-xs text-on-surface-variant/50">No conectado</div>
+                                </div>
+                            </div>
+                            <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
+                        </div>
+                        <!-- Integracion Notion -->
+                        <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">📘</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">Notion</div>
+                                    <div class="text-xs text-on-surface-variant/50">No conectado</div>
+                                </div>
+                            </div>
+                            <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
+                        </div>
+                        <!-- Integracion Google Docs -->
+                        <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">📄</span>
+                                <div>
+                                    <div class="text-sm font-medium text-on-surface">Google Docs</div>
+                                    <div class="text-xs text-on-surface-variant/50">No conectado</div>
+                                </div>
+                            </div>
+                            <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. SECCION SEGURIDAD -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">security</span>
+                        Seguridad
+                    </h4>
+                    <div class="space-y-3">
+                        <!-- Cambiar contrasena (expansible) -->
+                        <button class="w-full text-left p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all flex items-center justify-between" onclick="document.getElementById('config-password-section').classList.toggle('hidden')">
+                            <span class="text-sm text-on-surface">Cambiar contrasena</span>
+                            <span class="material-symbols-outlined text-on-surface-variant/40">chevron_right</span>
+                        </button>
+                        <!-- Seccion de cambio de contrasena (inicialmente oculta) -->
+                        <div id="config-password-section" class="hidden p-4 glass rounded-xl border border-primary/20 space-y-3">
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nueva contrasena</label>
+                                <input type="password" id="config-new-password" class="modal-input" placeholder="••••••••" />
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Confirmar contrasena</label>
+                                <input type="password" id="config-confirm-password" class="modal-input" placeholder="••••••••" />
+                            </div>
+                            <button onclick="updatePassword()" class="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar contrasena</button>
+                        </div>
+                        <!-- 2FA -->
+                        <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                            <span class="text-sm text-on-surface">Autenticacion de dos factores</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant/20">Desactivado</span>
+                        </div>
+                        <!-- Sesiones activas -->
+                        <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
+                            <span class="text-sm text-on-surface">Sesiones activas</span>
+                            <span class="text-xs text-on-surface-variant/50">1 dispositivo</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. SECCION EXPORTAR DATOS -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">download</span>
+                        Datos
+                    </h4>
+                    <div class="flex flex-wrap gap-3">
+                        <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            Exportar proyectos (JSON)
+                        </button>
+                        <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            Exportar documentacion (PDF)
+                        </button>
+                        <button class="px-4 py-2 glass rounded-xl border border-red-200 hover:border-red-400 transition-all text-sm text-red-600 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">delete</span>
+                            Eliminar todos los datos
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- FOOTER del modal con botones de accion -->
+            <div class="flex items-center justify-between p-6 border-t border-outline-variant/10 flex-shrink-0 bg-surface-container/30">
+                <button onclick="closeConfigModal()" class="px-6 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all font-medium text-sm">
+                    Cancelar
+                </button>
+                <button onclick="saveConfig()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-medium text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    Guardar cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         JAVASCRIPT - LOGICA PRINCIPAL DEL DASHBOARD
+         ============================================================ -->
     <script>
-        // ==================== LÓGICA PRINCIPAL ====================
+        // ============================================================
+        // INICIALIZACION Y AUTENTICACION
+        // ============================================================
+        
+        // Obtener token de autenticacion del localStorage
         const token = localStorage.getItem('token');
+        // Si no hay token, redirigir al login
         if (!token) window.location.href = '/';
 
+        // Obtener datos del usuario del localStorage
         const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Actualizar elementos de la UI con la informacion del usuario
         if (user.name) {
             document.getElementById('sidebar-user-name').textContent = user.name;
             document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
             document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
-            document.getElementById('greeting').textContent = `Bienvenido, ${user.name}`;
+            document.getElementById('greeting').textContent = 'Bienvenido, ' + user.name;
         }
 
+        // Actualizar el nombre del plan en el header
         const planName = document.getElementById('plan-name');
         if (planName && user.plan) {
             const planDisplay = user.plan === 'free' ? 'Free' : user.plan === 'pro' ? 'Pro' : user.plan === 'enterprise' ? 'Enterprise' : 'Free';
             planName.textContent = planDisplay;
         }
 
+        // ============================================================
+        // FUNCIONES DE AUTENTICACION
+        // ============================================================
+        
+        /**
+         * Devuelve los headers necesarios para peticiones autenticadas
+         * @returns {Object} Headers con token JWT
+         */
         function authHeaders() {
-            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+            return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
         }
 
-        let allProjects = [];
+        // ============================================================
+        // GESTION DE PROYECTOS
+        // ============================================================
+        
+        let allProjects = []; // Almacena todos los proyectos del usuario
 
-async function loadProjects() {
-    try {
-        // Cargar proyectos
-        const res = await fetch('/api/projects/', { headers: authHeaders() });
-        if (!res.ok) {
-            console.error('Error loading projects:', res.status);
-            return;
+        /**
+         * Carga los proyectos desde el backend y actualiza la UI
+         * Funcion asincrona que maneja la carga inicial y refrescos periodicos
+         */
+        async function loadProjects() {
+            try {
+                // Cargar proyectos desde el API
+                const res = await fetch('/api/projects/', { headers: authHeaders() });
+                if (!res.ok) {
+                    console.error('Error loading projects:', res.status);
+                    return;
+                }
+                const projects = await res.json();
+                allProjects = projects;
+                
+                // Renderizar estadisticas y tarjetas de proyectos
+                renderStats(projects);
+                renderProjects(projects);
+                
+                // Actualizar contador en el sidebar
+                document.getElementById('sidebar-project-count').textContent = projects.length;
+                
+                // Cargar plan del usuario y actualizar contador de proyectos
+                const planData = await loadUserPlan();
+                
+                // Actualizar el contador de proyectos con el limite del plan
+                const projectCountEl = document.getElementById('project-count');
+                if (projectCountEl) {
+                    const limits = { 'free': 3, 'pro': 20, 'enterprise': -1 };
+                    const limit = limits[planData?.plan || 'free'] || 3;
+                    const count = projects.length;
+                    
+                    if (limit === -1) {
+                        projectCountEl.textContent = count + '/∞';
+                    } else {
+                        projectCountEl.textContent = count + '/' + limit;
+                        // Cambiar color si esta cerca del limite
+                        if (count >= limit) {
+                            projectCountEl.classList.add('text-error');
+                        } else if (count >= limit * 0.8) {
+                            projectCountEl.classList.add('text-yellow-500');
+                        } else {
+                            projectCountEl.classList.remove('text-error', 'text-yellow-500');
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error('Error in loadProjects:', e);
+            }
         }
-        const projects = await res.json();
-        allProjects = projects;
-        renderStats(projects);
-        renderProjects(projects);
+
+        // ============================================================
+        // CONFIGURACION DE USUARIO
+        // ============================================================
         
-        // Actualizar contador en sidebar
-        document.getElementById('sidebar-project-count').textContent = projects.length;
-        
-        // Cargar plan del usuario
-        const planData = await loadUserPlan();
-        
-        // Actualizar contador de proyectos con el límite del plan
-        const projectCountEl = document.getElementById('project-count');
-        if (projectCountEl) {
-            const limits = { 'free': 3, 'pro': 20, 'enterprise': -1 };
-            const limit = limits[planData?.plan || 'free'] || 3;
-            const count = projects.length;
-            
-            if (limit === -1) {
-                projectCountEl.textContent = `${count}/∞`;
-            } else {
-                projectCountEl.textContent = `${count}/${limit}`;
-                // Cambiar color si está cerca del límite
-                if (count >= limit) {
-                    projectCountEl.classList.add('text-error');
-                } else if (count >= limit * 0.8) {
-                    projectCountEl.classList.add('text-yellow-500');
+        let configUserData = {};   // Datos del usuario para configuracion
+        let configPlanData = {};   // Datos del plan del usuario
+
+        /**
+         * Abre el modal de configuracion y carga los datos
+         */
+        function openConfigModal() {
+            document.getElementById('configModal').classList.remove('hidden');
+            document.getElementById('configModal').classList.add('flex');
+            loadConfigData();
+        }
+
+        /**
+         * Cierra el modal de configuracion
+         */
+        function closeConfigModal() {
+            document.getElementById('configModal').classList.add('hidden');
+            document.getElementById('configModal').classList.remove('flex');
+        }
+
+        /**
+         * Carga los datos de configuracion desde el backend
+         */
+        async function loadConfigData() {
+            try {
+                // Cargar datos del usuario
+                const userRes = await fetch('/api/auth/me', { headers: authHeaders() });
+                if (userRes.ok) {
+                    const user = await userRes.json();
+                    configUserData = user;
+                    document.getElementById('config-username').value = user.name || '';
+                    document.getElementById('config-email').value = user.email || '';
+                    document.getElementById('config-bio').value = user.bio || '';
+                }
+
+                // Cargar plan del usuario
+                const planData = await loadUserPlan();
+                if (planData) {
+                    configPlanData = planData;
+                    
+                    const projectLimits = { free: 3, pro: 20, enterprise: -1 };
+
+                    // Cargar proyectos para contar
+                    const projectsRes = await fetch('/api/projects/', { headers: authHeaders() });
+                    if (projectsRes.ok) {
+                        const projects = await projectsRes.json();
+                        const used = projects.length;
+                        const limit = projectLimits[planData.plan] || 3;
+
+                        document.getElementById('config-projects-used').textContent = used;
+                        document.getElementById('config-projects-limit').textContent = limit === -1 ? '∞' : limit;
+
+                        const progress = limit === -1 ? 0 : Math.min((used / limit) * 100, 100);
+                        document.getElementById('config-progress-bar').style.width = progress + '%';
+                    }
+                }
+
+                // Cargar tema guardado
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                setThemeIndicator(savedTheme);
+
+                // Cargar configuracion de notificaciones
+                const notifSettings = JSON.parse(localStorage.getItem('notifications') || '{}');
+                document.getElementById('notif-completed').checked = notifSettings.completed !== false;
+                document.getElementById('notif-reminders').checked = notifSettings.reminders || false;
+                document.getElementById('notif-updates').checked = notifSettings.updates !== false;
+
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        /**
+         * Guarda la configuracion del usuario en el backend
+         */
+        function saveConfig() {
+            const username = document.getElementById('config-username').value.trim();
+            const bio = document.getElementById('config-bio').value.trim();
+
+            if (!username) {
+                alert('El nombre de usuario no puede estar vacio');
+                return;
+            }
+
+            // Guardar perfil en el backend
+            fetch('/api/auth/me', {
+                method: 'PUT',
+                headers: authHeaders(),
+                body: JSON.stringify({ name: username, bio: bio })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Guardar configuracion de notificaciones en localStorage
+                const notifications = {
+                    completed: document.getElementById('notif-completed').checked,
+                    reminders: document.getElementById('notif-reminders').checked,
+                    updates: document.getElementById('notif-updates').checked
+                };
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+
+                // Mostrar feedback visual de guardado exitoso
+                const btn = document.querySelector('#configModal .bg-gradient-to-r');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Guardado';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    closeConfigModal();
+                }, 1500);
+            })
+            .catch(err => {
+                alert('Error al guardar: ' + err.message);
+            });
+        }
+
+        /**
+         * Actualiza la contrasena del usuario
+         */
+        async function updatePassword() {
+            const newPass = document.getElementById('config-new-password').value;
+            const confirmPass = document.getElementById('config-confirm-password').value;
+
+            if (!newPass || newPass.length < 6) {
+                alert('La contrasena debe tener al menos 6 caracteres');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                alert('Las contrasenas no coinciden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/me', {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ password: newPass })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Contrasena actualizada correctamente');
+                    document.getElementById('config-new-password').value = '';
+                    document.getElementById('config-confirm-password').value = '';
+                    document.getElementById('config-password-section').classList.add('hidden');
                 } else {
-                    projectCountEl.classList.remove('text-error', 'text-yellow-500');
+                    alert(data.error || 'Error al actualizar contrasena');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ============================================================
+        // GESTION DE TEMAS (CLARO/OSCURO)
+        // ============================================================
+        
+        /**
+         * Cambia el tema de la aplicacion
+         * @param {string} theme - 'light', 'dark', o 'system'
+         */
+        function setTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+            } else if (theme === 'light') {
+                html.classList.remove('dark');
+                html.classList.add('light');
+            } else {
+                // Sistema: usar preferencia del sistema operativo
+                html.classList.remove('dark', 'light');
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.add('light');
                 }
             }
-        }
-    } catch(e) {
-        console.error('Error in loadProjects:', e);
-    }
-}
-// ==================== CONFIGURACIÓN ====================
+            setThemeIndicator(theme);
+            localStorage.setItem('theme', theme);
 
-// Variables globales
-let configUserData = {};
-let configPlanData = {};
-
-function openConfigModal() {
-    document.getElementById('configModal').classList.remove('hidden');
-    document.getElementById('configModal').classList.add('flex');
-    loadConfigData();
-}
-
-function closeConfigModal() {
-    document.getElementById('configModal').classList.add('hidden');
-    document.getElementById('configModal').classList.remove('flex');
-}
-
-async function loadConfigData() {
-    try {
-        // Cargar datos del usuario
-        const userRes = await fetch('/api/auth/me', { headers: authHeaders() });
-        if (userRes.ok) {
-            const user = await userRes.json();
-            configUserData = user;
-            document.getElementById('config-username').value = user.name || '';
-            document.getElementById('config-email').value = user.email || '';
-            document.getElementById('config-bio').value = user.bio || '';
-        }
-
-        // Cargar plan usando la función centralizada
-        const planData = await loadUserPlan();
-        if (planData) {
-            configPlanData = planData;
-            
-            const projectLimits = { free: 3, pro: 20, enterprise: -1 };
-
-            // Cargar proyectos para contar
-            const projectsRes = await fetch('/api/projects/', { headers: authHeaders() });
-            if (projectsRes.ok) {
-                const projects = await projectsRes.json();
-                const used = projects.length;
-                const limit = projectLimits[planData.plan] || 3;
-
-                document.getElementById('config-projects-used').textContent = used;
-                document.getElementById('config-projects-limit').textContent = limit === -1 ? '∞' : limit;
-
-                const progress = limit === -1 ? 0 : Math.min((used / limit) * 100, 100);
-                document.getElementById('config-progress-bar').style.width = progress + '%';
+            // Actualizar icono del boton de tema
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) {
+                const isDark = document.documentElement.classList.contains('dark');
+                themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
             }
         }
 
-        // Cargar tema guardado
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        setThemeIndicator(savedTheme);
-
-        // Cargar notificaciones guardadas
-        const notifSettings = JSON.parse(localStorage.getItem('notifications') || '{}');
-        document.getElementById('notif-completed').checked = notifSettings.completed !== false;
-        document.getElementById('notif-reminders').checked = notifSettings.reminders || false;
-        document.getElementById('notif-updates').checked = notifSettings.updates !== false;
-
-    } catch (error) {
-        console.error('Error loading config:', error);
-    }
-}
-
-function saveConfig() {
-    const username = document.getElementById('config-username').value.trim();
-    const bio = document.getElementById('config-bio').value.trim();
-
-    if (!username) {
-        alert('El nombre de usuario no puede estar vacío');
-        return;
-    }
-
-    // Guardar perfil
-    fetch('/api/auth/me', {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ name: username, bio: bio })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-            return;
+        /**
+         * Actualiza el indicador visual del tema seleccionado
+         * @param {string} theme - 'light', 'dark', o 'system'
+         */
+        function setThemeIndicator(theme) {
+            document.querySelectorAll('[id^="theme-"]').forEach(el => {
+                el.style.background = 'rgba(56, 189, 248, 0.1)';
+            });
+            const indicator = document.getElementById('theme-' + theme + '-indicator');
+            if (indicator) {
+                indicator.style.background = 'linear-gradient(90deg, #38bdf8, #818cf8)';
+            }
         }
+
+        // ============================================================
+        // EVENTOS DE TECLADO
+        // ============================================================
         
-        // Guardar notificaciones
-        const notifications = {
-            completed: document.getElementById('notif-completed').checked,
-            reminders: document.getElementById('notif-reminders').checked,
-            updates: document.getElementById('notif-updates').checked
-        };
-        localStorage.setItem('notifications', JSON.stringify(notifications));
-
-        // Mostrar feedback
-        const btn = document.querySelector('#configModal .bg-gradient-to-r');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Guardado';
-        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.background = '';
-            closeConfigModal();
-        }, 1500);
-    })
-    .catch(err => {
-        alert('Error al guardar: ' + err.message);
-    });
-}
-
-async function updatePassword() {
-    const newPass = document.getElementById('config-new-password').value;
-    const confirmPass = document.getElementById('config-confirm-password').value;
-
-    if (!newPass || newPass.length < 6) {
-        alert('La contraseña debe tener al menos 6 caracteres');
-        return;
-    }
-    if (newPass !== confirmPass) {
-        alert('Las contraseñas no coinciden');
-        return;
-    }
-
-    try {
-        const res = await fetch('/api/auth/me', {
-            method: 'PUT',
-            headers: authHeaders(),
-            body: JSON.stringify({ password: newPass })
+        // Cerrar modales con la tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeConfigModal();
+            }
         });
-        const data = await res.json();
-        if (res.ok) {
-            alert('Contraseña actualizada correctamente');
-            document.getElementById('config-new-password').value = '';
-            document.getElementById('config-confirm-password').value = '';
-            document.getElementById('config-password-section').classList.add('hidden');
-        } else {
-            alert(data.error || 'Error al actualizar contraseña');
-        }
-    } catch (err) {
-        alert('Error: ' + err.message);
-    }
-}
 
-function setTheme(theme) {
-    const html = document.documentElement;
-    if (theme === 'dark') {
-        html.classList.add('dark');
-        html.classList.remove('light');
-    } else if (theme === 'light') {
-        html.classList.remove('dark');
-        html.classList.add('light');
-    } else {
-        // Sistema
-        html.classList.remove('dark', 'light');
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            html.classList.add('dark');
-        } else {
-            html.classList.add('light');
-        }
-    }
-    setThemeIndicator(theme);
-    localStorage.setItem('theme', theme);
-    
-    // Actualizar icono del botón de tema si existe
-    const themeIcon = document.getElementById('themeIcon');
-    if (themeIcon) {
-        const isDark = document.documentElement.classList.contains('dark');
-        themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
-    }
-}
+        // Cerrar modal de configuracion al hacer clic fuera
+        document.getElementById('configModal').addEventListener('click', function(e) {
+            if (e.target === this) closeConfigModal();
+        });
 
-function setThemeIndicator(theme) {
-    document.querySelectorAll('[id^="theme-"]').forEach(el => {
-        el.style.background = 'rgba(56, 189, 248, 0.1)';
-    });
-    const indicator = document.getElementById(`theme-${theme}-indicator`);
-    if (indicator) {
-        indicator.style.background = 'linear-gradient(90deg, #38bdf8, #818cf8)';
-    }
-}
-
-// Cerrar configuración con Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeConfigModal();
-    }
-});
-
-// Click fuera del modal para cerrar
-document.getElementById('configModal').addEventListener('click', function(e) {
-    if (e.target === this) closeConfigModal();
-});
-
-// Función auxiliar para auth headers
-function authHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    };
-}
+        // ============================================================
+        // FUNCIONES DE RENDERIZADO
+        // ============================================================
+        
+        /**
+         * Renderiza las estadisticas del dashboard
+         * @param {Array} projects - Lista de proyectos del usuario
+         */
         function renderStats(projects) {
+            // Total de proyectos
             document.getElementById('stat-projects').textContent = projects.length;
             
+            // Proyectos completados
             const completed = projects.filter(p => p.status === 'completed').length;
             document.getElementById('stat-completed').textContent = completed;
             document.getElementById('stat-completed-small').textContent = completed;
             
+            // Total de funciones
             const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
             document.getElementById('stat-functions').textContent = totalFuncs;
             
+            // Total de endpoints
             const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
             document.getElementById('stat-endpoints').textContent = totalEp;
             
+            // Proyectos activos (no completados)
             const active = projects.filter(p => p.status !== 'completed').length;
             document.getElementById('stat-active-small').textContent = active;
 
+            // Porcentaje de progreso
             const percent = projects.length ? Math.round((completed / projects.length) * 100) : 0;
             document.getElementById('progress-percent').textContent = percent + '%';
             
+            // Actualizar anillo de progreso SVG
             const circle = document.getElementById('progress-circle');
             if (circle) {
                 const circumference = 213.6;
@@ -1289,20 +1611,26 @@ function authHeaders() {
                 circle.setAttribute('stroke-dashoffset', offset);
             }
             
+            // Actualizar etiqueta de progreso
             document.getElementById('progress-label').textContent =
                 projects.length === 0 ? 'Sin proyectos' : 
                 completed === projects.length ? 'Todo completado' : 
-                `${completed} de ${projects.length} completados`;
+                completed + ' de ' + projects.length + ' completados';
         }
 
+        /**
+         * Renderiza las tarjetas de proyectos en el grid
+         * @param {Array} projects - Lista de proyectos
+         */
         function renderProjects(projects) {
             const grid = document.getElementById('projects-grid');
             
+            // Si no hay proyectos, mostrar mensaje de vacio
             if (!projects.length) {
                 grid.innerHTML = `
                     <div class="col-span-full glass p-12 rounded-2xl text-center text-on-surface-variant/50">
                         <span class="material-symbols-outlined text-5xl mb-4 block text-primary/40">folder_open</span>
-                        <p class="text-lg font-semibold text-on-surface">Sin proyectos aún</p>
+                        <p class="text-lg font-semibold text-on-surface">Sin proyectos aun</p>
                         <p class="text-sm">Sube tu primer proyecto para comenzar</p>
                         <button onclick="openUploadModal()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary/80 transition-all">
                             Crear proyecto
@@ -1312,13 +1640,14 @@ function authHeaders() {
                 return;
             }
 
-            // Ordenar: primero los más recientes (por created_at)
+            // Ordenar proyectos por fecha de creacion (mas recientes primero)
             const sorted = [...projects].sort((a, b) => {
                 const da = a.created_at ? new Date(a.created_at) : new Date(0);
                 const db = b.created_at ? new Date(b.created_at) : new Date(0);
                 return db - da;
             });
 
+            // Mapeo de estados a clases CSS y etiquetas visuales
             const statusMap = {
                 completed: { class: 'completed', label: 'Completado' },
                 analyzing: { class: 'analyzing', label: 'Analizando' },
@@ -1326,37 +1655,76 @@ function authHeaders() {
                 error: { class: 'error', label: 'Error' }
             };
 
+            // Mapeo de estados a iconos
+            const iconMap = {
+                completed: 'check_circle',
+                analyzing: 'sync',
+                error: 'error',
+                pending: 'folder'
+            };
+
+            // Obtener plan del usuario para determinar funcionalidades disponibles
+            const userPlan = localStorage.getItem('userPlan') || 'free';
+            const canSync = userPlan !== 'free'; // Solo Pro/Enterprise pueden sincronizar
+
+            // Generar HTML para cada tarjeta de proyecto
             grid.innerHTML = sorted.map(p => {
                 const st = statusMap[p.status] || statusMap.pending;
+                const icon = iconMap[p.status] || iconMap.pending;
                 const lang = p.language || 'Desconocido';
                 const q = p.stats?.quality_score || 0;
                 const created = p.created_at ? new Date(p.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+                // Mensaje de error (si existe) para mostrar como tooltip en el badge
+                const errorMsg = p.error_message ? String(p.error_message).replace(/"/g, '&quot;') : '';
                 
                 return `
-                    <div class="project-card glass rounded-2xl p-5 glass-hover cursor-pointer border border-outline-variant/10" onclick="window.location.href='/analysis/${p._id}'">
-                        <span class="status-badge ${st.class}">${st.label}</span>
-                        <div class="flex items-start gap-3 mb-3">
+                    <div class="project-card glass rounded-2xl p-5 glass-hover border border-outline-variant/10 ${p.status === 'error' ? 'border-red-300/40' : ''}">
+                        <div class="flex items-start justify-between mb-3">
+                            <span class="status-badge ${st.class}" ${errorMsg ? `title="${errorMsg}"` : ''}>${st.label}</span>
+                            <div class="flex gap-2">
+                                <!-- Boton Editar proyecto -->
+                                <button onclick="event.stopPropagation(); openEditModal('${p._id}', '${p.name}', '${p.description || ''}')" class="action-icon" title="Editar proyecto">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </button>
+                                <!-- Boton Sincronizar (solo para planes Pro/Enterprise) -->
+                                ${canSync ? `
+                                <button onclick="event.stopPropagation(); syncProject('${p._id}', '${p.name}')" class="action-icon" title="Actualizar desde GitHub">
+                                    <span class="material-symbols-outlined">sync</span>
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <!-- Click en la tarjeta redirige al analisis del proyecto -->
+                        <div class="flex items-start gap-3 mb-3 cursor-pointer" onclick="window.location.href='/analysis/${p._id}'">
                             <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 flex-shrink-0">
-                                <span class="material-symbols-outlined text-xl">${p.status === 'completed' ? 'check_circle' : p.status === 'analyzing' ? 'sync' : 'folder'}</span>
+                                <span class="material-symbols-outlined text-xl">${icon}</span>
                             </div>
                             <div class="min-w-0 flex-1 pr-16">
                                 <h3 class="font-semibold text-on-surface truncate">${p.name}</h3>
-                                <div class="flex items-center gap-2 text-xs text-on-surface-variant/60">
+                                <div class="flex items-center gap-2 text-xs text-on-surface-variant/60" style="color: #BFBDBD;">
                                     <span class="font-mono">${lang}</span>
                                     <span>·</span>
                                     <span>${created}</span>
                                 </div>
                             </div>
                         </div>
+                        <!-- Mensaje de error visible en la tarjeta (si aplica) -->
+                        ${p.status === 'error' && errorMsg ? `
+                        <div class="mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500 truncate" title="${errorMsg}">
+                            ${errorMsg}
+                        </div>
+                        ` : ''}
+                        <!-- Barra de calidad (solo para proyectos completados) -->
                         ${p.status === 'completed' ? `
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs text-on-surface-variant">Calidad</span>
+                            <span class="text-xs text-on-surface-variant" style="color: #BFBDBD;">Calidad</span>
                             <div class="flex-1 h-1.5 bg-surface-variant/30 rounded-full overflow-hidden">
                                 <div class="h-full rounded-full transition-all duration-1000" style="width:${q}%;background:${q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444'}"></div>
                             </div>
                             <span class="text-xs font-bold" style="color:${q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444'}">${q}%</span>
                         </div>
                         ` : ''}
+                        <!-- Metricas del proyecto -->
                         <div class="project-metrics">
                             <div class="metric">
                                 <div class="value">${p.stats?.files || 0}</div>
@@ -1375,15 +1743,25 @@ function authHeaders() {
                 `;
             }).join('');
 
+            // Inicializar efecto tilt en las tarjetas
             initTilt();
         }
 
-        // ==================== MODALES ====================
+        // ============================================================
+        // GESTION DE MODALES
+        // ============================================================
+        
+        /**
+         * Abre el modal de subida de proyecto
+         */
         function openUploadModal() {
             document.getElementById('uploadModal').classList.add('flex');
             document.getElementById('uploadModal').classList.remove('hidden');
         }
 
+        /**
+         * Cierra el modal de subida y limpia el formulario
+         */
         function closeUploadModal() {
             document.getElementById('uploadModal').classList.add('hidden');
             document.getElementById('uploadModal').classList.remove('flex');
@@ -1392,8 +1770,12 @@ function authHeaders() {
             document.getElementById('file-input').value = '';
         }
 
-        let selectedFile = null;
+        let selectedFile = null; // Archivo seleccionado para subir
 
+        /**
+         * Maneja la seleccion de archivo (click o drag & drop)
+         * @param {Event} e - Evento de seleccion de archivo
+         */
         function onFileSelect(e) {
             selectedFile = e.target.files[0];
             const el = document.getElementById('file-name');
@@ -1405,6 +1787,13 @@ function authHeaders() {
             }
         }
 
+        // ============================================================
+        // CREACION DE PROYECTOS
+        // ============================================================
+        
+        /**
+         * Crea un nuevo proyecto (subida de archivo o clonacion desde GitHub)
+         */
         async function createProject() {
             const name = document.getElementById('proj-name').value.trim() || 'Nuevo Proyecto';
             const desc = document.getElementById('proj-desc').value.trim();
@@ -1427,30 +1816,36 @@ function authHeaders() {
             btn.textContent = 'Creando...';
 
             try {
+                // Enviar peticion al backend
                 const res = await fetch('/api/projects/', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
+                    headers: { 'Authorization': 'Bearer ' + token },
                     body: fd
                 });
                 const data = await res.json();
 
                 if (res.ok) {
                     closeUploadModal();
+                    // Mostrar modal de carga
                     const modal = document.getElementById('loadingModal');
                     modal.classList.add('flex');
                     modal.classList.remove('hidden');
                     
-                    await fetch(`/api/analysis/${data.id}/start`, { 
+                    // Iniciar analisis del proyecto
+                    await fetch('/api/analysis/' + data.id + '/start', { 
                         method: 'POST', 
                         headers: authHeaders() 
                     });
                     
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
-                    await loadProjects();
+                    await loadProjects(); // Recargar proyectos
                 } else {
-                    if (data.error && data.error.includes('límite')) {
+                    // Manejar errores especificos
+                    if (data.error && data.error.includes('limite')) {
                         showLimitModal(data.error);
+                    } else if (data.error && data.error.includes('Ya existe un proyecto con el nombre')) {
+                        showDuplicateModal(data.error);
                     } else {
                         alert(data.error || 'Error al crear proyecto');
                     }
@@ -1463,37 +1858,245 @@ function authHeaders() {
             }
         }
 
+        // ============================================================
+        // MODALES DE ERROR Y VALIDACION
+        // ============================================================
+        
+        /**
+         * Muestra el modal de limite de proyectos alcanzado
+         */
         function showLimitModal(message) {
-            document.getElementById('limitMessage').textContent = message;
             document.getElementById('limitModal').classList.remove('hidden');
             document.getElementById('limitModal').classList.add('flex');
         }
 
+        /**
+         * Cierra el modal de limite alcanzado
+         */
         function closeLimitModal() {
             document.getElementById('limitModal').classList.add('hidden');
             document.getElementById('limitModal').classList.remove('flex');
         }
 
+        /**
+         * Muestra el modal de nombre duplicado
+         * @param {string} message - Mensaje de error
+         */
+        function showDuplicateModal(message) {
+            const modal = document.getElementById('duplicateModal');
+            const messageEl = document.getElementById('duplicateMessage');
+            if (modal && messageEl) {
+                messageEl.textContent = message;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        /**
+         * Cierra el modal de nombre duplicado
+         */
+        function closeDuplicateModal() {
+            document.getElementById('duplicateModal').classList.add('hidden');
+            document.getElementById('duplicateModal').classList.remove('flex');
+        }
+
+        let syncButtonElement = null; // Referencia al boton de sincronizacion
+
+        /**
+         * Abre el modal de confirmacion para sincronizar proyecto
+         * @param {string} projectId - ID del proyecto
+         * @param {string} projectName - Nombre del proyecto
+         */
+        async function syncProject(projectId, projectName) {
+            syncButtonElement = event.target.closest('button');
+            document.getElementById('syncConfirmMessage').textContent = 'Actualizar "' + projectName + '" desde GitHub? Esto reemplazara los datos actuales con los del repositorio.';
+            
+            const confirmBtn = document.getElementById('confirmSyncBtn');
+            confirmBtn.dataset.projectId = projectId;
+            confirmBtn.dataset.projectName = projectName;
+            
+            document.getElementById('syncConfirmModal').classList.remove('hidden');
+            document.getElementById('syncConfirmModal').classList.add('flex');
+        }
+
+        /**
+         * Cierra el modal de confirmacion de sincronizacion
+         */
+        function closeSyncConfirmModal() {
+            document.getElementById('syncConfirmModal').classList.add('hidden');
+            document.getElementById('syncConfirmModal').classList.remove('flex');
+            syncButtonElement = null;
+        }
+
+        /**
+         * Confirma y ejecuta la sincronizacion del proyecto
+         */
+        async function confirmSync() {
+            const confirmBtn = document.getElementById('confirmSyncBtn');
+            const projectId = confirmBtn.dataset.projectId;
+            const projectName = confirmBtn.dataset.projectName;
+            
+            if (!projectId) return;
+
+            closeSyncConfirmModal();
+
+            const btn = syncButtonElement;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
+            }
+
+            try {
+                const res = await fetch('/api/projects/' + projectId + '/sync', {
+                    method: 'POST',
+                    headers: authHeaders()
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('syncSuccessMessage').textContent = data.message || 'Proyecto sincronizado correctamente. El analisis comenzara pronto.';
+                    document.getElementById('syncSuccessModal').classList.remove('hidden');
+                    document.getElementById('syncSuccessModal').classList.add('flex');
+                    await loadProjects(); // Recargar proyectos
+                } else {
+                    const error = await res.json();
+                    alert(error.error || 'Error al actualizar el proyecto');
+                }
+            } catch (e) {
+                alert('Error al actualizar el proyecto: ' + e.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-symbols-outlined">sync</span>';
+                }
+            }
+        }
+
+        /**
+         * Cierra el modal de exito de sincronizacion
+         */
+        function closeSyncSuccessModal() {
+            document.getElementById('syncSuccessModal').classList.add('hidden');
+            document.getElementById('syncSuccessModal').classList.remove('flex');
+        }
+
+        let currentEditProjectId = null; // ID del proyecto que se esta editando
+
+        /**
+         * Abre el modal de edicion de proyecto
+         * @param {string} projectId - ID del proyecto
+         * @param {string} name - Nombre actual
+         * @param {string} description - Descripcion actual
+         */
+        function openEditModal(projectId, name, description) {
+            currentEditProjectId = projectId;
+            document.getElementById('editProjectName').value = name;
+            document.getElementById('editProjectDescription').value = description || '';
+            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.add('flex');
+        }
+
+        /**
+         * Cierra el modal de edicion
+         */
+        function closeEditModal() {
+            const editModal = document.getElementById('editModal');
+            if (editModal) {
+                editModal.classList.add('hidden');
+                editModal.classList.remove('flex');
+            }
+            currentEditProjectId = null;
+        }
+
+        /**
+         * Guarda los cambios del proyecto editado
+         */
+        async function saveProjectEdit() {
+            if (!currentEditProjectId) return;
+
+            const name = document.getElementById('editProjectName').value.trim();
+            const description = document.getElementById('editProjectDescription').value.trim();
+
+            if (!name) {
+                alert('El nombre del proyecto es obligatorio');
+                return;
+            }
+
+            const saveBtn = document.querySelector('#editModal button[onclick="saveProjectEdit()"]');
+            const cancelBtn = document.querySelector('#editModal button[onclick="closeEditModal()"]');
+            const originalText = saveBtn.textContent;
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Guardando...';
+            if (cancelBtn) cancelBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/projects/' + currentEditProjectId, {
+                    method: 'PUT',
+                    headers: {
+                        ...authHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+
+                if (res.ok) {
+                    closeEditModal();
+                    await loadProjects(); // Recargar proyectos
+                } else {
+                    const error = await res.json();
+                    if (error.error && error.error.includes('Ya existe un proyecto con el nombre')) {
+                        closeEditModal();
+                        showDuplicateModal(error.error);
+                    } else {
+                        alert(error.error || 'Error al actualizar el proyecto');
+                    }
+                }
+            } catch (e) {
+                alert('Error al actualizar el proyecto: ' + e.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+                if (cancelBtn) cancelBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Cierra sesion del usuario
+         */
         function logout() {
             localStorage.clear();
             window.location.href = '/';
         }
 
-        // ==================== PARTÍCULAS ====================
+        // ============================================================
+        // SISTEMA DE PARTICULAS (FONDO ANIMADO)
+        // ============================================================
+        
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
         let mouse = { x: null, y: null };
         const particleCount = 60;
 
+        /**
+         * Inicializa el canvas con el tamano de la ventana
+         */
         function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             setupParticles();
         }
 
+        /**
+         * Clase que representa una particula individual
+         */
         class Particle {
             constructor() { this.reset(); }
+            
+            /**
+             * Reinicia la particula en una posicion aleatoria
+             */
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
@@ -1502,9 +2105,15 @@ function authHeaders() {
                 this.vy = (Math.random() - 0.5) * 0.3;
                 this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(129, 140, 248, 0.15)';
             }
+            
+            /**
+             * Actualiza la posicion de la particula
+             */
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
+                
+                // Efecto de repulsion del mouse
                 if (mouse.x !== null) {
                     const dx = mouse.x - this.x;
                     const dy = mouse.y - this.y;
@@ -1516,21 +2125,28 @@ function authHeaders() {
                         this.y -= Math.sin(angle) * force * 1.5;
                     }
                 }
+                
+                // Rebote en los bordes
                 if (this.x < 0) this.x = canvas.width;
                 if (this.x > canvas.width) this.x = 0;
                 if (this.y < 0) this.y = canvas.height;
                 if (this.y > canvas.height) this.y = 0;
             }
+            
+            /**
+             * Dibuja la particula y las conexiones con otras cercanas
+             */
             draw() {
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Dibujar lineas de conexion
                 particles.forEach(p => {
                     const d = Math.hypot(this.x - p.x, this.y - p.y);
                     if (d < 100) {
-                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.08 * (1 - d/100)})`;
+                        ctx.strokeStyle = 'rgba(56, 189, 248, ' + (0.08 * (1 - d/100)) + ')';
                         ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(this.x, this.y);
@@ -1541,88 +2157,108 @@ function authHeaders() {
             }
         }
 
+        /**
+         * Configura las particulas iniciales
+         */
         function setupParticles() {
             particles = [];
             for (let i = 0; i < particleCount; i++) particles.push(new Particle());
         }
 
+        /**
+         * Bucle de animacion de las particulas
+         */
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
-// ==================== CARGAR PLAN DEL USUARIO ====================
-async function loadUserPlan() {
-    try {
-        const res = await fetch('/api/payments/my-plan', { 
-            headers: authHeaders() 
-        });
-        
-        if (res.ok) {
-            const planData = await res.json();
-            const plan = planData.plan || 'free';
-            
-            // Mapeo de planes
-            const planNames = {
-                'free': 'Gratuito',
-                'pro': 'Pro',
-                'enterprise': 'Enterprise'
-            };
-            
-            const planColors = {
-                'free': 'text-gray-500',
-                'pro': 'text-primary',
-                'enterprise': 'text-amber-500'
-            };
 
-            const planDetails = {
-                free: '3 proyectos · Análisis básico · Documentación automática',
-                pro: '20 proyectos · Análisis avanzado · PDF + IA',
-                enterprise: 'Proyectos ilimitados · Análisis ilimitados · Soporte prioritario'
-            };
-            
-            const projectLimits = { free: 3, pro: 20, enterprise: -1 };
-            
-            // Actualizar nombre del plan en header
-            const planNameEl = document.getElementById('plan-name');
-            if (planNameEl) {
-                planNameEl.textContent = planNames[plan] || 'Gratuito';
-                planNameEl.className = `text-sm font-semibold ${planColors[plan] || 'text-gray-500'}`;
+        // ============================================================
+        // CARGAR PLAN DEL USUARIO
+        // ============================================================
+        
+        /**
+         * Carga el plan del usuario desde el backend
+         * @returns {Object|null} Datos del plan o null en caso de error
+         */
+        async function loadUserPlan() {
+            try {
+                const res = await fetch('/api/payments/my-plan', { 
+                    headers: authHeaders() 
+                });
+                
+                if (res.ok) {
+                    const planData = await res.json();
+                    const plan = planData.plan || 'free';
+                    
+                    // Mapeo de nombres y colores de planes
+                    const planNames = {
+                        'free': 'Gratuito',
+                        'pro': 'Pro',
+                        'enterprise': 'Enterprise'
+                    };
+                    
+                    const planColors = {
+                        'free': 'text-gray-500',
+                        'pro': 'text-primary',
+                        'enterprise': 'text-amber-500'
+                    };
+
+                    const planDetails = {
+                        free: '3 proyectos · Analisis basico · Documentacion automatica',
+                        pro: '20 proyectos · Analisis avanzado · PDF + IA',
+                        enterprise: 'Proyectos ilimitados · Analisis ilimitados · Soporte prioritario'
+                    };
+                    
+                    // Actualizar nombre del plan en header
+                    const planNameEl = document.getElementById('plan-name');
+                    if (planNameEl) {
+                        planNameEl.textContent = planNames[plan] || 'Gratuito';
+                        planNameEl.className = 'text-sm font-semibold ' + (planColors[plan] || 'text-gray-500');
+                    }
+                    
+                    // Actualizar seccion de Plan en configuracion
+                    const configPlanName = document.getElementById('config-plan-name');
+                    const configPlanDetails = document.getElementById('config-plan-details');
+                    if (configPlanName) {
+                        configPlanName.textContent = planNames[plan] || 'Plan Gratuito';
+                    }
+                    if (configPlanDetails) {
+                        configPlanDetails.textContent = planDetails[plan] || '';
+                    }
+                    
+                    // Guardar en localStorage para acceso rapido
+                    localStorage.setItem('userPlan', plan);
+                    
+                    // Actualizar sidebar
+                    const sidebarPlan = document.getElementById('sidebar-user-plan');
+                    if (sidebarPlan) {
+                        sidebarPlan.textContent = planNames[plan] || 'Plan Gratuito';
+                    }
+                    
+                    return planData;
+                }
+            } catch (error) {
+                console.error('Error loading user plan:', error);
             }
-            
-            // Actualizar sección de Plan y Facturación en dashboard
-            const configPlanName = document.getElementById('config-plan-name');
-            const configPlanDetails = document.getElementById('config-plan-details');
-            if (configPlanName) {
-                configPlanName.textContent = planNames[plan] || 'Plan Gratuito';
-            }
-            if (configPlanDetails) {
-                configPlanDetails.textContent = planDetails[plan] || '';
-            }
-            
-            // Guardar en localStorage para uso posterior
-            localStorage.setItem('userPlan', plan);
-            
-            // También actualizar el sidebar
-            const sidebarPlan = document.getElementById('sidebar-user-plan');
-            if (sidebarPlan) {
-                sidebarPlan.textContent = planNames[plan] || 'Plan Gratuito';
-            }
-            
-            return planData;
+            return null;
         }
-    } catch (error) {
-        console.error('Error loading user plan:', error);
-    }
-    return null;
-}
-        // ==================== TILT ====================
+
+        // ============================================================
+        // EFECTO TILT 3D
+        // ============================================================
+        
+        /**
+         * Inicializa el efecto de inclinacion 3D en las tarjetas
+         */
         function initTilt() {
             const cards = document.querySelectorAll('.tilt-card, .project-card');
             cards.forEach(card => {
                 if (card.hasTilt) return;
                 card.hasTilt = true;
                 const interaction = card.querySelector('.card-interaction') || card;
+                
                 card.addEventListener('mousemove', (e) => {
                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
                     const rect = card.getBoundingClientRect();
@@ -1630,31 +2266,41 @@ async function loadUserPlan() {
                     const y = e.clientY - rect.top;
                     const rotateX = (y - rect.height/2) / 50;
                     const rotateY = (rect.width/2 - x) / 50;
-                    interaction.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+                    interaction.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.01, 1.01, 1.01)';
                 });
+                
                 card.addEventListener('mouseleave', () => {
                     interaction.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                 });
             });
         }
 
-        // ==================== INICIALIZACIÓN ====================
+        // ============================================================
+        // INICIALIZACION DE LA PAGINA
+        // ============================================================
+        
+        // Event listeners para redimensionar y movimiento del mouse
         window.addEventListener('resize', initCanvas);
         window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
 
+        // Inicializacion al cargar el DOM
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             animate();
             loadProjects();
-            // Recargar cada 10 segundos
+            // Recargar proyectos cada 10 segundos (para actualizar estados)
             setInterval(loadProjects, 10000);
         });
 
-        // Cerrar modales con Escape
+        // Cerrar modales con la tecla Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeUploadModal();
                 closeLimitModal();
+                closeDuplicateModal();
+                closeSyncConfirmModal();
+                closeSyncSuccessModal();
+                closeEditModal();
                 const loading = document.getElementById('loadingModal');
                 if (!loading.classList.contains('hidden')) {
                     loading.classList.add('hidden');
@@ -1663,6 +2309,7 @@ async function loadUserPlan() {
             }
         });
     </script>
+    <!-- Cargar script de tema (para persistencia de tema) -->
     <script src="/static/theme.js"></script>
 </body>
 </html>

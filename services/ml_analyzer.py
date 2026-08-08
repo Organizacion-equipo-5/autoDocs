@@ -245,7 +245,7 @@ def linear_regression_multiple(features: dict) -> dict:
     ]])
     pred_actual = round(float(model.predict(x_actual)[0]), 2)
 
-    # 🔍 Identificar factor con mayor impacto
+    # Identificar factor con mayor impacto
     mayor_impacto = max(coefs, key=lambda k: abs(coefs[k]))
     valor_impacto = coefs[mayor_impacto]
 
@@ -568,6 +568,7 @@ def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2
     complejos_baja_salud = []
     saludables_eficientes = []
     simples_baja_salud = []
+    otros_proyectos = []
 
     for pc in project_coordinates:
         c1 = pc.get("component_1", 0.0)
@@ -584,13 +585,15 @@ def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2
             # Si viene el UUID crudo sin prefijo, lo recortamos de forma segura
             p_name = f"Proyecto ({p_name[:8]})"
 
-        # Clasificación por cuadrantes de PCA
-        if c1 > 1.0 and c2 < -0.5:
+        # Clasificación por cuadrantes de PCA (umbrales más permisivos)
+        if c1 > 0.5 and c2 < -0.3:
             complejos_baja_salud.append(p_name)
-        elif c1 < -0.5 and c2 > 0.5:
+        elif c1 < -0.3 and c2 > 0.3:
             saludables_eficientes.append(p_name)
-        elif c1 < -0.5 and c2 < -0.5:
+        elif c1 < -0.3 and c2 < -0.3:
             simples_baja_salud.append(p_name)
+        else:
+            otros_proyectos.append(p_name)
 
     # Inyectamos las conclusiones y sugerencias usando los nombres ya limpios
     if complejos_baja_salud:
@@ -621,6 +624,16 @@ def pca_analysis(analyses: list, project_map: dict = None, n_components: int = 2
         sugerencias.append(
             f"Corrige la estructura de [{', '.join(simples_baja_salud)}] ahora. Es el momento ideal para "
             f"documentar e implementar buenas prácticas antes de que escalen y se vuelvan inmanejables."
+        )
+
+    if otros_proyectos:
+        conclusion.append(
+            f"Proyectos en Zona Neutra: Los proyectos [{', '.join(otros_proyectos)}] se encuentran en una posición intermedia "
+            f"del espacio PCA, lo que indica un equilibrio razonable entre complejidad y calidad."
+        )
+        sugerencias.append(
+            f"Para [{', '.join(otros_proyectos)}], realiza un análisis individualizado para identificar oportunidades "
+            f"de mejora específicas en cada proyecto."
         )
 
     if not conclusion:
@@ -1001,7 +1014,7 @@ def decision_tree_classifier(features: dict, project_type_features: dict,
             caracteristicas_clave.append(f"• {feat}: {imp*100:.1f}% de influencia")
 
     conclusion = f"""
-Como conclusión, los resultados del árbol de decisión (entrenado con {fuente_datos}, {total_muestras_entrenamiento} muestras) muestran que tu proyecto se clasifica como **{predicted_class}** con un nivel de confianza del {confidence}%. Esto significa que el análisis de las palabras clave en funciones, clases, endpoints y archivos sugiere que el proyecto está orientado a {predicted_class.lower()}. Además, las características más importantes para esta clasificación son: {', '.join(caracteristicas_clave) if caracteristicas_clave else 'sin variables dominantes claras'}. Por ello, es recomendable {recomendacion} y considerar que la documentación y estructura del código deben alinearse con las mejores prácticas del dominio identificado.
+Como conclusión, los resultados del árbol de decisión (entrenado con {fuente_datos}, {total_muestras_entrenamiento}  muestran que tu proyecto se clasifica como {predicted_class} con un nivel de confianza del {confidence}%. Esto significa que el análisis de las palabras clave en funciones, clases, endpoints y archivos sugiere que el proyecto está orientado a {predicted_class.lower()}. Además, las características más importantes para esta clasificación son: {', '.join(caracteristicas_clave) if caracteristicas_clave else 'sin variables dominantes claras'}. Por ello, es recomendable {recomendacion} y considerar que la documentación y estructura del código deben alinearse con las mejores prácticas del dominio identificado.
     """
 
     all_probabilities = {

@@ -1,1345 +1,1813 @@
 <!DOCTYPE html>
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+     ADMIN DASHBOARD - AutoDocs AI
+     ═══════════════════════════════════════════════════════════════════════════════
+     - Panel de administración con visión general del sistema
+     - Incluye estadísticas de usuarios, proyectos, gráficas y clasificación ML
+     - Soporta temas claro/oscuro y modo responsive
+════════════════════════════════════════════════════════════════════════════════ -->
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard — AutoDocs AI</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <script id="tailwind-config">
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            background: 'var(--color-background)',
-            surface: 'var(--color-surface)',
-            'surface-container': 'var(--color-surface-container)',
-            'surface-container-high': 'var(--color-surface-container-high)',
-            'on-surface': 'var(--color-on-surface)',
-            'on-surface-variant': 'var(--color-on-surface-variant)',
-            primary: 'var(--color-primary)',
-            secondary: 'var(--color-secondary)',
-            'outline-variant': 'var(--color-outline-variant)',
-            error: 'var(--color-error)',
-            'green-accent': 'var(--color-green-accent)',
-            tertiary: 'var(--color-tertiary)',
-          },
-          fontFamily: {
-            body: ['Geist', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-        },
-      },
-    }
-  </script>
-  <style>
-    /* ====== TEMA OSCURO (por defecto) ====== */
-    :root, body[data-theme="dark"] {
-      --color-background: #0f1418;
-      --color-surface: rgba(27,32,36,0.4);
-      --color-surface-container: #1b2024;
-      --color-surface-container-high: #252b2e;
-      --color-on-surface: #dee3e8;
-      --color-on-surface-variant: #bdc8d1;
-      --color-primary: #8ed5ff;
-      --color-secondary: #c0c1ff;
-      --color-outline-variant: #3e484f;
-      --color-error: #ffb4ab;
-      --color-green-accent: #10b981;
-      --color-tertiary: #ffc176;
-      --glass-border: rgba(123,208,255,0.1);
-      --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
-      --glass-hover-border: rgba(123,208,255,0.3);
-      --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
-      --particle-color-1: rgba(142,213,255,0.4);
-      --particle-color-2: rgba(192,193,255,0.2);
-      --particle-line: rgba(142,213,255,0.12);
-    }
-    body[data-theme="light"] {
-      --color-background: #f1f5f9;
-      --color-surface: rgba(255,255,255,0.7);
-      --color-surface-container: #ffffff;
-      --color-surface-container-high: #e2e8f0;
-      --color-on-surface: #0f172a;
-      --color-on-surface-variant: #334155;
-      --color-primary: #38bdf8;
-      --color-secondary: #818cf8;
-      --color-outline-variant: #cbd5e1;
-      --color-error: #ba1a1a;
-      --color-green-accent: #10b981;
-      --color-tertiary: #7c5800;
-      --glass-border: rgba(0,0,0,0.04);
-      --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
-      --glass-hover-border: rgba(56,189,248,0.3);
-      --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
-      --particle-color-1: rgba(56,189,248,0.25);
-      --particle-color-2: rgba(129,140,248,0.2);
-      --particle-line: rgba(56,189,248,0.12);
-    }
-    body {
-      background: var(--color-background);
-      color: var(--color-on-surface);
-      font-family: 'Geist', sans-serif;
-      transition: background 0.25s ease, color 0.25s ease;
-      overflow-x: hidden;
-    }
-    #particle-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 80%;
-      z-index: 0;
-      pointer-events: none;
-    }
-    .glass {
-      background: var(--color-surface);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
-    }
-    .glass-hover:hover {
-      border-color: var(--glass-hover-border);
-      box-shadow: var(--glass-hover-shadow);
-      transform: translateY(-2px);
-    }
-    .glass input,
-    .glass select,
-    .glass textarea {
-      color: #0f1418;
-    }
-    .sidebar {
-      background: var(--color-surface-container);
-      backdrop-filter: blur(8px);
-      border-right: 1px solid var(--glass-border);
-    }
-    .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 0.75rem;
-      border-radius: 0.75rem;
-      color: var(--color-on-surface-variant);
-      transition: all 0.15s;
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-    }
-    .nav-link:hover {
-      color: var(--color-primary);
-      background: rgba(142,213,255,0.08);
-    }
-    .nav-link.active {
-      color: var(--color-primary);
-      background: rgba(142,213,255,0.12);
-      font-weight: 700;
-    }
-    .nav-link .material-symbols-outlined {
-      font-size: 20px;
-    }
-    .btn-primary {
-      background: var(--color-primary);
-      color: #0f1418;
-      font-weight: 700;
-      transition: all 0.2s;
-    }
-    .btn-primary:hover {
-      filter: brightness(1.05);
-      transform: scale(0.98);
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.25rem 0.65rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-    }
-    .badge.completed { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-    .badge.pending { background: rgba(136,146,176,0.2); color: var(--color-on-surface-variant); border: 1px solid rgba(136,146,176,0.2); }
-    .badge.error { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
-    .modal-anim { animation: fadeDown 0.2s ease; }
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .stagger-in {
-      opacity: 0;
-      transform: translateY(16px);
-      animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
-    }
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .stagger-in, .glass-hover { animation: none !important; transition: none !important; transform: none !important; opacity: 1 !important; }
-    }
-    .action-icon {
-      cursor: pointer;
-      transition: all 0.15s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.25rem;
-      border-radius: 0.375rem;
-      color: var(--color-on-surface-variant);
-    }
-    .action-icon:hover { background: var(--color-outline-variant); color: var(--color-primary); }
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .section-title .material-symbols-outlined {
-      color: var(--color-primary);
-      font-size: 22px;
-    }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
-
-    /* ====== SIDEBAR ESTILO "USUARIOS" (hover-expand) ====== */
-    .sidebar-shell {
-      width: 72px;
-      transition: width 0.3s ease;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    @media (min-width: 1024px) {
-      .sidebar-shell:hover { width: 240px; }
-      .sidebar-shell:hover .nav-label,
-      .sidebar-shell:hover .nav-badge,
-      .sidebar-shell:hover .sidebar-user-info,
-      .sidebar-shell:hover .sidebar-brand-label { opacity: 1; }
-    }
-    .nav-label, .nav-badge, .sidebar-user-info, .sidebar-brand-label {
-      opacity: 0;
-      transition: opacity 0.2s;
-      white-space: nowrap;
-    }
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
-      padding: 0 8px;
-    }
-    .sidebar-nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      color: var(--color-on-surface-variant);
-      text-decoration: none;
-      transition: all 0.2s;
-      font-size: 0.85rem;
-      font-weight: 500;
-      position: relative;
-      width: 100%;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      text-align: left;
-    }
-    .sidebar-nav-item:hover {
-      background: rgba(142,213,255,0.08);
-      color: var(--color-primary);
-    }
-    .sidebar-nav-item.active {
-      background: rgba(142,213,255,0.12);
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    .sidebar-nav-item .material-symbols-outlined {
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-    .sidebar-nav-item .nav-badge {
-      margin-left: auto;
-      font-size: 0.6rem;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: rgba(142,213,255,0.15);
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-</head>
-<body data-theme="dark">
-  <canvas id="particle-canvas"></canvas>
-
-  <div class="flex min-h-screen w-full relative z-10">
-    <!-- Sidebar (estilo hover-expand) -->
-    <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
-      <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
-        <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
-        </div>
-        <span class="sidebar-brand-label font-mono text-lg font-bold">Auto<span class="text-primary">Docs</span></span>
-      </div>
-
-      <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
-        <div class="sidebar-nav">
-          <button onclick="showView('resumen')" id="nav-resumen" class="sidebar-nav-item active">
-            <span class="material-symbols-outlined">shield_person</span>
-            <span class="nav-label">Admin</span>
-          </button>
-          <button onclick="showView('users')" id="nav-users" class="sidebar-nav-item">
-            <span class="material-symbols-outlined">group</span>
-            <span class="nav-label">Usuarios</span>
-            <span class="nav-badge" id="sidebar-user-count">0</span>
-          </button>
-          <button onclick="showView('projects')" id="nav-projects" class="sidebar-nav-item">
-            <span class="material-symbols-outlined">folder_open</span>
-            <span class="nav-label">Proyectos</span>
-            <span class="nav-badge" id="sidebar-project-count">0</span>
-          </button>
-          <button onclick="showView('pca')" id="nav-pca" class="sidebar-nav-item">
-            <span class="material-symbols-outlined">scatter_plot</span>
-            <span class="nav-label">Análisis PCA</span>
-          </button>
-          <button onclick="showView('classification')" id="nav-classification" class="sidebar-nav-item">
-            <span class="material-symbols-outlined">category</span>
-            <span class="nav-label">Clasificación</span>
-          </button>
-        </div>
-      </nav>
-
-      <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
-        <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background flex-shrink-0" id="user-avatar">A</div>
-          <div class="sidebar-user-info min-w-0">
-            <div class="font-bold text-sm truncate" id="user-name">Administrador</div>
-            <div class="text-xs text-on-surface-variant/70 truncate" id="user-role">Admin</div>
-          </div>
-        </a>
-        <button onclick="logout()" class="sidebar-nav-item mt-2" style="justify-content:flex-start;">
-          <span class="material-symbols-outlined">logout</span>
-          <span class="nav-label">Cerrar sesión</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- Main content -->
-    <main class="flex-1 p-8 relative z-10 overflow-x-hidden">
-      <div class="flex justify-between items-center mb-8 stagger-in" style="animation-delay:0.1s;">
-        <div>
-          <h1 class="text-4xl font-extrabold tracking-tight">Panel de Administrador</h1>
-          <p class="text-on-surface-variant/60">Supervisión total de usuarios, proyectos y análisis</p>
-        </div>
-        <div class="flex gap-3">
-          <button id="themeButton" class="glass glass-hover p-2 rounded-full w-10 h-10 flex items-center justify-center">
-            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ============ VISTA: RESUMEN ============ -->
-      <div id="view-resumen">
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 stagger-in" style="animation-delay:0.15s;">
-          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Usuarios registrados</span><span class="material-symbols-outlined text-primary/60">group</span></div><div class="text-3xl font-bold mt-2" id="stat-users">0</div></div>
-          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Proyectos totales</span><span class="material-symbols-outlined text-primary/60">folder</span></div><div class="text-3xl font-bold mt-2" id="stat-projects">0</div></div>
-          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Completados</span><span class="material-symbols-outlined text-green-accent/60">check_circle</span></div><div class="text-3xl font-bold mt-2" id="stat-completed">0</div></div>
-          <div class="glass rounded-2xl p-5 glass-hover"><div class="flex justify-between"><span class="text-on-surface-variant/60 text-sm">Calidad media</span><span class="material-symbols-outlined text-tertiary/60">star</span></div><div class="text-3xl font-bold mt-2" id="stat-quality">0</div></div>
-        </div>
-
-        <!-- Gráficas de Machine Learning / Analytics -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10 stagger-in" style="animation-delay:0.2s;">
-          <!-- Gráfica: Lenguajes más usados -->
-          <div class="glass rounded-2xl p-6 glass-hover">
-            <h2 class="text-lg font-bold mb-4 section-title">
-              <span class="material-symbols-outlined">code</span>
-              Lenguajes más usados
-            </h2>
-            <div style="position:relative;height:260px;">
-              <canvas id="chart-languages"></canvas>
-            </div>
-          </div>
-          <!-- Gráfica: Proyectos por mes -->
-          <div class="glass rounded-2xl p-6 glass-hover">
-            <h2 class="text-lg font-bold mb-4 section-title">
-              <span class="material-symbols-outlined">bar_chart</span>
-              Proyectos por mes
-            </h2>
-            <div style="position:relative;height:260px;">
-              <canvas id="chart-monthly"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.25s;">
-          <h2 class="text-xl font-bold mb-4 section-title">
-            <span class="material-symbols-outlined">description</span>
-            Análisis de documentación
-          </h2>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div><div class="text-on-surface-variant/60 text-sm">Documentos</div><div class="text-2xl font-bold" id="doc-count">0</div></div>
-            <div><div class="text-on-surface-variant/60 text-sm">Palabras clave</div><div class="text-2xl font-bold" id="keyword-count">0</div></div>
-            <div><div class="text-on-surface-variant/60 text-sm">Términos técnicos</div><div class="text-2xl font-bold" id="technical-count">0</div></div>
-            <div><div class="text-on-surface-variant/60 text-sm">Coincidencias</div><div class="text-2xl font-bold" id="matching-count">0</div></div>
-          </div>
-          <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
-        </div>
-      </div>
-
-      <!-- ============ VISTA: USUARIOS ============ -->
-      <div id="view-users" class="hidden">
-        <div id="users-section" class="mb-12 stagger-in" style="animation-delay:0.35s;">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold section-title">
-              <span class="material-symbols-outlined">group</span>
-              Usuarios
-            </h2>
-            <button onclick="openUserModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo usuario</button>
-          </div>
-          <div class="glass rounded-2xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left">
-                <thead class="border-b border-outline-variant/30 bg-surface-container/30">
-                  <tr class="text-on-surface-variant/70 text-sm">
-                    <th class="p-4 font-bold">Nombre</th><th class="p-4">Email</th><th class="p-4">Rol</th><th class="p-4">Plan</th><th class="p-4">Proyectos</th><th class="p-4">Creado</th><th class="p-4">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="users-table"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ VISTA: PROYECTOS ============ -->
-      <div id="view-projects" class="hidden">
-        <div id="projects-section" class="stagger-in" style="animation-delay:0.4s;">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold section-title">
-              <span class="material-symbols-outlined">folder_open</span>
-              Proyectos
-            </h2>
-            <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto</button>
-          </div>
-          <div class="glass rounded-2xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left">
-                <thead class="border-b border-outline-variant/30">
-                  <tr class="text-on-surface-variant/70 text-sm">
-                    <th class="p-4">Nombre</th><th class="p-4">Propietario</th><th class="p-4">Lenguaje</th><th class="p-4">Estado</th><th class="p-4">Score</th><th class="p-4">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="projects-table"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ VISTA: ANÁLISIS PCA ============ -->
-      <div id="view-pca" class="hidden">
-        <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.1s;">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h2 class="text-xl font-bold section-title">
-                <span class="material-symbols-outlined">scatter_plot</span>
-                Análisis PCA
-              </h2>
-              <p class="text-on-surface-variant/70 text-sm" id="pca-description">Proyección de los proyectos analizados en 2 componentes principales.</p>
-            </div>
-            <div class="text-right">
-              <div class="text-sm text-on-surface-variant">Varianza explicada</div>
-              <div class="text-lg font-semibold text-primary" id="pca-variance">Cargando...</div>
-            </div>
-          </div>
-          <div style="position:relative;height:320px;">
-            <canvas id="chart-pca"></canvas>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-            <div class="glass rounded-2xl p-4">
-              <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">data_object</span>Origen de los valores PCA</h3>
-              <p class="text-sm text-on-surface-variant mb-3">Los puntos del PCA se generan a partir de las métricas extraídas de cada proyecto:</p>
-              <ul class="text-sm space-y-2" id="pca-metrics-list"></ul>
-            </div>
-            <div class="glass rounded-2xl p-4">
-              <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">lightbulb</span>¿Para qué ayuda?</h3>
-              <p class="text-sm text-on-surface-variant" id="pca-help-text">
-                El PCA ayuda a ver la relación entre proyectos, identificar grupos similares y entender qué proyectos se desvían en calidad o estructura.
-              </p>
-            </div>
-          </div>
-          <div class="glass rounded-2xl p-4 mt-4">
-            <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">list</span>Proyectos en el espacio PCA</h3>
-            <div id="pca-projects-list" class="grid gap-2 text-sm"></div>
-          </div>
-          <!-- Conclusión -->
-          <div class="glass rounded-2xl p-4 mt-4">
-            <h3 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-size:18px;">insights</span>Conclusión</h3>
-            <div id="pca-conclusion" class="space-y-2 text-sm text-on-surface-variant"></div>
-          </div>
-          <!-- Sugerencias -->
-          <div class="glass rounded-2xl p-4 mt-4 bg-secondary/10 border border-secondary/30">
-            <h3 class="font-semibold mb-2 flex items-center gap-2 text-secondary">
-              <span class="material-symbols-outlined" style="font-size:18px;">lightbulb</span>
-              Sugerencias
-            </h3>
-            <div id="pca-suggestions" class="space-y-2 text-sm text-on-surface-variant"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ VISTA: CLASIFICACIÓN ============ -->
-      <div id="view-classification" class="hidden">
-        <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.1s;">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h2 class="text-xl font-bold section-title">
-                <span class="material-symbols-outlined">category</span>
-                Clasificación de Proyectos
-              </h2>
-              <p class="text-on-surface-variant/70 text-sm">Clasifica automáticamente los proyectos por dominio usando Árbol de Decisión.</p>
-            </div>
-            <button onclick="classifyAllProjects()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">play_arrow</span> Clasificar todos
-            </button>
-          </div>
-          
-          <div id="classification-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <p class="text-on-surface-variant/60 text-sm col-span-full">Haz clic en "Clasificar todos" para analizar los proyectos.</p>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- MODAL USUARIO -->
-  <div id="userModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeUserModal()" style="background:rgba(0,0,0,0.5);">
-    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
-      <button onclick="closeUserModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-      <h3 class="text-2xl font-bold text-on-surface mb-1" id="userModalTitle">Agregar Usuario</h3>
-      <p class="text-on-surface-variant/60 text-sm mb-6">Administra los usuarios del sistema</p>
-      <input type="hidden" id="userId">
-      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre</label><input id="userName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
-      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Email</label><input id="userEmail" type="email" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
-      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña (solo para nuevo)</label><input id="userPassword" type="password" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
-      <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Rol</label><select id="userRole" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
-      <div class="flex gap-3 justify-end">
-        <button onclick="closeUserModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
-        <button onclick="saveUser()" class="btn-primary px-4 py-2 rounded-xl transition-all">Guardar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PROYECTO -->
-  <div id="projectModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeProjectModal()" style="background:rgba(0,0,0,0.5);">
-    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
-      <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-      <h3 class="text-2xl font-bold text-on-surface mb-1" id="projectModalTitle">Agregar Proyecto</h3>
-      <p class="text-on-surface-variant/60 text-sm mb-6">Administra los proyectos del sistema</p>
-      <input type="hidden" id="projectId">
-      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label><input id="projectName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
-      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Propietario (email)</label><input id="projectOwner" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors"></div>
-      <div class="mb-4"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Lenguaje</label><input id="projectLanguage" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" value="Python"></div>
-      <div class="mb-6"><label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Estado</label><select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors"><option value="pending">Pendiente</option><option value="completed">Completado</option><option value="error">Error</option></select></div>
-      <div class="flex gap-3 justify-end">
-        <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
-        <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl transition-all">Guardar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL CLASIFICACIÓN DETALLES -->
-  <div id="classificationModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeClassificationModal()" style="background:rgba(0,0,0,0.5);">
-    <div class="glass p-8 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-y-auto">
-      <button onclick="closeClassificationModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-      <h3 class="text-2xl font-bold text-on-surface mb-1" id="classificationModalTitle">Detalles de Clasificación</h3>
-      <p class="text-on-surface-variant/60 text-sm mb-6">Análisis detallado del árbol de decisión</p>
-      
-      <div id="classification-details">
-        <!-- Se llena dinámicamente -->
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/';
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.role !== 'admin') window.location.href = '/dashboard';
-    document.getElementById('user-name').innerText = user.name || 'Admin';
-    document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
-
-    function authHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
-
-    // ─── Manejo de vistas ───────────────────────────────────────────
-    let pcaLoaded = false;
-
-    function showView(view) {
-      const views = ['resumen', 'users', 'projects', 'pca', 'classification'];
-      const navs = {
-        'resumen': document.getElementById('nav-resumen'),
-        'users': document.getElementById('nav-users'),
-        'projects': document.getElementById('nav-projects'),
-        'pca': document.getElementById('nav-pca'),
-        'classification': document.getElementById('nav-classification')
-      };
-
-      // Ocultar todas las vistas
-      views.forEach(v => {
-        const el = document.getElementById('view-' + v);
-        if (el) el.classList.add('hidden');
-      });
-
-      // Remover active de todos los navs
-      Object.values(navs).forEach(el => {
-        if (el) el.classList.remove('active');
-      });
-
-      // Mostrar la vista seleccionada
-      const targetView = document.getElementById('view-' + view);
-      if (targetView) {
-        targetView.classList.remove('hidden');
-      }
-
-      // Activar el nav correspondiente
-      if (navs[view]) {
-        navs[view].classList.add('active');
-      }
-
-      // Cargar datos específicos si es necesario
-      if (view === 'pca' && !pcaLoaded) {
-        loadPCA();
-        pcaLoaded = true;
-      }
-    }
-
-    // ─── Carga de datos ─────────────────────────────────────────────
-    async function loadStats() {
-      try {
-        const res = await fetch('/api/admin/overview', { headers: authHeaders() });
-        if (!res.ok) {
-          console.error('Error loading stats:', res.status);
-          if (res.status === 403) {
-            alert('No tienes permisos de administrador. Redirigiendo al dashboard...');
-            window.location.href = '/dashboard';
-            return;
-          }
-          throw new Error();
-        }
-        const data = await res.json();
-        console.log('Admin stats data:', data);
-
-        if (!data.stats) {
-          console.error('No stats in response:', data);
-          return;
-        }
-
-        document.getElementById('stat-users').innerText = data.stats.total_users || 0;
-        document.getElementById('stat-projects').innerText = data.stats.total_projects || 0;
-        document.getElementById('stat-completed').innerText = data.stats.completed_projects || 0;
-        document.getElementById('stat-quality').innerText = data.stats.average_quality_score || 0;
-        document.getElementById('doc-count').innerText = data.data_analysis?.document_count || 0;
-        document.getElementById('keyword-count').innerText = data.data_analysis?.keywords?.length || 0;
-        document.getElementById('technical-count').innerText = data.data_analysis?.technical_terms?.length || 0;
-        document.getElementById('matching-count').innerText = data.data_analysis?.matching_terms?.length || 0;
-        document.getElementById('sidebar-user-count').innerText = data.stats.total_users || 0;
-        document.getElementById('sidebar-project-count').innerText = data.stats.total_projects || 0;
-        
-        const kwContainer = document.getElementById('keywords-list');
-        if (data.data_analysis?.keywords) {
-          kwContainer.innerHTML = data.data_analysis.keywords.slice(0,8).map(k => `<span class="badge pending" style="background:rgba(142,213,255,0.12);color:var(--color-primary);border-color:rgba(142,213,255,0.25);">${k}</span>`).join('');
-        }
-
-        // ─── Gráficas ───────────────────────────────────────────────
-        const isDark = document.body.getAttribute('data-theme') !== 'light';
-        const textColor = isDark ? '#dee3e8' : '#0f172a';
-        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-        const palette = ['#8ed5ff','#c0c1ff','#10b981','#ffc176','#ff8fab','#a8dadc','#cdb4db','#ffcf77'];
-
-        Chart.defaults.color = textColor;
-        Chart.defaults.borderColor = gridColor;
-        Chart.defaults.font.family = "'Geist', sans-serif";
-
-        // Obtener proyectos reales para las gráficas
-        let allProjects = [];
-        try {
-          const projRes = await fetch('/api/admin/projects', { headers: authHeaders() });
-          if (projRes.ok) allProjects = await projRes.json();
-        } catch(e) { console.warn('No se pudieron cargar proyectos para gráficas', e); }
-
-        // ── 1. Lenguajes más usados (Doughnut) ──
-        const langMap = {};
-        allProjects.forEach(p => {
-          const lang = (p.language && p.language !== 'unknown' && p.language !== 'Unknown') ? p.language : 'Otro';
-          langMap[lang] = (langMap[lang] || 0) + 1;
-        });
-        if (!allProjects.length && data.stats.language_distribution) {
-          Object.assign(langMap, data.stats.language_distribution);
-        }
-        const langLabels = Object.keys(langMap);
-        const langValues = Object.values(langMap);
-        const ctxLang = document.getElementById('chart-languages').getContext('2d');
-        if (window._chartLang) window._chartLang.destroy();
-        window._chartLang = new Chart(ctxLang, {
-          type: 'doughnut',
-          data: {
-            labels: langLabels.length ? langLabels : ['Sin datos'],
-            datasets: [{
-              data: langValues.length ? langValues : [1],
-              backgroundColor: palette,
-              borderWidth: 2,
-              borderColor: isDark ? '#1b2024' : '#ffffff'
-            }]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'right', labels: { color: textColor, padding: 14, font: { size: 13 } } },
-              tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} proyecto${ctx.parsed !== 1 ? 's' : ''}` } }
-            },
-            cutout: '60%'
-          }
-        });
-
-        // ── 2. Proyectos por mes (Bar) ──
-        const monthMap = {};
-        allProjects.forEach(p => {
-          const ca = p.created_at || '';
-          if (ca && ca.length >= 7) {
-            const key = ca.substring(0, 7);
-            monthMap[key] = (monthMap[key] || 0) + 1;
-          }
-        });
-        if (!allProjects.length && data.stats.projects_per_month) {
-          Object.assign(monthMap, data.stats.projects_per_month);
-        }
-        const sortedMonths = Object.keys(monthMap).sort().slice(-12);
-        const monthLabels = sortedMonths.map(m => {
-          const [y, mo] = m.split('-');
-          return new Date(+y, +mo - 1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
-        });
-        const monthValues = sortedMonths.map(m => monthMap[m]);
-        const ctxMonth = document.getElementById('chart-monthly').getContext('2d');
-        if (window._chartMonth) window._chartMonth.destroy();
-        window._chartMonth = new Chart(ctxMonth, {
-          type: 'bar',
-          data: {
-            labels: monthLabels.length ? monthLabels : ['Sin datos'],
-            datasets: [{
-              label: 'Proyectos',
-              data: monthValues.length ? monthValues : [0],
-              backgroundColor: 'rgba(142,213,255,0.55)',
-              borderColor: '#8ed5ff',
-              borderWidth: 2,
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: gridColor }, ticks: { color: textColor } },
-              y: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1, precision: 0 }, beginAtZero: true }
-            }
-          }
-        });
-
-        if (pcaLoaded) await loadPCA();
-      } catch (error) {
-        console.error('Error loading stats:', error);
-        alert('Error al cargar estadísticas. Verifica la consola para más detalles.');
-      }
-    }
-
-    async function loadUsers() {
-      const res = await fetch('/api/admin/users', { headers: authHeaders() });
-      if (!res.ok) return;
-      const users = await res.json();
-      const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
-      const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
-      document.getElementById('users-table').innerHTML = users.map(u => `
-        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
-          <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
-          <td class="p-4"><span class="badge ${planColors[u.plan] || 'pending'}">${planNames[u.plan] || u.plan || 'Gratuito'}</span></td>
-          <td class="p-4">${u.projects_count || 0}</td><td class="p-4">${new Date(u.created_at).toLocaleDateString()}</td>
-          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editUser('${u._id}','${escapeHtml(u.name)}','${escapeHtml(u.email)}','${u.role}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteUser('${u._id}')">delete</span></div></td>
-        </tr>
-      `).join('');
-    }
-
-    async function loadProjects() {
-      const res = await fetch('/api/admin/projects', { headers: authHeaders() });
-      if (!res.ok) return;
-      const projects = await res.json();
-      document.getElementById('projects-table').innerHTML = projects.map(p => `
-        <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
-          <td class="p-4">${escapeHtml(p.name)}</td><td class="p-4">${escapeHtml(p.owner)}</td><td class="p-4">${p.language}</td>
-          <td class="p-4"><span class="badge ${p.status}">${p.status === 'completed' ? 'Completado' : p.status === 'error' ? 'Error' : 'Pendiente'}</span></td>
-          <td class="p-4">${p.quality_score || '—'}</td>
-          <td class="p-4"><div class="flex gap-2"><span class="action-icon material-symbols-outlined" onclick="editProject('${p._id}','${escapeHtml(p.name)}','${escapeHtml(p.owner)}','${p.language}','${p.status}')">edit</span><span class="action-icon material-symbols-outlined text-error/70" onclick="deleteProject('${p._id}')">delete</span></div></td>
-        </tr>
-      `).join('');
-    }
-
-    async function loadPCA() {
-      try {
-        const isDark = document.body.getAttribute('data-theme') !== 'light';
-        const textColor = isDark ? '#dee3e8' : '#0f172a';
-        const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-
-        const res = await fetch('/api/admin/pca', { headers: authHeaders() });
-        if (!res.ok) {
-          console.warn('PCA no disponible:', res.status);
-          document.getElementById('pca-variance').innerText = 'No disponible';
-          return;
-        }
-        const data = await res.json();
-        if (data.status !== 'ok' || !data.pca) {
-          console.warn('PCA response invalid', data);
-          document.getElementById('pca-variance').innerText = 'No disponible';
-          return;
-        }
-
-        const pca = data.pca;
-        const varTotal = pca.explained_variance_ratio.reduce((sum, val) => sum + val, 0) * 100;
-        document.getElementById('pca-variance').innerText = `${varTotal.toFixed(1)}% varianza`; 
-        const labels = pca.project_coordinates.map(item => item.name || item.project_id);
-        const valuesX = pca.project_coordinates.map(item => item.component_1);
-        const valuesY = pca.project_coordinates.map(item => item.component_2);
-
-        const ctxPCA = document.getElementById('chart-pca').getContext('2d');
-        const metrics = [
-          'total_files', 'total_funcs', 'total_classes', 'total_endpoints',
-          'total_issues', 'total_langs', 'doc_ratio', 'async_funcs',
-          'test_funcs', 'avg_complexity', 'max_complexity', 'high_cx_funcs',
-          'quality_score', 'total_size_kb'
-        ];
-
-        document.getElementById('pca-metrics-list').innerHTML = metrics
-          .map(metric => `<li class="flex items-start gap-2"><span class="inline-flex h-2.5 w-2.5 rounded-full bg-primary mt-1"></span><span>${metric.replace(/_/g, ' ')}</span></li>`)
-          .join('');
-
-        document.getElementById('pca-help-text').innerText =
-          'El PCA usa estas métricas cuantitativas para proyectar cada proyecto en un espacio de dos dimensiones. Esto ayuda a detectar grupos de proyectos similares, distinguir los outliers y entender cómo variables como la complejidad, documentación y tamaño impactan la calidad general.';
-
-        const projectList = document.getElementById('pca-projects-list');
-        projectList.innerHTML = pca.project_coordinates.slice(0, 8).map(item =>
-          `<div class="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
-             <div class="font-semibold">${item.name}</div>
-             <div class="text-xs text-on-surface-variant mt-1">Componente 1: ${item.component_1.toFixed(3)}, Componente 2: ${item.component_2.toFixed(3)}</div>
-           </div>`
-        ).join('');
-
-        const conclusionContainer = document.getElementById('pca-conclusion');
-        if (pca.conclusion && Array.isArray(pca.conclusion)) {
-          conclusionContainer.innerHTML = pca.conclusion
-            .map(text => `<p class="mb-2">${text}</p>`)
-            .join('');
-        } else if (pca.interpretacion) {
-          conclusionContainer.innerHTML = `<p class="mb-2">${pca.interpretacion}</p>`;
-        } else {
-          conclusionContainer.innerHTML = `<p class="text-on-surface-variant/60">No hay conclusión disponible para este análisis.</p>`;
-        }
-
-        const suggestionsContainer = document.getElementById('pca-suggestions');
-        if (pca.sugerencias && Array.isArray(pca.sugerencias)) {
-          suggestionsContainer.innerHTML = pca.sugerencias
-            .map(text => `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>${text}</span></div>`)
-            .join('');
-        } else {
-          suggestionsContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>No hay sugerencias disponibles para este análisis.</span></div>`;
-        }
-
-        // Gráfico PCA
-        if (window._chartPCA) window._chartPCA.destroy();
-        window._chartPCA = new Chart(ctxPCA, {
-          type: 'scatter',
-          data: {
-            datasets: [{
-              label: 'Proyectos',
-              data: labels.map((label, index) => ({
-                x: valuesX[index],
-                y: valuesY[index],
-                label
-              })),
-              backgroundColor: '#8ed5ff',
-              borderColor: '#38bdf8',
-              pointRadius: 6,
-              pointHoverRadius: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              tooltip: {
-                callbacks: {
-                  label(ctx) {
-                    const item = ctx.raw;
-                    return `${item.label}: (${item.x.toFixed(2)}, ${item.y.toFixed(2)})`;
-                  }
-                }
-              },
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                title: { display: true, text: 'Componente 1', color: textColor },
-                grid: { color: gridColor },
-                ticks: { color: textColor }
-              },
-              y: {
-                title: { display: true, text: 'Componente 2', color: textColor },
-                grid: { color: gridColor },
-                ticks: { color: textColor }
-              }
-            }
-          }
-        });
-      } catch (err) {
-        console.error('Error loading PCA:', err);
-        document.getElementById('pca-variance').innerText = 'Error';
-      }
-    }
-
-    // ─── CRUD Usuarios ──────────────────────────────────────────────
-    function openUserModal(edit = false) { 
-      const modal = document.getElementById('userModal');
-      modal.classList.remove('hidden'); 
-      modal.classList.add('flex'); 
-      if(!edit) { 
-        document.getElementById('userModalTitle').innerText = 'Agregar Usuario'; 
-        document.getElementById('userId').value = ''; 
-        document.getElementById('userName').value = ''; 
-        document.getElementById('userEmail').value = ''; 
-        document.getElementById('userPassword').value = ''; 
-        document.getElementById('userRole').value = 'user'; 
-      } 
-    }
-    function closeUserModal() { 
-      const modal = document.getElementById('userModal');
-      modal.classList.add('hidden'); 
-      modal.classList.remove('flex'); 
-    }
-    window.editUser = (id, name, email, role) => {
-      document.getElementById('userModalTitle').innerText = 'Editar Usuario';
-      document.getElementById('userId').value = id;
-      document.getElementById('userName').value = name;
-      document.getElementById('userEmail').value = email;
-      document.getElementById('userPassword').value = '';
-      document.getElementById('userRole').value = role;
-      openUserModal(true);
-    };
-    async function saveUser() {
-      const id = document.getElementById('userId').value;
-      const name = document.getElementById('userName').value;
-      const email = document.getElementById('userEmail').value;
-      const password = document.getElementById('userPassword').value;
-      const role = document.getElementById('userRole').value;
-      const method = id ? 'PUT' : 'POST';
-      const url = id ? `/api/admin/users/${id}` : '/api/admin/users';
-      const body = { name, email, role };
-      if (password) body.password = password;
-      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
-      if (res.ok) { closeUserModal(); loadUsers(); loadStats(); }
-      else alert('Error al guardar usuario');
-    }
-    window.deleteUser = async (id) => {
-      if(confirm('¿Eliminar usuario permanentemente?')) {
-        const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: authHeaders() });
-        if(res.ok) { loadUsers(); loadStats(); }
-      }
-    };
-
-    // ─── CRUD Proyectos ─────────────────────────────────────────────
-    function openProjectModal() { 
-      const modal = document.getElementById('projectModal');
-      modal.classList.remove('hidden'); 
-      modal.classList.add('flex'); 
-      document.getElementById('projectId').value = ''; 
-      document.getElementById('projectName').value = ''; 
-      document.getElementById('projectOwner').value = ''; 
-      document.getElementById('projectLanguage').value = 'Python'; 
-      document.getElementById('projectStatus').value = 'pending'; 
-      document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto'; 
-    }
-    function closeProjectModal() { 
-      const modal = document.getElementById('projectModal');
-      modal.classList.add('hidden'); 
-      modal.classList.remove('flex'); 
-    }
-    window.editProject = (id, name, owner, lang, status) => {
-      document.getElementById('projectModalTitle').innerText = 'Editar Proyecto';
-      document.getElementById('projectId').value = id;
-      document.getElementById('projectName').value = name;
-      document.getElementById('projectOwner').value = owner;
-      document.getElementById('projectLanguage').value = lang;
-      document.getElementById('projectStatus').value = status;
-      const modal = document.getElementById('projectModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    };
-    async function saveProject() {
-      const id = document.getElementById('projectId').value;
-      const name = document.getElementById('projectName').value;
-      const owner = document.getElementById('projectOwner').value;
-      const language = document.getElementById('projectLanguage').value;
-      const status = document.getElementById('projectStatus').value;
-      const method = id ? 'PUT' : 'POST';
-      const url = id ? `/api/admin/projects/${id}` : '/api/admin/projects';
-      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify({ name, owner, language, status }) });
-      if (res.ok) { closeProjectModal(); loadProjects(); loadStats(); }
-      else alert('Error guardando proyecto');
-    }
-    window.deleteProject = async (id) => {
-      if(confirm('¿Eliminar este proyecto?')) {
-        const res = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE', headers: authHeaders() });
-        if(res.ok) loadProjects();
-      }
-    };
-
-    // ─── Clasificación de proyectos ──────────────────────────────────
-    async function classifyAllProjects() {
-      const container = document.getElementById('classification-results');
-      container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">Clasificando proyectos...</p>';
-      
-      try {
-        const res = await fetch('/api/admin/classify-all-projects', { headers: authHeaders() });
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error('Error response:', res.status, errorText);
-          container.innerHTML = `<p class="text-error text-sm col-span-full">Error al clasificar proyectos: ${res.status} ${res.statusText}</p>`;
-          return;
-        }
-        
-        const data = await res.json();
-        if (data.status !== 'ok' || !data.classifications) {
-          container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">No hay proyectos para clasificar</p>';
-          return;
-        }
-        
-        const classifications = data.classifications;
-        const colors = {
-          'Medico/Salud': 'border-emerald-400/30 bg-emerald-400/10',
-          'Financiero': 'border-blue-400/30 bg-blue-400/10',
-          'Educativo': 'border-amber-400/30 bg-amber-400/10',
-          'Comercio': 'border-purple-400/30 bg-purple-400/10',
-          'API/REST': 'border-cyan-400/30 bg-cyan-400/10',
-          'Otro': 'border-gray-400/30 bg-gray-400/10'
-        };
-        
-        // 🆕 Iconos Material Symbols en vez de emojis
-        const icons = {
-          'Medico/Salud': 'medical_services',
-          'Financiero': 'account_balance',
-          'Educativo': 'school',
-          'Comercio': 'shopping_cart',
-          'API/REST': 'api',
-          'Otro': 'folder'
-        };
-
-        const iconColors = {
-          'Medico/Salud': 'text-emerald-400',
-          'Financiero': 'text-blue-400',
-          'Educativo': 'text-amber-400',
-          'Comercio': 'text-purple-400',
-          'API/REST': 'text-cyan-400',
-          'Otro': 'text-gray-400'
-        };
-        
-        if (classifications.length === 0) {
-          container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">No se encontraron proyectos con análisis para clasificar.</p>';
-          return;
-        }
-        
-        container.innerHTML = classifications.map(c => {
-          const classification = c.classification;
-          const cls = classification.clasificacion || 'Otro';
-          const color = colors[cls] || colors['Otro'];
-          const icon = icons[cls] || icons['Otro'];
-          const iconColor = iconColors[cls] || iconColors['Otro'];
-          const confidence = classification.confianza || 0;
-          const fuenteDatos = classification.fuente_datos || '';
-          const esReal = fuenteDatos.includes('reales');
-          
-          return `
-            <div class="glass rounded-2xl p-4 glass-hover border ${color} cursor-pointer" onclick="showClassificationDetails('${c.project_id}')">
-              <div class="flex items-start justify-between">
-                <div class="flex items-start gap-3">
-                  <span class="material-symbols-outlined ${iconColor}" style="font-size:28px;">${icon}</span>
-                  <div>
-                    <div class="text-lg font-semibold">${escapeHtml(c.project_name)}</div>
-                    <div class="text-sm text-on-surface-variant mt-1">${cls}</div>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <div class="text-sm font-bold ${confidence > 70 ? 'text-green-accent' : confidence > 50 ? 'text-tertiary' : 'text-error'}">
-                    ${confidence}%
-                  </div>
-                  <div class="text-xs text-on-surface-variant">confianza</div>
-                </div>
-              </div>
-              <div class="mt-2 flex flex-wrap gap-1">
-                ${Object.entries(classification.probabilidades || {}).slice(0, 4).map(([label, prob]) => `
-                  <span class="badge ${prob > 20 ? 'completed' : 'pending'}" style="font-size:0.6rem;">
-                    ${label}: ${prob}%
-                  </span>
-                `).join('')}
-              </div>
-              ${fuenteDatos ? `
-                <div class="mt-3 flex items-center gap-1.5 text-xs ${esReal ? 'text-green-accent' : 'text-tertiary'}">
-                  <span class="material-symbols-outlined" style="font-size:14px;">${esReal ? 'verified' : 'science'}</span>
-                  <span>${esReal ? 'Entrenado con proyectos reales' : 'Entrenado con datos sintéticos'}</span>
-                </div>
-              ` : ''}
-            </div>
-          `;
-        }).join('');
-        
-      } catch (error) {
-        console.error('Error clasificando proyectos:', error);
-        container.innerHTML = `<p class="text-error text-sm col-span-full">Error al clasificar proyectos: ${error.message}</p>`;
-      }
-    }
-    // ─── Mostrar detalles de clasificación ──────────────────────────
-    async function showClassificationDetails(projectId) {
-      try {
-        const res = await fetch(`/api/admin/classify-project/${projectId}`, { headers: authHeaders() });
-        if (!res.ok) {
-          alert('Error al obtener detalles del proyecto');
-          return;
-        }
-        
-        const data = await res.json();
-        if (data.status !== 'ok' || !data.classification) {
-          alert('No se encontró clasificación para este proyecto');
-          return;
-        }
-        
-        const classification = data.classification;
-        const modal = document.getElementById('classificationModal');
-        const details = document.getElementById('classification-details');
-
-        // 🆕 Iconos por categoría (mismos que en la lista)
-        const icons = {
-          'Medico/Salud': 'medical_services',
-          'Financiero': 'account_balance',
-          'Educativo': 'school',
-          'Comercio': 'shopping_cart',
-          'API/REST': 'api',
-          'Otro': 'folder'
-        };
-        const cls = classification.clasificacion || 'Otro';
-        const icon = icons[cls] || icons['Otro'];
-        const fuenteDatos = classification.fuente_datos || 'desconocida';
-        const esReal = fuenteDatos.includes('reales');
-        const muestras = classification.muestras_entrenamiento;
-        
-        document.getElementById('classificationModalTitle').innerHTML = `
-          <span class="inline-flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary" style="font-size:24px;">${icon}</span>
-            Clasificación: ${cls}
-          </span>
-        `;
-        
-        let html = `
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div class="glass rounded-xl p-4">
-              <div class="text-sm text-on-surface-variant">Clasificación</div>
-              <div class="text-2xl font-bold text-primary flex items-center gap-2">
-                <span class="material-symbols-outlined" style="font-size:22px;">${icon}</span>
-                ${cls}
-              </div>
-              <div class="text-sm mt-1">Confianza: ${classification.confianza || 0}%</div>
-            </div>
-            <div class="glass rounded-xl p-4">
-              <div class="text-sm text-on-surface-variant">Tipo de modelo</div>
-              <div class="text-lg font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary" style="font-size:20px;">account_tree</span>
-                ${classification.tipo || 'Árbol de Decisión'}
-              </div>
-            </div>
-          </div>
-
-          <div class="glass rounded-xl p-4 mb-4 ${esReal ? 'border border-green-accent/30' : 'border border-tertiary/30'}">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined ${esReal ? 'text-green-accent' : 'text-tertiary'}" style="font-size:20px;">
-                ${esReal ? 'verified' : 'science'}
-              </span>
-              <div>
-                <div class="font-semibold ${esReal ? 'text-green-accent' : 'text-tertiary'}">
-                  ${esReal ? 'Modelo entrenado con proyectos reales' : 'Modelo entrenado con datos sintéticos'}
-                </div>
-                <div class="text-xs text-on-surface-variant">
-                  ${muestras ? `${muestras} muestras de entrenamiento` : ''}
-                  ${esReal ? '' : ' — agrega más proyectos analizados para mejorar la precisión'}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="glass rounded-xl p-4 mb-4">
-            <h4 class="font-semibold mb-2 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" style="font-size:18px;">bar_chart</span>
-              Probabilidades por categoría
-            </h4>
-            <div class="space-y-2">
-              ${Object.entries(classification.probabilidades || {}).map(([label, prob]) => `
-                <div>
-                  <div class="flex justify-between text-sm">
-                    <span class="flex items-center gap-1.5">
-                      <span class="material-symbols-outlined" style="font-size:14px;">${icons[label] || 'folder'}</span>
-                      ${label}
-                    </span>
-                    <span class="font-bold">${prob}%</span>
-                  </div>
-                  <div class="w-full bg-surface-container rounded-full h-2">
-                    <div class="bg-primary rounded-full h-2 transition-all" style="width: ${prob}%"></div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          
-          <div class="glass rounded-xl p-4 mb-4">
-            <h4 class="font-semibold mb-2 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" style="font-size:18px;">checklist</span>
-              Detalles de la decisión
-            </h4>
-            <ul class="list-disc list-inside text-sm space-y-1">
-              ${(classification.detalles_decision || []).map(d => `<li>${d}</li>`).join('')}
-            </ul>
-          </div>
-          
-          <div class="glass rounded-xl p-4 mb-4">
-            <h4 class="font-semibold mb-2 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" style="font-size:18px;">insights</span>
-              Características más importantes
-            </h4>
-            <div class="space-y-2">
-              ${(classification.caracteristicas_importantes || []).map(([feature, importance]) => `
-                <div>
-                  <div class="flex justify-between text-sm">
-                    <span>${feature}</span>
-                    <span class="font-bold">${(importance * 100).toFixed(1)}%</span>
-                  </div>
-                  <div class="w-full bg-surface-container rounded-full h-2">
-                    <div class="bg-secondary rounded-full h-2 transition-all" style="width: ${importance * 100}%"></div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          
-          <div class="glass rounded-xl p-4 mb-4 bg-secondary/10 border border-secondary/30">
-            <h4 class="font-semibold mb-2 text-secondary flex items-center gap-2">
-              <span class="material-symbols-outlined" style="font-size:18px;">psychology</span>
-              Interpretación
-            </h4>
-            <p class="text-sm text-on-surface-variant">${classification.interpretacion || 'Sin interpretación disponible'}</p>
-          </div>
-          
-          <div class="glass rounded-xl p-4">
-            <h4 class="font-semibold mb-2 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" style="font-size:18px;">lightbulb</span>
-              Recomendaciones
-            </h4>
-            <ul class="list-disc list-inside text-sm space-y-1">
-              ${(classification.recomendaciones || []).map(r => `<li>${r}</li>`).join('')}
-            </ul>
-          </div>
-        `;
-        
-        details.innerHTML = html;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        
-      } catch (error) {
-        console.error('Error mostrando detalles:', error);
-        alert('Error al obtener detalles del proyecto');
-      }
-    }
-    function closeClassificationModal() {
-      const modal = document.getElementById('classificationModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    // ─── Utils ──────────────────────────────────────────────────────
-    function escapeHtml(str) { 
-      if (!str) return '';
-      return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); 
-    }
+    <!-- ============================================================
+         METADATOS Y CONFIGURACIÓN DEL DOCUMENTO
+         ============================================================ -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard — AutoDocs AI</title>
     
-    function logout() { localStorage.clear(); window.location.href = '/'; }
+    <!-- ============================================================
+         LIBRERÍAS EXTERNAS
+         ============================================================ -->
+    <!-- Tailwind CSS: Framework de estilos utilitario con plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Fuentes de Google: JetBrains Mono (código) y Geist (UI) -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Material Symbols: Sistema de iconos de Google Material Design -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- ============================================================
+         CONFIGURACIÓN DE TAILWIND
+         ============================================================ -->
+    <script id="tailwind-config">
+        // Extiende la configuración de Tailwind con colores personalizados
+        tailwind.config = {
+            theme: {
+                extend: {
+                    // Colores personalizados que usan variables CSS para soportar temas
+                    colors: {
+                        background: 'var(--color-background)',
+                        surface: 'var(--color-surface)',
+                        'surface-container': 'var(--color-surface-container)',
+                        'surface-container-high': 'var(--color-surface-container-high)',
+                        'on-surface': 'var(--color-on-surface)',
+                        'on-surface-variant': 'var(--color-on-surface-variant)',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        'outline-variant': 'var(--color-outline-variant)',
+                        error: 'var(--color-error)',
+                        'green-accent': 'var(--color-green-accent)',
+                        tertiary: 'var(--color-tertiary)',
+                    },
+                    // Fuentes personalizadas
+                    fontFamily: {
+                        body: ['Geist', 'sans-serif'],      // Texto general
+                        mono: ['JetBrains Mono', 'monospace'], // Código
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        /* ============================================================
+           VARIABLES CSS - TEMA OSCURO (por defecto)
+           ============================================================ */
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;              /* Fondo principal oscuro */
+            --color-surface: rgba(27, 32, 36, 0.4);    /* Superficies con transparencia */
+            --color-surface-container: #1b2024;       /* Contenedores sólidos */
+            --color-surface-container-high: #252b2e;  /* Contenedores más claros */
+            --color-on-surface: #dee3e8;              /* Texto sobre superficies */
+            --color-on-surface-variant: #bdc8d1;      /* Texto secundario */
+            --color-primary: #8ed5ff;                 /* Color principal (azul claro) */
+            --color-secondary: #c0c1ff;               /* Color secundario (violeta) */
+            --color-outline-variant: #3e484f;         /* Bordes y líneas */
+            --color-error: #ffb4ab;                   /* Color de error */
+            --color-green-accent: #10b981;            /* Verde para éxito */
+            --color-tertiary: #ffc176;                /* Color terciario */
+            /* Efectos de vidrio (glassmorphism) */
+            --glass-border: rgba(123, 208, 255, 0.1);
+            --glass-shadow: 0 0 40px rgba(123, 208, 255, 0.1);
+            --glass-hover-border: rgba(123, 208, 255, 0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123, 208, 255, 0.1);
+            /* Colores de partículas para el fondo animado */
+            --particle-color-1: rgba(142, 213, 255, 0.4);
+            --particle-color-2: rgba(192, 193, 255, 0.2);
+            --particle-line: rgba(142, 213, 255, 0.12);
+        }
 
-    // ─── Tema claro/oscuro ─────────────────────────────────────────
-    const themeBtn = document.getElementById('themeButton');
-    const themeIcon = document.getElementById('themeIcon');
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    function applyTheme(theme) { 
-      document.body.setAttribute('data-theme', theme); 
-      themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode'; 
-      localStorage.setItem('theme', theme); 
+        /* ============================================================
+           VARIABLES CSS - TEMA CLARO
+           ============================================================ */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;              /* Fondo claro grisáceo */
+            --color-surface: rgba(255, 255, 255, 0.7); /* Superficies blancas */
+            --color-surface-container: #ffffff;       /* Contenedores blancos sólidos */
+            --color-surface-container-high: #e2e8f0;  /* Contenedores grises */
+            --color-on-surface: #0f172a;              /* Texto oscuro */
+            --color-on-surface-variant: #334155;      /* Texto secundario oscuro */
+            --color-primary: #38bdf8;                 /* Azul claro */
+            --color-secondary: #818cf8;               /* Violeta claro */
+            --color-outline-variant: #cbd5e1;         /* Bordes grises */
+            --color-error: #ba1a1a;                   /* Rojo para errores */
+            --color-green-accent: #10b981;            /* Verde */
+            --color-tertiary: #7c5800;                /* Amarillo oscuro */
+            /* Efectos de vidrio más sutiles para modo claro */
+            --glass-border: rgba(0, 0, 0, 0.04);
+            --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            --glass-hover-border: rgba(56, 189, 248, 0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+            /* Partículas más sutiles */
+            --particle-color-1: rgba(56, 189, 248, 0.25);
+            --particle-color-2: rgba(129, 140, 248, 0.2);
+            --particle-line: rgba(56, 189, 248, 0.12);
+        }
+
+        /* ============================================================
+           ESTILOS GLOBALES
+           ============================================================ */
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            font-family: 'Geist', sans-serif;
+            transition: background 0.25s ease, color 0.25s ease;
+            overflow-x: hidden;
+        }
+
+        /* ============================================================
+           CANVAS DE PARTÍCULAS (FONDO ANIMADO)
+           ============================================================ */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80%;        /* Ocupa solo el 80% de la altura */
+            z-index: 0;          /* Detrás de todo el contenido */
+            pointer-events: none; /* Permite hacer clic a través del canvas */
+        }
+
+        /* ============================================================
+           EFECTO GLASS (VIDRIO ESMERILADO)
+           ============================================================ */
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px); /* Desenfoque del fondo */
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
+        }
+
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        /* Inputs dentro de elementos glass (modo claro) */
+        .glass input,
+        .glass select,
+        .glass textarea {
+            color: #0f1418;
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .sidebar {
+            background: var(--color-surface-container);
+            backdrop-filter: blur(8px);
+            border-right: 1px solid var(--glass-border);
+        }
+
+        /* Enlace de navegación del sidebar */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.75rem;
+            color: var(--color-on-surface-variant);
+            transition: all 0.15s;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: var(--color-primary);
+            background: rgba(142, 213, 255, 0.08);
+        }
+
+        .nav-link.active {
+            color: var(--color-primary);
+            background: rgba(142, 213, 255, 0.12);
+            font-weight: 700;
+        }
+
+        .nav-link .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* ============================================================
+           BOTÓN PRIMARIO
+           ============================================================ */
+        .btn-primary {
+            background: var(--color-primary);
+            color: #0f1418;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.05);
+            transform: scale(0.98);
+        }
+
+        /* ============================================================
+           BADGES DE ESTADO
+           ============================================================ */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+        }
+
+        .badge.completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge.pending {
+            background: rgba(136, 146, 176, 0.2);
+            color: var(--color-on-surface-variant);
+            border: 1px solid rgba(136, 146, 176, 0.2);
+        }
+
+        .badge.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* ============================================================
+           ANIMACIONES DE MODALES
+           ============================================================ */
+        .modal-anim {
+            animation: fadeDown 0.2s ease;
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+           ANIMACIONES DE ENTRADA (STAGGER)
+           ============================================================ */
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Desactiva animaciones si el usuario prefiere movimiento reducido */
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in,
+            .glass-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+        }
+
+        /* ============================================================
+           ICONOS DE ACCIÓN
+           ============================================================ */
+        .action-icon {
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            color: var(--color-on-surface-variant);
+        }
+
+        .action-icon:hover {
+            background: var(--color-outline-variant);
+            color: var(--color-primary);
+        }
+
+        /* ============================================================
+           TÍTULOS DE SECCIÓN CON ICONOS
+           ============================================================ */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title .material-symbols-outlined {
+            color: var(--color-primary);
+            font-size: 22px;
+        }
+
+        /* ============================================================
+           SCROLLBAR PERSONALIZADA
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-primary);
+            border-radius: 10px;
+        }
+
+        /* ============================================================
+           SIDEBAR ESTILO "USUARIOS" (hover-expand)
+           ============================================================ */
+        .sidebar-shell {
+            width: 72px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* En escritorio, el sidebar se expande al hacer hover */
+        @media (min-width: 1024px) {
+            .sidebar-shell:hover {
+                width: 240px;
+            }
+            .sidebar-shell:hover .nav-label,
+            .sidebar-shell:hover .nav-badge,
+            .sidebar-shell:hover .sidebar-user-info,
+            .sidebar-shell:hover .sidebar-brand-label {
+                opacity: 1;
+            }
+        }
+
+        /* Elementos del sidebar que se ocultan/muestran al hacer hover */
+        .nav-label,
+        .nav-badge,
+        .sidebar-user-info,
+        .sidebar-brand-label {
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        /* Navegación del sidebar */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            padding: 0 8px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: var(--color-on-surface-variant);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            position: relative;
+            width: 100%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(142, 213, 255, 0.08);
+            color: var(--color-primary);
+        }
+
+        .sidebar-nav-item.active {
+            background: rgba(142, 213, 255, 0.12);
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        .sidebar-nav-item .material-symbols-outlined {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-item .nav-badge {
+            margin-left: auto;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(142, 213, 255, 0.15);
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           ESTILOS PARA BARRAS DE LENGUAJES
+           ============================================================ */
+        .lang-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 0;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .lang-bar-container:hover {
+            background: rgba(142, 213, 255, 0.06);
+        }
+
+        /* Nombre del lenguaje con color dot */
+        .lang-name {
+            min-width: 80px;
+            max-width: 80px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-on-surface);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lang-color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* Track de la barra de progreso */
+        .lang-bar-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.12);
+            border-radius: 4px;
+            overflow: hidden;
+            min-width: 40px;
+        }
+
+        /* Relleno de la barra de progreso */
+        .lang-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Texto de estadísticas del lenguaje */
+        .lang-stats-text {
+            min-width: 105px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--color-on-surface-variant);
+            text-align: right;
+            white-space: nowrap;
+            opacity: 0.7;
+        }
+
+        .lang-count {
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .lang-percent {
+            opacity: 0.6;
+        }
+
+        /* Scrollbar personalizada para la lista de lenguajes */
+        #lang-bars-container::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        #lang-bars-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #lang-bars-container::-webkit-scrollbar-thumb {
+            background: rgba(142, 213, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        /* Contenedor de la gráfica de lenguajes */
+        #language-chart-container {
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+    </style>
+    
+    <!-- ============================================================
+         CHART.JS - LIBRERÍA PARA GRÁFICOS
+         ============================================================ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+    </script>
+</head>
+
+<!-- ============================================================
+     CUERPO DE LA PÁGINA
+     ============================================================ -->
+<body data-theme="dark">
+    
+    <!-- Canvas para partículas de fondo (efecto visual dinámico) -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Contenedor principal con layout flex de pantalla completa -->
+    <div class="flex min-h-screen w-full relative z-10">
+        
+        <!-- ============================================================
+             SIDEBAR (MENÚ LATERAL) - ESTILO HOVER-EXPAND
+             ============================================================ -->
+        <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
+            
+            <!-- Logo de la aplicación -->
+            <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
+                <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
+                </div>
+                <span class="sidebar-brand-label font-mono text-lg font-bold">Auto<span class="text-primary">Docs</span></span>
+            </div>
+
+            <!-- Navegación principal del sidebar -->
+            <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
+                <div class="sidebar-nav">
+                    <!-- Botón para vista de Resumen (activo por defecto) -->
+                    <button onclick="showView('resumen')" id="nav-resumen" class="sidebar-nav-item active">
+                        <span class="material-symbols-outlined">shield_person</span>
+                        <span class="nav-label">Admin</span>
+                    </button>
+                    <!-- Enlace a la gestión de usuarios -->
+                    <a href="/admin/users" id="nav-users" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">group</span>
+                        <span class="nav-label">Usuarios</span>
+                        <span class="nav-badge" id="sidebar-user-count">0</span>
+                    </a>
+                    <!-- Enlace a la gestión de proyectos -->
+                    <a href="/admin/projects" id="nav-projects" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        <span class="nav-label">Proyectos</span>
+                        <span class="nav-badge" id="sidebar-project-count">0</span>
+                    </a>
+                    <!-- Enlace al análisis PCA -->
+                    <a href="/admin/pca" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">scatter_plot</span>
+                        <span class="nav-label">Análisis PCA</span>
+                    </a>
+                    <!-- Botón para vista de Clasificación -->
+                    <button onclick="showView('classification')" id="nav-classification" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">category</span>
+                        <span class="nav-label">Clasificación</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Perfil de usuario y cierre de sesión en la parte inferior -->
+            <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+                <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+                    <!-- Avatar del usuario con inicial -->
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background flex-shrink-0" id="user-avatar">A</div>
+                    <!-- Información del usuario -->
+                    <div class="sidebar-user-info min-w-0">
+                        <div class="font-bold text-sm truncate" id="user-name">Administrador</div>
+                        <div class="text-xs text-on-surface-variant/70 truncate" id="user-role">Admin</div>
+                    </div>
+                </a>
+                <!-- Botón de cerrar sesión -->
+                <button onclick="logout()" class="sidebar-nav-item mt-2" style="justify-content:flex-start;">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="nav-label">Cerrar sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ============================================================
+             CONTENIDO PRINCIPAL
+             ============================================================ -->
+        <main class="flex-1 p-8 relative z-10 overflow-x-hidden">
+            
+            <!-- HEADER DE LA PÁGINA -->
+            <div class="flex justify-between items-center mb-8 stagger-in" style="animation-delay:0.1s;">
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight">Panel de Administrador</h1>
+                    <p class="text-on-surface-variant/60">Supervisión total de usuarios, proyectos y análisis</p>
+                </div>
+                <div class="flex gap-3">
+                    <!-- Botón para cambiar entre tema claro/oscuro -->
+                    <button id="themeButton" class="glass glass-hover p-2 rounded-full w-10 h-10 flex items-center justify-center">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 VISTA: RESUMEN (Dashboard principal)
+                 ============================================================ -->
+            <div id="view-resumen">
+                
+                <!-- ============================================================
+                     TARJETAS DE ESTADÍSTICAS
+                     ============================================================ -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 stagger-in" style="animation-delay:0.15s;">
+                    <!-- Tarjeta: Usuarios registrados -->
+                    <div class="glass rounded-2xl p-5 glass-hover">
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant/60 text-sm">Usuarios registrados</span>
+                            <span class="material-symbols-outlined text-primary/60">group</span>
+                        </div>
+                        <div class="text-3xl font-bold mt-2" id="stat-users">0</div>
+                    </div>
+                    <!-- Tarjeta: Proyectos totales -->
+                    <div class="glass rounded-2xl p-5 glass-hover">
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant/60 text-sm">Proyectos totales</span>
+                            <span class="material-symbols-outlined text-primary/60">folder</span>
+                        </div>
+                        <div class="text-3xl font-bold mt-2" id="stat-projects">0</div>
+                    </div>
+                    <!-- Tarjeta: Proyectos completados -->
+                    <div class="glass rounded-2xl p-5 glass-hover">
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant/60 text-sm">Completados</span>
+                            <span class="material-symbols-outlined text-green-accent/60">check_circle</span>
+                        </div>
+                        <div class="text-3xl font-bold mt-2" id="stat-completed">0</div>
+                    </div>
+                    <!-- Tarjeta: Calidad media -->
+                    <div class="glass rounded-2xl p-5 glass-hover">
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant/60 text-sm">Calidad media</span>
+                            <span class="material-symbols-outlined text-tertiary/60">star</span>
+                        </div>
+                        <div class="text-3xl font-bold mt-2" id="stat-quality">0</div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     GRÁFICAS DE MACHINE LEARNING / ANALYTICS
+                     ============================================================ -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10 stagger-in" style="animation-delay:0.2s;">
+                    
+                    <!-- Gráfica 1: Lenguajes más usados - BARRAS HORIZONTALES -->
+                    <div class="glass rounded-2xl p-6 glass-hover">
+                        <h2 class="text-lg font-bold mb-2 section-title">
+                            <span class="material-symbols-outlined">code</span>
+                            Lenguajes más usados
+                        </h2>
+                        <p class="text-on-surface-variant/50 text-xs mb-3">Cantidad de proyectos por lenguaje</p>
+                        <!-- Contenedor donde se renderizan las barras dinámicamente -->
+                        <div id="language-chart-container" style="max-height: 280px; overflow-y: auto; padding-right: 4px;">
+                            <!-- Las barras se generan dinámicamente con JavaScript -->
+                        </div>
+                        <!-- Estadísticas de lenguajes -->
+                        <div id="lang-stats" class="flex justify-between items-center text-xs mt-3 pt-3 border-t border-outline-variant/20">
+                            <span id="lang-total" class="text-on-surface-variant/60">Total: 0 lenguajes</span>
+                            <span id="lang-most-used" class="text-on-surface-variant/60">Más usado: —</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfica 2: Proyectos por mes (Barras verticales) -->
+                    <div class="glass rounded-2xl p-6 glass-hover">
+                        <h2 class="text-lg font-bold mb-4 section-title">
+                            <span class="material-symbols-outlined">bar_chart</span>
+                            Proyectos por mes
+                        </h2>
+                        <div style="position:relative;height:260px;">
+                            <canvas id="chart-monthly"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     ANÁLISIS DE DOCUMENTACIÓN
+                     ============================================================ -->
+                <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.25s;">
+                    <h2 class="text-xl font-bold mb-4 section-title">
+                        <span class="material-symbols-outlined">description</span>
+                        Análisis de documentación
+                    </h2>
+                    <!-- Métricas de documentación -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div>
+                            <div class="text-on-surface-variant/60 text-sm">Documentos</div>
+                            <div class="text-2xl font-bold" id="doc-count">0</div>
+                        </div>
+                        <div>
+                            <div class="text-on-surface-variant/60 text-sm">Palabras clave</div>
+                            <div class="text-2xl font-bold" id="keyword-count">0</div>
+                        </div>
+                        <div>
+                            <div class="text-on-surface-variant/60 text-sm">Términos técnicos</div>
+                            <div class="text-2xl font-bold" id="technical-count">0</div>
+                        </div>
+                        <div>
+                            <div class="text-on-surface-variant/60 text-sm">Coincidencias</div>
+                            <div class="text-2xl font-bold" id="matching-count">0</div>
+                        </div>
+                    </div>
+                    <!-- Lista de palabras clave (máximo 8) -->
+                    <div class="flex flex-wrap gap-2 mt-4" id="keywords-list"></div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 VISTA: CLASIFICACIÓN DE PROYECTOS (ML)
+                 ============================================================ -->
+            <div id="view-classification" class="hidden">
+                <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.1s;">
+                    
+                    <!-- Encabezado de la sección de clasificación -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold section-title">
+                                <span class="material-symbols-outlined">category</span>
+                                Clasificación de Proyectos
+                            </h2>
+                            <p class="text-on-surface-variant/70 text-sm">Clasifica automáticamente los proyectos por dominio usando Árbol de Decisión.</p>
+                        </div>
+                        <!-- Botón para ejecutar clasificación en todos los proyectos -->
+                        <button onclick="classifyAllProjects()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">play_arrow</span> Clasificar todos
+                        </button>
+                    </div>
+
+                    <!-- Contenedor de resultados de clasificación -->
+                    <div id="classification-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <p class="text-on-surface-variant/60 text-sm col-span-full">Haz clic en "Clasificar todos" para analizar los proyectos.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================================
+         MODAL DE DETALLES DE CLASIFICACIÓN
+         ============================================================ -->
+    <div id="classificationModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeClassificationModal()" style="background:rgba(0,0,0,0.5);">
+        <div class="glass p-8 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-y-auto">
+            <!-- Botón para cerrar el modal -->
+            <button onclick="closeClassificationModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1" id="classificationModalTitle">Detalles de Clasificación</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Análisis detallado del árbol de decisión</p>
+
+            <!-- Contenido dinámico de detalles de clasificación -->
+            <div id="classification-details">
+                <!-- Se llena dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         JAVASCRIPT - LÓGICA PRINCIPAL
+         ============================================================ -->
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN DE COLORES POR LENGUAJE
+        // ============================================================
+        // Mapa de colores para cada lenguaje de programación
+        const languageColors = {
+            'Python': '#38bdf8',
+            'JavaScript': '#f7df1e',
+            'TypeScript': '#3178c6',
+            'React (JSX)': '#61dafb',
+            'React (TSX)': '#61dafb',
+            'PHP': '#777bb4',
+            'Ruby': '#cc342d',
+            'Go': '#00add8',
+            'Rust': '#dea584',
+            'C++': '#f34b7d',
+            'C': '#555555',
+            'C#': '#178600',
+            'Java': '#b07219',
+            'Kotlin': '#a97bff',
+            'Swift': '#ffac45',
+            'Dart': '#00b4ab',
+            'HTML': '#e34c26',
+            'CSS': '#563d7c',
+            'SCSS': '#c6538c',
+            'Shell': '#89e051',
+            'Bash': '#4d4d4d',
+            'SQL': '#e38c00',
+            'JSON': '#292929',
+            'YAML': '#cb171e',
+            'TOML': '#9c4221',
+            'Terraform': '#7b42bc',
+            'Otro': '#94a3b8'
+        };
+
+        /**
+         * Obtiene el color asociado a un lenguaje
+         * @param {string} lang - Nombre del lenguaje
+         * @returns {string} Color en formato hexadecimal
+         */
+        function getLanguageColor(lang) {
+            return languageColors[lang] || '#94a3b8';
+        }
+
+        // ============================================================
+        // AUTENTICACIÓN Y VERIFICACIÓN DE PERMISOS
+        // ============================================================
+        
+        // Obtener token de autenticación del localStorage
+        const token = localStorage.getItem('token');
+        // Si no hay token, redirigir al login
+        if (!token) window.location.href = '/';
+        
+        // Obtener datos del usuario del localStorage
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Si no es administrador, redirigir al dashboard de usuario
+        if (user.role !== 'admin') window.location.href = '/dashboard';
+        
+        // Actualizar elementos de la UI con la información del usuario
+        document.getElementById('user-name').innerText = user.name || 'Admin';
+        document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
+
+        /**
+         * Devuelve los headers necesarios para peticiones autenticadas
+         * @returns {Object} Headers con token JWT
+         */
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
+
+        // ============================================================
+        // RENDERIZAR BARRAS DE LENGUAJES (Gráfica horizontal)
+        // ============================================================
+        /**
+         * Renderiza barras horizontales para la distribución de lenguajes
+         * @param {Object} langMap - Mapa de lenguaje -> cantidad de proyectos
+         */
+        function renderLanguageBars(langMap) {
+            const container = document.getElementById('language-chart-container');
+            const totalSpan = document.getElementById('lang-total');
+            const mostUsedSpan = document.getElementById('lang-most-used');
+
+            // Ordenar lenguajes por cantidad (mayor a menor)
+            const sorted = Object.entries(langMap).sort((a, b) => b[1] - a[1]);
+            const total = sorted.reduce((sum, [_, count]) => sum + count, 0);
+
+            // Si no hay lenguajes, mostrar mensaje de vacío
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                            <div class="flex flex-col items-center justify-center py-8 text-on-surface-variant/40">
+                                <span class="material-symbols-outlined text-3xl">code_off</span>
+                                <p class="text-sm mt-2">No hay lenguajes detectados</p>
+                            </div>
+                        `;
+                totalSpan.textContent = 'Total: 0 lenguajes';
+                mostUsedSpan.textContent = 'Más usado: —';
+                return;
+            }
+
+            const maxCount = sorted[0][1];
+
+            // Generar HTML para cada barra de lenguaje
+            let html = '';
+            sorted.forEach(([lang, count]) => {
+                const percentage = ((count / total) * 100).toFixed(1);
+                const barWidth = ((count / maxCount) * 100).toFixed(1);
+                const color = getLanguageColor(lang);
+
+                html += `
+                            <div class="lang-bar-container">
+                                <div class="lang-name" title="${lang}">
+                                    <span class="lang-color-dot" style="background: ${color};"></span>
+                                    ${lang}
+                                </div>
+                                <div class="lang-bar-track">
+                                    <div class="lang-bar-fill" style="width: ${barWidth}%; background: ${color}; opacity: 0.85;"></div>
+                                </div>
+                                <div class="lang-stats-text">
+                                    <span class="lang-count">${count}</span>
+                                    <span class="lang-percent">(${percentage}%)</span>
+                                </div>
+                            </div>
+                        `;
+            });
+
+            container.innerHTML = html;
+
+            // Actualizar estadísticas de lenguajes
+            const langText = sorted.length === 1 ? 'lenguaje' : 'lenguajes';
+            totalSpan.textContent = `Total: ${sorted.length} ${langText} · ${total} proyectos`;
+            mostUsedSpan.textContent = `Más usado: ${sorted[0][0]} (${sorted[0][1]} proyecto${sorted[0][1] !== 1 ? 's' : ''})`;
+        }
+
+        // ============================================================
+        // MANEJO DE VISTAS
+        // ============================================================
+        let pcaLoaded = false;
+
+        /**
+         * Cambia entre las vistas del panel de administración
+         * @param {string} view - Nombre de la vista ('resumen', 'pca', 'classification')
+         */
+        function showView(view) {
+            const views = ['resumen', 'pca', 'classification'];
+            const navs = {
+                'resumen': document.getElementById('nav-resumen'),
+                'pca': document.getElementById('nav-pca'),
+                'classification': document.getElementById('nav-classification')
+            };
+
+            // Ocultar todas las vistas
+            views.forEach(v => {
+                const el = document.getElementById('view-' + v);
+                if (el) el.classList.add('hidden');
+            });
+
+            // Desactivar todos los botones de navegación
+            Object.values(navs).forEach(el => {
+                if (el) el.classList.remove('active');
+            });
+
+            // Mostrar la vista seleccionada
+            const targetView = document.getElementById('view-' + view);
+            if (targetView) {
+                targetView.classList.remove('hidden');
+            }
+
+            // Activar el botón de navegación correspondiente
+            if (navs[view]) {
+                navs[view].classList.add('active');
+            }
+
+            // Cargar PCA si es la primera vez que se selecciona
+            if (view === 'pca' && !pcaLoaded) {
+                loadPCA();
+                pcaLoaded = true;
+            }
+        }
+
+        // ============================================================
+        // CARGA DE ESTADÍSTICAS DEL DASHBOARD
+        // ============================================================
+        /**
+         * Carga todas las estadísticas del dashboard desde el backend
+         * Incluye usuarios, proyectos, métricas de documentación y gráficas
+         */
+        async function loadStats() {
+            try {
+                // Obtener datos de resumen del API
+                const res = await fetch('/api/admin/overview', { headers: authHeaders() });
+                if (!res.ok) {
+                    console.error('Error loading stats:', res.status);
+                    if (res.status === 403) {
+                        alert('No tienes permisos de administrador. Redirigiendo al dashboard...');
+                        window.location.href = '/dashboard';
+                        return;
+                    }
+                    throw new Error();
+                }
+                const data = await res.json();
+
+                if (!data.stats) {
+                    console.error('No stats in response:', data);
+                    return;
+                }
+
+                // ============================================================
+                // ACTUALIZAR ESTADÍSTICAS EN LA UI
+                // ============================================================
+                document.getElementById('stat-users').innerText = data.stats.total_users || 0;
+                document.getElementById('stat-projects').innerText = data.stats.total_projects || 0;
+                document.getElementById('stat-completed').innerText = data.stats.completed_projects || 0;
+                document.getElementById('stat-quality').innerText = data.stats.average_quality_score || 0;
+                
+                // Métricas de documentación
+                document.getElementById('doc-count').innerText = data.data_analysis?.document_count || 0;
+                document.getElementById('keyword-count').innerText = data.data_analysis?.keywords?.length || 0;
+                document.getElementById('technical-count').innerText = data.data_analysis?.technical_terms?.length || 0;
+                document.getElementById('matching-count').innerText = data.data_analysis?.matching_terms?.length || 0;
+                
+                // Badges del sidebar
+                document.getElementById('sidebar-user-count').innerText = data.stats.total_users || 0;
+                document.getElementById('sidebar-project-count').innerText = data.stats.total_projects || 0;
+
+                // ============================================================
+                // LISTA DE PALABRAS CLAVE (máximo 8)
+                // ============================================================
+                const kwContainer = document.getElementById('keywords-list');
+                if (data.data_analysis?.keywords) {
+                    kwContainer.innerHTML = data.data_analysis.keywords.slice(0, 8).map(k =>
+                        `<span class="badge pending" style="background:rgba(142,213,255,0.12);color:var(--color-primary);border-color:rgba(142,213,255,0.25);">${k}</span>`
+                    ).join('');
+                }
+
+                // ============================================================
+                // CONFIGURAR GRÁFICAS
+                // ============================================================
+                const isDark = document.body.getAttribute('data-theme') !== 'light';
+                const textColor = isDark ? '#dee3e8' : '#0f172a';
+                const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
+                // Configurar colores globales de Chart.js según el tema
+                Chart.defaults.color = textColor;
+                Chart.defaults.borderColor = gridColor;
+                Chart.defaults.font.family = "'Geist', sans-serif";
+
+                // ============================================================
+                // OBTENER PROYECTOS PARA GRÁFICAS
+                // ============================================================
+                let allProjects = [];
+                try {
+                    const projRes = await fetch('/api/admin/projects', { headers: authHeaders() });
+                    if (projRes.ok) allProjects = await projRes.json();
+                } catch (e) {
+                    console.warn('No se pudieron cargar proyectos para gráficas', e);
+                }
+
+                // ============================================================
+                // GRÁFICA 1: LENGUAJES MÁS USADOS (BARRAS HORIZONTALES)
+                // ============================================================
+                const langMap = {};
+                allProjects.forEach(p => {
+                    const lang = (p.language && p.language !== 'unknown' && p.language !== 'Unknown') ? p.language : 'Otro';
+                    langMap[lang] = (langMap[lang] || 0) + 1;
+                });
+                // Si no hay proyectos, usar distribución del backend
+                if (!allProjects.length && data.stats.language_distribution) {
+                    Object.assign(langMap, data.stats.language_distribution);
+                }
+                renderLanguageBars(langMap);
+
+                // ============================================================
+                // GRÁFICA 2: PROYECTOS POR MES (BARRAS VERTICALES)
+                // ============================================================
+                const monthMap = {};
+                allProjects.forEach(p => {
+                    const ca = p.created_at || '';
+                    if (ca && ca.length >= 7) {
+                        const key = ca.substring(0, 7); // Formato: YYYY-MM
+                        monthMap[key] = (monthMap[key] || 0) + 1;
+                    }
+                });
+                // Si no hay proyectos, usar datos del backend
+                if (!allProjects.length && data.stats.projects_per_month) {
+                    Object.assign(monthMap, data.stats.projects_per_month);
+                }
+                
+                // Ordenar meses y tomar los últimos 12
+                const sortedMonths = Object.keys(monthMap).sort().slice(-12);
+                const monthLabels = sortedMonths.map(m => {
+                    const [y, mo] = m.split('-');
+                    return new Date(+y, +mo - 1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
+                });
+                const monthValues = sortedMonths.map(m => monthMap[m]);
+                
+                // Crear o actualizar gráfico
+                const ctxMonth = document.getElementById('chart-monthly').getContext('2d');
+if (window._chartMonth) window._chartMonth.destroy();
+
+// Función para asignar color según el valor
+function getColorByValue(value, maxValue) {
+    if (maxValue === 0) return 'rgba(142,213,255,0.50)'; // color por defecto si no hay datos
+    
+    const ratio = value / maxValue;
+    
+    if (ratio === 1) {
+        // Valor máximo → Verde
+        return '#3EDE82';
+    } else if (ratio >= 0.5) {
+        // Intermedio → Naranja
+        return '#F0913E';
+    } else {
+        // Bajo → Rojo
+        return '#C95444';
     }
-    applyTheme(savedTheme);
-    themeBtn?.addEventListener('click', () => { 
-      const cur = document.body.getAttribute('data-theme'); 
-      applyTheme(cur === 'light' ? 'dark' : 'light'); 
-      loadStats(); 
-    });
+}
 
-    // ─── Partículas ──────────────────────────────────────────────────
-    const canvas = document.getElementById('particle-canvas');
-    let ctx = canvas.getContext('2d');
-    let particles = [], mouse = { x: null, y: null };
-    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    class Particle { 
-      constructor() { this.reset(); } 
-      reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; } 
-      update() { 
-        this.x += this.vx; this.y += this.vy; 
-        if (mouse.x) { 
-          let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy); 
-          if (d < 150) { 
-            let angle = Math.atan2(dy, dx), force = (150 - d) / 150; 
-            this.x -= Math.cos(angle) * force * 1.2; 
-            this.y -= Math.sin(angle) * force * 1.2; 
-          } 
-        } 
-        if (this.x < 0) this.x = canvas.width; 
-        if (this.x > canvas.width) this.x = 0; 
-        if (this.y < 0) this.y = canvas.height; 
-        if (this.y > canvas.height) this.y = 0; 
-      } 
-      draw() { 
-        const style = getComputedStyle(document.body); 
-        const c1 = style.getPropertyValue('--particle-color-1').trim(); 
-        const c2 = style.getPropertyValue('--particle-color-2').trim(); 
-        ctx.fillStyle = Math.random() > 0.7 ? c1 : c2; 
-        ctx.beginPath(); 
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
-        ctx.fill(); 
-        particles.forEach(p => { 
-          if (Math.hypot(this.x - p.x, this.y - p.y) < 100) { 
-            ctx.beginPath(); 
-            ctx.moveTo(this.x, this.y); 
-            ctx.lineTo(p.x, p.y); 
-            ctx.strokeStyle = style.getPropertyValue('--particle-line').trim(); 
-            ctx.stroke(); 
-          } 
-        }); 
-      } 
+// Generar colores para cada barra
+const backgroundColors = monthValues.length 
+    ? monthValues.map(val => getColorByValue(val, Math.max(...monthValues)))
+    : ['rgba(142,213,255,0.50)'];
+
+const borderColors = monthValues.length 
+    ? monthValues.map(val => {
+        const ratio = val / Math.max(...monthValues);
+        if (ratio === 1) return '#3EDE82';
+        if (ratio >= 0.5) return '#F0913E';
+        return '#C95444';
+      })
+    : ['#8ed5fa'];
+
+window._chartMonth = new Chart(ctxMonth, {
+    type: 'bar',
+    data: {
+        labels: monthLabels.length ? monthLabels : ['Sin datos'],
+        datasets: [{
+            label: 'Proyectos',
+            data: monthValues.length ? monthValues : [0],
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 2,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+           x: { 
+    grid: { color: gridColor }, 
+    ticks: { color: textColor },
+    title: {
+        display: true,
+        text: 'Meses',
+        color: textColor,
+        font: {
+            size: 11
+        }
     }
-    function initParticles() { particles = []; for (let i = 0; i < 70; i++) particles.push(new Particle()); }
-    function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
-    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
-    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
-    resizeCanvas(); initParticles(); animate();
+},
+            y: { 
+    grid: { color: gridColor }, 
+    ticks: { color: textColor },
+    title: {
+        display: true,
+        text: 'Número de Proyectos',
+        color: textColor,
+        font: {
+            size: 11
+        }
+    }
+}
+        }
+    }
+});
 
-    // ─── Cargar todo ──────────────────────────────────────────────────
-    loadStats(); loadUsers(); loadProjects();
-  </script>
+                // Cargar PCA si ya está disponible
+                if (pcaLoaded) await loadPCA();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                alert('Error al cargar estadísticas. Verifica la consola para más detalles.');
+            }
+        }
+
+        // ============================================================
+        // CARGA DE ANÁLISIS PCA
+        // ============================================================
+        /**
+         * Carga los datos del análisis PCA desde el backend
+         * Esta función es similar a la del dashboard PCA
+         */
+        async function loadPCA() {
+            try {
+                const isDark = document.body.getAttribute('data-theme') !== 'light';
+                const textColor = isDark ? '#dee3e8' : '#0f172a';
+                const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
+                const res = await fetch('/api/admin/pca', { headers: authHeaders() });
+                if (!res.ok) {
+                    console.warn('PCA no disponible:', res.status);
+                    document.getElementById('pca-variance').innerText = 'No disponible';
+                    return;
+                }
+                const data = await res.json();
+                if (data.status !== 'ok' || !data.pca) {
+                    console.warn('PCA response invalid', data);
+                    document.getElementById('pca-variance').innerText = 'No disponible';
+                    return;
+                }
+
+                const pca = data.pca;
+                const varTotal = pca.explained_variance_ratio.reduce((sum, val) => sum + val, 0) * 100;
+                document.getElementById('pca-variance').innerText = `${varTotal.toFixed(1)}% varianza`;
+                const labels = pca.project_coordinates.map(item => item.name || item.project_id);
+                const valuesX = pca.project_coordinates.map(item => item.component_1);
+                const valuesY = pca.project_coordinates.map(item => item.component_2);
+
+                const ctxPCA = document.getElementById('chart-pca').getContext('2d');
+                const metrics = [
+                    'total_files', 'total_funcs', 'total_classes', 'total_endpoints',
+                    'total_issues', 'total_langs', 'doc_ratio', 'async_funcs',
+                    'test_funcs', 'avg_complexity', 'max_complexity', 'high_cx_funcs',
+                    'quality_score', 'total_size_kb'
+                ];
+
+                document.getElementById('pca-metrics-list').innerHTML = metrics
+                    .map(metric =>
+                        `<li class="flex items-start gap-2"><span class="inline-flex h-2.5 w-2.5 rounded-full bg-primary mt-1"></span><span>${metric.replace(/_/g, ' ')}</span></li>`
+                        )
+                    .join('');
+
+                document.getElementById('pca-help-text').innerText =
+                    'El PCA usa estas métricas cuantitativas para proyectar cada proyecto en un espacio de dos dimensiones. Esto ayuda a detectar grupos de proyectos similares, distinguir los outliers y entender cómo variables como la complejidad, documentación y tamaño impactan la calidad general.';
+
+                const projectList = document.getElementById('pca-projects-list');
+                projectList.innerHTML = pca.project_coordinates.slice(0, 8).map(item =>
+                    `<div class="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+                                 <div class="font-semibold">${item.name}</div>
+                                 <div class="text-xs text-on-surface-variant mt-1">Componente 1: ${item.component_1.toFixed(3)}, Componente 2: ${item.component_2.toFixed(3)}</div>
+                               </div>`
+                ).join('');
+
+                const conclusionContainer = document.getElementById('pca-conclusion');
+                if (pca.conclusion && Array.isArray(pca.conclusion) && pca.conclusion.length > 0) {
+                    conclusionContainer.innerHTML = pca.conclusion
+                        .map(text => `<p class="mb-2">${text}</p>`)
+                        .join('');
+                } else if (pca.interpretacion) {
+                    conclusionContainer.innerHTML = `<p class="mb-2">${pca.interpretacion}</p>`;
+                } else {
+                    conclusionContainer.innerHTML =
+                        `<p class="text-on-surface-variant/60">No hay conclusión disponible para este análisis.</p>`;
+                }
+
+                const suggestionsContainer = document.getElementById('pca-suggestions');
+                if (pca.sugerencias && Array.isArray(pca.sugerencias) && pca.sugerencias.length > 0) {
+                    suggestionsContainer.innerHTML = pca.sugerencias
+                        .map(text =>
+                            `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>${text}</span></div>`
+                            )
+                        .join('');
+                } else {
+                    suggestionsContainer.innerHTML =
+                        `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>No hay sugerencias disponibles para este análisis.</span></div>`;
+                }
+
+                if (window._chartPCA) window._chartPCA.destroy();
+                window._chartPCA = new Chart(ctxPCA, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Proyectos',
+                            data: labels.map((label, index) => ({
+                                x: valuesX[index],
+                                y: valuesY[index],
+                                label
+                            })),
+                            backgroundColor: '#c084fc',
+                            borderColor: '#a855f7',
+                            pointRadius: 8,
+                            pointHoverRadius: 12,
+                            pointBorderWidth: 3,
+                            pointBorderColor: '#ffffff',
+                            pointBackgroundColor: '#c084fc',
+                            pointHoverBackgroundColor: '#a855f7',
+                            pointHoverBorderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label(ctx) {
+                                        const item = ctx.raw;
+                                        return `${item.label}: (${item.x.toFixed(2)}, ${item.y.toFixed(2)})`;
+                                    }
+                                },
+                                backgroundColor: 'rgba(15, 20, 24, 0.9)',
+                                titleColor: '#dee3e8',
+                                bodyColor: '#bdc8d1',
+                                borderColor: '#3e484f',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 8
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Componente 1', color: textColor, font: { size: 20, weight: '600' } },
+                                grid: { color: gridColor, drawBorder: false },
+                                ticks: { color: textColor, font: { size: 14 } }
+                            },
+                            y: {
+                                title: { display: true, text: 'Componente 2', color: textColor, font: { size: 20, weight: '600' } },
+                                grid: { color: gridColor, drawBorder: false },
+                                ticks: { color: textColor, font: { size: 14 } }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Error loading PCA:', err);
+                document.getElementById('pca-variance').innerText = 'Error';
+            }
+        }
+
+        // ============================================================
+        // CLASIFICACIÓN DE PROYECTOS (Machine Learning)
+        // ============================================================
+        /**
+         * Clasifica todos los proyectos usando el modelo de Árbol de Decisión
+         */
+        async function classifyAllProjects() {
+            const container = document.getElementById('classification-results');
+            container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">Clasificando proyectos...</p>';
+
+            try {
+                // Llamar al API de clasificación
+                const res = await fetch('/api/admin/classify-all-projects', { headers: authHeaders() });
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Error response:', res.status, errorText);
+                    container.innerHTML =
+                        `<p class="text-error text-sm col-span-full">Error al clasificar proyectos: ${res.status} ${res.statusText}</p>`;
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.status !== 'ok' || !data.classifications) {
+                    container.innerHTML = '<p class="text-on-surface-variant/60 text-sm col-span-full">No hay proyectos para clasificar</p>';
+                    return;
+                }
+
+                const classifications = data.classifications;
+                
+                // ============================================================
+                // CONFIGURACIÓN DE COLORES E ICONOS POR CATEGORÍA
+                // ============================================================
+                const colors = {
+                    'Medico/Salud': 'border-emerald-400/30 bg-emerald-400/10',
+                    'Financiero': 'border-blue-400/30 bg-blue-400/10',
+                    'Educativo': 'border-amber-400/30 bg-amber-400/10',
+                    'Comercio': 'border-purple-400/30 bg-purple-400/10',
+                    'API/REST': 'border-cyan-400/30 bg-cyan-400/10',
+                    'Otro': 'border-gray-400/30 bg-gray-400/10'
+                };
+
+                const icons = {
+                    'Medico/Salud': 'medical_services',
+                    'Financiero': 'account_balance',
+                    'Educativo': 'school',
+                    'Comercio': 'shopping_cart',
+                    'API/REST': 'api',
+                    'Otro': 'folder'
+                };
+
+                const iconColors = {
+                    'Medico/Salud': 'text-emerald-400',
+                    'Financiero': 'text-blue-400',
+                    'Educativo': 'text-amber-400',
+                    'Comercio': 'text-purple-400',
+                    'API/REST': 'text-cyan-400',
+                    'Otro': 'text-gray-400'
+                };
+
+                if (classifications.length === 0) {
+                    container.innerHTML =
+                        '<p class="text-on-surface-variant/60 text-sm col-span-full">No se encontraron proyectos con análisis para clasificar.</p>';
+                    return;
+                }
+
+                // ============================================================
+                // RENDERIZAR TARJETAS DE CLASIFICACIÓN
+                // ============================================================
+                container.innerHTML = classifications.map(c => {
+                    const classification = c.classification;
+                    const cls = classification.clasificacion || 'Otro';
+                    const color = colors[cls] || colors['Otro'];
+                    const icon = icons[cls] || icons['Otro'];
+                    const iconColor = iconColors[cls] || iconColors['Otro'];
+                    const confidence = classification.confianza || 0;
+                    const fuenteDatos = classification.fuente_datos || '';
+                    const esReal = fuenteDatos.includes('reales');
+
+                    return `
+                                <div class="glass rounded-2xl p-4 glass-hover border ${color} cursor-pointer" onclick="showClassificationDetails('${c.project_id}')">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start gap-3">
+                                            <span class="material-symbols-outlined ${iconColor}" style="font-size:28px;">${icon}</span>
+                                            <div>
+                                                <div class="text-lg font-semibold">${escapeHtml(c.project_name)}</div>
+                                                <div class="text-sm text-on-surface-variant mt-1">${cls}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-sm font-bold ${confidence > 70 ? 'text-green-accent' : confidence > 50 ? 'text-tertiary' : 'text-error'}">
+                                                ${confidence}%
+                                            </div>
+                                            <div class="text-xs text-on-surface-variant">confianza</div>
+                                        </div>
+                                    </div>
+                                    <!-- Probabilidades por categoría (top 4) -->
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        ${Object.entries(classification.probabilidades || {}).slice(0, 4).map(([label, prob]) => `
+                                            <span class="badge ${prob > 20 ? 'completed' : 'pending'}" style="font-size:0.6rem;">
+                                                ${label}: ${prob}%
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                    <!-- Indicador de fuente de datos (real vs sintético) -->
+                                    ${fuenteDatos ? `
+                                        <div class="mt-3 flex items-center gap-1.5 text-xs ${esReal ? 'text-green-accent' : 'text-tertiary'}">
+                                            <span class="material-symbols-outlined" style="font-size:14px;">${esReal ? 'verified' : 'science'}</span>
+                                            <span>${esReal ? 'Entrenado con proyectos reales' : 'Entrenado con datos sintéticos'}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error clasificando proyectos:', error);
+                container.innerHTML =
+                    `<p class="text-error text-sm col-span-full">Error al clasificar proyectos: ${error.message}</p>`;
+            }
+        }
+
+        // ============================================================
+        // MOSTRAR DETALLES DE CLASIFICACIÓN (Modal)
+        // ============================================================
+        /**
+         * Muestra los detalles completos de la clasificación de un proyecto
+         * @param {string} projectId - ID del proyecto
+         */
+        async function showClassificationDetails(projectId) {
+            try {
+                const res = await fetch(`/api/admin/classify-project/${projectId}`, { headers: authHeaders() });
+                if (!res.ok) {
+                    alert('Error al obtener detalles del proyecto');
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.status !== 'ok' || !data.classification) {
+                    alert('No se encontró clasificación para este proyecto');
+                    return;
+                }
+
+                const classification = data.classification;
+                const modal = document.getElementById('classificationModal');
+                const details = document.getElementById('classification-details');
+
+                // ============================================================
+                // CONFIGURACIÓN DE ICONOS POR CATEGORÍA
+                // ============================================================
+                const icons = {
+                    'Medico/Salud': 'medical_services',
+                    'Financiero': 'account_balance',
+                    'Educativo': 'school',
+                    'Comercio': 'shopping_cart',
+                    'API/REST': 'api',
+                    'Otro': 'folder'
+                };
+                const cls = classification.clasificacion || 'Otro';
+                const icon = icons[cls] || icons['Otro'];
+                const fuenteDatos = classification.fuente_datos || 'desconocida';
+                const esReal = fuenteDatos.includes('reales');
+                const muestras = classification.muestras_entrenamiento;
+
+                // Actualizar título del modal
+                document.getElementById('classificationModalTitle').innerHTML = `
+                            <span class="inline-flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary" style="font-size:24px;">${icon}</span>
+                                Clasificación: ${cls}
+                            </span>
+                        `;
+
+                // ============================================================
+                // GENERAR HTML DE DETALLES
+                // ============================================================
+                let html = `
+                            <!-- Resumen de clasificación y confianza -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="glass rounded-xl p-4">
+                                    <div class="text-sm text-on-surface-variant">Clasificación</div>
+                                    <div class="text-2xl font-bold text-primary flex items-center gap-2">
+                                        <span class="material-symbols-outlined" style="font-size:22px;">${icon}</span>
+                                        ${cls}
+                                    </div>
+                                    <div class="text-sm mt-1">Confianza: ${classification.confianza || 0}%</div>
+                                </div>
+                                <div class="glass rounded-xl p-4">
+                                    <div class="text-sm text-on-surface-variant">Tipo de modelo</div>
+                                    <div class="text-lg font-semibold flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary" style="font-size:20px;">account_tree</span>
+                                        ${classification.tipo || 'Árbol de Decisión'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información del modelo (real vs sintético) -->
+                            <div class="glass rounded-xl p-4 mb-4 ${esReal ? 'border border-green-accent/30' : 'border border-tertiary/30'}">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined ${esReal ? 'text-green-accent' : 'text-tertiary'}" style="font-size:20px;">
+                                        ${esReal ? 'verified' : 'science'}
+                                    </span>
+                                    <div>
+                                        <div class="font-semibold ${esReal ? 'text-green-accent' : 'text-tertiary'}">
+                                            ${esReal ? 'Modelo entrenado con proyectos reales' : 'Modelo entrenado con datos sintéticos'}
+                                        </div>
+                                        <div class="text-xs text-on-surface-variant">
+                                            ${muestras ? `${muestras} muestras de entrenamiento` : ''}
+                                            ${esReal ? '' : ' — agrega más proyectos analizados para mejorar la precisión'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Probabilidades por categoría -->
+                            <div class="glass rounded-xl p-4 mb-4">
+                                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:18px;">bar_chart</span>
+                                    Probabilidades por categoría
+                                </h4>
+                                <div class="space-y-2">
+                                    ${Object.entries(classification.probabilidades || {}).map(([label, prob]) => `
+                                        <div>
+                                            <div class="flex justify-between text-sm">
+                                                <span class="flex items-center gap-1.5">
+                                                    <span class="material-symbols-outlined" style="font-size:14px;">${icons[label] || 'folder'}</span>
+                                                    ${label}
+                                                </span>
+                                                <span class="font-bold">${prob}%</span>
+                                            </div>
+                                            <div class="w-full bg-surface-container rounded-full h-2">
+                                                <div class="bg-primary rounded-full h-2 transition-all" style="width: ${prob}%"></div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Detalles de la decisión del árbol -->
+                            <div class="glass rounded-xl p-4 mb-4">
+                                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:18px;">checklist</span>
+                                    Detalles de la decisión
+                                </h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    ${(classification.detalles_decision || []).map(d => `<li>${d}</li>`).join('')}
+                                </ul>
+                            </div>
+
+                            <!-- Características más importantes del modelo -->
+                            <div class="glass rounded-xl p-4 mb-4">
+                                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:18px;">insights</span>
+                                    Características más importantes
+                                </h4>
+                                <div class="space-y-2">
+                                    ${(classification.caracteristicas_importantes || []).map(([feature, importance]) => `
+                                        <div>
+                                            <div class="flex justify-between text-sm">
+                                                <span>${feature}</span>
+                                                <span class="font-bold">${(importance * 100).toFixed(1)}%</span>
+                                            </div>
+                                            <div class="w-full bg-surface-container rounded-full h-2">
+                                                <div class="bg-secondary rounded-full h-2 transition-all" style="width: ${importance * 100}%"></div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Interpretación del modelo -->
+                            <div class="glass rounded-xl p-4 mb-4 bg-secondary/10 border border-secondary/30">
+                                <h4 class="font-semibold mb-2 text-secondary flex items-center gap-2">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">psychology</span>
+                                    Interpretación
+                                </h4>
+                                <p class="text-sm text-on-surface-variant">${classification.interpretacion || 'Sin interpretación disponible'}</p>
+                            </div>
+
+                            <!-- Recomendaciones -->
+                            <div class="glass rounded-xl p-4">
+                                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:18px;">lightbulb</span>
+                                    Recomendaciones
+                                </h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    ${(classification.recomendaciones || []).map(r => `<li>${r}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+
+                details.innerHTML = html;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+
+            } catch (error) {
+                console.error('Error mostrando detalles:', error);
+                alert('Error al obtener detalles del proyecto');
+            }
+        }
+
+        /**
+         * Cierra el modal de detalles de clasificación
+         */
+        function closeClassificationModal() {
+            const modal = document.getElementById('classificationModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // ============================================================
+        // UTILIDADES
+        // ============================================================
+        
+        /**
+         * Escapa caracteres HTML para prevenir XSS
+         * @param {string} str - Cadena a escapar
+         * @returns {string} Cadena escapada
+         */
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        /**
+         * Cierra sesión del usuario
+         */
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // ============================================================
+        // GESTIÓN DE TEMA (CLARO/OSCURO)
+        // ============================================================
+        const themeBtn = document.getElementById('themeButton');
+        const themeIcon = document.getElementById('themeIcon');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+
+        /**
+         * Aplica el tema seleccionado y guarda la preferencia
+         * @param {string} theme - 'light' o 'dark'
+         */
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
+            localStorage.setItem('theme', theme);
+        }
+        
+        applyTheme(savedTheme);
+        
+        // Event listener para el botón de tema
+        themeBtn?.addEventListener('click', () => {
+            const cur = document.body.getAttribute('data-theme');
+            applyTheme(cur === 'light' ? 'dark' : 'light');
+            // Recargar estadísticas para actualizar colores de gráficas
+            loadStats();
+        });
+
+        // ============================================================
+        // SISTEMA DE PARTÍCULAS (FONDO ANIMADO)
+        // ============================================================
+        const canvas = document.getElementById('particle-canvas');
+        let ctx = canvas.getContext('2d');
+        let particles = [],
+            mouse = { x: null, y: null };
+
+        /**
+         * Redimensiona el canvas al tamaño de la ventana
+         */
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        /**
+         * Clase que representa una partícula individual
+         */
+        class Particle {
+            constructor() { this.reset(); }
+            
+            /**
+             * Reinicia la partícula en una posición aleatoria
+             */
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+            
+            /**
+             * Actualiza la posición de la partícula
+             */
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Efecto de repulsión del mouse
+                if (mouse.x) {
+                    let dx = mouse.x - this.x,
+                        dy = mouse.y - this.y,
+                        d = Math.hypot(dx, dy);
+                    if (d < 150) {
+                        let angle = Math.atan2(dy, dx),
+                            force = (150 - d) / 150;
+                        this.x -= Math.cos(angle) * force * 1.2;
+                        this.y -= Math.sin(angle) * force * 1.2;
+                    }
+                }
+                
+                // Rebote en los bordes
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            
+            /**
+             * Dibuja la partícula y las conexiones con otras cercanas
+             */
+            draw() {
+                const style = getComputedStyle(document.body);
+                const c1 = style.getPropertyValue('--particle-color-1').trim();
+                const c2 = style.getPropertyValue('--particle-color-2').trim();
+                
+                // Dibujar la partícula
+                ctx.fillStyle = Math.random() > 0.7 ? c1 : c2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Dibujar líneas de conexión
+                particles.forEach(p => {
+                    if (Math.hypot(this.x - p.x, this.y - p.y) < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.strokeStyle = style.getPropertyValue('--particle-line').trim();
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        /**
+         * Inicializa las partículas
+         */
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 70; i++) particles.push(new Particle());
+        }
+
+        /**
+         * Bucle de animación de las partículas
+         */
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update();
+                p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        // ============================================================
+        // EVENT LISTENERS GLOBALES
+        // ============================================================
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        
+        // Inicializar canvas y partículas
+        resizeCanvas();
+        initParticles();
+        animate();
+
+        // ============================================================
+        // CARGA INICIAL DE DATOS
+        // ============================================================
+        loadStats();
+    </script>
 </body>
 </html>

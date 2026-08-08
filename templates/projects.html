@@ -1,17 +1,28 @@
 <!DOCTYPE html>
+<!-- Declaración del tipo de documento y lenguaje -->
 <html class="light" lang="es">
 <head>
+    <!-- Configuración básica del documento -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Proyectos — AutoDocs AI</title>
+    
+    <!-- Importación de Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Fuentes de Google: JetBrains Mono para código, Geist para texto general -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos de Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Configuración personalizada de Tailwind -->
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
+            darkMode: "class", // Modo oscuro activado por clase CSS
             theme: {
                 extend: {
+                    // Paleta de colores personalizada para el tema
                     colors: {
                         "on-primary-container": "#001f2b",
                         "tertiary-container": "#ffdbb7",
@@ -61,12 +72,14 @@
                         "on-secondary": "#ffffff",
                         "inverse-surface": "#1e293b"
                     },
+                    // Configuración de bordes redondeados
                     borderRadius: {
                         "DEFAULT": "0.125rem",
                         "lg": "0.25rem",
                         "xl": "0.5rem",
                         "full": "0.75rem"
                     },
+                    // Fuentes tipográficas
                     fontFamily: {
                         "body-md": ["Geist"],
                         "headline-lg": ["Geist"],
@@ -78,30 +91,37 @@
             },
         }
     </script>
+    
+    <!-- Estilos CSS personalizados -->
     <style>
+        /* Estilos base del cuerpo del documento */
         body {
             background: #f1f5f9;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Evita scroll horizontal */
             min-height: 100vh;
             color: #0f172a;
         }
 
+        /* Estilos para el modo oscuro */
         html.dark body {
             background: #0f1418;
             color: #e2e8f0;
         }
 
+        /* Efecto de vidrio (glassmorphism) en modo oscuro */
         html.dark .glass {
             background: rgba(15, 20, 24, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
+        /* Efecto hover para elementos glass en modo oscuro */
         html.dark .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.4);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
+        /* Colores de texto para modo oscuro */
         html.dark .text-on-surface {
             color: #f1f5f9 !important;
         }
@@ -126,6 +146,7 @@
             color: #475569 !important;
         }
 
+        /* Colores primarios en modo oscuro */
         html.dark .text-primary {
             color: #38bdf8 !important;
         }
@@ -138,6 +159,7 @@
             color: #818cf8 !important;
         }
 
+        /* Bordes en modo oscuro */
         html.dark .border-outline-variant\/20 {
             border-color: rgba(148, 163, 184, 0.2) !important;
         }
@@ -154,6 +176,7 @@
             border-color: rgba(56, 189, 248, 0.4) !important;
         }
 
+        /* Fondos con opacidad en modo oscuro */
         html.dark .bg-primary\/15 {
             background: rgba(56, 189, 248, 0.15) !important;
         }
@@ -170,6 +193,7 @@
             background: #1e293b !important;
         }
 
+        /* Colores de texto gris en modo oscuro */
         html.dark .text-gray-600 {
             color: #94a3b8 !important;
         }
@@ -182,16 +206,18 @@
             border-color: #334155 !important;
         }
 
+        /* Canvas para las partículas de fondo */
         #particle-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-            pointer-events: none;
+            z-index: 0; /* Detrás del contenido principal */
+            pointer-events: none; /* Permite hacer clic a través del canvas */
         }
 
+        /* Efecto glassmorphism base */
         .glass {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(16px);
@@ -202,18 +228,19 @@
             will-change: transform, opacity;
         }
 
+        /* Interacciones de tarjetas */
         .card-interaction {
             position: relative;
             overflow: visible;
         }
         .card-interaction > button {
             position: relative;
-            z-index: 30;
+            z-index: 30; /* Asegura que los botones estén por encima */
             background: transparent;
             border: none;
         }
         .card-interaction > button .material-symbols-outlined {
-            pointer-events: none;
+            pointer-events: none; /* Permite que el clic pase al botón padre */
         }
         .glass:hover {
             box-shadow: 0 8px 20px rgba(56, 189, 248, 0.08);
@@ -222,11 +249,13 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
+        /* Efecto hover para elementos glass */
         .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.3);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
         }
 
+        /* Efecto de brillo para textos */
         .glow-cyan {
             text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
         }
@@ -234,6 +263,7 @@
             text-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
         }
 
+        /* Animación de entrada escalonada */
         .stagger-in {
             opacity: 0;
             transform: translateY(20px) translate3d(0, 0, 0);
@@ -246,6 +276,7 @@
             }
         }
 
+        /* Respetar preferencias de reducción de movimiento */
         @media (prefers-reduced-motion: reduce) {
             .stagger-in,
             .animate-float,
@@ -257,6 +288,7 @@
             }
         }
 
+        /* Estilizado de la barra de scroll */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -286,6 +318,7 @@
             border-color: #38bdf8;
         }
 
+        /* Tooltip para colaboradores */
         .contributor-tooltip {
             position: absolute;
             bottom: calc(100% + 8px);
@@ -305,7 +338,7 @@
             opacity: 1;
         }
 
-        /* Modal de colaboradores */
+        /* Modal de colaboradores - overlay */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -316,13 +349,15 @@
             background: rgba(15, 20, 24, 0.7);
             backdrop-filter: blur(12px);
             opacity: 0;
-            pointer-events: none;
+            pointer-events: none; /* Oculta el modal inicialmente */
             transition: opacity 0.25s ease;
         }
         .modal-overlay.open {
             opacity: 1;
-            pointer-events: all;
+            pointer-events: all; /* Muestra el modal */
         }
+        
+        /* Contenido del modal */
         .modal-content {
             width: 90%;
             max-width: 600px;
@@ -344,6 +379,8 @@
             background: rgba(15, 20, 24, 0.95);
             border-color: rgba(56, 189, 248, 0.2);
         }
+        
+        /* Cuerpo del modal con scroll */
         .modal-body {
             overflow-y: auto;
             flex: 1;
@@ -359,33 +396,45 @@
     </style>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    <!-- Canvas para las partículas animadas de fondo -->
     <canvas id="particle-canvas"></canvas>
+    
+    <!-- Contenedor principal con z-index para estar sobre el canvas -->
     <div class="flex min-h-screen w-full relative z-10">
-        <!-- Sidebar -->
+        <!-- Barra lateral (Sidebar) -->
         <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
+            <!-- Logo / icono de la aplicación -->
             <div class="mb-12">
                 <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
                     <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
                 </div>
             </div>
+            
+            <!-- Navegación principal -->
             <nav class="flex-1 flex flex-col gap-8">
+                <!-- Enlace al Dashboard -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">dashboard</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Dashboard</span>
                 </a>
+                <!-- Enlace a Proyectos (activo) -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
                     <span class="material-symbols-outlined text-primary text-2xl group-hover:glow-cyan">folder_open</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Proyectos</span>
                 </a>
+                <!-- Botón para nuevo proyecto -->
                 <button class="group relative flex items-center justify-center hover:scale-110 transition-transform bg-transparent border-none cursor-pointer" onclick="openUploadModal()">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">upload</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Nuevo proyecto</span>
                 </button>
+                <!-- Botón de cerrar sesión -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Cerrar sesión</span>
                 </a>
             </nav>
+            
+            <!-- Avatar del usuario en la parte inferior -->
             <div class="mt-auto">
                 <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative">
                     <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
@@ -396,18 +445,20 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Contenido principal -->
         <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
-            <!-- Header -->
+            <!-- Encabezado -->
             <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
                 <div>
                     <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">AutoDocs <span class="text-primary/80">AI</span></h1>
                     <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="projects-count">Cargando...</p>
                 </div>
                 <div class="flex gap-4">
+                    <!-- Botón de cambio de tema (claro/oscuro) -->
                     <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
                         <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
                     </button>
+                    <!-- Botón para nuevo proyecto -->
                     <button onclick="openUploadModal()" class="px-6 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all active:scale-95 hover:bg-primary/5">
                         <span class="material-symbols-outlined text-xl">upload</span>
                         Nuevo Proyecto
@@ -415,7 +466,7 @@
                 </div>
             </header>
 
-            <!-- Filtros -->
+            <!-- Filtros de búsqueda y estado -->
             <div class="flex flex-col sm:flex-row gap-4 stagger-in" style="animation-delay: 0.2s;">
                 <input type="text" class="glass rounded-xl px-4 py-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors flex-1 font-code-md text-sm" placeholder="Buscar proyecto..." id="search-input" oninput="filterProjects()" />
                 <select class="glass rounded-xl px-4 py-3 text-on-surface-variant focus:border-primary focus:outline-none transition-colors font-code-md text-sm" id="status-filter" onchange="filterProjects()">
@@ -427,7 +478,7 @@
                 </select>
             </div>
 
-            <!-- Lista de proyectos -->
+            <!-- Lista de proyectos (se llena dinámicamente) -->
             <div class="flex flex-col gap-4 stagger-in" style="animation-delay: 0.3s;" id="projects-list">
                 <div class="glass p-12 rounded-3xl text-center text-on-surface-variant/50">
                     <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
@@ -437,9 +488,10 @@
         </main>
     </div>
 
-    <!-- Modal de colaboradores -->
+    <!-- Modal de colaboradores (inicialmente oculto) -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="contributorsModal" onclick="if(event.target===this)closeContributorsModal()">
         <div class="glass p-6 rounded-3xl w-full max-w-2xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]" onclick="event.stopPropagation()" style="max-height:90vh;overflow:hidden;display:flex;flex-direction:column;">
+            <!-- Cabecera del modal -->
             <div class="flex items-center justify-between mb-5 flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
@@ -450,8 +502,10 @@
                         <p id="contributorsModalSubtitle" class="text-muted text-xs"></p>
                     </div>
                 </div>
+                <!-- Botón de cierre -->
                 <button onclick="closeContributorsModal()" class="w-7 h-7 rounded-lg border-none bg-black/5 hover:bg-red-50 hover:text-red-500 text-on-surface-variant cursor-pointer flex items-center justify-center text-base transition-all">✕</button>
             </div>
+            <!-- Cuerpo del modal (se llena dinámicamente) -->
             <div id="contributorsModalBody" class="flex-1 overflow-y-auto pr-1">
                 <div class="text-center py-8 text-muted">Cargando colaboradores...</div>
             </div>
@@ -460,18 +514,21 @@
 
     <script>
         // ==================== AUTENTICACIÓN ====================
+        // Obtener token y usuario del localStorage
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = '/';
+        if (!token) window.location.href = '/'; // Redirigir si no hay token
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (user.name) {
+            // Actualizar datos del usuario en la interfaz
             document.getElementById('sidebar-user-name').textContent = user.name;
             document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
             document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
         }
 
-        let allProjects = [];
+        let allProjects = []; // Almacenar todos los proyectos
 
         // ==================== OBTENER COLABORADORES ====================
+        // Función para obtener colaboradores de un proyecto desde la API
         async function getContributors(projectId) {
             try {
                 const res = await fetch(`/api/projects/${projectId}/contributors`, {
@@ -485,23 +542,28 @@
             }
         }
 
+        // Función para abrir el modal de colaboradores
         function openContributorsModal(projectId, projectName) {
             const modal = document.getElementById('contributorsModal');
             const title = document.getElementById('contributorsModalTitle');
             const subtitle = document.getElementById('contributorsModalSubtitle');
             const body = document.getElementById('contributorsModalBody');
 
+            // Configurar título del modal
             title.textContent = 'Colaboradores';
             subtitle.textContent = `${projectName}`;
 
+            // Mostrar el modal
             modal.classList.add('open');
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // Evitar scroll en el fondo
+            
+            // Mostrar spinner de carga
             body.innerHTML = `<div class="text-center py-8 text-muted">
                 <div class="spinner mx-auto mb-4"></div>
                 <p class="text-sm">Cargando colaboradores...</p>
             </div>`;
 
-            // Agregar spinner si no existe
+            // Agregar estilos del spinner si no existen
             if (!document.querySelector('.spinner')) {
                 const style = document.createElement('style');
                 style.textContent = `
@@ -520,9 +582,10 @@
                 document.head.appendChild(style);
             }
 
-            // Cargar colaboradores
+            // Cargar colaboradores desde la API
             getContributors(projectId).then(data => {
                 if (!data || !data.contributors || data.contributors.length === 0) {
+                    // Mostrar mensaje si no hay colaboradores
                     body.innerHTML = `
                         <div class="text-center py-8">
                             <span class="material-symbols-outlined text-4xl text-muted mb-3 block">group_off</span>
@@ -536,6 +599,7 @@
                 const contributors = data.contributors;
                 const totalCommits = contributors.reduce((sum, c) => sum + (c.commits || 0), 0);
 
+                // Construir el HTML de la lista de colaboradores
                 let html = `
                     <div class="flex items-center gap-3 mb-4">
                         <span class="text-xs font-semibold text-muted uppercase tracking-wider">${contributors.length} colaboradores</span>
@@ -544,13 +608,14 @@
                     <div class="space-y-3">
                 `;
 
-                // Ordenar por commits descendente
-                contributors.sort((a, b) => (b.commits || 0) - (a.commits || 0));
-
+                // Colores para los avatares
                 const colors = [
                     '#38bdf8', '#818cf8', '#10b981', '#f59e0b', '#ef4444',
                     '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#6366f1'
                 ];
+
+                // Ordenar colaboradores por número de commits (descendente)
+                contributors.sort((a, b) => (b.commits || 0) - (a.commits || 0));
 
                 contributors.forEach((contrib, index) => {
                     const initials = contrib.name ? contrib.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??';
@@ -602,6 +667,7 @@
 
                 body.innerHTML = html;
             }).catch(err => {
+                // Manejar errores
                 body.innerHTML = `
                     <div class="text-center py-8">
                         <span class="material-symbols-outlined text-4xl text-red-400 mb-3 block">error</span>
@@ -612,25 +678,30 @@
             });
         }
 
+        // Función para cerrar el modal de colaboradores
         function closeContributorsModal() {
             const modal = document.getElementById('contributorsModal');
             modal.classList.remove('open');
-            document.body.style.overflow = '';
+            document.body.style.overflow = ''; // Restaurar scroll
         }
 
+        // Cerrar modal con la tecla Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeContributorsModal();
         });
 
         // ==================== GESTIÓN DE PROYECTOS ====================
+        // Cargar proyectos desde la API
         async function loadProjects() {
             const res = await fetch('/api/projects/', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             allProjects = await res.json();
+            // Actualizar contador de proyectos
             document.getElementById('projects-count').textContent = `${allProjects.length} proyecto${allProjects.length !== 1 ? 's' : ''}`;
             renderProjects(allProjects);
         }
 
+        // Filtrar proyectos según búsqueda y estado
         function filterProjects() {
             const q = document.getElementById('search-input').value.toLowerCase();
             const status = document.getElementById('status-filter').value;
@@ -641,9 +712,11 @@
             renderProjects(filtered);
         }
 
+        // Renderizar la lista de proyectos
         function renderProjects(projects) {
             const list = document.getElementById('projects-list');
             if (!projects.length) {
+                // Mostrar mensaje si no hay proyectos
                 list.innerHTML = `<div class="glass p-12 rounded-3xl text-center text-on-surface-variant/50">
                     <span class="material-symbols-outlined text-4xl mb-3 block">folder_open</span>
                     <p class="text-lg font-semibold">Sin proyectos</p>
@@ -651,8 +724,13 @@
                 </div>`;
                 return;
             }
+            
+            // Mapeo de estados a etiquetas
             const labels = { completed: '✓ Completado', analyzing: '⟳ Analizando', pending: '○ Pendiente', error: '✕ Error' };
+            // Iconos por lenguaje de programación
             const langIcons = { Python: '🐍', JavaScript: '⚡', TypeScript: '🔷', Java: '☕', PHP: '🐘', Go: '🔵', Ruby: '💎' };
+            
+            // Construir HTML de cada proyecto
             list.innerHTML = projects.map(p => {
                 const q = p.stats?.quality_score || 0;
                 const qColor = q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444';
@@ -665,43 +743,51 @@
                 const contributorCount = p.contributors_count || 0;
                 return `<div class="tilt-card">
                     <div class="glass rounded-2xl p-5 glass-hover card-interaction cursor-pointer transition-all hover:shadow-md flex items-center gap-5" onclick="goToProject('${p._id}')">
+                        <!-- Icono del lenguaje -->
                         <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl border border-primary/20 flex-shrink-0">${icon}</div>
+                        <!-- Información del proyecto -->
                         <div class="flex-1">
                             <h3 class="font-bold text-on-surface">${p.name}</h3>
                             <p class="text-xs text-on-surface-variant/60 font-code-md">${p.language || 'Desconocido'} · ${new Date(p.created_at).toLocaleDateString('es-MX')}</p>
                         </div>
+                        <!-- Estadísticas del proyecto -->
                         <div class="hidden md:flex gap-6 text-sm text-on-surface-variant/70 font-code-md">
                             <span>Archivos <strong class="text-on-surface">${p.stats?.files || 0}</strong></span>
                             <span>Funciones <strong class="text-on-surface">${p.stats?.functions || 0}</strong></span>
                             <span>Endpoints <strong class="text-on-surface">${p.stats?.endpoints || 0}</strong></span>
                             ${p.status === 'completed' ? `<span>Calidad <strong style="color:${qColor}">${q}/100</strong></span>` : ''}
                         </div>
-                        <!-- 🆕 Botón de colaboradores -->
+                        <!-- Botón de colaboradores -->
                         <button class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105" 
                             style="background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.2);color:#818cf8;cursor:pointer;position:relative;z-index:30;"
                             onclick="openContributorsModal('${p._id}','${p.name}')">
                             <span class="material-symbols-outlined text-[16px]">group</span>
                             ${contributorCount > 0 ? contributorCount : ''}
                         </button>
+                        <!-- Etiqueta de estado -->
                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase border ${statusClass}">${labels[p.status] || p.status}</span>
+                        <!-- Botón de eliminar -->
                         <button class="text-on-surface-variant/40 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors project-delete-btn" style="position:relative; z-index:30;" onclick="deleteProject(event,'${p._id}')">
                             <span class="material-symbols-outlined text-xl">delete</span>
                         </button>
                     </div>
                 </div>`;
             }).join('');
-            initTilt();
+            initTilt(); // Inicializar efecto tilt en las tarjetas
         }
 
+        // Navegar a la página de análisis del proyecto
         function goToProject(id) { window.location.href = `/analysis/${id}`; }
 
+        // Eliminar un proyecto
         async function deleteProject(e, id) {
-            e.stopPropagation();
+            e.stopPropagation(); // Evitar que se propague el clic
             if (!confirm('¿Eliminar este proyecto?')) return;
 
             const btn = e.target.closest('button') || e.target;
             const cardWrapper = btn ? btn.closest('.tilt-card') : null;
             if (cardWrapper) {
+                // Animación de eliminación
                 const el = cardWrapper;
                 el.style.overflow = 'hidden';
                 const startH = el.offsetHeight + 'px';
@@ -720,14 +806,17 @@
                 return;
             }
 
+            // Eliminación sin animación (fallback)
             await fetch(`/api/projects/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             loadProjects();
         }
 
+        // Funciones auxiliares para navegación
         function openUploadModal() { window.location.href = '/dashboard'; }
         function logout() { localStorage.clear(); window.location.href = '/'; }
 
         // ==================== PARTÍCULAS Y TILT ====================
+        // Configuración del canvas de partículas
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -735,12 +824,14 @@
         const particleCount = 80;
         const repulsionRadius = 180;
 
+        // Inicializar el canvas con el tamaño de la ventana
         function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             setupParticles();
         }
 
+        // Clase para las partículas
         class Particle {
             constructor() { this.reset(); }
             reset() {
@@ -754,6 +845,7 @@
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
+                // Repulsión con el mouse
                 if (mouse.x !== null) {
                     const dx = mouse.x - this.x;
                     const dy = mouse.y - this.y;
@@ -765,16 +857,19 @@
                         this.y -= Math.sin(angle) * force * 2;
                     }
                 }
+                // Wrapping alrededor del canvas
                 if (this.x < 0) this.x = canvas.width;
                 if (this.x > canvas.width) this.x = 0;
                 if (this.y < 0) this.y = canvas.height;
                 if (this.y > canvas.height) this.y = 0;
             }
             draw() {
+                // Dibujar la partícula
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
+                // Dibujar líneas entre partículas cercanas
                 particles.forEach(p => {
                     const d = Math.hypot(this.x - p.x, this.y - p.y);
                     if (d < 120) {
@@ -788,21 +883,24 @@
             }
         }
 
+        // Crear las partículas
         function setupParticles() {
             particles = [];
             for (let i = 0; i < particleCount; i++) particles.push(new Particle());
         }
 
+        // Bucle de animación
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
 
+        // Inicializar efecto tilt en las tarjetas
         function initTilt() {
             const cards = document.querySelectorAll('.tilt-card');
             cards.forEach(card => {
-                if (card.hasTilt) return;
+                if (card.hasTilt) return; // Evitar duplicados
                 card.hasTilt = true;
                 card.addEventListener('mousemove', (e) => {
                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -823,9 +921,11 @@
             });
         }
 
+        // Event listeners para redimensionar y mouse
         window.addEventListener('resize', initCanvas);
         window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
 
+        // Inicialización al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             animate();
@@ -833,6 +933,7 @@
             loadProjects();
         });
     </script>
+    <!-- Script externo para el tema -->
     <script src="/static/theme.js"></script>
 </body>
 </html>

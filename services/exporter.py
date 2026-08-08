@@ -85,17 +85,40 @@ class DocumentExporter:
 
         html_body = re.sub(r'<table(?![^>]*class=)', '<table class="report-table"', html_body)
 
-        # Inject section IDs onto h1/h2 headings so TOC links work
+        # Inject section IDs onto h1/h2/h3 headings
         sec_counter = [0]
+        toc_headings = []
         def inject_section_id(m):
             sec_counter[0] += 1
             tag = m.group(1)
             text = m.group(2)
+            level = int(tag[1])
+            plain_text = re.sub(r'<[^>]+>', '', text).strip()
+            toc_headings.append((level, plain_text, sec_counter[0]))
             return f'<{tag} id="sec{sec_counter[0]}">{text}</{tag}>'
-        html_body = re.sub(r'<(h[12])>(.*?)</\1>', inject_section_id, html_body, flags=re.DOTALL)
+        html_body = re.sub(r'<(h[123])>(.*?)</\1>', inject_section_id, html_body, flags=re.DOTALL)
 
-        # Wrap each diagram heading + image into a .diagram-section so they stay visually together
-        # Matches: <h3>2.N Diagrama ...</h3> followed (possibly across whitespace) by <img ...>
+        def _build_toc_html(headings):
+            if not headings:
+                return '<p style="color:var(--muted)">No se detectaron secciones.</p>'
+            html_parts = ['<ul class="toc-list">']
+            top_counter = 0
+            for level, text, sec_id in headings:
+                if level == 1:
+                    top_counter += 1
+                    label = f'{top_counter}. {text}'
+                else:
+                    label = text
+                css_class = f'toc-h{level}'
+                html_parts.append(
+                    f'<li class="{css_class}"><a href="#sec{sec_id}">{label}</a></li>'
+                )
+            html_parts.append('</ul>')
+            return ''.join(html_parts)
+
+        toc_html = _build_toc_html(toc_headings)
+
+        # Wrap diagram heading + image
         html_body = re.sub(
             r'(<h3>(2\.\d+\s+Diagrama[^<]*)</h3>)(\s*(?:<p>\s*)?(<img[^>]+>)(?:\s*</p>)?)',
             lambda m: (
@@ -128,7 +151,7 @@ class DocumentExporter:
                         resolved_src = src
                 except Exception:
                     resolved_src = src
-            return f'<img src="{resolved_src}" {attrs} style="max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 8px;">'
+            return f'<img src="{resolved_src}" {attrs} style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;">'
 
         html_body = re.sub(r'<img\s+([^>]*?)src=["\']([^"\']+)["\']([^>]*)>', image_replacer, html_body)
 
@@ -151,9 +174,9 @@ class DocumentExporter:
     --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
     --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
   }}
-  body {{ background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.7; }}
+  body {{ background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; font-size: 12pt; line-height: 1.6; text-align: justify; }}
   .container {{ max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }}
-  .doc-header {{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; }}
+  .doc-header {{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }}
   .doc-header::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }}
   .doc-header h1 {{ font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }}
   .doc-header .subtitle {{ color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }}
@@ -162,14 +185,15 @@ class DocumentExporter:
   .stat .val {{ font-size: 1.8rem; font-weight: 800; color: var(--white); }}
   .stat .lbl {{ font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }}
   .quality-badge {{ display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: {score_color}; margin-top: 1rem; }}
-  h1 {{ font-size: 1.8rem; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }}
-  h2 {{ font-size: 1.4rem; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }}
-  h3 {{ font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }}
-  h4 {{ font-size: 1rem; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }}
-  p {{ margin: 0.75rem 0; }}
-  code {{ background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.15); padding: 0.15rem 0.45rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); }}
+  h1, h2, h3, h4 {{ font-family: Arial, Helvetica, sans-serif; text-align: left; }}
+  h1 {{ font-size: 20pt; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }}
+  h2 {{ font-size: 16pt; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }}
+  h3 {{ font-size: 13pt; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }}
+  h4 {{ font-size: 12pt; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }}
+  p, li {{ margin: 0.75rem 0; font-size: 12pt; text-align: justify; }}
+  code {{ background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.3); padding: 0.2rem 0.55rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: #7dd3fc; }}
   pre {{ background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }}
-  pre code {{ background: none; border: none; padding: 0; color: #a8d8f0; font-size: 0.85rem; }}
+  pre code {{ background: none; border: none; padding: 0; color: #bae6fd; font-size: 0.95rem; font-weight: 600; }}
   table {{ width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }}
   .report-table {{ width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }}
   .report-table thead tr {{ background: rgba(56,189,248,0.08); }}
@@ -180,7 +204,7 @@ class DocumentExporter:
   th {{ background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }}
   td {{ padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }}
   tr:nth-child(even) td {{ background: rgba(255,255,255,0.02); }}
-  blockquote {{ border-left: 3px solid var(--accent3); padding: 0.75rem 1rem; background: rgba(52,211,153,0.05); border-radius: 0 8px 8px 0; margin: 1rem 0; color: var(--accent3); font-style: italic; }}
+  blockquote {{ border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem; background: rgba(52,211,153,0.1); border-radius: 0 8px 8px 0; margin: 1rem 0; color: #6ee7b7; font-size: 1.05rem; font-weight: 600; font-style: italic; }}
   ul {{ padding-left: 1.5rem; margin: 0.5rem 0; }}
   li {{ margin: 0.3rem 0; }}
   hr {{ border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }}
@@ -188,10 +212,15 @@ class DocumentExporter:
   em {{ color: var(--accent2); font-style: italic; }}
   .toc {{ background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }}
   .toc h3 {{ color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }}
-  .toc ol {{ padding-left: 1.5rem; }}
-  .toc li {{ margin: 0.4rem 0; }}
-  .toc a {{ color: var(--accent); text-decoration: none; }}
-  .toc a:hover {{ text-decoration: underline; }}
+  .toc-list {{ list-style: none; padding-left: 0; }}
+  .toc-list li {{ margin: 0.35rem 0; }}
+  .toc-list a {{ color: var(--accent); text-decoration: none; }}
+  .toc-list a:hover {{ text-decoration: underline; }}
+  .toc-list .toc-h1 {{ font-weight: 700; font-size: 1rem; margin-top: 0.9rem; }}
+  .toc-list .toc-h1 a {{ color: var(--white); }}
+  .toc-list .toc-h2 {{ padding-left: 1.25rem; font-size: 0.92rem; }}
+  .toc-list .toc-h3 {{ padding-left: 2.5rem; font-size: 0.85rem; }}
+  .toc-list .toc-h3 a {{ color: var(--accent2); }}
   .doc-footer {{ margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }}
   .doc-footer span {{ color: var(--accent); font-weight: 700; }}
   .doc-footer .footer-grid {{ display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }}
@@ -201,10 +230,9 @@ class DocumentExporter:
   .doc-footer .footer-divider {{ border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }}
   .doc-footer .footer-brand {{ color: var(--muted); font-size: 0.72rem; }}
   .diagram-section {{ margin: 2rem 0; }}
-  /* Page numbers for print/PDF export */
   @media print {{
     @page {{ margin: 2cm; @bottom-center {{ content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; }} }}
-    .doc-header {{ page-break-after: avoid; }}
+    .doc-header {{ page-break-after: always; min-height: 85vh; }}
     .toc {{ page-break-after: always; }}
     h2 {{ page-break-before: auto; page-break-after: avoid; }}
     h3 {{ page-break-after: avoid; }}
@@ -234,16 +262,7 @@ class DocumentExporter:
   </div>
   <div class="toc">
     <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
-    <ol>
-      <li><a href="#sec1">Resumen del Proyecto</a></li>
-      <li><a href="#sec2">Arquitectura y Diseño</a></li>
-      <li><a href="#sec3">Documentación de API</a></li>
-      <li><a href="#sec4">Clases y Objetos</a></li>
-      <li><a href="#sec5">Funciones</a></li>
-      <li><a href="#sec6">Modelos de Datos</a></li>
-      <li><a href="#sec7">Guía de Despliegue</a></li>
-      <li><a href="#sec8">Reporte de Calidad</a></li>
-    </ol>
+    {toc_html}
   </div>
   <div class="content">{html_body}</div>
   <div class="doc-footer">
@@ -287,20 +306,25 @@ class DocumentExporter:
     def _is_valid_pdf(self, path: Path) -> bool:
         try:
             with path.open('rb') as f:
-                return f.read(4) == b'%PDF'
+                header = f.read(5)
+                if not header.startswith(b'%PDF'):
+                    return False
+                f.seek(0, 2)
+                size = f.tell()
+                f.seek(max(0, size - 2048))
+                tail = f.read()
+                return b'%%EOF' in tail
         except Exception:
             return False
 
-    # ── PDF: ReportLab → WeasyPrint → HTML fallback ──────────────────────────
     def to_pdf(self) -> str:
         html_content = self.to_html()
         output_path = EXPORT_BASE / f"{self.project['_id']}_docs.pdf"
         html_path   = EXPORT_BASE / f"{self.project['_id']}_docs.html"
 
-        # Always save HTML as backup
         html_path.write_text(html_content, encoding='utf-8')
 
-        # 1st attempt: WeasyPrint (preserves HTML tables and formatting)
+        # 1st attempt: WeasyPrint
         try:
             from weasyprint import HTML
             HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
@@ -314,7 +338,7 @@ class DocumentExporter:
             print(f"[PDF] Error en WeasyPrint: {str(e)}")
             output_path.unlink(missing_ok=True)
 
-        # 2nd attempt: ReportLab (fallback when HTML rendering fails)
+        # 2nd attempt: ReportLab
         try:
             pdf_path = self._pdf_with_reportlab(str(output_path))
             pdf_obj = Path(pdf_path)
@@ -325,9 +349,11 @@ class DocumentExporter:
                 print(f"[PDF] ReportLab generó archivo inválido o muy pequeño")
                 pdf_obj.unlink(missing_ok=True)
         except Exception as e:
+            import traceback
             print(f"[PDF] Error en ReportLab: {str(e)}")
+            print(traceback.format_exc())
+            Path(output_path).unlink(missing_ok=True)
 
-        # Final fallback
         print(f"[PDF] Ambos métodos fallaron, usando HTML como fallback")
         return str(html_path)
 
@@ -338,18 +364,62 @@ class DocumentExporter:
         from reportlab.lib import colors
         from reportlab.platypus import (
             SimpleDocTemplate, Paragraph, Spacer,
-            Table, TableStyle, HRFlowable,
+            Table, TableStyle, HRFlowable, PageBreak, KeepTogether,
         )
-        from reportlab.lib.enums import TA_CENTER
+        from reportlab.platypus.tableofcontents import TableOfContents
+        from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+        from reportlab.pdfgen import canvas as _pdfcanvas
 
         project_name = self.project.get('name', 'Proyecto')
-        score  = self.results.get('quality_score', 0)
-        md     = self.to_markdown()
+        score = self.results.get('quality_score', 0)
+        md = self.to_markdown()
 
-        doc = SimpleDocTemplate(
+        class _AutoDocsDocTemplate(SimpleDocTemplate):
+            _toc_anchor_counter = 0
+
+            def afterFlowable(self, flowable):
+                if isinstance(flowable, Paragraph):
+                    style_name = getattr(flowable.style, 'name', '')
+                    level_by_style = {'H1': 0, 'H2': 1, 'H3': 2}
+                    if style_name in level_by_style:
+                        self._toc_anchor_counter += 1
+                        text = flowable.getPlainText()
+                        self.notify('TOCEntry', (level_by_style[style_name], text, self.page))
+
+        class _NumberedCanvas(_pdfcanvas.Canvas):
+            _SKIPPED_PAGES = 2
+
+            def __init__(self, *args, **kwargs):
+                _pdfcanvas.Canvas.__init__(self, *args, **kwargs)
+                self._saved_page_states = []
+
+            def showPage(self):
+                self._saved_page_states.append(dict(self.__dict__))
+                self._startPage()
+
+            def save(self):
+                total_pages = len(self._saved_page_states)
+                content_pages = max(total_pages - self._SKIPPED_PAGES, 0)
+                for state in self._saved_page_states:
+                    self.__dict__.update(state)
+                    self._draw_page_number(content_pages)
+                    _pdfcanvas.Canvas.showPage(self)
+                _pdfcanvas.Canvas.save(self)
+
+            def _draw_page_number(self, content_pages):
+                page_num = self._pageNumber - self._SKIPPED_PAGES
+                if page_num >= 1:
+                    self.setFont('Helvetica', 8)
+                    self.setFillColor(colors.HexColor('#64748b'))
+                    self.drawCentredString(
+                        A4[0] / 2, 1.2 * cm,
+                        f"Página {page_num} de {content_pages}"
+                    )
+
+        doc = _AutoDocsDocTemplate(
             output_path, pagesize=A4,
-            leftMargin=2*cm, rightMargin=2*cm,
-            topMargin=2*cm, bottomMargin=2*cm,
+            leftMargin=2.5*cm, rightMargin=2.5*cm,
+            topMargin=2.5*cm, bottomMargin=2.5*cm,
             title=f"{project_name} — Documentación Técnica",
             author="AutoDocs AI",
         )
@@ -359,25 +429,55 @@ class DocumentExporter:
             return ParagraphStyle(name, parent=base[parent], **kw)
 
         styles = {
-            'title': S('T', 'Title',   fontSize=24, textColor=colors.HexColor('#0f172a'), spaceAfter=8, alignment=TA_CENTER),
-            'sub':   S('Su','Normal',  fontSize=10, textColor=colors.HexColor('#64748b'), spaceAfter=16, alignment=TA_CENTER),
-            'h1':    S('H1','Heading1',fontSize=18, textColor=colors.HexColor('#0f172a'), spaceBefore=20, spaceAfter=8),
-            'h2':    S('H2','Heading2',fontSize=14, textColor=colors.HexColor('#1e293b'), spaceBefore=16, spaceAfter=6),
-            'h3':    S('H3','Heading3',fontSize=12, textColor=colors.HexColor('#334155'), spaceBefore=12, spaceAfter=4),
-            'h4':    S('H4','Heading4',fontSize=10, textColor=colors.HexColor('#475569'), spaceBefore=10,  spaceAfter=3),
-            'body':  S('Bo','Normal',  fontSize=10, textColor=colors.HexColor('#334155'), leading=15, spaceAfter=5),
-            'code':  S('Co','Code',    fontSize=8, textColor=colors.HexColor('#0c4a6e'),
-                       backColor=colors.HexColor('#f0f9ff'), borderPad=4,
-                       fontName='Courier', leading=12, spaceAfter=8),
-            'quote': S('Qu','Normal',  fontSize=10, textColor=colors.HexColor('#166534'),
-                       leftIndent=15, backColor=colors.HexColor('#f0fdf4'), spaceAfter=8),
+            'title': S('T', 'Title', fontSize=24, textColor=colors.HexColor('#0f172a'), spaceAfter=8, alignment=TA_CENTER),
+            'sub': S('Su','Normal', fontSize=10, textColor=colors.HexColor('#64748b'), spaceAfter=16, alignment=TA_CENTER),
+            'h1': S('H1','Heading1',fontSize=18, textColor=colors.HexColor('#0f172a'), spaceBefore=20, spaceAfter=8),
+            'h2': S('H2','Heading2',fontSize=14, textColor=colors.HexColor('#1e293b'), spaceBefore=16, spaceAfter=6),
+            'h3': S('H3','Heading3',fontSize=12, textColor=colors.HexColor('#334155'), spaceBefore=12, spaceAfter=4),
+            'h4': S('H4','Heading4',fontSize=10, textColor=colors.HexColor('#475569'), spaceBefore=10, spaceAfter=3),
+            'body': S('Bo','Normal', fontSize=12, fontName='Helvetica', textColor=colors.HexColor('#334155'), leading=17, alignment=TA_JUSTIFY, spaceAfter=5),
+            'code': S('Co','Code', fontSize=10, textColor=colors.HexColor('#0369a1'),
+                     backColor=colors.HexColor('#e0f2fe'), borderPad=5,
+                     fontName='Courier-Bold', leading=14, spaceAfter=8),
+            'quote': S('Qu','Normal', fontSize=12, fontName='Helvetica-Bold', textColor=colors.HexColor('#15803d'),
+                     leftIndent=15, backColor=colors.HexColor('#dcfce7'), spaceAfter=8, alignment=TA_JUSTIFY),
             'location': S('Loc','Normal', fontSize=8, textColor=colors.HexColor('#64748b'),
-                          leftIndent=10, spaceAfter=4),
+                        leftIndent=10, spaceAfter=4, alignment=TA_JUSTIFY),
         }
 
         story = []
+
+        # Portada simplificada
+        story.append(Spacer(1, 4*cm))
+        story.append(Paragraph(project_name.upper(), styles['title']))
         story.append(Spacer(1, 1*cm))
-        story.append(Paragraph(f"[DOC] {project_name}", styles['title']))
+        story.append(Paragraph("Documentación Técnica", styles['sub']))
+        story.append(Spacer(1, 2*cm))
+        story.append(Paragraph(f"Generado: {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC", styles['sub']))
+        story.append(Spacer(1, 2*cm))
+        story.append(Paragraph("AutoDocs AI", styles['sub']))
+        story.append(PageBreak())
+
+        # Índice
+        toc = TableOfContents()
+        toc.levelStyles = [
+            S('TOC1', 'Normal', fontName='Helvetica-Bold', fontSize=12,
+              leftIndent=0, firstLineIndent=0, spaceBefore=10, leading=16,
+              textColor=colors.HexColor('#0f172a')),
+            S('TOC2', 'Normal', fontName='Helvetica', fontSize=11,
+              leftIndent=14, firstLineIndent=0, spaceBefore=4, leading=14,
+              textColor=colors.HexColor('#334155')),
+            S('TOC3', 'Normal', fontName='Helvetica-Oblique', fontSize=10,
+              leftIndent=28, firstLineIndent=0, spaceBefore=2, leading=13,
+              textColor=colors.HexColor('#64748b')),
+        ]
+        story.append(Paragraph('Tabla de Contenido', styles['h1']))
+        story.append(Spacer(1, 0.5*cm))
+        story.append(toc)
+        story.append(PageBreak())
+
+        # Contenido
+        story.append(Paragraph(f"{project_name}", styles['title']))
         story.append(Paragraph("Documentación Técnica · AutoDocs AI · " +
                                 datetime.utcnow().strftime('%d/%m/%Y'), styles['sub']))
 
@@ -389,19 +489,19 @@ class DocumentExporter:
         row2 = ['Archivos', 'Funciones', 'Clases', 'Endpoints']
         t = Table([row1, row2], colWidths=[3.5*cm]*4)
         t.setStyle(TableStyle([
-            ('BACKGROUND',    (0,0), (-1,0), colors.HexColor('#1e293b')),
-            ('TEXTCOLOR',     (0,0), (-1,0), colors.white),
-            ('FONTSIZE',      (0,0), (-1,0), 18),
-            ('FONTNAME',      (0,0), (-1,0), 'Helvetica-Bold'),
-            ('BACKGROUND',    (0,1), (-1,1), colors.HexColor('#f8fafc')),
-            ('TEXTCOLOR',     (0,1), (-1,1), colors.HexColor('#64748b')),
-            ('FONTSIZE',      (0,1), (-1,1), 7),
-            ('FONTNAME',      (0,1), (-1,1), 'Helvetica'),
-            ('ALIGN',         (0,0), (-1,-1), 'CENTER'),
-            ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
-            ('BOX',           (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
-            ('INNERGRID',     (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
-            ('TOPPADDING',    (0,0), (-1,-1), 8),
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1e293b')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('FONTSIZE', (0,0), (-1,0), 18),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#f8fafc')),
+            ('TEXTCOLOR', (0,1), (-1,1), colors.HexColor('#64748b')),
+            ('FONTSIZE', (0,1), (-1,1), 7),
+            ('FONTNAME', (0,1), (-1,1), 'Helvetica'),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
             ('BOTTOMPADDING', (0,0), (-1,-1), 8),
         ]))
         story.append(t)
@@ -415,15 +515,27 @@ class DocumentExporter:
         story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#e2e8f0')))
         story.append(Spacer(1, 0.4*cm))
 
-        # Parse markdown → ReportLab elements
+        # Parse markdown
         in_code = False
         code_buf = []
+        heading_anchor_counter = [0]
+
+        def add_heading(raw_text, style, is_toc_level):
+            text = raw_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+            text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
+            if is_toc_level:
+                heading_anchor_counter[0] += 1
+                anchor = f'sec{heading_anchor_counter[0]}'
+                text = f'<a name="{anchor}"/>{text}'
+            try:
+                story.append(Paragraph(text, style))
+            except Exception:
+                story.append(Paragraph(re.sub(r'<[^>]+>', '', text), style))
 
         def flush_code():
             if code_buf:
                 txt = '\n'.join(code_buf).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                # Agregar borde y mejor formato para bloques de código
-                from reportlab.platypus import Table, TableStyle
                 code_text = txt.replace('\n', '<br/>').replace(' ', '&nbsp;')
                 code_para = Paragraph(code_text, styles['code'])
                 story.append(code_para)
@@ -431,13 +543,11 @@ class DocumentExporter:
                 code_buf.clear()
 
         def safe_para(text, style):
-            """Escape XML-unsafe chars and apply inline bold/code."""
             text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
-            text = re.sub(r'\*(.+?)\*',     r'<i>\1</i>', text)
+            text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
             text = re.sub(r'`([^`]+)`',
-                          r'<font name="Courier" color="#0369a1" size="8">\1</font>', text)
-            # Manejar ubicación del código
+                          r'<font name="Courier-Bold" color="#0369a1" size="10">\1</font>', text)
             if text.strip().startswith('**Ubicación:**'):
                 text = text.replace('**Ubicación:**', '<b>Ubicación:</b>')
                 style = styles['location']
@@ -449,39 +559,61 @@ class DocumentExporter:
                 except Exception:
                     story.append(Paragraph(re.sub(r'<[^>]+>', '', text), style))
 
-        def add_pdf_image_from_html(line):
+        def _fit_image_size(pil_size, max_w=10*cm, max_h=13*cm):
+            w, h = pil_size
+            if not w or not h:
+                return max_w, max_h
+            scale = min(max_w / w, max_h / h)
+            return w * scale, h * scale
+
+        def build_image_flowables(line):
             img_tags = re.findall(r'<img[^>]*src=["\']([^"\']+)["\'][^>]*>', line)
             if not img_tags:
-                return False
+                return []
 
             from reportlab.platypus import Image as RLImage
+            try:
+                from PIL import Image as PILImage
+            except Exception:
+                PILImage = None
+
+            flowables = []
             for src in img_tags:
                 if src.startswith('data:'):
                     try:
                         header, payload = src.split(',', 1)
                         data = base64.b64decode(payload)
-                        image_file = io.BytesIO(data)
-                        img = RLImage(image_file, width=15*cm)
+                        if PILImage is not None:
+                            with PILImage.open(io.BytesIO(data)) as im:
+                                w, h = _fit_image_size(im.size)
+                        else:
+                            w, h = 10*cm, 13*cm
+                        img = RLImage(io.BytesIO(data), width=w, height=h)
                         img.hAlign = 'CENTER'
-                        story.append(img)
-                        story.append(Spacer(1, 0.4*cm))
+                        flowables.append(img)
+                        flowables.append(Spacer(1, 0.4*cm))
                     except Exception:
-                        story.append(Paragraph('Imagen no disponible', styles['body']))
+                        flowables.append(Paragraph('Imagen no disponible', styles['body']))
                 else:
                     try:
                         image_path = Path(src)
                         if not image_path.is_absolute():
                             image_path = Path.cwd() / image_path
                         if image_path.exists():
-                            img = RLImage(str(image_path), width=15*cm)
+                            if PILImage is not None:
+                                with PILImage.open(str(image_path)) as im:
+                                    w, h = _fit_image_size(im.size)
+                            else:
+                                w, h = 10*cm, 13*cm
+                            img = RLImage(str(image_path), width=w, height=h)
                             img.hAlign = 'CENTER'
-                            story.append(img)
-                            story.append(Spacer(1, 0.4*cm))
+                            flowables.append(img)
+                            flowables.append(Spacer(1, 0.4*cm))
                         else:
-                            story.append(Paragraph('Imagen no encontrada: ' + src, styles['body']))
+                            flowables.append(Paragraph('Imagen no encontrada: ' + src, styles['body']))
                     except Exception:
-                        story.append(Paragraph('Imagen no disponible', styles['body']))
-            return True
+                        flowables.append(Paragraph('Imagen no disponible', styles['body']))
+            return flowables
 
         def parse_table(lines, start_index):
             if start_index + 1 >= len(lines):
@@ -534,50 +666,68 @@ class DocumentExporter:
                 tbl = Table(table_data, colWidths=[None] * len(table_data[0]))
                 tbl.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
-                    ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
-                    ('ALIGN',      (0, 0), (-1, -1), 'LEFT'),
-                    ('VALIGN',     (0, 0), (-1, -1), 'MIDDLE'),
-                    ('INNERGRID',  (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-                    ('BOX',        (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                    ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
                     ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
-                    ('TEXTCOLOR',  (0, 1), (-1, -1), colors.HexColor('#334155')),
-                    ('FONTNAME',   (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTNAME',   (0, 1), (-1, -1), 'Helvetica'),
-                    ('FONTSIZE',   (0, 0), (-1, 0), 10),
-                    ('FONTSIZE',   (0, 1), (-1, -1), 9),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor('#334155')),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('FONTSIZE', (0, 1), (-1, -1), 9),
                     ('LEFTPADDING', (0, 0), (-1, -1), 6),
-                    ('RIGHTPADDING',(0, 0), (-1, -1), 6),
-                    ('TOPPADDING',  (0, 0), (-1, -1), 4),
-                    ('BOTTOMPADDING',(0, 0), (-1, -1), 4),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
                 ]))
                 story.append(tbl)
                 story.append(Spacer(1, 0.3*cm))
                 idx += consumed
                 continue
 
+            diagram_heading = re.match(r'^###\s+(\d+\.\d+\s+Diagrama.*)$', line.strip())
+            if diagram_heading:
+                look = idx + 1
+                while look < len(lines) and lines[look].strip() == '':
+                    look += 1
+                img_flowables = build_image_flowables(lines[look]) if look < len(lines) else []
+                if img_flowables:
+                    title_clean = (diagram_heading.group(1)
+                                    .replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'))
+                    heading_anchor_counter[0] += 1
+                    anchor = f'sec{heading_anchor_counter[0]}'
+                    heading_para = Paragraph(f'<a name="{anchor}"/>{title_clean}', styles['h3'])
+                    group = [heading_para, Spacer(1, 0.2*cm)] + img_flowables
+                    story.append(KeepTogether(group))
+                    idx = look + 1
+                    continue
+
             if line.strip() == '---':
                 story.append(HRFlowable(width="100%", thickness=0.5,
                                         color=colors.HexColor('#e2e8f0')))
                 story.append(Spacer(1, 0.2*cm))
             elif line.startswith('#### '):
-                safe_para(line[5:], styles['h4'])
+                add_heading(line[5:], styles['h4'], is_toc_level=False)
             elif line.startswith('### '):
-                safe_para(line[4:], styles['h3'])
+                add_heading(line[4:], styles['h3'], is_toc_level=True)
             elif line.startswith('## '):
-                safe_para(line[3:], styles['h2'])
+                add_heading(line[3:], styles['h2'], is_toc_level=True)
             elif line.startswith('# '):
-                safe_para(line[2:], styles['h1'])
+                add_heading(line[2:], styles['h1'], is_toc_level=True)
             elif line.startswith('> '):
                 safe_para(line[2:], styles['quote'])
             elif line.startswith(('- ', '* ')):
                 safe_para('• ' + line[2:], styles['body'])
             elif line.strip() == '':
                 story.append(Spacer(1, 0.15*cm))
-            elif add_pdf_image_from_html(line):
-                idx += 1
-                continue
             else:
-                safe_para(line, styles['body'])
+                imgs = build_image_flowables(line)
+                if imgs:
+                    story.extend(imgs)
+                else:
+                    safe_para(line, styles['body'])
             idx += 1
 
         if in_code:
@@ -587,5 +737,5 @@ class DocumentExporter:
         story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#e2e8f0')))
         story.append(Paragraph("Generado automáticamente por AutoDocs AI", styles['sub']))
 
-        doc.build(story)
+        doc.multiBuild(story, canvasmaker=_NumberedCanvas)
         return output_path

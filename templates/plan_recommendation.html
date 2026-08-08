@@ -1,404 +1,2801 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
+    <!-- ============================================================
+         METADATOS Y CONFIGURACION DEL DOCUMENTO
+         ============================================================ -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tu plan ideal — AutoDocs AI</title>
+
+    <!-- ============================================================
+         LIBRERIAS EXTERNAS
+         ============================================================ -->
+    <!-- Chart.js: usado para dibujar el grafico del "codo" y el de "silueta" -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+    <!-- Tailwind via CDN (modo JIT en el navegador) -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Fuentes: Geist para texto, JetBrains Mono para codigo/monoespaciado, Material Symbols para iconos -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- ============================================================
+         CONFIGURACION DE TAILWIND
+         ============================================================ -->
     <script id="tailwind-config">
+        // Configuracion de Tailwind: paleta de colores tipo "Material You" y
+        // radios de borde personalizados. darkMode:"class" significa que el
+        // modo oscuro se activa agregando la clase "dark" al <html>.
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "background": "var(--color-background)",
-                        "surface": "var(--color-surface)",
-                        "surface-container": "var(--color-surface-container)",
-                        "surface-container-high": "var(--color-surface-container-high)",
-                        "on-surface": "var(--color-on-surface)",
-                        "on-surface-variant": "var(--color-on-surface-variant)",
-                        "primary": "var(--color-primary)",
-                        "secondary": "var(--color-secondary)",
-                        "outline-variant": "var(--color-outline-variant)",
-                        "error": "var(--color-error)",
-                        "green-accent": "var(--color-green-accent)",
+                        "on-primary-container": "#001f2b",
+                        "tertiary-container": "#ffdbb7",
+                        "surface-tint": "#38bdf8",
+                        "on-secondary-fixed-variant": "#2f2ebe",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#07006c",
+                        "secondary": "#818cf8",
+                        "primary": "#38bdf8",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary-container": "#613b00",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-variant": "#cbd5e1",
+                        "secondary-container": "#e0e7ff",
+                        "on-surface-variant": "#334155",
+                        "primary-fixed": "#bae6fd",
+                        "surface-container-highest": "#e2e8f0",
+                        "surface-dim": "#cbd5e1",
+                        "outline-variant": "#94a3b8",
+                        "on-surface": "#0f172a",
+                        "on-secondary-container": "#1e1b4b",
+                        "secondary-fixed": "#e0e7ff",
+                        "tertiary": "#7c5800",
+                        "primary-fixed-dim": "#7dd3fc",
+                        "background": "#f1f5f9",
+                        "primary-container": "#e0f2fe",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "surface-bright": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001e2c",
+                        "inverse-on-surface": "#eef2f5",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7d2fe",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#004c69",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "inverse-primary": "#7dd3fc",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-primary": "#ffffff",
+                        "outline": "#64748b",
+                        "surface-container-low": "#f8fafc",
+                        "surface": "#f1f5f9",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#1e293b"
                     },
-                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
-                    fontFamily: { "body-md": ["Geist"], "headline-lg": ["Geist"], "code-md": ["JetBrains Mono"] }
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"]
+                    }
                 },
             },
         }
     </script>
+
+    <script>
+        // Se ejecuta ANTES de pintar la pagina para evitar el "parpadeo"
+        // (flash) de tema: lee la preferencia guardada en localStorage o,
+        // si no hay ninguna, usa la preferencia del sistema operativo.
+        (function() {
+            var savedTheme = localStorage.getItem('theme');
+            var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            var theme = savedTheme || systemTheme;
+
+            var html = document.documentElement;
+            html.classList.remove('dark', 'light');
+
+            if (theme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.add('light');
+            }
+        })();
+    </script>
+
     <style>
-        :root, body[data-theme="dark"] {
-            --color-background: #0f1418;
-            --color-surface: rgba(27,32,36,0.4);
-            --color-surface-container: #1b2024;
-            --color-surface-container-high: #252b2e;
-            --color-on-surface: #dee3e8;
-            --color-on-surface-variant: #bdc8d1;
-            --color-primary: #39b2f8;
-            --color-secondary: #c0c1ff;
-            --color-outline-variant: #3e484f;
-            --color-error: #ffb4ab;
-            --color-green-accent: #10b981;
-        }
-        body { background: var(--color-background); font-family: 'Geist', sans-serif; }
-        .glass { background: var(--color-surface); backdrop-filter: blur(20px); }
-        .glass-hover { transition: all .25s ease; }
-        .glass-hover:hover { border-color: var(--color-primary); transform: translateY(-2px); }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: var(--color-outline-variant); border-radius: 10px; }
-    </style>
-</head>
-<body data-theme="dark" class="min-h-screen text-on-surface">
-
-<div class="max-w-5xl mx-auto px-6 py-10">
-
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <a href="/dashboard" class="text-xs text-on-surface-variant/60 hover:text-primary flex items-center gap-1 mb-2">
-                <span class="material-symbols-outlined text-sm">arrow_back</span> Volver al dashboard
-            </a>
-            <h1 class="text-3xl font-bold tracking-tight">Tu plan ideal</h1>
-            <p class="text-on-surface-variant/60 text-sm mt-1">
-                Analizamos tu uso real (proyectos, análisis, IA, exportaciones) contra usuarios con
-                patrones similares para asegurarnos de que pagues solo por lo que ocupas.
-            </p>
-        </div>
-        <a href="/pricing" class="text-xs px-4 py-2 rounded-xl glass glass-hover border border-outline-variant/20 whitespace-nowrap">
-            Ver todos los planes
-        </a>
-    </div>
-
-    <!-- Loading -->
-    <div id="loading-state" class="glass rounded-3xl p-10 text-center border border-outline-variant/20">
-        <p class="text-on-surface-variant/60 text-sm">Calculando tu perfil de uso…</p>
-    </div>
-
-    <!-- Error -->
-    <div id="error-state" class="hidden glass rounded-3xl p-10 text-center border border-outline-variant/20">
-        <p class="text-on-surface-variant/60 text-sm" id="error-msg">Ocurrió un error.</p>
-    </div>
-
-    <!-- Contenido principal -->
-    <div id="content" class="hidden flex flex-col gap-6">
-
-        <!-- Tarjeta de recomendación -->
-        <div id="recommendation-card" class="glass rounded-3xl p-8 border border-outline-variant/20">
-            <div class="mb-3">
-                <p id="rec-badge" class="text-xs uppercase tracking-widest font-bold text-primary"></p>
-            </div>
-            <p id="rec-mensaje" class="text-on-surface text-lg leading-relaxed mb-6"></p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div class="rounded-2xl bg-surface-container p-4 border border-outline-variant/10">
-                    <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mb-1">Plan actual</p>
-                    <p id="plan-actual-nombre" class="text-xl font-bold"></p>
-                    <p id="plan-actual-precio" class="text-sm text-on-surface-variant/60"></p>
-                </div>
-                <div class="flex items-center justify-center">
-                    <span class="material-symbols-outlined text-on-surface-variant/40 text-3xl">trending_flat</span>
-                </div>
-                <div class="rounded-2xl bg-primary/10 p-4 border border-primary/30">
-                    <p class="text-xs text-primary uppercase tracking-widest mb-1">Plan recomendado</p>
-                    <p id="plan-ideal-nombre" class="text-xl font-bold text-primary"></p>
-                    <p id="plan-ideal-precio" class="text-sm text-on-surface-variant/60"></p>
-                </div>
-            </div>
-
-            <div id="promo-box" class="hidden rounded-2xl bg-green-accent/10 border border-green-accent/30 p-4 mb-6">
-                <p class="text-sm text-green-accent font-semibold" id="promo-texto"></p>
-            </div>
-
-            <button id="cta-btn" onclick="aplicarRecomendacion()"
-                class="w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95">
-                Aplicar cambio de plan
-            </button>
-        </div>
-
-        <!-- Uso real -->
-        <div class="glass rounded-3xl p-8 border border-outline-variant/20">
-            <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-4">Tu uso real (últimos 30 días)</p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="uso-grid"></div>
-        </div>
-
-        <!-- Perfil de uso (clustering) -->
-        <div id="perfil-box" class="hidden glass rounded-3xl p-8 border border-outline-variant/20">
-            <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-2">Tu perfil de uso</p>
-            <p id="perfil-texto" class="text-on-surface-variant text-sm mb-4"></p>
-        </div>
-
-        <!-- Explicación en lenguaje simple -->
-        <div id="tecnico-box" class="hidden glass rounded-3xl p-8 border border-outline-variant/20">
-            <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-1">¿Por qué te recomendamos esto?</p>
-            <p class="text-on-surface-variant/60 text-sm mb-6">
-                Comparamos tu forma de usar AutoDocs con la de otros usuarios: cuántos proyectos subes,
-                cuántos análisis corres, si usas IA o exportas seguido. Con eso identificamos
-                <strong class="text-on-surface">grupos naturales de usuarios</strong> (por ejemplo, quienes
-                usan poco, quienes usan lo normal, y quienes usan mucho) y ubicamos en cuál grupo estás tú,
-                para asegurarnos de recomendarte el plan que de verdad necesitas.
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <p class="text-sm font-semibold text-on-surface mb-1">¿Cuántos grupos de usuarios hay?</p>
-                    <p class="text-xs text-on-surface-variant/50 mb-3">
-                        Cada punto es una forma distinta de dividir a los usuarios. El punto resaltado
-                        marca dónde encontramos la división más natural.
-                    </p>
-                    <canvas id="elbow-chart" height="180"></canvas>
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-on-surface mb-1">Qué tan bien definidos están esos grupos</p>
-                    <p class="text-xs text-on-surface-variant/50 mb-3">
-                        Entre más alta la barra, más clara es la diferencia entre un grupo de usuarios y otro.
-                        La barra resaltada es la que usamos para tu recomendación.
-                    </p>
-                    <canvas id="silhouette-chart" height="180"></canvas>
-                </div>
-            </div>
-            <div id="grupos-explicacion" class="mt-6 hidden">
-                <p class="text-sm font-semibold text-on-surface mb-2">Qué significa cada grupo</p>
-                <div id="grupos-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<script>
-    const API = window.location.origin;
-
-    const badges = { promocion_downgrade: 'Promoción disponible', upgrade_necesario: 'Necesitas más capacidad', plan_ajustado: 'Plan bien ajustado' };
-
-    function moneyFmt(v) { return v === 0 ? 'Gratis' : `$${v}/mes`; }
-
-    async function cargarRecomendacion() {
-        const token = localStorage.getItem('token');
-        if (!token) { window.location.href = '/'; return; }
-
-        try {
-            const res = await fetch(`${API}/api/plan-recommendation/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error('No se pudo calcular tu recomendación.');
-            const data = await res.json();
-            render(data);
-        } catch (err) {
-            document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('error-state').classList.remove('hidden');
-            document.getElementById('error-msg').textContent = err.message;
-        }
-    }
-
-    let lastData = null;
-
-    function render(data) {
-        lastData = data;
-        document.getElementById('loading-state').classList.add('hidden');
-        document.getElementById('content').classList.remove('hidden');
-
-        document.getElementById('rec-badge').textContent = badges[data.tipo_recomendacion] || '';
-        document.getElementById('rec-mensaje').textContent = data.mensaje;
-
-        document.getElementById('plan-actual-nombre').textContent = data.plan_actual.name;
-        document.getElementById('plan-actual-precio').textContent = moneyFmt(data.plan_actual.price);
-        document.getElementById('plan-ideal-nombre').textContent = data.plan_ideal.name;
-        document.getElementById('plan-ideal-precio').textContent = moneyFmt(data.plan_ideal.price);
-
-        const ctaBtn = document.getElementById('cta-btn');
-        if (data.tipo_recomendacion === 'plan_ajustado') {
-            ctaBtn.classList.add('hidden');
-        } else {
-            ctaBtn.classList.remove('hidden');
-            ctaBtn.textContent = data.tipo_recomendacion === 'promocion_downgrade'
-                ? `Cambiarme a ${data.plan_ideal.name} con descuento`
-                : `Subir a ${data.plan_ideal.name}`;
+        /* ============================================================
+           ESTILOS BASE
+           ============================================================ */
+        body {
+            background: var(--color-background, #f1f5f9);
+            font-family: 'Geist', sans-serif;
+            overflow-x: hidden;
         }
 
-        if (data.promocion) {
-            document.getElementById('promo-box').classList.remove('hidden');
-            document.getElementById('promo-texto').textContent =
-                `${data.promocion.descuento_pct}% de descuento durante ${data.promocion.duracion_meses} meses: ` +
-                `$${data.promocion.precio_promocional}/mes en vez de $${data.promocion.precio_lista}/mes ` +
-                `(ahorras $${data.promocion.ahorro_mensual_vs_actual}/mes vs. tu plan actual).`;
+        /* ============================================================
+           FONDO ANIMADO DE PARTICULAS (igual que en dashboard.html)
+           El <canvas> se pinta detras de todo el contenido (z-index: 0)
+           y no intercepta clics (pointer-events: none).
+           ============================================================ */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        // Uso real
-        const uso = data.uso_real;
-        const usoGrid = document.getElementById('uso-grid');
-        const items = [
-            { label: 'Proyectos', value: uso.projects_count },
-            { label: 'Análisis (30 días)', value: uso.analyses_30d },
-            { label: 'Usos de IA', value: uso.ai_usage_count },
-            { label: 'Exportaciones', value: uso.export_usage_count },
-        ];
-        usoGrid.innerHTML = items.map(i => `
-            <div class="rounded-2xl bg-surface-container p-4 border border-outline-variant/10 text-center">
-                <p class="text-2xl font-bold mb-2">${i.value}</p>
-                <p class="text-xs text-on-surface-variant/50">${i.label}</p>
-            </div>
-        `).join('');
-
-        // Perfil de uso (cluster)
-        if (data.perfil_uso && data.perfil_uso.etiqueta != null) {
-            document.getElementById('perfil-box').classList.remove('hidden');
-            document.getElementById('perfil-texto').textContent =
-                `Perteneces al grupo ${data.perfil_uso.cluster_id + 1} (${data.perfil_uso.etiqueta}): usuarios con un patrón de uso similar al tuyo. ` +
-                `En promedio, este grupo usa ${data.perfil_uso.uso_promedio_grupo.analyses_30d} análisis al mes y ` +
-                `${data.perfil_uso.uso_promedio_grupo.projects_count} proyectos.`;
+        /* ============================================================
+           MODO OSCURO
+           Estas reglas sobreescriben colores de Tailwind cuando el
+           <html> tiene la clase "dark" (ver script de arriba).
+           ============================================================ */
+        html.dark body {
+            background: #0f1418;
+            color: #dee3e8;
         }
 
-        // Gráficas del codo y silueta
-        const c = data.clustering;
-        if (c.disponible && c.elbow && c.elbow.length) {
-            document.getElementById('tecnico-box').classList.remove('hidden');
-            dibujarElbow(c.elbow, c.codo_detectado);
-            dibujarSilhouette(c.silhouette, c.k_optimo);
-            // Mostrar explicación de grupos si vienen los perfiles
-            if (c.perfiles_cluster && Object.keys(c.perfiles_cluster).length) {
-                renderGroupDescriptions(c.perfiles_cluster, c.etiqueta_por_cluster || {}, c.descriptions || {});
+        html.dark .text-on-surface {
+            color: #dee3e8 !important;
+        }
+
+        html.dark .text-on-surface-variant {
+            color: #bdc8d1 !important;
+        }
+
+        html.dark .text-on-surface-variant\/60 {
+            color: rgba(189, 200, 209, 0.6) !important;
+        }
+
+        html.dark .text-on-surface-variant\/50 {
+            color: rgba(189, 200, 209, 0.5) !important;
+        }
+
+        /* ============================================================
+           EFECTO GLASSMORPHISM
+           Fondo semitransparente + blur, usado en las tarjetas grandes
+           (recomendacion, uso real, perfil, seccion tecnica).
+           ============================================================ */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        html.dark .glass {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* ============================================================
+           EFECTO HOVER PARA TARJETAS
+           ============================================================ */
+        .glass-hover {
+            transition: all .25s ease;
+        }
+        .glass-hover:hover {
+            border-color: var(--color-primary, #38bdf8);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           ESTILOS PARA GRAFICOS (Chart.js)
+           ============================================================ */
+
+        /* Caja que envuelve cada <canvas> de Chart.js */
+        .chart-container {
+            background: var(--color-surface-container-low, #f8fafc);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+        }
+
+        html.dark .chart-container {
+            background: rgba(27, 32, 36, 0.3);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Tarjeta de interpretacion (texto que explica el resultado del clustering) */
+        .interpretacion-card {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .interpretacion-card:hover {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        /* Leyendas debajo de cada grafico (lineas/puntos de referencia) */
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.7rem;
+            color: var(--color-on-surface-variant, #64748b);
+        }
+
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .chart-legend-color {
+            width: 1rem;
+            height: 0.25rem;
+            border-radius: 0.125rem;
+        }
+
+        .chart-legend-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+        }
+
+        /* Paleta de colores compartida por los graficos (JS la lee via chartColors()) */
+        :root {
+            --chart-primary: #38bdf8;
+            --chart-secondary: #818cf8;
+            --chart-success: #34d399;
+            --chart-warning: #fbbf24;
+            --chart-error: #f87171;
+            --chart-grid: rgba(0, 0, 0, 0.06);
+        }
+
+        html.dark {
+            --chart-grid: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Barra resaltada como "optima" en el grafico de silueta */
+        .silhouette-bar-optimo {
+            background: var(--chart-secondary) !important;
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+        }
+
+        .silhouette-bar-normal {
+            background: rgba(56, 189, 248, 0.4) !important;
+        }
+
+        /* Punto resaltado como "optimo" en el grafico del codo */
+        .elbow-point-optimo {
+            fill: var(--chart-secondary);
+            stroke: white;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.5));
+        }
+
+        .elbow-point-normal {
+            fill: var(--chart-primary);
+        }
+
+        /* ============================================================
+           ICONOS DE MATERIAL SYMBOLS
+           ============================================================ */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Variante "rellena" para cuando un icono necesita mas enfasis (ej. destacados) */
+        .material-symbols-outlined.icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-outline-variant, #94a3b8);
+            border-radius: 10px;
+        }
+
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #3e484f;
+        }
+
+        /* ============================================================
+           BADGE DE DESCUENTO ANIMADO (pastilla verde con animacion de pulso)
+           ============================================================ */
+        .descuento-badge {
+            background: linear-gradient(135deg, #10b98120, #05966920);
+            border: 2px solid #18de9c;
+            color: #2de8a9;
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse-badge 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ============================================================
+           ESTILOS DE PRECIOS
+           ============================================================ */
+        .precio-original {
+            text-decoration: line-through;
+            color: var(--color-on-surface-variant, #64748b);
+            opacity: 0.5;
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+
+        .precio-con-descuento {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1ed598;
+            text-shadow: 0 0 30px rgba(17, 177, 124, 0.856);
+        }
+
+        .precio-normal {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-on-surface, #0f172a);
+        }
+
+        /* ============================================================
+           BADGE DE AHORRO
+           ============================================================ */
+        .ahorro-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* ============================================================
+           TARJETA DEL PLAN ACTUAL
+           Siempre oscura (fondo gris-negro) independientemente del tema,
+           para que destaque como "tarjeta de identidad" del usuario.
+           ============================================================ */
+        .plan-actual-card {
+            background: linear-gradient(145deg, rgba(27, 32, 36, 0.9), rgba(20, 24, 28, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+
+        /* En modo claro si cambia a fondo blanco, para no verse "flotando" */
+        html:not(.dark) .plan-actual-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        /* Linea de acento superior (degradado azul -> morado -> verde) */
+        .plan-actual-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8, #34d399);
+            opacity: 0.5;
+        }
+
+        .plan-actual-card:hover {
+            border-color: rgba(57, 178, 248, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        html:not(.dark) .plan-actual-card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .plan-actual-badge {
+            background: rgba(57, 178, 248, 0.15);
+            color: #38bdf8;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid rgba(57, 178, 248, 0.2);
+        }
+
+        /* Cada fila de caracteristica dentro de la tarjeta del plan actual (icono + texto + valor) */
+        .plan-actual-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        html:not(.dark) .plan-actual-feature {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .plan-actual-feature:last-child {
+            border-bottom: none;
+        }
+
+        .plan-actual-feature .material-symbols-outlined {
+            font-size: 18px;
+            color: var(--color-on-surface-variant, #64748b);
+            opacity: 0.6;
+        }
+
+        .plan-actual-feature .feature-label {
+            font-size: 0.85rem;
+            color: var(--color-on-surface-variant, #64748b);
+            flex: 1;
+        }
+
+        .plan-actual-feature .feature-value {
+            color: var(--color-on-surface, #f9f9fb);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* Caja del precio dentro de la tarjeta del plan actual */
+        .plan-actual-precio-detalle {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        html:not(.dark) .plan-actual-precio-detalle {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .plan-actual-precio-detalle .label {
+            font-size: 0.75rem;
+            color: var(--color-on-surface-variant, #64748b);
+            opacity: 0.6;
+        }
+
+        .plan-actual-precio-detalle .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-on-surface, #0f172a);
+        }
+
+        html.dark .plan-actual-precio-detalle .price {
+            color: #dee3e8;
+        }
+
+        .plan-actual-precio-detalle .price .currency {
+            font-size: 0.9rem;
+            opacity: 0.5;
+            font-weight: 400;
+        }
+
+        /* ============================================================
+           TARJETA DEL PLAN RECOMENDADO
+           ============================================================ */
+        #plan-recomendado-card {
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.08), rgba(129, 140, 248, 0.05));
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        html.dark #plan-recomendado-card {
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.12), rgba(129, 140, 248, 0.06));
+        }
+
+        /* Resplandor decorativo en la esquina superior derecha */
+        #plan-recomendado-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08), transparent 70%);
+            pointer-events: none;
+        }
+
+        #plan-recomendado-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        /* Se agrega por JS cuando hay una promocion activa (borde verde) */
+        .plan-card-highlight {
+            border: 2px solid #10b981 !important;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+        }
+
+        /* ============================================================
+           TARJETAS DE "TU USO REAL" (proyectos, analisis, IA, exportaciones)
+           ============================================================ */
+        .uso-card {
+            background: var(--color-surface-container, #ffffff);
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        html.dark .uso-card {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Linea inferior que aparece solo en hover */
+        .uso-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .uso-card:hover::after {
+            opacity: 1;
+        }
+
+        .uso-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-color: var(--color-primary, #38bdf8);
+        }
+
+        html.dark .uso-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .uso-card .uso-icon {
+            font-size: 2rem;
+            color: var(--color-primary, #38bdf8);
+            opacity: 0.4;
+            margin-bottom: 0.25rem;
+        }
+
+        .uso-card .uso-valor {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--color-on-surface, #0f172a);
+            line-height: 1.2;
+        }
+
+        html.dark .uso-card .uso-valor {
+            color: #dee3e8;
+        }
+
+        .uso-card .uso-etiqueta {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-on-surface-variant, #64748b);
+            opacity: 0.6;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        /* ============================================================
+           TARJETAS DE PERFIL DE USO
+           ============================================================ */
+        .perfil-card {
+            background: var(--color-surface-container, #ffffff);
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        html.dark .perfil-card {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .perfil-card:hover {
+            border-color: var(--color-primary, #38bdf8);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           TARJETAS DE METRICAS TECNICAS (metodo del codo / silueta, en texto)
+           ============================================================ */
+        .metrica-card {
+            background: var(--color-surface-container, #ffffff);
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+            border-radius: 1rem;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        html.dark .metrica-card {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .metrica-card:hover {
+            border-color: var(--color-primary, #38bdf8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        html.dark .metrica-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ============================================================
+           TARJETAS DE GRUPOS ("que significa cada grupo")
+           ============================================================ */
+        .grupo-card {
+            background: var(--color-surface-container, #ffffff);
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        html.dark .grupo-card {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Franja de color a la izquierda (el color real lo pone JS inline segun el grupo) */
+        .grupo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #38bdf8, #818cf8);
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .grupo-card:hover::before {
+            opacity: 1;
+        }
+
+        .grupo-card:hover {
+            border-color: var(--color-primary, #38bdf8);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        html.dark .grupo-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Encabezado de cada tarjeta de grupo: icono + texto (ver JS: titulo con <span> de icono) */
+        .grupo-titulo {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-on-surface, #0f172a);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        html.dark .grupo-titulo {
+            color: #dee3e8;
+        }
+
+        /* Icono dentro del titulo del grupo, con el color del grupo asignado por JS */
+        .grupo-titulo .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .grupo-descripcion {
+            font-size: 0.8rem;
+            color: var(--color-on-surface-variant, #64748b);
+            line-height: 1.6;
+        }
+
+        html.dark .grupo-descripcion {
+            color: #bdc8d1;
+        }
+
+        /* Cada fila de estadistica dentro de la descripcion del grupo (icono + etiqueta + valor) */
+        .grupo-descripcion .stat-block {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        html:not(.dark) .grupo-descripcion .stat-block {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .grupo-descripcion .stat-block:last-child {
+            border-bottom: none;
+        }
+
+        .grupo-descripcion .stat-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.7;
+        }
+
+        /* Icono chico junto a cada etiqueta de estadistica (reemplaza los emojis) */
+        .grupo-descripcion .stat-label .material-symbols-outlined {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .grupo-descripcion .stat-value {
+            font-weight: 600;
+            color: var(--color-on-surface, #0f172a);
+        }
+
+        html.dark .grupo-descripcion .stat-value {
+            color: #dee3e8;
+        }
+
+        /* ============================================================
+           SECCION DE PROMOCION
+           ============================================================ */
+        #promo-box {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        html.dark #promo-box {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.06));
+        }
+
+        #promo-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.05), transparent 70%);
+            pointer-events: none;
+        }
+
+        #promo-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            opacity: 0.6;
+        }
+
+        .promo-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .promo-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10b98120, #05966930);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            flex-shrink: 0;
+        }
+
+        .promo-icon-wrapper .material-symbols-outlined {
+            font-size: 28px;
+            color: #10b981;
+            font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 48;
+        }
+
+        .promo-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #10b981;
+            letter-spacing: -0.3px;
+        }
+
+        .promo-subtitle {
+            font-size: 0.8rem;
+            color: var(--color-on-surface-variant, #64748b);
+            opacity: 0.7;
+        }
+
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .promo-stat {
+            background: rgba(16, 185, 129, 0.06);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid rgba(16, 185, 129, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .promo-stat:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .promo-stat .stat-icon {
+            font-size: 20px;
+            color: #10b981;
+            opacity: 0.7;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .promo-stat .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .promo-stat .stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-on-surface-variant, #64748b);
+            opacity: 0.5;
+            font-weight: 600;
+        }
+
+        .promo-stat .stat-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-on-surface, #09ffc6);
+            margin-top: 1px;
+        }
+
+        .promo-stat .stat-value .highlight {
+            color: #3ac093;
+        }
+
+        .promo-stat .stat-value .strike {
+            text-decoration: line-through;
+            opacity: 0.4;
+            font-weight: 400;
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+
+        .promo-cta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .promo-cta-badge .material-symbols-outlined {
+            font-size: 16px;
+            font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* ============================================================
+           SECCION TECNICA ("Por que te recomendamos esto?")
+           ============================================================ */
+        .tecnico-section {
+            background: var(--color-surface-container, #ffffff);
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        html.dark .tecnico-section {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .tecnico-titulo {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: var(--color-secondary, #818cf8);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ============================================================
+           TARJETAS DE GRAFICOS (contenedor del grafico del codo y silueta)
+           Antes usaban clases de Tailwind sin variante oscura
+           (bg-surface-container), por lo que se veian blancas en modo
+           oscuro. Esta clase si tiene su contraparte para html.dark.
+           ============================================================ */
+        .grafico-card {
+            background: var(--color-surface-container, #ffffff);
+            border: 1px solid var(--color-outline-variant, #94a3b8);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        html.dark .grafico-card {
+            background: rgba(27, 32, 36, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .grafico-card:hover {
+            border-color: var(--color-primary, #38bdf8);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        html.dark .grafico-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Encabezado de cada tarjeta de grafico (icono + titulo) */
+        .grafico-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        /* ============================================================
+           BOTON DE ACCION PRINCIPAL
+           ============================================================ */
+        #cta-btn {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        #cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.3);
+            opacity: 0.9;
+        }
+
+        #cta-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .promo-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .promo-header .ml-auto {
+                margin-left: 0 !important;
+                margin-top: 0.5rem;
+            }
+            .promo-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
-    }
 
-    function renderGroupDescriptions(perfiles, etiquetas, descriptions) {
-        const container = document.getElementById('grupos-explicacion');
-        const list = document.getElementById('grupos-list');
-        list.innerHTML = '';
-        const keys = Object.keys(perfiles).sort((a,b)=>Number(a)-Number(b));
-        keys.forEach(k => {
-            const p = perfiles[k] || {};
-            const etiqueta = p.etiqueta || etiquetas[k] || `Grupo ${Number(k) + 1}`;
-            const desc = (descriptions && descriptions[k]) ? descriptions[k] : null;
-            const titulo = `Grupo ${Number(k) + 1} — ${etiqueta}`;
+        @media (max-width: 480px) {
+            .promo-grid {
+                grid-template-columns: 1fr;
+            }
+            .uso-card .uso-valor {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-on-surface">
 
-            const html = desc ? `
-                <div class="rounded-2xl bg-surface-container p-4 border border-outline-variant/10">
-                    <p class="text-sm font-semibold text-on-surface mb-2">${titulo}</p>
-                    <p class="text-xs text-on-surface-variant/60">${desc}</p>
+    <!-- Fondo animado de particulas (mismo efecto que dashboard.html) -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="max-w-5xl mx-auto px-6 py-10 relative z-10">
+
+        <!-- ============================================================
+             HEADER: titulo de la pagina + botones de tema y "ver planes"
+             ============================================================ -->
+        <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+            <div>
+                <a href="/dashboard" class="text-xs text-on-surface-variant/60 hover:text-primary flex items-center gap-1 mb-2">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span> Volver al dashboard
+                </a>
+                <h1 class="text-3xl font-bold tracking-tight">Tu plan ideal</h1>
+                <p class="text-on-surface-variant/60 text-sm mt-1 max-w-2xl">
+                    Analizamos tu uso real (proyectos, analisis, IA, exportaciones) contra usuarios con
+                    patrones similares para asegurarnos de que pagues solo por lo que ocupas.
+                </p>
+            </div>
+            <div class="flex gap-3 items-center flex-shrink-0">
+                <!-- Boton de tema: alterna entre light_mode / dark_mode (ver toggleTheme en JS) -->
+                <button id="themeButton" class="px-4 py-2 glass glass-hover rounded-xl text-xs font-semibold text-on-surface-variant hover:text-primary transition-all">
+                    <span id="themeIcon" class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">light_mode</span>
+                </button>
+                <a href="/pricing" class="text-xs px-4 py-2 rounded-xl glass glass-hover whitespace-nowrap">
+                    Ver todos los planes
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             ESTADO DE CARGA: visible mientras se espera la respuesta del API
+             ============================================================ -->
+        <div id="loading-state" class="glass rounded-3xl p-10 text-center">
+            <p class="text-on-surface-variant/60 text-sm">Calculando tu perfil de uso...</p>
+        </div>
+
+        <!-- ============================================================
+             ESTADO DE ERROR: visible si el fetch falla
+             ============================================================ -->
+        <div id="error-state" class="hidden glass rounded-3xl p-10 text-center">
+            <p class="text-on-surface-variant/60 text-sm" id="error-msg">Ocurrio un error.</p>
+        </div>
+
+        <!-- ============================================================
+             CONTENIDO PRINCIPAL: se muestra una vez que llega la data (render())
+             ============================================================ -->
+        <div id="content" class="hidden flex flex-col gap-6">
+
+            <!-- =========================================================
+                 TARJETA DE RECOMENDACION (plan actual vs. plan ideal)
+                 ========================================================= -->
+            <div id="recommendation-card" class="glass rounded-3xl p-8">
+
+                <!-- Badge de tipo de recomendacion (texto + icono, ver render()) -->
+                <div class="mb-3 flex items-center gap-2">
+                    <span id="rec-badge-icon" class="material-symbols-outlined text-primary text-lg"></span>
+                    <p id="rec-badge" class="text-xs uppercase tracking-widest font-bold text-primary"></p>
                 </div>
-            ` : `
-                <div class="rounded-2xl bg-surface-container p-4 border border-outline-variant/10">
-                    <p class="text-sm font-semibold text-on-surface mb-2">${titulo}</p>
-                    <p class="text-xs text-on-surface-variant/60 mb-1">Proyectos (prom): <strong class="text-on-surface">${Math.round(p.projects_count||0)}</strong></p>
-                    <p class="text-xs text-on-surface-variant/60 mb-1">Análisis (prom/30d): <strong class="text-on-surface">${Math.round(p.analyses_30d||p.analyses_total||0)}</strong></p>
-                    <p class="text-xs text-on-surface-variant/60 mb-1">Usos IA (prom): <strong class="text-on-surface">${Math.round(p.ai_usage_count||0)}</strong></p>
-                    <p class="text-xs text-on-surface-variant/60 mb-1">Exportaciones (prom): <strong class="text-on-surface">${Math.round(p.export_usage_count||0)}</strong></p>
-                    <p class="text-xs text-on-surface-variant/60">Base de datos (prom): <strong class="text-on-surface">${Math.round(p.db_usage_count||0)}</strong></p>
-                </div>
-            `;
-            list.insertAdjacentHTML('beforeend', html);
-        });
-        container.classList.remove('hidden');
-    }
 
-    function chartColors() {
-        return {
-            grid: 'rgba(255,255,255,0.06)',
-            text: '#bdc8d1',
-            primary: '#39b2f8',
-            secondary: '#c0c1ff',
+                <!-- Mensaje explicativo que manda el backend -->
+                <p id="rec-mensaje" class="text-on-surface text-lg leading-relaxed mb-6"></p>
+
+                <!-- ======================================================
+                     GRID DE COMPARACION DE PLANES
+                     ====================================================== -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+                    <!-- PLAN ACTUAL -->
+                    <div id="plan-actual-container" class="plan-actual-card p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest font-semibold">Plan actual</p>
+                            <span class="plan-actual-badge">Activo</span>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-2">
+                            <p id="plan-actual-nombre" class="text-xl font-bold text-on-surface"></p>
+                            <span class="material-symbols-outlined text-primary/30 text-2xl">check_circle</span>
+                        </div>
+
+                        <!-- Caracteristicas del plan actual: cada fila = icono + etiqueta + valor -->
+                        <div class="mt-3 space-y-1">
+                            <div class="plan-actual-feature">
+                                <span class="material-symbols-outlined">folder</span>
+                                <span class="feature-label">Proyectos</span>
+                                <span class="feature-value" id="plan-actual-projects">---</span>
+                            </div>
+                            <div class="plan-actual-feature">
+                                <span class="material-symbols-outlined">analytics</span>
+                                <span class="feature-label">Analisis / mes</span>
+                                <span class="feature-value" id="plan-actual-analyses">---</span>
+                            </div>
+                            <div class="plan-actual-feature">
+                                <span class="material-symbols-outlined">psychology</span>
+                                <span class="feature-label">Usos de IA</span>
+                                <span class="feature-value" id="plan-actual-ai">---</span>
+                            </div>
+                        </div>
+
+                        <div class="plan-actual-precio-detalle">
+                            <span class="label">Costo mensual</span>
+                            <span class="price"><span class="currency">$</span><span id="plan-actual-precio">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- FLECHA DECORATIVA entre "plan actual" y "plan recomendado" -->
+                    <div class="hidden lg:flex items-center justify-center">
+                        <span class="material-symbols-outlined text-on-surface-variant/30 text-4xl">trending_flat</span>
+                    </div>
+
+                    <!-- PLAN RECOMENDADO -->
+                    <div id="plan-recomendado-card" class="p-5">
+                        <p class="text-xs text-primary uppercase tracking-widest mb-1 font-semibold">Plan recomendado</p>
+
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <p id="plan-ideal-nombre" class="text-xl font-bold text-primary"></p>
+                            <!-- Badge de % de descuento, oculto si no hay promocion -->
+                            <span id="descuento-badge" class="descuento-badge hidden">
+                                <span class="material-symbols-outlined text-sm">sell</span>
+                                <span id="descuento-porcentaje">-20%</span>
+                            </span>
+                        </div>
+
+                        <div id="precio-container" class="mt-1">
+                            <span id="plan-ideal-precio" class="precio-con-descuento"></span>
+                            <span id="plan-ideal-precio-original" class="precio-original hidden"></span>
+                            <span id="plan-ideal-precio-mes" class="text-sm text-on-surface-variant/60">/mes</span>
+                        </div>
+
+                        <!-- Badge "ahorras $X/mes", oculto si no aplica -->
+                        <div id="ahorro-mensual" class="mt-2 hidden">
+                            <span class="ahorro-badge">
+                                <span class="material-symbols-outlined text-sm">savings</span>
+                                Ahorras <span id="ahorro-monto"></span>/mes
+                            </span>
+                        </div>
+
+                        <!-- Detalle de la promocion (duracion + precio normal), oculto si no aplica -->
+                        <div id="promo-detalles" class="mt-3 pt-3 border-t border-primary/20 hidden">
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="material-symbols-outlined text-green-accent text-sm">check_circle</span>
+                                <span class="text-on-surface-variant">Descuento por <span id="promo-duracion" class="font-semibold text-green-accent"></span> meses</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs mt-1">
+                                <span class="material-symbols-outlined text-green-accent text-sm">trending_down</span>
+                                <span class="text-on-surface-variant">Precio normal: <span id="promo-precio-normal" class="font-semibold text-on-surface-variant"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================
+                     SECCION DE PROMOCION (caja verde con detalle de la oferta)
+                     ====================================================== -->
+                <div id="promo-box" class="hidden">
+                    <div class="promo-header">
+                        <div class="promo-icon-wrapper">
+                            <span class="material-symbols-outlined">whatshot</span>
+                        </div>
+                        <div>
+                            <div class="promo-title" id="promo-titulo">Oferta especial</div>
+                            <div class="promo-subtitle" id="promo-subtitulo">Aprovecha este descuento por tiempo limitado</div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="promo-cta-badge">
+                                <span class="material-symbols-outlined">bolt</span>
+                                Ahorra ahora
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Grid de estadisticas de la promo, se llena en renderPromocion() -->
+                    <div class="promo-grid" id="promo-grid"></div>
+                </div>
+
+                <!-- BOTON DE ACCION: aplica el cambio de plan (ver aplicarRecomendacion) -->
+                <button id="cta-btn" onclick="aplicarRecomendacion()">
+                    Aplicar cambio de plan
+                </button>
+            </div>
+
+            <!-- =========================================================
+                 SECCION DE USO REAL (proyectos / analisis / IA / exportaciones)
+                 ========================================================= -->
+            <div class="glass rounded-3xl p-8">
+                <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-4">Tu uso real (ultimos 30 dias)</p>
+                <!-- Se llena dinamicamente en render() a partir de data.uso_real -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="uso-grid"></div>
+            </div>
+
+            <!-- =========================================================
+                 PERFIL DE USO (a que grupo/cluster pertenece el usuario)
+                 ========================================================= -->
+            <div id="perfil-box" class="hidden glass rounded-3xl p-8">
+                <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-2">Tu perfil de uso</p>
+                <p id="perfil-texto" class="text-on-surface-variant text-sm mb-4"></p>
+            </div>
+
+            <!-- =========================================================
+                 SECCION TECNICA: explica como se calculo la recomendacion
+                 (clustering / metodo del codo / coeficiente de silueta)
+                 ========================================================= -->
+            <div id="tecnico-box" class="hidden glass rounded-3xl p-8">
+
+                <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-1">Por que te recomendamos esto?</p>
+
+                <p class="text-on-surface-variant/60 text-sm mb-6">
+                    Comparamos tu forma de usar AutoDocs con la de otros usuarios: cuantos proyectos subes,
+                    cuantos analisis corres, si usas IA o exportas seguido. Con eso identificamos
+                    <strong class="text-on-surface">grupos naturales de usuarios</strong> (por ejemplo, quienes
+                    usan poco, quienes usan lo normal, y quienes usan mucho) y ubicamos en cual grupo estas tu,
+                    para asegurarnos de recomendarte el plan que de verdad necesitas.
+                </p>
+
+                <!-- Explicacion de las dos metricas usadas para elegir el numero de grupos (k) -->
+                <div class="tecnico-section mb-6">
+                    <p class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">science</span>
+                        Metodo de prueba y error
+                    </p>
+                    <p class="text-xs text-on-surface-variant/70 mb-4"style="color: #BFBDBD;">
+                        El sistema prueba diferentes numeros de grupos (k = 2, 3, 4, 5...) y evalua cual funciona mejor
+                        usando dos metricas principales:
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Metrica 1: metodo del codo -->
+                        <div class="metrica-card flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-primary text-sm">trending_down</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-on-surface">Metodo del codo</p>
+                                <p class="text-xs text-on-surface-variant/60">
+                                    Busca el punto donde agregar mas grupos ya no reduce significativamente
+                                    la diferencia entre usuarios. <strong class="text-primary">El punto mas bajo</strong>
+                                    del grafico indica el numero ideal de grupos.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Metrica 2: coeficiente de silueta -->
+                        <div class="metrica-card flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-secondary/15 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-secondary text-sm">bar_chart</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-on-surface">Coeficiente de silueta</p>
+                                <p class="text-xs text-on-surface-variant/60">
+                                    Mide que tan bien separados estan los grupos.
+                                    <strong class="text-secondary">La barra mas alta</strong> indica la mejor separacion
+                                    entre grupos de usuarios.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     GRID DE GRAFICOS: metodo del codo (linea) + silueta (barras)
+                     Ambas tarjetas usan .grafico-card para respetar modo oscuro.
+                     ============================================================ -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- GRAFICO 1: METODO DEL CODO -->
+                    <div class="grafico-card">
+                        <div class="grafico-header">
+                            <span class="material-symbols-outlined text-primary text-xl">query_stats</span>
+                            <p class="text-sm font-semibold text-on-surface">Cuantos grupos de usuarios hay?</p>
+                        </div>
+
+                        <!-- Contenedor del <canvas>, tambien respeta modo oscuro -->
+                        <div class="chart-container">
+                            <canvas id="elbow-chart" height="180"></canvas>
+                        </div>
+
+                        <!-- Leyenda explicativa: linea = metrica, punto = valor optimo -->
+                        <div class="mt-3 flex items-center gap-4 text-xs text-on-surface-variant/60">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-0.5 bg-primary"></span>
+                                <span>Diferencia entre usuarios</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-secondary"></span>
+                                <span class="font-semibold text-secondary">Optimo</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-on-surface-variant/50 mt-2 flex items-start gap-1">
+                            <span class="material-symbols-outlined text-xs">info</span>
+                            <span>Cada punto representa una division distinta. El punto
+                            <span class="text-secondary font-semibold">resaltado</span> marca la division mas natural.</span>
+                        </p>
+                    </div>
+
+                    <!-- GRAFICO 2: COEFICIENTE DE SILUETA -->
+                    <div class="grafico-card">
+                        <div class="grafico-header">
+                            <span class="material-symbols-outlined text-secondary text-xl">bar_chart</span>
+                            <p class="text-sm font-semibold text-on-surface">Que tan bien definidos estan esos grupos</p>
+                        </div>
+
+                        <div class="chart-container">
+                            <canvas id="silhouette-chart" height="180"></canvas>
+                        </div>
+
+                        <!-- Leyenda explicativa: barra clara = claridad media, barra oscura = mejor claridad -->
+                        <div class="mt-3 flex items-center gap-4 text-xs text-on-surface-variant/60">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-4 h-3 rounded bg-primary/40"></span>
+                                <span>Claridad media</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-4 h-3 rounded bg-secondary"></span>
+                                <span class="font-semibold text-secondary">Mejor claridad</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-on-surface-variant/50 mt-2 flex items-start gap-1">
+                            <span class="material-symbols-outlined text-xs">info</span>
+                            <span>La barra mas alta (<span class="text-secondary font-semibold">resaltada</span>) indica
+                            la mejor separacion entre grupos de usuarios.</span>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- INTERPRETACION DE RESULTADOS: texto generado por actualizarInterpretacion() -->
+                <div class="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-xl mt-0.5">lightbulb</span>
+                        <div>
+                            <p class="text-sm font-semibold text-on-surface">Interpretacion de los graficos</p>
+                            <p class="text-xs text-on-surface-variant/70 mt-1" id="interpretacion-graficos"style="color: #BFBDBD;">
+                                Los graficos muestran que <strong class="text-primary"style="color: #BFBDBD;">3 grupos</strong> es la division
+                                mas natural de usuarios. Esto significa que los usuarios de AutoDocs se pueden clasificar
+                                en tres perfiles distintos segun su uso.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DESCRIPCION DE GRUPOS: se llena en renderGroupDescriptions() -->
+                <div id="grupos-explicacion" class="mt-6 hidden">
+                    <p class="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">groups</span>
+                        Que significa cada grupo
+                    </p>
+                    <div id="grupos-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         SCRIPTS
+         ============================================================ -->
+    <script>
+        // ============================================================
+        //  CONFIGURACION GENERAL
+        // ============================================================
+
+        // Base de la API: mismo origen donde se sirve esta pagina
+        var API = window.location.origin;
+
+        // Guarda la ultima respuesta del API para poder reusarla
+        // (ej. al aplicar el cambio de plan o al redibujar graficos por tema)
+        var lastData = null;
+
+        // Texto + icono de Material Symbols para cada tipo de recomendacion
+        // que puede devolver el backend. Se usan en render() para llenar
+        // #rec-badge (texto) y #rec-badge-icon (icono).
+        var badges = {
+            promocion_downgrade: { texto: 'Promocion disponible', icono: 'sell' },
+            upgrade_necesario: { texto: 'Necesitas mas capacidad', icono: 'trending_up' },
+            plan_ajustado: { texto: 'Plan bien ajustado', icono: 'check_circle' }
         };
+
+        /**
+         * Formatea un precio: 0 se muestra como "Gratis", cualquier otro
+         * valor se muestra con el signo de $ delante.
+         * @param {number} v - Precio a formatear
+         * @returns {string} Precio formateado
+         */
+        function moneyFmt(v) {
+            return v === 0 ? 'Gratis' : '$' + v;
+        }
+
+        // ============================================================
+        //  TEMA (CLARO / OSCURO)
+        // ============================================================
+
+        /**
+         * Aplica el tema guardado (o el del sistema) al <html> y actualiza
+         * el icono del boton de tema.
+         */
+        function initTheme() {
+            var savedTheme = localStorage.getItem('theme');
+            var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            var theme = savedTheme || systemTheme;
+
+            var html = document.documentElement;
+            html.classList.remove('dark', 'light');
+
+            if (theme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.add('light');
+            }
+
+            updateThemeIcon();
+
+            // Si ya hay graficos dibujados, se vuelven a pintar con los
+            // colores correctos del nuevo tema (ver chartColors()).
+            if (lastData && lastData.clustering && lastData.clustering.disponible) {
+                dibujarElbow(lastData.clustering.elbow, lastData.clustering.codo_detectado);
+                dibujarSilhouette(lastData.clustering.silhouette, lastData.clustering.k_optimo);
+            }
+        }
+
+        /**
+         * Cambia entre modo claro y oscuro, y guarda la preferencia
+         */
+        function toggleTheme() {
+            var html = document.documentElement;
+            var isDark = html.classList.contains('dark');
+
+            if (isDark) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+
+            updateThemeIcon();
+
+            // Redibuja los graficos para que tomen los colores del tema nuevo
+            if (lastData && lastData.clustering && lastData.clustering.disponible) {
+                dibujarElbow(lastData.clustering.elbow, lastData.clustering.codo_detectado);
+                dibujarSilhouette(lastData.clustering.silhouette, lastData.clustering.k_optimo);
+            }
+        }
+
+        /**
+         * Cambia el icono del boton (sol/luna) segun el tema activo
+         */
+        function updateThemeIcon() {
+            var themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) {
+                var isDark = document.documentElement.classList.contains('dark');
+                themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
+            }
+        }
+
+        // Aplica el tema apenas carga el script (antes del DOMContentLoaded)
+        initTheme();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Conecta el boton de tema una vez que el DOM esta listo
+            var themeButton = document.getElementById('themeButton');
+            if (themeButton) {
+                themeButton.addEventListener('click', toggleTheme);
+            }
+            initTheme();
+        });
+
+        // ============================================================
+        //  CARGA DE LA RECOMENDACION (fetch al backend)
+        // ============================================================
+
+        /**
+         * Pide al backend la recomendacion de plan del usuario logueado
+         * y dispara render() con la respuesta. Si no hay token, redirige
+         * al login.
+         */
+        async function cargarRecomendacion() {
+            var token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                var res = await fetch(API + '/api/plan-recommendation/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('No se pudo calcular tu recomendacion.');
+                var data = await res.json();
+                render(data);
+            } catch (err) {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+                document.getElementById('error-msg').textContent = err.message;
+            }
+        }
+
+        // ============================================================
+        //  RENDERIZADO PRINCIPAL
+        //  Toma la respuesta del API y llena todo el DOM de la pagina.
+        // ============================================================
+
+        function render(data) {
+            lastData = data;
+
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+
+            // --- BADGE + MENSAJE DE RECOMENDACION ---
+            var badgeInfo = badges[data.tipo_recomendacion] || { texto: '', icono: 'info' };
+            document.getElementById('rec-badge').textContent = badgeInfo.texto;
+            document.getElementById('rec-badge-icon').textContent = badgeInfo.icono;
+            document.getElementById('rec-mensaje').textContent = data.mensaje;
+
+            // --- PLAN ACTUAL ---
+            document.getElementById('plan-actual-nombre').textContent = data.plan_actual.name;
+            document.getElementById('plan-actual-precio').textContent = moneyFmt(data.plan_actual.price);
+
+            var uso = data.uso_real;
+            document.getElementById('plan-actual-projects').textContent = uso.projects_count || '---';
+            document.getElementById('plan-actual-analyses').textContent = uso.analyses_30d || '---';
+            document.getElementById('plan-actual-ai').textContent = uso.ai_usage_count || '---';
+
+            // --- PLAN RECOMENDADO ---
+            document.getElementById('plan-ideal-nombre').textContent = data.plan_ideal.name;
+
+            var tienePromocion = data.promocion && data.promocion.descuento_pct > 0;
+
+            if (tienePromocion) {
+                // Hay promocion: mostrar precio tachado + precio con descuento + ahorro
+                document.getElementById('descuento-badge').classList.remove('hidden');
+                document.getElementById('descuento-porcentaje').textContent = '-' + data.promocion.descuento_pct + '%';
+
+                document.getElementById('plan-ideal-precio-original').textContent = '$' + data.promocion.precio_lista;
+                document.getElementById('plan-ideal-precio-original').classList.remove('hidden');
+
+                document.getElementById('plan-ideal-precio').textContent = '$' + data.promocion.precio_promocional;
+                document.getElementById('plan-ideal-precio').className = 'precio-con-descuento';
+
+                if (data.promocion.ahorro_mensual_vs_actual > 0) {
+                    document.getElementById('ahorro-mensual').classList.remove('hidden');
+                    document.getElementById('ahorro-monto').textContent = '$' + data.promocion.ahorro_mensual_vs_actual;
+                } else {
+                    document.getElementById('ahorro-mensual').classList.add('hidden');
+                }
+
+                document.getElementById('promo-detalles').classList.remove('hidden');
+                document.getElementById('promo-duracion').textContent = data.promocion.duracion_meses;
+                document.getElementById('promo-precio-normal').textContent = '$' + data.promocion.precio_lista + '/mes';
+
+                // Borde verde destacando que hay descuento activo
+                document.getElementById('plan-recomendado-card').classList.add('plan-card-highlight');
+
+                renderPromocion(data);
+
+            } else {
+                // Sin promocion: precio normal, se ocultan todos los elementos de descuento
+                document.getElementById('descuento-badge').classList.add('hidden');
+                document.getElementById('plan-ideal-precio-original').classList.add('hidden');
+                document.getElementById('ahorro-mensual').classList.add('hidden');
+                document.getElementById('promo-detalles').classList.add('hidden');
+
+                document.getElementById('plan-ideal-precio').textContent = moneyFmt(data.plan_ideal.price);
+                document.getElementById('plan-ideal-precio').className = 'precio-normal';
+
+                document.getElementById('plan-recomendado-card').classList.remove('plan-card-highlight');
+                document.getElementById('promo-box').classList.add('hidden');
+            }
+
+            // --- BOTON DE ACCION ---
+            // Si el plan ya esta bien ajustado, no tiene sentido mostrar el boton.
+            var ctaBtn = document.getElementById('cta-btn');
+            if (data.tipo_recomendacion === 'plan_ajustado') {
+                ctaBtn.classList.add('hidden');
+            } else {
+                ctaBtn.classList.remove('hidden');
+                if (tienePromocion) {
+                    ctaBtn.textContent = 'Cambiarme a ' + data.plan_ideal.name + ' con ' + data.promocion.descuento_pct + '% OFF';
+                    ctaBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                } else if (data.tipo_recomendacion === 'promocion_downgrade') {
+                    ctaBtn.textContent = 'Cambiarme a ' + data.plan_ideal.name + ' con descuento';
+                    ctaBtn.style.background = '';
+                } else {
+                    ctaBtn.textContent = 'Subir a ' + data.plan_ideal.name;
+                    ctaBtn.style.background = '';
+                }
+            }
+
+            // --- TARJETAS DE "USO REAL" ---
+            var usoGrid = document.getElementById('uso-grid');
+            var items = [
+                { label: 'Proyectos', value: uso.projects_count, icon: 'folder' },
+                { label: 'Analisis (30 dias)', value: uso.analyses_30d, icon: 'analytics' },
+                { label: 'Usos de IA', value: uso.ai_usage_count, icon: 'psychology' },
+                { label: 'Exportaciones', value: uso.export_usage_count, icon: 'file_export' },
+            ];
+            usoGrid.innerHTML = items.map(function(i) {
+                return '<div class="uso-card">' +
+                    '<div class="uso-icon material-symbols-outlined">' + i.icon + '</div>' +
+                    '<div class="uso-valor">' + i.value + '</div>' +
+                    '<div class="uso-etiqueta">' + i.label + '</div>' +
+                    '</div>';
+            }).join('');
+
+            // --- PERFIL DE USO (a que cluster pertenece el usuario) ---
+            if (data.perfil_uso && data.perfil_uso.etiqueta != null) {
+                document.getElementById('perfil-box').classList.remove('hidden');
+                document.getElementById('perfil-texto').textContent =
+                    'Perteneces al grupo ' + (data.perfil_uso.cluster_id + 1) + ' (' + data.perfil_uso.etiqueta + '): usuarios con un patron de uso similar al tuyo. ' +
+                    'En promedio, este grupo usa ' + data.perfil_uso.uso_promedio_grupo.analyses_30d + ' analisis al mes y ' +
+                    data.perfil_uso.uso_promedio_grupo.projects_count + ' proyectos.';
+            }
+
+            // --- GRAFICOS TECNICOS (solo si el backend mando datos de clustering) ---
+            var c = data.clustering;
+            if (c.disponible && c.elbow && c.elbow.length) {
+                document.getElementById('tecnico-box').classList.remove('hidden');
+                dibujarElbow(c.elbow, c.codo_detectado);
+                dibujarSilhouette(c.silhouette, c.k_optimo);
+                if (c.perfiles_cluster && Object.keys(c.perfiles_cluster).length) {
+                    renderGroupDescriptions(c.perfiles_cluster, c.etiqueta_por_cluster || {}, c.descriptions || {});
+                }
+            }
+        }
+
+        // ============================================================
+        //  RENDERIZADO DE LA CAJA DE PROMOCION
+        //  Llena #promo-grid con las estadisticas de la oferta (precio,
+        //  ahorro, duracion y codigo si existe).
+        // ============================================================
+
+        function renderPromocion(data) {
+            var promoBox = document.getElementById('promo-box');
+            promoBox.classList.remove('hidden');
+
+            var p = data.promocion;
+            var descuento = p.descuento_pct || 0;
+            var duracion = p.duracion_meses || 3;
+            var precioPromo = p.precio_promocional || data.plan_ideal.price;
+            var precioLista = p.precio_lista || data.plan_ideal.price;
+            var ahorro = p.ahorro_mensual_vs_actual || 0;
+
+            document.getElementById('promo-titulo').textContent = descuento + '% de descuento';
+            document.getElementById('promo-subtitulo').textContent = 'Oferta valida por ' + duracion + ' meses';
+
+            var grid = document.getElementById('promo-grid');
+            grid.innerHTML = `
+                    <div class="promo-stat">
+                        <span class="stat-icon material-symbols-outlined">payments</span>
+                        <div class="stat-content">
+                            <span class="stat-label">Precio promocional</span>
+                            <span class="stat-value"><span class="highlight">$${precioPromo}</span><span class="strike">$${precioLista}</span></span>
+                        </div>
+                    </div>
+                    <div class="promo-stat">
+                        <span class="stat-icon material-symbols-outlined">savings</span>
+                        <div class="stat-content">
+                            <span class="stat-label">Ahorro mensual</span>
+                            <span class="stat-value"><span class="highlight">$${ahorro}</span></span>
+                        </div>
+                    </div>
+                    <div class="promo-stat">
+                        <span class="stat-icon material-symbols-outlined">schedule</span>
+                        <div class="stat-content">
+                            <span class="stat-label">Duracion</span>
+                            <span class="stat-value">${duracion} meses</span>
+                        </div>
+                    </div>
+                    ${p.codigo ? `
+                    <div class="promo-stat">
+                        <span class="stat-icon material-symbols-outlined">confirmation_number</span>
+                        <div class="stat-content">
+                            <span class="stat-label">Codigo</span>
+                            <span class="stat-value" style="font-family: monospace; letter-spacing: 1px; font-size: 0.85rem;">${p.codigo}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+        }
+
+        // ============================================================
+        //  DESCRIPCION DE GRUPOS ("que significa cada grupo")
+        // ============================================================
+
+        // Iconos de Material Symbols asignados a cada grupo, en el mismo
+        // orden que los colores de abajo. Antes esto se resolvia con
+        // emojis; ahora usa solo iconos consistentes con el resto de la UI.
+        var GRUPO_ICONOS = ['eco', 'insights', 'rocket_launch', 'diamond', 'local_fire_department'];
+
+        // Iconos para cada estadistica dentro de la tarjeta de grupo,
+        // en el mismo orden que se listan mas abajo (proyectos, analisis,
+        // usos de IA, exportaciones).
+        var STAT_ICONOS = {
+            projects_count: 'folder',
+            analyses_30d: 'analytics',
+            ai_usage_count: 'psychology',
+            export_usage_count: 'file_export',
+        };
+
+        /**
+         * Dibuja las tarjetas de "que significa cada grupo" a partir de
+         * los perfiles que manda el backend (promedios de uso por cluster).
+         * @param {Object} perfiles - { "0": {projects_count, analyses_30d, ...}, ... }
+         * @param {Object} etiquetas - { "0": "Uso bajo", ... } (fallback si el perfil no trae etiqueta)
+         * @param {Object} descriptions - { "0": "texto libre del backend", ... } (opcional)
+         */
+        function renderGroupDescriptions(perfiles, etiquetas, descriptions) {
+            var container = document.getElementById('grupos-explicacion');
+            var list = document.getElementById('grupos-list');
+            list.innerHTML = '';
+
+            var keys = Object.keys(perfiles).sort(function(a, b) { return Number(a) - Number(b); });
+
+            // Colores para cada grupo (franja izquierda + icono del titulo)
+            var colores = ['#38bdf8', '#818cf8', '#34d399', '#fbbf24', '#f87171'];
+
+            keys.forEach(function(k, index) {
+                var p = perfiles[k] || {};
+                var etiqueta = p.etiqueta || etiquetas[k] || 'Grupo ' + (Number(k) + 1);
+                var desc = (descriptions && descriptions[k]) ? descriptions[k] : null;
+                var color = colores[index % colores.length];
+                var icono = GRUPO_ICONOS[index % GRUPO_ICONOS.length];
+
+                // Titulo de la tarjeta: icono (coloreado segun el grupo) + texto
+                var tituloHtml = `
+                    <span class="material-symbols-outlined" style="color: ${color};">${icono}</span>
+                    Grupo ${Number(k) + 1} — ${etiqueta}
+                `;
+
+                // Si el backend mando una descripcion en texto libre, se usa esa.
+                // Si no, se arma una lista de estadisticas promedio del grupo.
+                var html = desc ? `
+                        <div class="grupo-card" style="border-left: 4px solid ${color};">
+                            <p class="grupo-titulo">${tituloHtml}</p>
+                            <p class="grupo-descripcion">${desc}</p>
+                            <div class="mt-2 pt-2 border-t border-outline-variant/10 flex items-center gap-2 text-xs">
+                                <span class="material-symbols-outlined text-xs" style="color: ${color};">person</span>
+                                <span class="text-on-surface-variant/50">Usuarios con este perfil</span>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="grupo-card" style="border-left: 4px solid ${color};">
+                            <p class="grupo-titulo">${tituloHtml}</p>
+                            <div class="grupo-descripcion">
+                                <div class="stat-block">
+                                    <span class="stat-label"><span class="material-symbols-outlined">${STAT_ICONOS.projects_count}</span>Proyectos (prom)</span>
+                                    <span class="stat-value">${Math.round(p.projects_count || 0)}</span>
+                                </div>
+                                <div class="stat-block">
+                                    <span class="stat-label"><span class="material-symbols-outlined">${STAT_ICONOS.analyses_30d}</span>Analisis (prom/30d)</span>
+                                    <span class="stat-value">${Math.round(p.analyses_30d || p.analyses_total || 0)}</span>
+                                </div>
+                                <div class="stat-block">
+                                    <span class="stat-label"><span class="material-symbols-outlined">${STAT_ICONOS.ai_usage_count}</span>Usos IA (prom)</span>
+                                    <span class="stat-value">${Math.round(p.ai_usage_count || 0)}</span>
+                                </div>
+                                <div class="stat-block">
+                                    <span class="stat-label"><span class="material-symbols-outlined">${STAT_ICONOS.export_usage_count}</span>Exportaciones (prom)</span>
+                                    <span class="stat-value">${Math.round(p.export_usage_count || 0)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+            container.classList.remove('hidden');
+        }
+
+        // ============================================================
+        //  COLORES PARA GRAFICOS (Chart.js)
+        //  Lee el tema actual (claro/oscuro) y devuelve la paleta que
+        //  deben usar los graficos, para que tambien respeten el tema.
+        // ============================================================
+
+        function chartColors() {
+            var isDark = document.documentElement.classList.contains('dark');
+            return {
+                grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                text: isDark ? '#bdc8d1' : '#64748b',
+                primary: '#38bdf8',
+                secondary: '#818cf8',
+                success: '#34d399',
+                warning: '#fbbf24',
+                error: '#f87171',
+            };
+        }
+
+        /**
+         * Formatea el eje X de los graficos: "1 grupo" (singular) o "N grupos"
+         * @param {number} k - Numero de grupos
+         * @returns {string} Etiqueta formateada
+         */
+        function etiquetaGrupos(k) {
+            return k === 1 ? '1 grupo' : k + ' grupos';
+        }
+
+        // ============================================================
+        //  GRAFICO 1: METODO DEL CODO (linea)
+        //  Muestra, para cada k probado, que tan distintos son los
+        //  usuarios dentro de cada grupo (inertia). El punto marcado
+        //  como "codoK" es el que el backend detecto como optimo.
+        // ============================================================
+
+        function dibujarElbow(elbowData, codoK) {
+            var colors = chartColors();
+            var ctx = document.getElementById('elbow-chart').getContext('2d');
+
+            // Si ya existia un grafico dibujado (ej. al cambiar de tema), se destruye primero
+            if (window.elbowChart) {
+                window.elbowChart.destroy();
+            }
+
+            window.elbowChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: elbowData.map(function(p) { return etiquetaGrupos(p.k); }),
+                    datasets: [{
+                        label: 'Diferencia entre usuarios',
+                        data: elbowData.map(function(p) { return p.inertia; }),
+                        borderColor: colors.primary,
+                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        // El punto optimo se dibuja mas grande y con color secundario
+                        pointRadius: elbowData.map(function(p) { return p.k === codoK ? 8 : 4; }),
+                        pointBackgroundColor: elbowData.map(function(p) { return p.k === codoK ? colors.secondary : colors.primary; }),
+                        pointBorderColor: elbowData.map(function(p) { return p.k === codoK ? '#ffffff' : 'transparent'; }),
+                        pointBorderWidth: elbowData.map(function(p) { return p.k === codoK ? 2 : 0; }),
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }, // la leyenda ya esta en el HTML debajo del grafico
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: colors.primary,
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                // Marca en el titulo si el punto es el optimo
+                                title: function(items) {
+                                    var item = items[0];
+                                    if (item.label === etiquetaGrupos(codoK)) {
+                                        return item.label + ' (optimo)';
+                                    }
+                                    return item.label;
+                                },
+                                label: function(context) {
+                                    var value = context.parsed.y;
+                                    return 'Diferencia: ' + Math.round(value);
+                                },
+                                afterLabel: function(context) {
+                                    var label = context.label;
+                                    if (label === etiquetaGrupos(codoK)) {
+                                        return 'Division mas natural';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: colors.grid, drawBorder: false },
+                            ticks: { color: colors.text, font: { size: 11 } }
+                        },
+                        // El eje Y se oculta a proposito: lo importante es la
+                        // forma de la curva, no los valores absolutos.
+                        y: {
+                            display: false,
+                            grid: { display: false }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+
+            actualizarInterpretacion(elbowData, codoK, 'elbow');
+        }
+
+        // ============================================================
+        //  GRAFICO 2: COEFICIENTE DE SILUETA (barras)
+        //  Muestra, para cada k probado, que tan bien separados quedan
+        //  los grupos. La barra mas alta / la marcada como "kOptimo" es
+        //  la mejor.
+        // ============================================================
+
+        function dibujarSilhouette(silhouetteData, kOptimo) {
+            var colors = chartColors();
+            var ctx = document.getElementById('silhouette-chart').getContext('2d');
+
+            if (window.silhouetteChart) {
+                window.silhouetteChart.destroy();
+            }
+
+            // Se usa para resaltar en amarillo el caso raro en que el score
+            // maximo NO coincide con el k que el backend eligio como optimo
+            var maxScore = Math.max.apply(null, silhouetteData.map(function(p) { return p.score; }));
+
+            window.silhouetteChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: silhouetteData.map(function(p) { return etiquetaGrupos(p.k); }),
+                    datasets: [{
+                        label: 'Claridad de los grupos',
+                        data: silhouetteData.map(function(p) { return p.score; }),
+                        backgroundColor: silhouetteData.map(function(p) {
+                            if (p.k === kOptimo) return colors.secondary;
+                            return p.score === maxScore && p.k !== kOptimo
+                                ? 'rgba(251, 191, 36, 0.6)'
+                                : 'rgba(56, 189, 248, 0.3)';
+                        }),
+                        borderColor: silhouetteData.map(function(p) { return p.k === kOptimo ? colors.secondary : 'transparent'; }),
+                        borderWidth: silhouetteData.map(function(p) { return p.k === kOptimo ? 2 : 0; }),
+                        borderRadius: 8,
+                        barPercentage: 0.6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: colors.secondary,
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                title: function(items) {
+                                    var item = items[0];
+                                    if (item.label === etiquetaGrupos(kOptimo)) {
+                                        return item.label + ' (mejor)';
+                                    }
+                                    return item.label;
+                                },
+                                label: function(context) {
+                                    var value = context.parsed.y;
+                                    var isOptimo = context.dataIndex === kOptimo - 2;
+                                    var label = 'Claridad: ' + value.toFixed(3);
+                                    if (isOptimo) {
+                                        label += ' — mejor separacion';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: colors.grid, drawBorder: false },
+                            ticks: { color: colors.text, font: { size: 11 } }
+                        },
+                        y: {
+                            display: false,
+                            grid: { display: false },
+                            min: -0.5,
+                            max: 1
+                        }
+                    }
+                }
+            });
+
+            actualizarInterpretacion(silhouetteData, kOptimo, 'silhouette');
+        }
+
+        // ============================================================
+        //  TEXTO DE INTERPRETACION
+        //  Genera la frase que aparece debajo de los graficos,
+        //  explicando en palabras simples que significa el resultado.
+        // ============================================================
+
+        function actualizarInterpretacion(data, kOptimo, tipo) {
+            var interpretacion = document.getElementById('interpretacion-graficos');
+            if (!interpretacion) return;
+
+            var grupoTexto = kOptimo === 1 ? '1 grupo' : kOptimo + ' grupos';
+
+            var texto = '';
+            if (tipo === 'elbow') {
+                texto = 'El grafico muestra que <strong class="text-primary">' + grupoTexto + '</strong> es el punto donde agregar mas grupos ya no reduce significativamente la diferencia entre usuarios. Esto indica que <strong class="text-primary">' + grupoTexto + '</strong> es la division mas natural de los usuarios de AutoDocs.';
+            } else if (tipo === 'silhouette') {
+                var maxScore = Math.max.apply(null, data.map(function(p) { return p.score; }));
+                texto = 'El coeficiente de silueta alcanza su valor mas alto (<strong class="text-secondary">' + maxScore.toFixed(3) + '</strong>) con <strong class="text-secondary">' + grupoTexto + '</strong>, lo que confirma que esta es la mejor forma de dividir a los usuarios en grupos con caracteristicas similares.';
+            }
+
+            interpretacion.innerHTML = texto;
+        }
+
+        // ============================================================
+        //  APLICAR CAMBIO DE PLAN
+        //  Envia el plan elegido (y el codigo de promocion si aplica) al
+        //  backend, usando una tarjeta de prueba fija (ambiente de demo).
+        // ============================================================
+
+        async function aplicarRecomendacion() {
+            if (!lastData) return;
+
+            var token = localStorage.getItem('token');
+            var planKey = lastData.plan_ideal.key;
+
+            var payload = {
+                plan: planKey,
+                card: { number: '4242424242424242', expiry: '12/30', cvv: '123' }
+            };
+
+            if (lastData.promocion && lastData.promocion.codigo) {
+                payload.codigo_promocion = lastData.promocion.codigo;
+            }
+
+            try {
+                var res = await fetch(API + '/api/payments/upgrade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error();
+                window.location.href = '/dashboard';
+            } catch (err) {
+                alert('No se pudo aplicar el cambio de plan. Intenta desde /pricing.');
+            }
+        }
+
+        // ============================================================
+        //  FONDO ANIMADO DE PARTICULAS (identico al de dashboard.html)
+        //  Dibuja puntos que flotan lentamente y se conectan con lineas
+        //  finas cuando estan cerca; el mouse las "empuja" al acercarse.
+        // ============================================================
+
+        var canvas = document.getElementById('particle-canvas');
+        var ctxParticles = canvas.getContext('2d');
+        var particles = [];
+        var mouse = { x: null, y: null };
+        var particleCount = 60;
+
+        // Ajusta el tamano del canvas al de la ventana y regenera las particulas
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        function Particle() {
+            this.reset = function() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.color = Math.random() > 0.6 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(129, 140, 248, 0.15)';
+            };
+
+            // Mueve la particula y la "repele" del cursor si esta cerca;
+            // si sale de la pantalla, reaparece por el lado opuesto.
+            this.update = function() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (mouse.x !== null) {
+                    var dx = mouse.x - this.x;
+                    var dy = mouse.y - this.y;
+                    var distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) {
+                        var angle = Math.atan2(dy, dx);
+                        var force = (150 - distance) / 150;
+                        this.x -= Math.cos(angle) * force * 1.5;
+                        this.y -= Math.sin(angle) * force * 1.5;
+                    }
+                }
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            };
+
+            // Dibuja el punto y una linea tenue hacia las particulas cercanas
+            this.draw = function() {
+                ctxParticles.fillStyle = this.color;
+                ctxParticles.beginPath();
+                ctxParticles.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctxParticles.fill();
+
+                particles.forEach(function(p) {
+                    var d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 100) {
+                        ctxParticles.strokeStyle = 'rgba(56, 189, 248, ' + (0.08 * (1 - d / 100)) + ')';
+                        ctxParticles.lineWidth = 0.5;
+                        ctxParticles.beginPath();
+                        ctxParticles.moveTo(this.x, this.y);
+                        ctxParticles.lineTo(p.x, p.y);
+                        ctxParticles.stroke();
+                    }
+                }.bind(this));
+            };
+
+            this.reset();
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (var i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // Bucle de animacion: limpia el canvas y redibuja cada particula en cada frame
+        function animate() {
+            ctxParticles.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(function(p) { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        // Redimensiona el canvas si cambia el tamano de ventana, y sigue al mouse
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', function(e) { mouse.x = e.x; mouse.y = e.y; });
+
+        // Respeta la preferencia de "reducir movimiento" del sistema operativo
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            initCanvas();
+            animate();
+        }
+// ============================================================
+//  VALIDACIÓN Y MANEJO DE ERRORES PARA GRÁFICOS
+// ============================================================
+
+// Sobrescribir la función dibujarElbow con validación mejorada
+function dibujarElbow(elbowData, codoK) {
+    // Validar que los datos existan y tengan el formato correcto
+    if (!elbowData || !Array.isArray(elbowData) || elbowData.length === 0) {
+        console.warn('No hay datos para el gráfico del codo');
+        const ctx = document.getElementById('elbow-chart');
+        if (ctx) {
+            ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+            ctx.getContext('2d').fillStyle = '#94a3b8';
+            ctx.getContext('2d').font = '14px Geist';
+            ctx.getContext('2d').textAlign = 'center';
+            ctx.getContext('2d').fillText('No hay datos disponibles', ctx.width/2, ctx.height/2);
+        }
+        return;
     }
 
-    function etiquetaGrupos(k) { return k === 1 ? '1 grupo' : `${k} grupos`; }
+    // Verificar que los datos tengan la estructura esperada
+    const hasValidData = elbowData.every(item => 
+        typeof item === 'object' && 
+        item !== null && 
+        typeof item.k === 'number' && 
+        typeof item.inertia === 'number'
+    );
 
-    function dibujarElbow(elbowData, codoK) {
-        const colors = chartColors();
-        new Chart(document.getElementById('elbow-chart'), {
+    if (!hasValidData) {
+        console.warn('Datos del codo en formato incorrecto:', elbowData);
+        return;
+    }
+
+    var colors = chartColors();
+    var ctx = document.getElementById('elbow-chart').getContext('2d');
+
+    if (window.elbowChart) {
+        window.elbowChart.destroy();
+    }
+
+    try {
+        window.elbowChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: elbowData.map(p => etiquetaGrupos(p.k)),
+                labels: elbowData.map(function(p) { return etiquetaGrupos(p.k); }),
                 datasets: [{
                     label: 'Diferencia entre usuarios',
-                    data: elbowData.map(p => p.inertia),
+                    data: elbowData.map(function(p) { return p.inertia; }),
                     borderColor: colors.primary,
-                    backgroundColor: 'rgba(57,178,248,0.15)',
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    borderWidth: 3,
                     tension: 0.3,
-                    pointRadius: elbowData.map(p => p.k === codoK ? 7 : 3),
-                    pointBackgroundColor: elbowData.map(p => p.k === codoK ? colors.secondary : colors.primary),
+                    pointRadius: elbowData.map(function(p) { return p.k === codoK ? 8 : 4; }),
+                    pointBackgroundColor: elbowData.map(function(p) { return p.k === codoK ? colors.secondary : colors.primary; }),
+                    pointBorderColor: elbowData.map(function(p) { return p.k === codoK ? '#ffffff' : 'transparent'; }),
+                    pointBorderWidth: elbowData.map(function(p) { return p.k === codoK ? 2 : 0; }),
                     fill: true,
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: true,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#e2e8f0',
+                        borderColor: colors.primary,
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
                         callbacks: {
-                            title: (items) => items[0].label === etiquetaGrupos(codoK)
-                                ? `${items[0].label} (la más natural)` : items[0].label,
-                            label: () => 'Nivel de diferencia entre usuarios'
+                            title: function(items) {
+                                var item = items[0];
+                                if (item.label === etiquetaGrupos(codoK)) {
+                                    return item.label + ' (óptimo)';
+                                }
+                                return item.label;
+                            },
+                            label: function(context) {
+                                var value = context.parsed.y;
+                                return 'Diferencia: ' + Math.round(value);
+                            },
+                            afterLabel: function(context) {
+                                var label = context.label;
+                                if (label === etiquetaGrupos(codoK)) {
+                                    return 'División más natural';
+                                }
+                                return '';
+                            }
                         }
                     }
                 },
                 scales: {
-                    x: { grid: { color: colors.grid }, ticks: { color: colors.text } },
-                    y: { display: false },
+                    x: {
+                        grid: { color: colors.grid, drawBorder: false },
+                        ticks: { color: colors.text, font: { size: 11 } },
+                        title: {
+                            display: true,
+                            text: 'Número de grupos (k)',
+                            color: colors.text,
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        grid: { display: false },
+                        ticks: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Diferencia entre usuarios',
+                            color: colors.text,
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 }
             }
         });
+
+        // Actualizar interpretación
+        actualizarInterpretacion(elbowData, codoK, 'elbow');
+    } catch (error) {
+        console.error('Error al dibujar gráfico del codo:', error);
+    }
+}
+
+// Sobrescribir la función dibujarSilhouette con validación mejorada
+function dibujarSilhouette(silhouetteData, kOptimo) {
+    // Validar que los datos existan y tengan el formato correcto
+    if (!silhouetteData || !Array.isArray(silhouetteData) || silhouetteData.length === 0) {
+        console.warn('No hay datos para el gráfico de silueta');
+        const ctx = document.getElementById('silhouette-chart');
+        if (ctx) {
+            ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+            ctx.getContext('2d').fillStyle = '#94a3b8';
+            ctx.getContext('2d').font = '14px Geist';
+            ctx.getContext('2d').textAlign = 'center';
+            ctx.getContext('2d').fillText('No hay datos disponibles', ctx.width/2, ctx.height/2);
+        }
+        return;
     }
 
-    function dibujarSilhouette(silhouetteData, kOptimo) {
-        const colors = chartColors();
-        new Chart(document.getElementById('silhouette-chart'), {
+    // Verificar que los datos tengan la estructura esperada
+    const hasValidData = silhouetteData.every(item => 
+        typeof item === 'object' && 
+        item !== null && 
+        typeof item.k === 'number' && 
+        typeof item.score === 'number'
+    );
+
+    if (!hasValidData) {
+        console.warn('Datos de silueta en formato incorrecto:', silhouetteData);
+        return;
+    }
+
+    var colors = chartColors();
+    var ctx = document.getElementById('silhouette-chart').getContext('2d');
+
+    if (window.silhouetteChart) {
+        window.silhouetteChart.destroy();
+    }
+
+    try {
+        var maxScore = Math.max.apply(null, silhouetteData.map(function(p) { return p.score; }));
+
+        window.silhouetteChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: silhouetteData.map(p => etiquetaGrupos(p.k)),
+                labels: silhouetteData.map(function(p) { return etiquetaGrupos(p.k); }),
                 datasets: [{
                     label: 'Claridad de los grupos',
-                    data: silhouetteData.map(p => p.score),
-                    backgroundColor: silhouetteData.map(p => p.k === kOptimo ? colors.secondary : 'rgba(57,178,248,0.4)'),
-                    borderRadius: 6,
+                    data: silhouetteData.map(function(p) { return p.score; }),
+                    backgroundColor: silhouetteData.map(function(p) {
+                        if (p.k === kOptimo) return colors.secondary;
+                        return p.score === maxScore && p.k !== kOptimo
+                            ? 'rgba(251, 191, 36, 0.6)'
+                            : 'rgba(56, 189, 248, 0.3)';
+                    }),
+                    borderColor: silhouetteData.map(function(p) { return p.k === kOptimo ? colors.secondary : 'transparent'; }),
+                    borderWidth: silhouetteData.map(function(p) { return p.k === kOptimo ? 2 : 0; }),
+                    borderRadius: 8,
+                    barPercentage: 0.6,
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: true,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#e2e8f0',
+                        borderColor: colors.secondary,
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
                         callbacks: {
-                            title: (items) => items[0].label === etiquetaGrupos(kOptimo)
-                                ? `${items[0].label} (la que usamos)` : items[0].label,
-                            label: () => 'Qué tan clara es la diferencia entre grupos'
+                            title: function(items) {
+                                var item = items[0];
+                                if (item.label === etiquetaGrupos(kOptimo)) {
+                                    return item.label + ' (mejor)';
+                                }
+                                return item.label;
+                            },
+                            label: function(context) {
+                                var value = context.parsed.y;
+                                var isOptimo = context.dataIndex === kOptimo - 2;
+                                var label = 'Claridad: ' + value.toFixed(3);
+                                if (isOptimo) {
+                                    label += ' — mejor separación';
+                                }
+                                return label;
+                            }
                         }
                     }
                 },
                 scales: {
-                    x: { grid: { color: colors.grid }, ticks: { color: colors.text } },
-                    y: { display: false, min: -1, max: 1 },
+                    x: {
+                        grid: { color: colors.grid, drawBorder: false },
+                        ticks: { color: colors.text, font: { size: 11 } },
+                        title: {
+                            display: true,
+                            text: 'Número de grupos (k)',
+                            color: colors.text,
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        grid: { display: false },
+                        ticks: { display: false },
+                        min: -0.5,
+                        max: 1,
+                        title: {
+                            display: true,
+                            text: 'Coeficiente de silueta',
+                            color: colors.text,
+                            font: { size: 11 }
+                        }
+                    }
                 }
             }
         });
+
+        actualizarInterpretacion(silhouetteData, kOptimo, 'silhouette');
+    } catch (error) {
+        console.error('Error al dibujar gráfico de silueta:', error);
+    }
+}
+
+// Mejorar la función actualizarInterpretacion
+function actualizarInterpretacion(data, kOptimo, tipo) {
+    var interpretacion = document.getElementById('interpretacion-graficos');
+    if (!interpretacion) return;
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+        interpretacion.innerHTML = 'No hay datos suficientes para mostrar la interpretación de los gráficos.';
+        return;
     }
 
-    async function aplicarRecomendacion() {
-        if (!lastData) return;
-        const token = localStorage.getItem('token');
-        const planKey = lastData.plan_ideal.key;
+    var grupoTexto = kOptimo === 1 ? '1 grupo' : kOptimo + ' grupos';
 
-        try {
-            const res = await fetch(`${API}/api/payments/upgrade`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    plan: planKey,
-                    card: { number: '4242424242424242', expiry: '12/30', cvv: '123' }
-                })
-            });
-            if (!res.ok) throw new Error();
-            window.location.href = '/dashboard';
-        } catch (err) {
-            alert('No se pudo aplicar el cambio de plan. Intenta desde /pricing.');
+    var texto = '';
+    if (tipo === 'elbow') {
+        var ultimoValor = data[data.length - 1]?.inertia || 0;
+        var primerValor = data[0]?.inertia || 1;
+        var reduccion = ((primerValor - ultimoValor) / primerValor * 100).toFixed(1);
+        
+        texto = 'El gráfico muestra que <strong class="text-primary">' + grupoTexto + '</strong> es el punto donde agregar más grupos ya no reduce significativamente la diferencia entre usuarios (reducción del ' + reduccion + '% desde el inicio). Esto indica que <strong class="text-primary">' + grupoTexto + '</strong> es la división más natural de los usuarios de AutoDocs.';
+    } else if (tipo === 'silhouette') {
+        var maxScore = Math.max.apply(null, data.map(function(p) { return p.score; }));
+        var posicionOptimo = data.findIndex(p => p.k === kOptimo);
+        var scoreOptimo = data[posicionOptimo]?.score || 0;
+        
+        texto = 'El coeficiente de silueta alcanza su valor más alto (<strong class="text-secondary">' + scoreOptimo.toFixed(3) + '</strong>) con <strong class="text-secondary">' + grupoTexto + '</strong>, lo que confirma que esta es la mejor forma de dividir a los usuarios en grupos con características similares. ' +
+                'Un valor cercano a 1 indica que los grupos están bien separados y definidos.';
+    }
+
+    interpretacion.innerHTML = texto;
+}
+
+// ============================================================
+//  FUNCIÓN DE DIAGNÓSTICO PARA VERIFICAR DATOS
+// ============================================================
+
+function diagnosticarDatos(data) {
+    console.log('=== DIAGNÓSTICO DE DATOS PARA GRÁFICOS ===');
+    console.log('Datos recibidos:', data);
+    
+    if (!data) {
+        console.error('No hay datos');
+        return;
+    }
+    
+    if (!data.clustering) {
+        console.error('No hay datos de clustering en la respuesta');
+        return;
+    }
+    
+    const clustering = data.clustering;
+    console.log('Clustering disponible:', clustering.disponible);
+    console.log('Datos de elbow:', clustering.elbow);
+    console.log('Datos de silhouette:', clustering.silhouette);
+    console.log('Codo detectado (k):', clustering.codo_detectado);
+    console.log('K óptimo:', clustering.k_optimo);
+    
+    if (!clustering.disponible) {
+        console.warn('El clustering no está disponible. Razón:', clustering.razon || 'No especificada');
+    }
+    
+    if (clustering.elbow && Array.isArray(clustering.elbow)) {
+        console.log('Elbow tiene', clustering.elbow.length, 'elementos');
+        clustering.elbow.forEach((item, index) => {
+            console.log(`Elbow[${index}]:`, item);
+        });
+    } else {
+        console.warn('Elbow no es un array válido');
+    }
+    
+    if (clustering.silhouette && Array.isArray(clustering.silhouette)) {
+        console.log('Silhouette tiene', clustering.silhouette.length, 'elementos');
+        clustering.silhouette.forEach((item, index) => {
+            console.log(`Silhouette[${index}]:`, item);
+        });
+    } else {
+        console.warn('Silhouette no es un array válido');
+    }
+}
+
+// Modificar la función render para incluir diagnóstico
+const renderOriginal = render;
+render = function(data) {
+    // Llamar diagnóstico
+    diagnosticarDatos(data);
+    
+    // Llamar función original
+    renderOriginal(data);
+};
+
+// Sobrescribir la función cargarRecomendacion para manejar mejor los errores
+const cargarRecomendacionOriginal = cargarRecomendacion;
+cargarRecomendacion = async function() {
+    var token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/';
+        return;
+    }
+
+    try {
+        var res = await fetch(API + '/api/plan-recommendation/me', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('No se pudo calcular tu recomendación.');
+        var data = await res.json();
+        
+        console.log('=== RESPUESTA COMPLETA DEL API ===');
+        console.log(JSON.stringify(data, null, 2));
+        
+        render(data);
+    } catch (err) {
+        console.error('Error al cargar recomendación:', err);
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+        document.getElementById('error-msg').textContent = err.message + '. Revisa la consola para más detalles.';
+    }
+};
+// ============================================================
+//  MANEJO DE CLUSTERING NO DISPONIBLE
+// ============================================================
+
+// Modificar la función render para manejar el caso de clustering no disponible
+const renderConClustering = render;
+render = function(data) {
+    // Llamar al render original
+    renderConClustering(data);
+    
+    // Verificar si el clustering está disponible
+    if (data.clustering && !data.clustering.disponible) {
+        const razon = data.clustering.razon_no_disponible || 'No hay suficientes datos para el análisis de grupos.';
+        
+        // Mostrar mensaje en la sección técnica
+        const tecnicoBox = document.getElementById('tecnico-box');
+        if (tecnicoBox) {
+            tecnicoBox.classList.remove('hidden');
+            
+            // Modificar el contenido para mostrar el mensaje
+            const contenidoOriginal = tecnicoBox.innerHTML;
+            tecnicoBox.innerHTML = `
+                <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-1">¿Por qué no se muestran los gráficos?</p>
+                <div class="mt-4 p-6 rounded-xl bg-primary/5 border border-primary/20">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-primary text-2xl mt-0.5">info</span>
+                        <div>
+                            <p class="text-sm font-semibold text-on-surface">Análisis de grupos no disponible</p>
+                            <p class="text-sm text-on-surface-variant/70 mt-2">${razon}</p>
+                            <p class="text-sm text-on-surface-variant/70 mt-3">
+                                <strong>¿Cómo funciona el análisis de grupos?</strong><br>
+                                El sistema necesita al menos <strong class="text-primary">6 usuarios activos</strong> para identificar 
+                                patrones de uso similares. Una vez que más usuarios utilicen AutoDocs, podremos:
+                            </p>
+                            <ul class="text-sm text-on-surface-variant/70 mt-2 space-y-1.5 list-disc pl-5">
+                                <li>Agrupar automáticamente a los usuarios según su comportamiento</li>
+                                <li>Recomendar el plan más adecuado para cada perfil</li>
+                                <li>Detectar oportunidades de ahorro para usuarios con uso moderado</li>
+                            </ul>
+                            <div class="mt-4 p-4 rounded-lg bg-secondary/5 border border-secondary/20">
+                                <p class="text-xs text-on-surface-variant/60">
+                                    <span class="material-symbols-outlined text-secondary text-sm align-middle">trending_up</span>
+                                    <strong>Consejo:</strong> Mientras más usuarios usen AutoDocs, más preciso será el análisis.
+                                    Actualmente hay <strong class="text-secondary">5 usuarios</strong> en el sistema, necesitamos al menos 6.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Ocultar los contenedores de gráficos con un mensaje amigable
+        const graficoCards = document.querySelectorAll('.grafico-card');
+        graficoCards.forEach(card => {
+            const chartContainer = card.querySelector('.chart-container');
+            if (chartContainer) {
+                const canvas = chartContainer.querySelector('canvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '14px Geist';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🔍 Esperando más datos', canvas.width/2, canvas.height/2 - 10);
+                    ctx.font = '12px Geist';
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText('(Se necesitan 6+ usuarios activos)', canvas.width/2, canvas.height/2 + 20);
+                }
+            }
+        });
+        
+        // Ocultar la sección de grupos
+        document.getElementById('grupos-explicacion')?.classList.add('hidden');
+        document.getElementById('interpretacion-graficos')?.classList.remove('hidden');
+        document.getElementById('interpretacion-graficos').innerHTML = `
+            <span class="text-on-surface-variant/60">
+                El análisis de grupos estará disponible cuando haya más usuarios activos en el sistema. 
+                Actualmente hay <strong>5 usuarios</strong> y se necesitan al menos <strong>6</strong> para identificar patrones de uso.
+            </span>
+        `;
+    }
+};
+
+// ============================================================
+//  FUNCIÓN PARA MOSTRAR ESTADO DE USUARIOS EN EL SISTEMA
+// ============================================================
+
+async function verificarEstadoUsuarios() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        
+        const res = await fetch(API + '/api/users/count', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            console.log('Usuarios en el sistema:', data.count);
+            
+            // Si hay menos de 6 usuarios, mostrar un badge informativo
+            if (data.count < 6) {
+                const badgeHTML = `
+                    <div class="mt-4 p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400">group</span>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                                    Sistema en crecimiento
+                                </p>
+                                <p class="text-xs text-yellow-700 dark:text-yellow-400">
+                                    Actualmente hay <strong>${data.count} usuarios</strong> activos. 
+                                    El análisis de grupos necesita al menos 6 usuarios para funcionar.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Insertar el badge después del mensaje de recomendación
+                const recMensaje = document.getElementById('rec-mensaje');
+                if (recMensaje && !document.getElementById('usuarios-badge')) {
+                    const badgeContainer = document.createElement('div');
+                    badgeContainer.id = 'usuarios-badge';
+                    badgeContainer.innerHTML = badgeHTML;
+                    recMensaje.parentNode.insertBefore(badgeContainer, recMensaje.nextSibling);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error al verificar usuarios:', error);
+    }
+}
+
+// ============================================================
+//  MODIFICAR LA CARGA INICIAL PARA INCLUIR LA VERIFICACIÓN
+// ============================================================
+
+// Guardar la función original
+const cargarRecomendacionOriginal2 = cargarRecomendacion;
+
+// Sobrescribir con la versión mejorada
+cargarRecomendacion = async function() {
+    var token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/';
+        return;
+    }
+
+    try {
+        // Cargar recomendación
+        var res = await fetch(API + '/api/plan-recommendation/me', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('No se pudo calcular tu recomendación.');
+        var data = await res.json();
+        
+        console.log('=== RESPUESTA COMPLETA DEL API ===');
+        console.log(JSON.stringify(data, null, 2));
+        
+        // Renderizar con la función mejorada
+        render(data);
+        
+        // Verificar estado de usuarios
+        await verificarEstadoUsuarios();
+        
+    } catch (err) {
+        console.error('Error al cargar recomendación:', err);
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+        document.getElementById('error-msg').textContent = err.message + '. Revisa la consola para más detalles.';
+    }
+};
+
+// ============================================================
+//  FUNCIÓN PARA FORZAR RECALCULO (cuando haya más usuarios)
+// ============================================================
+
+function recargarRecomendacion() {
+    document.getElementById('loading-state').classList.remove('hidden');
+    document.getElementById('content').classList.add('hidden');
+    document.getElementById('error-state').classList.add('hidden');
+    cargarRecomendacion();
+}
+
+// Agregar un botón de recarga en el área de error
+document.addEventListener('DOMContentLoaded', function() {
+    const errorState = document.getElementById('error-state');
+    if (errorState) {
+        const reloadBtn = document.createElement('button');
+        reloadBtn.textContent = 'Reintentar';
+        reloadBtn.className = 'mt-4 px-4 py-2 glass glass-hover rounded-xl text-sm font-semibold';
+        reloadBtn.onclick = recargarRecomendacion;
+        errorState.appendChild(reloadBtn);
+    }
+});
+
+// Si la recomendación ya está ajustada, mostrar información adicional
+const renderOriginal3 = render;
+render = function(data) {
+    renderOriginal3(data);
+    
+    // Si el plan ya está ajustado y hay promoción, mostrar detalle
+    if (data.tipo_recomendacion === 'plan_ajustado' && data.promocion) {
+        const ctaBtn = document.getElementById('cta-btn');
+        if (ctaBtn) {
+            ctaBtn.classList.remove('hidden');
+            ctaBtn.textContent = `Aprovechar ${data.promocion.descuento_pct}% de descuento`;
+            ctaBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
         }
     }
+};
+        // ============================================================
+        //  INICIALIZACION: dispara la carga de datos apenas se ejecuta el script
+        // ============================================================
 
-    cargarRecomendacion();
-</script>
+        cargarRecomendacion();
+    </script>
+
 </body>
 </html>

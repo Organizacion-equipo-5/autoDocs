@@ -1,10 +1,15 @@
+# routes/projects.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.db import get_db
 from services.file_handler import save_uploaded_project, clone_github_repo
+from utils.project_timeout import mark_stale_projects_as_error
 from datetime import datetime
 import uuid
 from pathlib import Path
+import subprocess
+import shutil
+import requests
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -15,7 +20,29 @@ def get_projects():
         user_id = get_jwt_identity()
         print(f"[DEBUG] get_projects - user_id: {user_id}")
         db = get_db()
-        projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1}))
+        
+        # Verificar si el usuario existe y su rol
+        user = db.users.find_one({"_id": user_id})
+        print(f"[DEBUG] get_projects - user exists: {user is not None}")
+        if user:
+            print(f"[DEBUG] get_projects - user email: {user.get('email')}, role: {user.get('role')}")
+        
+        # Si es admin, mostrar todos los proyectos
+        if user and user.get('role') == 'admin':
+            print(f"[DEBUG] get_projects - User is admin, returning all projects")
+            # 🔑 Revisa y marca como error TODOS los proyectos atascados (todos los usuarios)
+            stale_count = mark_stale_projects_as_error(db)
+            if stale_count:
+                print(f"[DEBUG] get_projects - {stale_count} proyecto(s) marcados como error por timeout")
+            projects = list(db.projects.find({}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1, "error_message": 1}))
+        else:
+            # 🔑 Revisa y marca como error SOLO los proyectos atascados de este usuario
+            stale_count = mark_stale_projects_as_error(db, {"user_id": user_id})
+            if stale_count:
+                print(f"[DEBUG] get_projects - {stale_count} proyecto(s) del usuario marcados como error por timeout")
+            # Usuario normal, solo sus proyectos
+            projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1, "error_message": 1}))
+        
         print(f"[DEBUG] get_projects - found {len(projects)} projects")
         for p in projects:
             if '_id' in p:
@@ -57,8 +84,14 @@ def create_project():
     description = request.form.get('description', '')
     github_url = request.form.get('github_url', '')
 
+    # Check for duplicate project name globally (all users)
+    existing_project = db.projects.find_one({"name": name})
+    if existing_project:
+        return jsonify({"error": f"Ya existe un proyecto con el nombre '{name}'. Por favor usa un nombre diferente."}), 400
+
     project_id = str(uuid.uuid4())
     project_path = None
+    error_message = None  # 🔑 En vez de cortar el flujo con un 500, guardamos el motivo del error
 
     has_file = 'file' in request.files and request.files['file'].filename
 
@@ -70,22 +103,24 @@ def create_project():
         try:
             project_path = save_uploaded_project(f, project_id)
         except Exception as e:
-            return jsonify({"error": f"Failed to save uploaded project: {str(e)}"}), 500
+            error_message = f"Error al guardar el archivo subido: {str(e)}"
     elif github_url:
         try:
             project_path = clone_github_repo(github_url, project_id)
         except Exception as e:
-            return jsonify({"error": f"Failed to clone repository: {str(e)}"}), 400
+            error_message = f"Error al clonar el repositorio: {str(e)}"
 
-    try:
-        if project_path:
+    if project_path and not error_message:
+        try:
             p = Path(project_path)
             project_path = str(p.resolve())
             if not p.exists():
-                return jsonify({"error": "Project path does not exist after extraction/cloning"}), 500
-    except Exception as e:
-        return jsonify({"error": f"Invalid project path: {str(e)}"}), 500
+                error_message = "La ruta del proyecto no existe después de la extracción/clonado"
+        except Exception as e:
+            error_message = f"Ruta de proyecto inválida: {str(e)}"
 
+    # 🔑 El proyecto SIEMPRE se crea, aunque haya fallado la subida/clonado.
+    # Si hubo error, nace directamente con status "error".
     project = {
         "_id": project_id,
         "user_id": user_id,
@@ -93,7 +128,7 @@ def create_project():
         "description": description,
         "github_url": github_url,
         "file_path": project_path,
-        "status": "pending",
+        "status": "error" if error_message else "pending",
         "language": "unknown",
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
@@ -108,9 +143,12 @@ def create_project():
             "unique_authors": 0
         }
     }
+    if error_message:
+        project["error_message"] = error_message
+
     db.projects.insert_one(project)
 
-    if github_url:
+    if github_url and not error_message:
         try:
             from services.github_client import get_contributors_from_api
             contributors_data = get_contributors_from_api(github_url)
@@ -132,6 +170,15 @@ def create_project():
     new_count = db.projects.count_documents({"user_id": user_id})
     db.users.update_one({"_id": user_id}, {"$set": {"projects_count": new_count}})
 
+    if error_message:
+        # Se devuelve 201 igual (el proyecto SÍ se creó), pero con el detalle del error
+        # para que el frontend pueda mostrar feedback si quiere, sin romper el flujo.
+        return jsonify({
+            "id": project_id,
+            "message": "Proyecto creado con errores",
+            "error": error_message
+        }), 201
+
     return jsonify({"id": project_id, "message": "Project created successfully"}), 201
 
 @projects_bp.route('/<project_id>', methods=['GET'])
@@ -139,6 +186,8 @@ def create_project():
 def get_project(project_id):
     user_id = get_jwt_identity()
     db = get_db()
+    # 🔑 Revisa si ESTE proyecto en particular quedó atascado antes de devolverlo
+    mark_stale_projects_as_error(db, {"_id": project_id, "user_id": user_id})
     project = db.projects.find_one({"_id": project_id, "user_id": user_id})
     if not project:
         return jsonify({"error": "Project not found"}), 404
@@ -162,6 +211,42 @@ def delete_project(project_id):
     db.users.update_one({"_id": user_id}, {"$set": {"projects_count": new_count}})
 
     return jsonify({"message": "Project deleted"}), 200
+
+@projects_bp.route('/<project_id>', methods=['PUT'])
+@jwt_required()
+def update_project(project_id):
+    user_id = get_jwt_identity()
+    db = get_db()
+    
+    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    
+    data = request.get_json()
+    name = data.get('name')
+    description = data.get('description')
+    
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
+    
+    # Check for duplicate name globally (excluding current project)
+    existing_project = db.projects.find_one({
+        "name": name,
+        "_id": {"$ne": project_id}
+    })
+    if existing_project:
+        return jsonify({"error": f"Ya existe un proyecto con el nombre '{name}'. Por favor usa un nombre diferente."}), 400
+    
+    update_data = {"name": name}
+    if description is not None:
+        update_data["description"] = description
+    
+    db.projects.update_one(
+        {"_id": project_id},
+        {"$set": update_data}
+    )
+    
+    return jsonify({"message": "Project updated successfully"}), 200
 
 # ══════════════════════════════════════════════════════════
 #  ENDPOINTS PARA COLABORADORES
@@ -272,3 +357,82 @@ def refresh_project_contributors(project_id):
         return jsonify({
             "error": f"Error al actualizar colaboradores: {str(e)}"
         }), 500
+
+@projects_bp.route('/<project_id>/sync', methods=['POST'])
+@jwt_required()
+def sync_project(project_id):
+    """
+    Sincroniza un proyecto con GitHub (git pull + re-análisis)
+    Solo disponible para usuarios Pro y Enterprise
+    """
+    user_id = get_jwt_identity()
+    db = get_db()
+
+    # Verificar plan del usuario
+    user = db.users.find_one({"_id": user_id})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    plan = user.get('plan', 'free')
+    if plan == 'free':
+        return jsonify({"error": "La función de sincronización con GitHub solo está disponible para planes Pro y Enterprise. Actualiza tu plan para usar esta función."}), 403
+
+    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+
+    github_url = project.get('github_url')
+    if not github_url:
+        return jsonify({"error": "Este proyecto no tiene URL de GitHub asociada"}), 400
+
+    project_path = project.get('file_path')
+    if not project_path or not Path(project_path).exists():
+        return jsonify({"error": "Ruta del proyecto no encontrada"}), 400
+
+    try:
+        # Realizar git pull
+        result = subprocess.run(
+            ['git', 'pull'],
+            cwd=project_path,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
+        if result.returncode != 0:
+            print(f"[ERROR] git pull failed: {result.stderr}")
+            return jsonify({"error": f"Error al hacer git pull: {result.stderr}"}), 400
+
+        print(f"[INFO] git pull successful for project {project_id}")
+
+        # Actualizar estado del proyecto
+        db.projects.update_one(
+            {"_id": project_id},
+            {"$set": {
+                "status": "pending",
+                "updated_at": datetime.utcnow().isoformat()
+            }}
+        )
+
+        # Iniciar nuevo análisis
+        try:
+            requests.post(
+                f'http://127.0.0.1:5000/api/analysis/{project_id}/start',
+                headers={'Authorization': request.headers.get('Authorization')},
+                timeout=10
+            )
+        except:
+            # Si falla el inicio asíncrono, continuar
+            pass
+
+        return jsonify({
+            "message": "Proyecto sincronizado correctamente. El análisis comenzará pronto."
+        }), 200
+
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Timeout al hacer git pull"}), 400
+    except Exception as e:
+        print(f"[ERROR] sync_project: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error al sincronizar proyecto: {str(e)}"}), 500

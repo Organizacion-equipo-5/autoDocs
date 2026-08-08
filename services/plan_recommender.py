@@ -9,6 +9,8 @@ from typing import Optional, Dict, List, Tuple
 import numpy as np
 import sys
 
+print(f"[DEBUG plan_recommender] Módulo cargado/recargado - {datetime.now()}")
+
 # Número máximo de clusters (k) a evaluar
 K_MAX = 5
 # Mínimo de usuarios con actividad necesarios para agrupar
@@ -41,7 +43,7 @@ def _get_plans() -> dict:
             "free": {
                 "name": "Free",
                 "price": 0,
-                "projects_limit": 2,
+                "projects_limit": 3,
                 "analyses_per_month": 5,
                 "export_pdf": False,
                 "ai_enhanced": False,
@@ -484,6 +486,10 @@ def recommend_plan_for_user(db, user_id: str) -> dict:
 
     ahorro_mensual = round(plan_actual["price"] - plan_ideal["price"], 2)
 
+    print(f"[DEBUG plan_recommender] idx_actual: {idx_actual}, idx_ideal: {idx_ideal}")
+    print(f"[DEBUG plan_recommender] plan_actual_key: {plan_actual_key}, plan_ideal_key: {plan_ideal_key}")
+    print(f"[DEBUG plan_recommender] plan_actual price: {plan_actual['price']}, plan_ideal price: {plan_ideal['price']}")
+
     if idx_ideal < idx_actual:
         tipo = "promocion_downgrade"
         precio_promo = round(plan_ideal["price"] * 0.8, 2)
@@ -501,6 +507,7 @@ def recommend_plan_for_user(db, user_id: str) -> dict:
             "duracion_meses": 3,
             "ahorro_mensual_vs_actual": ahorro_mensual,
         }
+        print(f"[DEBUG plan_recommender] Promoción generada: {promocion}")
     elif idx_ideal > idx_actual:
         tipo = "upgrade_necesario"
         mensaje = (
@@ -510,10 +517,26 @@ def recommend_plan_for_user(db, user_id: str) -> dict:
             f"para no quedarte sin capacidad."
         )
         promocion = None
+        print(f"[DEBUG plan_recommender] Upgrade necesario, sin promoción")
     else:
+        # Plan ajustado - ofrecer descuento de fidelización
         tipo = "plan_ajustado"
-        mensaje = f"Tu plan actual ({plan_actual['name']}) ya está bien ajustado a tu uso real."
-        promocion = None
+        precio_promo = round(plan_actual["price"] * 0.9, 2)  # 10% de descuento
+        ahorro_promo = round(plan_actual["price"] - precio_promo, 2)
+        mensaje = (
+            f"Tu plan actual ({plan_actual['name']}) ya está bien ajustado a tu uso real. "
+            f"Como agradecimiento por tu fidelidad, te ofrecemos un 10% de descuento "
+            f"por 6 meses: ${precio_promo}/mes (ahorras ${ahorro_promo}/mes)."
+        )
+        promocion = {
+            "plan_sugerido": plan_actual_key,
+            "precio_lista": plan_actual["price"],
+            "precio_promocional": precio_promo,
+            "descuento_pct": 10,
+            "duracion_meses": 6,
+            "ahorro_mensual_vs_actual": ahorro_promo,
+        }
+        print(f"[DEBUG plan_recommender] Plan ajustado con descuento de fidelización: {promocion}")
 
     # Construir descripciones legibles por cada cluster
     cluster_perfiles = cluster_info.get('perfiles_cluster', {})

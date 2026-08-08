@@ -1,62 +1,656 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Proyectos — AutoDocs AI</title>
-  <style>
-    :root{--bg:#040d1a;--bg2:#060f22;--surface:#0a1628;--border:#112240;--accent:#00d4ff;--text:#ccd6f6;--muted:#8892b0}
-    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;display:flex;margin:0}
-    .sidebar{width:260px;background:var(--bg2);padding:1.5rem;position:fixed;height:100vh}
-    .main{margin-left:260px;padding:2rem;flex:1}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:.7rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
-    .btn{background:var(--accent);color:#001;padding:.5rem .75rem;border-radius:8px;border:none}
-    .table-button{background:rgba(255,255,255,0.04);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.35rem .6rem}
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,13,26,0.85);align-items:center;justify-content:center}
-    .modal-overlay.active{display:flex}
-    .modal{background:var(--bg);border-radius:12px;padding:1rem;width:min(720px,96%)}
-  </style>
+    <!-- ====== META Y CONFIGURACIÓN BÁSICA ====== -->
+    <!-- Configuración de codificación y viewport para responsividad -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — Proyectos — AutoDocs AI</title>
+    
+    <!-- ====== LIBRERÍAS EXTERNAS ====== -->
+    <!-- Tailwind CSS con plugins para formularios y container queries -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Fuentes de Google: JetBrains Mono para código y Geist para texto general -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Iconos de Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- ====== CONFIGURACIÓN DE TAILWIND ====== -->
+    <!-- Extensión de colores personalizados usando variables CSS para soportar temas claro/oscuro -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--color-background)',
+                        surface: 'var(--color-surface)',
+                        'surface-container': 'var(--color-surface-container)',
+                        'surface-container-high': 'var(--color-surface-container-high)',
+                        'on-surface': 'var(--color-on-surface)',
+                        'on-surface-variant': 'var(--color-on-surface-variant)',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        'outline-variant': 'var(--color-outline-variant)',
+                        error: 'var(--color-error)',
+                        'green-accent': 'var(--color-green-accent)',
+                        tertiary: 'var(--color-tertiary)',
+                    },
+                    fontFamily: {
+                        body: ['Geist', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- ====== ESTILOS PERSONALIZADOS ====== -->
+    <style>
+        /* ====== VARIABLES CSS PARA TEMA OSCURO (POR DEFECTO) ====== */
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;
+            --color-surface: rgba(27, 32, 36, 0.4);
+            --color-surface-container: #1b2024;
+            --color-surface-container-high: #252b2e;
+            --color-on-surface: #dee3e8;
+            --color-on-surface-variant: #bdc8d1;
+            --color-primary: #8ed5ff;
+            --color-secondary: #c0c1ff;
+            --color-outline-variant: #3e484f;
+            --color-error: #ffb4ab;
+            --color-green-accent: #10b981;
+            --color-tertiary: #ffc176;
+            /* Variables para efectos de vidrio (glass) */
+            --glass-border: rgba(123, 208, 255, 0.1);
+            --glass-shadow: 0 0 40px rgba(123, 208, 255, 0.1);
+            --glass-hover-border: rgba(123, 208, 255, 0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123, 208, 255, 0.1);
+            /* Colores para partículas del fondo */
+            --particle-color-1: rgba(142, 213, 255, 0.4);
+            --particle-color-2: rgba(192, 193, 255, 0.2);
+            --particle-line: rgba(142, 213, 255, 0.12);
+        }
+        
+        /* ====== VARIABLES CSS PARA TEMA CLARO ====== */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;
+            --color-surface: rgba(255, 255, 255, 0.7);
+            --color-surface-container: #ffffff;
+            --color-surface-container-high: #e2e8f0;
+            --color-on-surface: #0f172a;
+            --color-on-surface-variant: #334155;
+            --color-primary: #38bdf8;
+            --color-secondary: #818cf8;
+            --color-outline-variant: #cbd5e1;
+            --color-error: #ba1a1a;
+            --color-green-accent: #10b981;
+            --color-tertiary: #7c5800;
+            --glass-border: rgba(0, 0, 0, 0.04);
+            --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            --glass-hover-border: rgba(56, 189, 248, 0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
+            --particle-color-1: rgba(56, 189, 248, 0.25);
+            --particle-color-2: rgba(129, 140, 248, 0.2);
+            --particle-line: rgba(56, 189, 248, 0.12);
+        }
+        
+        /* ====== ESTILOS BASE ====== */
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            font-family: 'Geist', sans-serif;
+            transition: background 0.25s ease, color 0.25s ease;
+            overflow-x: hidden;
+        }
+        
+        /* ====== CANVAS DE PARTÍCULAS ====== */
+        #particle-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 80%; z-index: 0; pointer-events: none;
+        }
+        
+        /* ====== EFECTO DE VIDRIO (GLASS) ====== */
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
+        }
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+            transform: translateY(-2px);
+        }
+        
+        /* ====== COMPONENTES DE FORMULARIO ====== */
+        .glass input, .glass select, .glass textarea { color: #0f1418; }
+        
+        /* ====== SIDEBAR ====== */
+        .sidebar { background: var(--color-surface-container); backdrop-filter: blur(8px); border-right: 1px solid var(--glass-border); }
+        
+        /* ====== BOTONES PRIMARIOS ====== */
+        .btn-primary { background: var(--color-primary); color: #0f1418; font-weight: 700; transition: all 0.2s; }
+        .btn-primary:hover { filter: brightness(1.05); transform: scale(0.98); }
+        
+        /* ====== BADGES DE ESTADO ====== */
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.65rem; border-radius: 999px;
+            font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+        }
+        .badge.completed { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge.pending { background: rgba(136, 146, 176, 0.2); color: var(--color-on-surface-variant); border: 1px solid rgba(136, 146, 176, 0.2); }
+        .badge.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
+        /* ====== ANIMACIONES ====== */
+        .modal-anim { animation: fadeDown 0.2s ease; }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .stagger-in { opacity: 0; transform: translateY(16px); animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        /* Reducción de movimiento para accesibilidad */
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in, .glass-hover { animation: none !important; transition: none !important; transform: none !important; opacity: 1 !important; }
+        }
+        
+        /* ====== ICONOS DE ACCIÓN ====== */
+        .action-icon {
+            cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center;
+            padding: 0.25rem; border-radius: 0.375rem; color: var(--color-on-surface-variant);
+        }
+        .action-icon:hover { background: var(--color-outline-variant); color: var(--color-primary); }
+        
+        /* ====== TÍTULOS DE SECCIÓN ====== */
+        .section-title { display: flex; align-items: center; gap: 0.5rem; }
+        .section-title .material-symbols-outlined { color: var(--color-primary); font-size: 22px; }
+        
+        /* ====== SCROLLBAR PERSONALIZADA ====== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+        
+        /* ====== SIDEBAR COLABSABLE ====== */
+        .sidebar-shell { width: 72px; transition: width 0.3s ease; overflow: hidden; flex-shrink: 0; }
+        /* En pantallas grandes, el sidebar se expande al hacer hover */
+        @media (min-width: 1024px) {
+            .sidebar-shell:hover { width: 240px; }
+            .sidebar-shell:hover .nav-label, .sidebar-shell:hover .nav-badge,
+            .sidebar-shell:hover .sidebar-user-info, .sidebar-shell:hover .sidebar-brand-label { opacity: 1; }
+        }
+        /* Elementos del sidebar que se ocultan/muestran */
+        .nav-label, .nav-badge, .sidebar-user-info, .sidebar-brand-label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0 8px; }
+        .sidebar-nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px;
+            color: var(--color-on-surface-variant); text-decoration: none; transition: all 0.2s;
+            font-size: 0.85rem; font-weight: 500; position: relative; width: 100%; background: transparent;
+            border: none; cursor: pointer; text-align: left;
+        }
+        .sidebar-nav-item:hover { background: rgba(142, 213, 255, 0.08); color: var(--color-primary); }
+        .sidebar-nav-item.active { background: rgba(142, 213, 255, 0.12); color: var(--color-primary); font-weight: 700; }
+        .sidebar-nav-item .material-symbols-outlined { font-size: 1.3rem; flex-shrink: 0; }
+        .sidebar-nav-item .nav-badge {
+            margin-left: auto; font-size: 0.6rem; padding: 2px 8px; border-radius: 20px;
+            background: rgba(142, 213, 255, 0.15); color: var(--color-primary); font-weight: 700;
+        }
+    </style>
 </head>
-<body>
-  <aside class="sidebar">
-    <div style="font-weight:700;margin-bottom:1rem;color:var(--text)">AutoDocs AI</div>
-    <a href="/admin" style="display:block;color:var(--muted);margin-bottom:.5rem">Overview</a>
-    <a href="/admin/users" style="display:block;color:var(--muted);margin-bottom:.5rem">Usuarios</a>
-    <a href="/admin/projects" style="display:block;font-weight:700;color:var(--accent);margin-bottom:.5rem">Proyectos</a>
-  </aside>
-  <main class="main">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <h2 style="margin:0">Proyectos</h2>
-        <button class="btn" onclick="openModal('project')">Nuevo proyecto</button>
-      </div>
-      <div style="overflow-x:auto">
-        <table><thead><tr><th>Nombre</th><th>Owner</th><th>Lenguaje</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead><tbody id="table-projects"></tbody></table>
-      </div>
-    </div>
-  </main>
+<!-- El atributo data-theme permite cambiar entre temas claro/oscuro -->
+<body data-theme="dark">
+    <!-- ====== CANVAS DE PARTÍCULAS (FONDO ANIMADO) ====== -->
+    <canvas id="particle-canvas"></canvas>
 
-  <div id="adminModal" class="modal-overlay">
-    <div class="modal">
-      <button style="float:right" onclick="closeModal()">✕</button>
-      <h3 id="modal-title">Proyecto</h3>
-      <div id="modal-content"></div>
-      <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem"><button onclick="closeModal()" class="table-button">Cancelar</button><button class="btn" onclick="submitModal()">Guardar</button></div>
-    </div>
-  </div>
+    <!-- ====== CONTENEDOR PRINCIPAL ====== -->
+    <div class="flex min-h-screen w-full relative z-10">
+        <!-- ====== SIDEBAR ====== -->
+        <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
+            <!-- Logo y nombre de la aplicación -->
+            <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
+                <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
+                </div>
+                <span class="sidebar-brand-label font-mono text-lg font-bold">Auto<span class="text-primary">Docs</span></span>
+            </div>
 
-  <script>
-    const token=localStorage.getItem('token'); if(!token) window.location.href='/'; const user=JSON.parse(localStorage.getItem('user')||'{}'); if(user.role!=='admin'&&user.role!=='superadmin') window.location.href='/dashboard';
-    function authHeaders(){return{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}}
-    let projectsData=[]; let currentModalType=null,currentModalId=null;
-    function openModal(type,item=null){currentModalType=type;currentModalId=item?item._id:null;document.getElementById('modal-title').textContent=item?'Editar proyecto':'Nuevo proyecto';const c=document.getElementById('modal-content');c.innerHTML='';c.innerHTML+=`<label>Nombre</label><input id="modal-name" value="${item?item.name:''}" />`;c.innerHTML+=`<label>User ID</label><input id="modal-user_id" value="${item?item.user_id:''}" />`;c.innerHTML+=`<label>Lenguaje</label><input id="modal-language" value="${item?item.language:''}" />`;c.innerHTML+=`<label>Estado</label><input id="modal-status" value="${item?item.status:'pending'}" />`;c.innerHTML+=`<label>Github</label><input id="modal-github" value="${item?item.github_url:''}" />`;document.getElementById('adminModal').classList.add('active')}
-    function closeModal(){document.getElementById('adminModal').classList.remove('active');currentModalType=null;currentModalId=null}
-    async function submitModal(){const data={name:document.getElementById('modal-name').value,user_id:document.getElementById('modal-user_id').value,language:document.getElementById('modal-language').value,status:document.getElementById('modal-status').value,github_url:document.getElementById('modal-github').value};const url=`/api/admin/projects${currentModalId?'/'+currentModalId:''}`;const method=currentModalId?'PUT':'POST';const res=await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(data)});if(!res.ok){alert('Error');return;}closeModal();loadProjectsTable();}
-    async function loadProjectsTable(){try{const res=await fetch('/api/admin/projects',{headers:authHeaders()});if(!res.ok) return;projectsData=await res.json();document.getElementById('table-projects').innerHTML=projectsData.map(p=>`<tr><td>${p.name}</td><td>${p.user_id}</td><td>${p.language}</td><td>${p.status}</td><td>${p.created_at?new Date(p.created_at).toLocaleDateString():'-'}</td><td><button class="table-button" onclick='openModal("project", ${JSON.stringify(p).replace(/'/g,"\\'")})'>Editar</button> <button class="table-button" onclick="deleteRecord('project','${p._id}')">Eliminar</button></td></tr>`).join('');}catch(e){console.error(e)}}
-    async function deleteRecord(type,id){if(!confirm('¿Eliminar?')) return;const res=await fetch(`/api/admin/${type==='user'?'users':type==='project'?'projects':'documents'}/${id}`,{method:'DELETE',headers:authHeaders()});if(!res.ok){alert('Error');return;}loadProjectsTable();}
-    loadProjectsTable();
-  </script>
+            <!-- Navegación del sidebar -->
+            <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
+                <div class="sidebar-nav">
+                    <a href="/admin" id="nav-resumen" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">shield_person</span>
+                        <span class="nav-label">Admin</span>
+                    </a>
+                    <a href="/admin/users" id="nav-users" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">group</span>
+                        <span class="nav-label">Usuarios</span>
+                        <span class="nav-badge" id="sidebar-user-count">0</span>
+                    </a>
+                    <a href="/admin/projects" id="nav-projects" class="sidebar-nav-item active">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        <span class="nav-label">Proyectos</span>
+                        <span class="nav-badge" id="sidebar-project-count">0</span>
+                    </a>
+                    <a href="/admin/pca" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">scatter_plot</span>
+                        <span class="nav-label">Análisis PCA</span>
+                    </a>
+                    <!-- Enlace de clasificación comentado -->
+                    <!-- <a href="/admin#classification" id="nav-classification" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">category</span>
+                        <span class="nav-label">Clasificación</span>
+                    </a> -->
+                </div>
+            </nav>
+
+            <!-- Perfil de usuario y logout en la parte inferior del sidebar -->
+            <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+                <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background flex-shrink-0" id="user-avatar">A</div>
+                    <div class="sidebar-user-info min-w-0">
+                        <div class="font-bold text-sm truncate" id="user-name">Administrador</div>
+                        <div class="text-xs text-on-surface-variant/70 truncate" id="user-role">Admin</div>
+                    </div>
+                </a>
+                <button onclick="logout()" class="sidebar-nav-item mt-2" style="justify-content:flex-start;">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="nav-label">Cerrar sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ====== CONTENIDO PRINCIPAL ====== -->
+        <main class="flex-1 p-8 relative z-10 overflow-x-hidden">
+            <!-- Encabezado de la página -->
+            <div class="flex justify-between items-center mb-8 stagger-in" style="animation-delay:0.1s;">
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight">Proyectos</h1>
+                    <p class="text-on-surface-variant/60">Gestión de los proyectos analizados por el sistema</p>
+                </div>
+                <!-- Botón para cambiar tema (claro/oscuro) -->
+                <div class="flex gap-3">
+                    <button id="themeButton" class="glass glass-hover p-2 rounded-full w-10 h-10 flex items-center justify-center">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sección de proyectos -->
+            <div id="projects-section" class="stagger-in" style="animation-delay:0.15s;">
+                <!-- Encabezado con botón para agregar proyecto -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold section-title">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        Proyectos
+                    </h2>
+                    <button onclick="openProjectModal()" class="btn-primary px-4 py-2 rounded-xl text-sm flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">add</span> Nuevo proyecto
+                    </button>
+                </div>
+                <!-- Tabla de proyectos con efecto glass -->
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="border-b border-outline-variant/30">
+                                <tr class="text-on-surface-variant/70 text-sm">
+                                    <th class="p-4">Nombre</th>
+                                    <th class="p-4">Propietario</th>
+                                    <th class="p-4">Lenguaje</th>
+                                    <th class="p-4">Estado</th>
+                                    <th class="p-4">Score</th>
+                                    <th class="p-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <!-- Cuerpo de la tabla que se llena dinámicamente desde JavaScript -->
+                            <tbody id="projects-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ====== MODAL PARA CREAR/EDITAR PROYECTO ====== -->
+    <div id="projectModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this) closeProjectModal()" style="background:rgba(0,0,0,0.5);">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <!-- Botón para cerrar modal -->
+            <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            
+            <!-- Título dinámico (cambia entre "Agregar" y "Editar") -->
+            <h3 class="text-2xl font-bold text-on-surface mb-1" id="projectModalTitle">Agregar Proyecto</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Administra los proyectos del sistema</p>
+            
+            <!-- Campo oculto para almacenar el ID al editar -->
+            <input type="hidden" id="projectId">
+            
+            <!-- Campo: Nombre del proyecto -->
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
+                <input id="projectName" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors">
+            </div>
+            
+            <!-- Campo: Propietario (email) -->
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Propietario (email)</label>
+                <input id="projectOwner" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors">
+            </div>
+            
+            <!-- Campo: Lenguaje -->
+            <div class="mb-4">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Lenguaje</label>
+                <input id="projectLanguage" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" value="Python">
+            </div>
+            
+            <!-- Campo: Estado (select) -->
+            <div class="mb-6">
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Estado</label>
+                <select id="projectStatus" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface focus:border-primary focus:outline-none transition-colors">
+                    <option value="pending">Pendiente</option>
+                    <option value="completed">Completado</option>
+                    <option value="error">Error</option>
+                </select>
+            </div>
+            
+            <!-- Botones de acción del modal -->
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeProjectModal()" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface-variant hover:border-primary hover:text-primary transition-all">Cancelar</button>
+                <button onclick="saveProject()" class="btn-primary px-4 py-2 rounded-xl transition-all">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+        // ================================================================
+        // 1. AUTENTICACIÓN Y SEGURIDAD
+        // ================================================================
+        // Obtener token del localStorage
+        const token = localStorage.getItem('token');
+        // Si no hay token, redirigir al login
+        if (!token) window.location.href = '/';
+        // Obtener datos del usuario
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Si el usuario no es admin, redirigir al dashboard
+        if (user.role !== 'admin') window.location.href = '/dashboard';
+        // Mostrar nombre y avatar del usuario en el sidebar
+        document.getElementById('user-name').innerText = user.name || 'Admin';
+        document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
+
+        // ================================================================
+        // 2. UTILIDADES
+        // ================================================================
+        // Función para generar headers de autenticación
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
+
+        // Función para escapar HTML y prevenir XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) { 
+                if (m === '&') return '&amp;'; 
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;'; 
+                return m; 
+            });
+        }
+
+        // ================================================================
+        // 3. CARGA DE CONTADORES DEL SIDEBAR
+        // ================================================================
+        async function loadSidebarCounts() {
+            try {
+                const res = await fetch('/api/admin/overview', { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                document.getElementById('sidebar-user-count').innerText = data.stats?.total_users || 0;
+                document.getElementById('sidebar-project-count').innerText = data.stats?.total_projects || 0;
+            } catch (e) { 
+                console.warn('No se pudieron cargar los contadores', e); 
+            }
+        }
+
+        // ================================================================
+        // 4. CRUD DE PROYECTOS
+        // ================================================================
+        
+        // 4.1 Cargar proyectos desde el servidor
+        async function loadProjects() {
+            const res = await fetch('/api/admin/projects', { headers: authHeaders() });
+            if (!res.ok) return;
+            const projects = await res.json();
+            // Renderizar cada proyecto como una fila de la tabla
+            document.getElementById('projects-table').innerHTML = projects.map(p => `
+                <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
+                    <td class="p-4">${escapeHtml(p.name)}</td>
+                    <td class="p-4">${escapeHtml(p.owner)}</td>
+                    <td class="p-4">${p.language}</td>
+                    <td class="p-4">
+                        <span class="badge ${p.status}">
+                            ${p.status === 'completed' ? 'Completado' : p.status === 'error' ? 'Error' : 'Pendiente'}
+                        </span>
+                    </td>
+                    <td class="p-4">${p.quality_score || '—'}</td>
+                    <td class="p-4">
+                        <div class="flex gap-2">
+                            <span class="action-icon material-symbols-outlined" 
+                                  onclick="editProject('${p._id}','${escapeHtml(p.name)}','${escapeHtml(p.owner)}','${p.language}','${p.status}')">
+                                edit
+                            </span>
+                            <span class="action-icon material-symbols-outlined text-error/70" 
+                                  onclick="deleteProject('${p._id}')">
+                                delete
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 4.2 Abrir modal para crear proyecto
+        function openProjectModal() {
+            const modal = document.getElementById('projectModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            // Limpiar campos
+            document.getElementById('projectId').value = '';
+            document.getElementById('projectName').value = '';
+            document.getElementById('projectOwner').value = '';
+            document.getElementById('projectLanguage').value = 'Python';
+            document.getElementById('projectStatus').value = 'pending';
+            document.getElementById('projectModalTitle').innerText = 'Agregar Proyecto';
+        }
+
+        // 4.3 Cerrar modal
+        function closeProjectModal() {
+            const modal = document.getElementById('projectModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // 4.4 Editar proyecto (carga datos en el modal)
+        window.editProject = (id, name, owner, lang, status) => {
+            document.getElementById('projectModalTitle').innerText = 'Editar Proyecto';
+            document.getElementById('projectId').value = id;
+            document.getElementById('projectName').value = name;
+            document.getElementById('projectOwner').value = owner;
+            document.getElementById('projectLanguage').value = lang;
+            document.getElementById('projectStatus').value = status;
+            const modal = document.getElementById('projectModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        // 4.5 Guardar proyecto (crear o actualizar)
+        async function saveProject() {
+            const id = document.getElementById('projectId').value;
+            const name = document.getElementById('projectName').value;
+            const owner = document.getElementById('projectOwner').value;
+            const language = document.getElementById('projectLanguage').value;
+            const status = document.getElementById('projectStatus').value;
+            
+            // Determinar método y URL según si hay ID (edición) o no (creación)
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/admin/projects/${id}` : '/api/admin/projects';
+            
+            const res = await fetch(url, { 
+                method, 
+                headers: authHeaders(), 
+                body: JSON.stringify({ name, owner, language, status }) 
+            });
+            
+            if (res.ok) { 
+                closeProjectModal(); 
+                loadProjects(); 
+                loadSidebarCounts(); 
+            } else {
+                alert('Error guardando proyecto');
+            }
+        }
+
+        // 4.6 Eliminar proyecto
+        window.deleteProject = async (id) => {
+            if (confirm('¿Eliminar este proyecto?')) {
+                const res = await fetch(`/api/admin/projects/${id}`, { 
+                    method: 'DELETE', 
+                    headers: authHeaders() 
+                });
+                if (res.ok) { 
+                    loadProjects(); 
+                    loadSidebarCounts(); 
+                }
+            }
+        };
+
+        // ================================================================
+        // 5. LOGOUT
+        // ================================================================
+        function logout() { 
+            localStorage.clear(); 
+            window.location.href = '/'; 
+        }
+
+        // ================================================================
+        // 6. CAMBIO DE TEMA (CLARO/OSCURO)
+        // ================================================================
+        const themeBtn = document.getElementById('themeButton');
+        const themeIcon = document.getElementById('themeIcon');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
+            localStorage.setItem('theme', theme);
+        }
+        
+        // Aplicar tema guardado
+        applyTheme(savedTheme);
+        
+        // Evento para cambiar tema al hacer clic
+        themeBtn?.addEventListener('click', () => {
+            const cur = document.body.getAttribute('data-theme');
+            applyTheme(cur === 'light' ? 'dark' : 'light');
+        });
+
+        // ================================================================
+        // 7. PARTÍCULAS ANIMADAS EN EL FONDO
+        // ================================================================
+        const canvas = document.getElementById('particle-canvas');
+        let ctx = canvas.getContext('2d');
+        let particles = [], mouse = { x: null, y: null };
+
+        // 7.1 Redimensionar canvas al tamaño de la ventana
+        function resizeCanvas() { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        }
+
+        // 7.2 Clase para cada partícula
+        class Particle {
+            constructor() { this.reset(); }
+            
+            // Inicializar posición y velocidad aleatorias
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+            
+            // Actualizar posición y aplicar efecto de repulsión al mouse
+            update() {
+                this.x += this.vx; 
+                this.y += this.vy;
+                
+                // Repulsión del mouse
+                if (mouse.x) {
+                    let dx = mouse.x - this.x, dy = mouse.y - this.y, d = Math.hypot(dx, dy);
+                    if (d < 150) {
+                        let angle = Math.atan2(dy, dx), force = (150 - d) / 150;
+                        this.x -= Math.cos(angle) * force * 1.2;
+                        this.y -= Math.sin(angle) * force * 1.2;
+                    }
+                }
+                
+                // Rebote en los bordes (wrap-around)
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            
+            // Dibujar partícula y líneas de conexión
+            draw() {
+                const style = getComputedStyle(document.body);
+                const c1 = style.getPropertyValue('--particle-color-1').trim();
+                const c2 = style.getPropertyValue('--particle-color-2').trim();
+                
+                // Dibujar la partícula
+                ctx.fillStyle = Math.random() > 0.7 ? c1 : c2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Dibujar líneas con otras partículas cercanas
+                particles.forEach(p => {
+                    if (Math.hypot(this.x - p.x, this.y - p.y) < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.strokeStyle = style.getPropertyValue('--particle-line').trim();
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        // 7.3 Inicializar partículas
+        function initParticles() { 
+            particles = []; 
+            for (let i = 0; i < 70; i++) particles.push(new Particle()); 
+        }
+
+        // 7.4 Bucle de animación
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        // 7.5 Event listeners
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        
+        // 7.6 Iniciar partículas
+        resizeCanvas();
+        initParticles();
+        animate();
+
+        // ================================================================
+        // 8. CARGA INICIAL DE DATOS
+        // ================================================================
+        loadProjects();
+        loadSidebarCounts();
+    </script>
 </body>
 </html>

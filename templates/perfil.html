@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html class="dark" lang="es">
 <head>
+  <!-- ============================================================
+       METADATOS Y CONFIGURACION DEL DOCUMENTO
+       ============================================================ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Perfil — AutoDocs AI</title>
+  
+  <!-- ============================================================
+       LIBRERIAS EXTERNAS
+       ============================================================ -->
+  <!-- Tailwind CSS: Framework utilitario para estilos rapidos y responsive -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Fuentes de Google: JetBrains Mono para codigo, Geist para UI -->
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Iconos Material Symbols: Sistema de iconos de Google Material Design -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- ============================================================
+       CONFIGURACION DE TAILWIND
+       ============================================================ -->
   <script id="tailwind-config">
     tailwind.config = {
-      darkMode: "class",
+      darkMode: "class", // Habilita el modo oscuro basado en clases CSS
       theme: {
         extend: {
+          // Paleta de colores personalizada
           colors: {
             "primary":               "#38bdf8",
             "secondary":             "#818cf8",
@@ -22,17 +39,23 @@
             "error":                 "#ba1a1a",
             "background":            "#f1f5f9",
           },
+          // Fuentes personalizadas para diferentes contextos
           fontFamily: {
-            "body-md":    ["Geist"],
-            "display-lg": ["Geist"],
-            "code-md":    ["JetBrains Mono"],
+            "body-md":    ["Geist"],        // Texto general
+            "display-lg": ["Geist"],        // Display
+            "code-md":    ["JetBrains Mono"], // Codigo
           }
         }
       }
     }
   </script>
+  
   <style>
-    /* ── BASE (light) ───────────────────────────────────────── */
+    /* ============================================================
+       ESTILOS GLOBALES - MODO CLARO
+       ============================================================ */
+    
+    /* Estilos base para el body en modo claro */
     body {
       background: #f1f5f9;
       color: #0f172a;
@@ -42,14 +65,20 @@
       transition: background 0.3s ease, color 0.3s ease;
     }
 
+    /* ============================================================
+       EFECTO GLASS (VIDRIO ESMERILADO)
+       ============================================================ */
     .glass {
       background: rgba(255,255,255,0.75);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px); /* Desenfoque del fondo */
       border: 1px solid rgba(0,0,0,0.06);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       transition: background 0.3s ease, border-color 0.3s ease;
     }
 
+    /* ============================================================
+       ESTILOS DE INPUTS
+       ============================================================ */
     .input-field {
       width: 100%;
       background: #f8fafc;
@@ -71,6 +100,9 @@
       cursor: default;
     }
 
+    /* ============================================================
+       ESTILOS DE BOTONES
+       ============================================================ */
     .btn-primary {
       background: #38bdf8;
       color: #0f1418;
@@ -84,6 +116,9 @@
     }
     .btn-primary:active { transform: scale(0.98); }
 
+    /* ============================================================
+       ESTILOS DE TITULOS
+       ============================================================ */
     .section-title {
       font-size: 1.75rem;
       font-weight: 800;
@@ -93,23 +128,34 @@
       color: transparent;
     }
 
+    /* ============================================================
+       AVATAR CON INICIALES
+       ============================================================ */
     .avatar-initials {
       background: linear-gradient(145deg, #38bdf8 0%, #818cf8 100%);
       color: #0f1418;
       font-weight: 700;
     }
 
+    /* ============================================================
+       BADGES DE INFORMACION
+       ============================================================ */
     .info-badge {
       background: rgba(56,189,248,0.10);
       border: 0.5px solid rgba(56,189,248,0.35);
     }
 
+    /* ============================================================
+       TARJETA DE SEGURIDAD
+       ============================================================ */
     .security-card {
       background: rgba(56,189,248,0.06);
       border-left: 3px solid #38bdf8;
     }
 
-    /* ── DARK OVERRIDES ─────────────────────────────────────── */
+    /* ============================================================
+       ESTILOS PARA MODO OSCURO (DARK OVERRIDES)
+       ============================================================ */
     html.dark body {
       background: #0f1418;
       color: #dee3e8;
@@ -142,6 +188,7 @@
       -webkit-background-clip: text;
     }
 
+    /* Helpers de texto para modo oscuro */
     html.dark .text-on-surface-custom   { color: #f1f5f9 !important; }
     html.dark .text-variant-custom      { color: #94a3b8 !important; }
     html.dark .text-variant-60          { color: #64748b !important; }
@@ -151,7 +198,7 @@
     html.dark .security-card            { background: rgba(142,213,255,0.06); }
     html.dark .info-badge               { background: rgba(142,213,255,0.12); border-color: rgba(142,213,255,0.3); }
 
-    /* light text helpers */
+    /* Helpers de texto para modo claro */
     .text-on-surface-custom   { color: #0f172a; }
     .text-variant-custom      { color: #334155; }
     .text-variant-60          { color: rgba(51,65,85,0.6); }
@@ -159,7 +206,9 @@
     .text-variant-50          { color: rgba(51,65,85,0.5); }
     .border-divider           { border-color: rgba(148,163,184,0.35); }
 
-    /* Theme button */
+    /* ============================================================
+       BOTON DE TEMA (CLARO/OSCURO)
+       ============================================================ */
     .theme-btn {
       display: inline-flex;
       align-items: center;
@@ -185,11 +234,15 @@
   </style>
 </head>
 <body>
+  <!-- Contenedor principal con padding responsive -->
   <div class="min-h-screen p-6 md:p-8">
     <div class="max-w-5xl mx-auto">
 
-      <!-- Header -->
+      <!-- ============================================================
+           ENCABEZADO (HEADER)
+           ============================================================ -->
       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+        <!-- Titulo y descripcion -->
         <div>
           <div class="flex items-center gap-2 text-sm text-variant-70 mb-1">
             <span class="material-symbols-outlined text-[18px]" style="color:#38bdf8">account_circle</span>
@@ -201,11 +254,12 @@
 
         <!-- Acciones del header -->
         <div class="flex items-center gap-3 flex-shrink-0">
-          <!-- Botón de tema -->
+          <!-- Boton de tema (claro/oscuro) -->
           <button id="themeButton" class="theme-btn" title="Cambiar tema">
             <span id="themeIcon" class="material-symbols-outlined" style="font-size:20px">light_mode</span>
           </button>
 
+          <!-- Boton para volver al dashboard -->
           <a href="/dashboard" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-divider text-variant-custom hover:text-primary transition-all duration-200 glass text-sm font-medium">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
             Volver al dashboard
@@ -213,18 +267,25 @@
         </div>
       </div>
 
-      <!-- Grid principal -->
+      <!-- ============================================================
+           GRID PRINCIPAL (3 columnas en desktop, 1 en mobile)
+           ============================================================ -->
       <div class="grid lg:grid-cols-3 gap-6">
 
-        <!-- Columna izquierda: avatar + estado -->
+        <!-- ============================================================
+             COLUMNA IZQUIERDA: AVATAR + ESTADO
+             ============================================================ -->
         <div class="lg:col-span-1">
           <div class="glass rounded-3xl p-6 text-center sticky top-6">
             <div class="flex flex-col items-center">
+              <!-- Contenedor del avatar circular con iniciales -->
               <div id="avatarContainer" class="w-28 h-28 rounded-full avatar-initials flex items-center justify-center text-3xl font-bold shadow-xl mb-4 ring-4" style="ring-color:rgba(56,189,248,0.25)">
                 <span id="avatarInitials">--</span>
               </div>
+              <!-- Nombre del usuario -->
               <h3 id="displayName" class="text-xl font-bold text-on-surface-custom">Cargando...</h3>
 
+              <!-- Badges de estado del usuario -->
               <div class="flex flex-wrap gap-2 justify-center mt-2">
                 <span class="info-badge text-xs px-3 py-1 rounded-full flex items-center gap-1 text-variant-custom">
                   <span class="material-symbols-outlined text-[14px]" style="color:#38bdf8">verified</span> Verificado
@@ -234,11 +295,11 @@
                 </span>
               </div>
 
-
+              <!-- Informacion adicional del usuario -->
               <div class="w-full mt-5 pt-5 border-t border-divider">
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-variant-70 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">schedule</span> Último acceso
+                    <span class="material-symbols-outlined text-[16px]">schedule</span> Ultimo acceso
                   </span>
                   <span class="text-on-surface-custom font-mono text-xs">—</span>
                 </div>
@@ -253,17 +314,23 @@
           </div>
         </div>
 
-        <!-- Columna derecha: formulario -->
+        <!-- ============================================================
+             COLUMNA DERECHA: FORMULARIO DE PERFIL
+             ============================================================ -->
         <div class="lg:col-span-2">
           <div class="glass rounded-3xl p-6 md:p-8">
+            <!-- Encabezado de la seccion -->
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-divider">
               <span class="material-symbols-outlined text-2xl" style="color:#38bdf8">edit_note</span>
-              <h2 class="text-xl font-bold tracking-tight text-on-surface-custom">Información personal</h2>
+              <h2 class="text-xl font-bold tracking-tight text-on-surface-custom">Informacion personal</h2>
             </div>
 
             <div class="space-y-6">
-              <!-- Nombre + Email -->
+              <!-- ============================================================
+                   CAMPO: NOMBRE + EMAIL
+                   ============================================================ -->
               <div class="grid md:grid-cols-2 gap-5">
+                <!-- Nombre completo -->
                 <div class="space-y-2">
                   <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
                     <span class="material-symbols-outlined text-[16px]">badge</span> Nombre completo
@@ -273,9 +340,10 @@
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-variant-50 text-[18px]">person</span>
                   </div>
                 </div>
+                <!-- Correo electronico (solo lectura) -->
                 <div class="space-y-2">
                   <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">mail</span> Correo electrónico
+                    <span class="material-symbols-outlined text-[16px]">mail</span> Correo electronico
                   </label>
                   <div class="relative">
                     <input id="profileEmail" type="email" class="input-field pl-9" readonly />
@@ -284,7 +352,9 @@
                 </div>
               </div>
 
-              <!-- Plan actual -->
+              <!-- ============================================================
+                   SECCION: PLAN ACTUAL
+                   ============================================================ -->
               <div class="space-y-2">
                 <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
                   <span class="material-symbols-outlined text-[16px]" style="color:#38bdf8">workspace_premium</span> Plan actual
@@ -292,14 +362,18 @@
                 <div class="glass rounded-xl p-4 border border-divider">
                   <div class="flex items-center justify-between">
                     <div>
+                      <!-- Nombre del plan -->
                       <p id="currentPlanName" class="text-lg font-bold text-on-surface-custom">Cargando...</p>
+                      <!-- Detalles del plan -->
                       <p id="currentPlanDetails" class="text-sm text-variant-70 mt-1">—</p>
                     </div>
                     <div class="text-right">
+                      <!-- Precio del plan -->
                       <p id="currentPlanPrice" class="text-2xl font-bold" style="color:#38bdf8">—</p>
                       <p class="text-xs text-variant-50">/mes</p>
                     </div>
                   </div>
+                  <!-- Barra de progreso de proyectos usados -->
                   <div class="mt-4 pt-4 border-t border-divider">
                     <div class="flex items-center justify-between text-sm mb-3">
                       <span class="text-variant-70">Proyectos usados</span>
@@ -308,6 +382,7 @@
                     <div class="w-full bg-outline-variant/20 rounded-full h-2 mb-3">
                       <div id="projectsProgress" class="h-2 rounded-full transition-all duration-300" style="width:0%;background:#38bdf8"></div>
                     </div>
+                    <!-- Boton para cambiar de plan -->
                     <button onclick="location.href='/pricing'" class="w-full py-2.5 rounded-xl border border-divider text-variant-custom hover:text-primary hover:border-primary/50 transition-all text-sm font-medium flex items-center justify-center gap-2">
                       <span class="material-symbols-outlined text-[18px]">upgrade</span> Cambiar plan
                     </button>
@@ -315,8 +390,11 @@
                 </div>
               </div>
 
-              <!-- Contraseñas -->
+              <!-- ============================================================
+                   SECCION: CONTRASEÑAS
+                   ============================================================ -->
               <div class="grid md:grid-cols-2 gap-5">
+                <!-- Nueva contraseña -->
                 <div class="space-y-2">
                   <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
                     <span class="material-symbols-outlined text-[16px]">lock</span> Nueva contraseña
@@ -324,12 +402,14 @@
                   <div class="relative">
                     <input id="profilePassword" type="password" class="input-field pl-9" placeholder="••••••••" />
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-variant-50 text-[18px]">key</span>
+                    <!-- Boton para mostrar/ocultar contraseña -->
                     <button type="button" onclick="togglePassword('profilePassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-variant-50 hover:text-primary transition-colors">
                       <span class="material-symbols-outlined">visibility</span>
                     </button>
                   </div>
-                  <p class="text-[11px] text-variant-50 mt-1">Mínimo 6 caracteres, déjala vacía si no deseas cambiarla</p>
+                  <p class="text-[11px] text-variant-50 mt-1">Minimo 6 caracteres, dejala vacia si no deseas cambiarla</p>
                 </div>
+                <!-- Confirmar contraseña -->
                 <div class="space-y-2">
                   <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
                     <span class="material-symbols-outlined text-[16px]">verified</span> Confirmar contraseña
@@ -337,6 +417,7 @@
                   <div class="relative">
                     <input id="profilePasswordConfirm" type="password" class="input-field pl-9" placeholder="••••••••" />
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-variant-50 text-[18px]">password</span>
+                    <!-- Boton para mostrar/ocultar contraseña -->
                     <button type="button" onclick="togglePassword('profilePasswordConfirm', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-variant-50 hover:text-primary transition-colors">
                       <span class="material-symbols-outlined">visibility</span>
                     </button>
@@ -344,28 +425,38 @@
                 </div>
               </div>
 
-              <!-- Tip de seguridad -->
+              <!-- ============================================================
+                   TIP DE SEGURIDAD
+                   ============================================================ -->
               <div class="security-card rounded-xl p-3 flex items-start gap-3">
                 <span class="material-symbols-outlined text-xl flex-shrink-0" style="color:#38bdf8">info</span>
                 <div class="text-xs text-variant-70 leading-relaxed">
-                  <span class="font-medium" style="color:#38bdf8">Recomendación de seguridad:</span> Utiliza una contraseña única, combina mayúsculas, números y símbolos. Evita palabras comunes.
+                  <span class="font-medium" style="color:#38bdf8">Recomendacion de seguridad:</span> Utiliza una contraseña unica, combina mayusculas, numeros y simbolos. Evita palabras comunes.
                 </div>
               </div>
 
-              <!-- Mensajes -->
+              <!-- ============================================================
+                   MENSAJES DE ERROR Y EXITO
+                   ============================================================ -->
+              <!-- Mensaje de error -->
               <div id="profileError" class="text-sm hidden rounded-xl p-3 flex items-center gap-2" style="background:rgba(186,26,26,0.1);border:1px solid rgba(186,26,26,0.2);color:#ba1a1a">
                 <span class="material-symbols-outlined text-base">error</span>
                 <span id="errorMessage"></span>
               </div>
+              <!-- Mensaje de exito -->
               <div id="profileSuccess" class="text-sm hidden rounded-xl p-3 flex items-center gap-2" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10b981">
                 <span class="material-symbols-outlined text-base">check_circle</span> Perfil actualizado correctamente.
               </div>
 
-              <!-- Acciones -->
+              <!-- ============================================================
+                   ACCIONES DEL FORMULARIO
+                   ============================================================ -->
               <div class="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-divider">
+                <!-- Boton para recargar datos -->
                 <button onclick="loadProfile()" class="px-5 py-2.5 rounded-2xl border border-divider text-variant-custom hover:text-primary transition-all flex items-center gap-2 text-sm glass">
                   <span class="material-symbols-outlined text-[18px]">refresh</span> Recargar datos
                 </button>
+                <!-- Boton para guardar cambios -->
                 <button id="saveButton" onclick="saveProfile()" class="btn-primary px-6 py-2.5 rounded-2xl text-sm flex items-center gap-2 shadow-lg">
                   <span class="material-symbols-outlined text-[18px]">save</span> Guardar cambios
                 </button>
@@ -377,11 +468,22 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       JAVASCRIPT - LOGICA PRINCIPAL
+       ============================================================ -->
   <script>
-    // ── TEMA ──────────────────────────────────────────────────────────
+    // ============================================================
+    // GESTION DE TEMA (CLARO/OSCURO)
+    // ============================================================
+    
+    // Obtener referencias al boton y al icono del tema
     const themeButton = document.getElementById('themeButton');
     const themeIcon   = document.getElementById('themeIcon');
 
+    /**
+     * Aplica el tema seleccionado y guarda la preferencia
+     * @param {string} theme - 'light' o 'dark'
+     */
     function applyTheme(theme) {
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -396,83 +498,110 @@
       localStorage.setItem('theme', theme);
     }
 
+    // Cargar tema guardado o usar 'dark' por defecto
     const savedTheme = localStorage.getItem('theme') || 'dark';
     applyTheme(savedTheme === 'light' ? 'light' : 'dark');
 
-    themeButton.addEventListener('click', () => {
-      const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    // Event listener para el boton de tema
+    themeButton.addEventListener('click', function() {
+      var current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
       applyTheme(current === 'dark' ? 'light' : 'dark');
     });
 
-    // ── AUTH ──────────────────────────────────────────────────────────
+    // ============================================================
+    // AUTENTICACION
+    // ============================================================
+    
+    // Obtener token de autenticacion del localStorage
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/';
 
+    /**
+     * Devuelve los headers necesarios para peticiones autenticadas
+     * @returns {Object} Headers con token JWT
+     */
     function authHeaders() {
-      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+      return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
     }
 
-    let isSaving = false;
+    // Variable para controlar el estado de guardado
+    var isSaving = false;
 
+    // ============================================================
+    // FUNCIONES DE UI
+    // ============================================================
+    
+    /**
+     * Actualiza la interfaz con los datos del usuario
+     * @param {string} name - Nombre del usuario
+     * @param {string} email - Email del usuario
+     */
     function updateProfileUI(name, email) {
-      const displayNameElem    = document.getElementById('displayName');
-      const avatarInitialsElem = document.getElementById('avatarInitials');
+      var displayNameElem    = document.getElementById('displayName');
+      var avatarInitialsElem = document.getElementById('avatarInitials');
       if (name) {
         displayNameElem.textContent = name;
-        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        var initials = name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
         avatarInitialsElem.textContent = initials || '👤';
       } else {
-        displayNameElem.textContent = email?.split('@')[0] || 'Usuario';
-        avatarInitialsElem.textContent = (email?.charAt(0) || 'U').toUpperCase();
+        displayNameElem.textContent = (email && email.split('@')[0]) || 'Usuario';
+        avatarInitialsElem.textContent = (email && email.charAt(0).toUpperCase()) || 'U';
       }
     }
 
+    // ============================================================
+    // CARGA DE PERFIL
+    // ============================================================
+    
+    /**
+     * Carga los datos del perfil desde el backend
+     */
     async function loadProfile() {
-      const errorEl   = document.getElementById('profileError');
-      const successEl = document.getElementById('profileSuccess');
+      var errorEl   = document.getElementById('profileError');
+      var successEl = document.getElementById('profileSuccess');
       errorEl.classList.add('hidden');
       successEl.classList.add('hidden');
       try {
-        const res = await fetch('/api/auth/me', { headers: authHeaders() });
+        // Cargar datos del usuario
+        var res = await fetch('/api/auth/me', { headers: authHeaders() });
         if (!res.ok) return window.location.href = '/';
-        const user = await res.json();
+        var user = await res.json();
         document.getElementById('profileName').value  = user.name  || '';
         document.getElementById('profileEmail').value = user.email || '';
         updateProfileUI(user.name, user.email);
 
         // Cargar plan actual y proyectos
-        const planRes = await fetch('/api/payments/my-plan', { headers: authHeaders() });
+        var planRes = await fetch('/api/payments/my-plan', { headers: authHeaders() });
         if (planRes.ok) {
-          const planData = await planRes.json();
-          const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
-          const planDetails = {
-            free: '3 proyectos, 10 análisis/mes',
-            pro: '20 proyectos, 100 análisis/mes, PDF + IA',
-            enterprise: 'Proyectos ilimitados, análisis ilimitados'
+          var planData = await planRes.json();
+          var planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+          var planDetails = {
+            free: '3 proyectos, 10 analisis/mes',
+            pro: '20 proyectos, 100 analisis/mes, PDF + IA',
+            enterprise: 'Proyectos ilimitados, analisis ilimitados'
           };
-          // Prices should match pricing page
-          const planPrices = { free: '$0', pro: '$350', enterprise: '$850' };
-          const projectLimits = { free: 3, pro: 20, enterprise: -1 };
+          var planPrices = { free: '$0', pro: '$350', enterprise: '$850' };
+          var projectLimits = { free: 3, pro: 20, enterprise: -1 };
 
           document.getElementById('currentPlanName').textContent = planNames[planData.plan] || planData.plan;
           document.getElementById('currentPlanDetails').textContent = planDetails[planData.plan] || '';
           document.getElementById('currentPlanPrice').textContent = planPrices[planData.plan] || '$0';
 
           // Cargar proyectos del usuario
-          const projectsRes = await fetch('/api/projects/', { headers: authHeaders() });
+          var projectsRes = await fetch('/api/projects/', { headers: authHeaders() });
           if (projectsRes.ok) {
-            const projects = await projectsRes.json();
-            const used = projects.length;
-            const limit = projectLimits[planData.plan] || 3;
+            var projects = await projectsRes.json();
+            var used = projects.length;
+            var limit = projectLimits[planData.plan] || 3;
 
             document.getElementById('projectsUsed').textContent = used;
             document.getElementById('projectsLimit').textContent = limit === -1 ? '∞' : limit;
 
             // Calcular progreso
-            const progress = limit === -1 ? 0 : Math.min((used / limit) * 100, 100);
+            var progress = limit === -1 ? 0 : Math.min((used / limit) * 100, 100);
             document.getElementById('projectsProgress').style.width = progress + '%';
 
-            // Cambiar color si está cerca del límite
+            // Cambiar color si esta cerca del limite
             if (limit !== -1 && used >= limit) {
               document.getElementById('projectsProgress').style.background = '#ef4444';
             } else if (limit !== -1 && used >= limit * 0.8) {
@@ -480,47 +609,34 @@
             }
           }
         }
-      } catch {
+      } catch (error) {
         document.getElementById('errorMessage').textContent = 'Error al cargar perfil.';
         errorEl.classList.remove('hidden');
       }
     }
 
-    async function goToDatabaseAnalysis() {
-      const messageBox = document.getElementById('dbPlanMessage');
-      const messageText = document.getElementById('dbPlanText');
-      messageBox.classList.add('hidden');
-      try {
-        const res = await fetch('/api/payments/my-plan', { headers: authHeaders() });
-        if (!res.ok) throw new Error('No autorizado');
-        const data = await res.json();
-        const plan = data.plan || 'free';
-        if (plan === 'free') {
-          messageText.textContent = 'Necesitas actualizar tu plan para usar el analizador de base de datos.';
-          messageBox.classList.remove('hidden');
-          return;
-        }
-        window.location.href = '/database-analysis';
-      } catch (error) {
-        messageText.textContent = 'No se pudo verificar tu plan. Intenta de nuevo.';
-        messageBox.classList.remove('hidden');
-      }
-    }
-
+    // ============================================================
+    // GUARDAR PERFIL
+    // ============================================================
+    
+    /**
+     * Guarda los cambios del perfil en el backend
+     */
     async function saveProfile() {
       if (isSaving) return;
-      const name            = document.getElementById('profileName').value.trim();
-      const password        = document.getElementById('profilePassword').value;
-      const passwordConfirm = document.getElementById('profilePasswordConfirm').value;
-      const errorEl         = document.getElementById('profileError');
-      const successEl       = document.getElementById('profileSuccess');
-      const saveBtn         = document.getElementById('saveButton');
+      var name            = document.getElementById('profileName').value.trim();
+      var password        = document.getElementById('profilePassword').value;
+      var passwordConfirm = document.getElementById('profilePasswordConfirm').value;
+      var errorEl         = document.getElementById('profileError');
+      var successEl       = document.getElementById('profileSuccess');
+      var saveBtn         = document.getElementById('saveButton');
 
       errorEl.classList.add('hidden');
       successEl.classList.add('hidden');
 
+      // Validaciones del formulario
       if (!name) {
-        document.getElementById('errorMessage').textContent = 'El nombre no puede estar vacío.';
+        document.getElementById('errorMessage').textContent = 'El nombre no puede estar vacio.';
         errorEl.classList.remove('hidden'); return;
       }
       if (password && password !== passwordConfirm) {
@@ -532,31 +648,31 @@
         errorEl.classList.remove('hidden'); return;
       }
 
-      const body = { name };
+      var body = { name: name };
       if (password) body.password = password;
 
       isSaving = true;
-      const originalBtnText = saveBtn.innerHTML;
+      var originalBtnText = saveBtn.innerHTML;
       saveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">progress_activity</span> Guardando...';
       saveBtn.disabled  = true;
 
       try {
-        const res = await fetch('/api/auth/me', {
+        var res = await fetch('/api/auth/me', {
           method: 'PUT', headers: authHeaders(), body: JSON.stringify(body)
         });
         if (!res.ok) {
-          const data = await res.json();
+          var data = await res.json();
           document.getElementById('errorMessage').textContent = data.error || 'No se pudo actualizar el perfil.';
           errorEl.classList.remove('hidden'); return;
         }
-        const updatedUser = await res.json();
+        var updatedUser = await res.json();
         if (updatedUser.name) document.getElementById('profileName').value = updatedUser.name;
         updateProfileUI(updatedUser.name, document.getElementById('profileEmail').value);
         successEl.classList.remove('hidden');
         document.getElementById('profilePassword').value        = '';
         document.getElementById('profilePasswordConfirm').value = '';
         successEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch {
+      } catch (error) {
         document.getElementById('errorMessage').textContent = 'Error de servidor. Intenta de nuevo.';
         errorEl.classList.remove('hidden');
       } finally {
@@ -566,9 +682,18 @@
       }
     }
 
+    // ============================================================
+    // MOSTRAR/OCULTAR CONTRASEÑA
+    // ============================================================
+    
+    /**
+     * Alterna la visibilidad de un campo de contraseña
+     * @param {string} inputId - ID del campo de contraseña
+     * @param {HTMLElement} button - Boton que dispara la accion
+     */
     function togglePassword(inputId, button) {
-      const input = document.getElementById(inputId);
-      const icon = button.querySelector('.material-symbols-outlined');
+      var input = document.getElementById(inputId);
+      var icon = button.querySelector('.material-symbols-outlined');
       if (!input) return;
       if (input.type === 'password') {
         input.type = 'text';
@@ -579,6 +704,9 @@
       }
     }
 
+    // ============================================================
+    // INICIALIZACION
+    // ============================================================
     loadProfile();
   </script>
 </body>

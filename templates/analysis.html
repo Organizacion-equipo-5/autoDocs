@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Análisis — AutoDocs AI</title>
+    <!-- Tailwind CSS para estilos utilitarios -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Fuentes personalizadas: Geist para textos, JetBrains Mono para código -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
+    <!-- Configuración de Tailwind: colores, modos oscuro/claro, tipografía -->
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -20,7 +24,7 @@
                         "on-tertiary-container": "#613b00","on-tertiary-fixed": "#2a1700","surface-variant": "#cbd5e1",
                         "secondary-container": "#e0e7ff","on-surface-variant": "#334155","primary-fixed": "#bae6fd",
                         "surface-container-highest": "#e2e8f0","surface-dim": "#cbd5e1","outline-variant": "#94a3b8",
-                        "on-surface": "#0f172a","on-secondary-container": "#1e1b4b","secondary-fixed": "#e0e7ff",
+                        "on-surface": "#FFFFFF","on-secondary-container": "#1e1b4b","secondary-fixed": "#e0e7ff",
                         "tertiary": "#7c5800","primary-fixed-dim": "#7dd3fc","background": "#f1f5f9",
                         "tertiary-fixed-dim": "#ffb960","surface-bright": "#ffffff",
                         "surface-container-lowest": "#ffffff","on-primary-fixed": "#001e2c","inverse-on-surface": "#eef2f5",
@@ -38,6 +42,9 @@
         }
     </script>
     <style>
+        /* ============================================================
+           ESTILOS GLOBALES Y VARIABLES CSS
+           ============================================================ */
         body { background: #f1f5f9; overflow-x: hidden; min-height: 100vh; color: #0f172a; }
         html.dark body { background: #0f1418; color: #e2e8f0; }
         html.dark .glass { background: rgba(15,20,24,0.7); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -67,6 +74,7 @@
         html.dark .bg-blue-100 { background: #1e3a8a !important; }
         html.dark .text-blue-700 { color: #60a5fa !important; }
         #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        /* --- Efecto Glassmorphism --- */
         .glass { background: var(--color-surface); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); transform: translate3d(0,0,0); transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.1s ease-out; will-change: transform, opacity; }
         .glass-hover:hover { border-color: var(--glass-hover-border); box-shadow: var(--glass-hover-shadow); }
         .glow-cyan { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
@@ -85,12 +93,12 @@
         .tab { padding: 0.6rem 1.2rem; font-size: 0.85rem; color: var(--on-surface-variant); cursor: pointer; background: none; border: none; border-radius: 6px; transition: all 0.15s; font-family: "Geist", sans-serif; }
         .tab.active { background: rgba(56,189,248,0.1); color: #38bdf8; }
 
-        /* ── SUGGESTION BUTTON ── */
+        /* ── BOTÓN DE SUGERENCIA ── */
         .btn-suggest { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35); color: #b45309; font-size: 0.72rem; font-family: "JetBrains Mono", monospace; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
         .btn-suggest:hover { background: rgba(251,191,36,0.22); transform: scale(1.04); }
         html.dark .btn-suggest { color: #fbbf24; background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.3); }
 
-        /* ── MODAL ── */
+        /* ── MODAL DE SUGERENCIAS ── */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -125,7 +133,7 @@
         .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-size: 0.78rem; font-family: "JetBrains Mono", monospace; cursor: pointer; transition: all 0.15s; }
         .copy-btn:hover { background: rgba(56,189,248,0.2); }
 
-        /* Checkbox styling */
+        /* Checkbox personalizado */
         .item-checkbox {
             appearance: none; -webkit-appearance: none;
             width: 18px; height: 18px;
@@ -138,11 +146,9 @@
         .item-checkbox:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; font-weight: bold; }
         html.dark .item-checkbox { background: rgba(30, 41, 59, 0.5); border-color: rgba(56, 189, 248, 0.4); }
 
-        /* ══════════════════════════════════════
-           CONTRIBUTORS — DISEÑO CORREGIDO
-           Los nombres ahora se ven en negrita
-        ══════════════════════════════════════ */
-
+        /* ============================================================
+           ESTILOS DE COLABORADORES — Nombres en negrita y oscuros
+           ============================================================ */
         .mvp-card {
             position: relative;
             overflow: hidden;
@@ -184,7 +190,7 @@
             font-family: "JetBrains Mono", monospace;
             margin-bottom: 2px;
         }
-        /* ⚠️ NOMBRE MVP EN NEGRITA Y OSCURO */
+        /*  NOMBRE MVP EN NEGRITA Y OSCURO */
         .mvp-name {
             font-size: 1.1rem;
             font-weight: 800;
@@ -224,7 +230,7 @@
             margin-top: 2px;
         }
 
-        /* Podio */
+        /* Podio de colaboradores */
         .podium-row {
             display: flex; gap: 8px; margin-bottom: 16px;
         }
@@ -253,7 +259,7 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 0.75rem; font-weight: 700; color: white;
         }
-        /* ⚠️ NOMBRE PODIO EN NEGRITA */
+        /*  NOMBRE PODIO EN NEGRITA */
         .podium-name {
             font-size: 0.72rem;
             font-weight: 700;
@@ -311,7 +317,7 @@
             transition: width 1.2s cubic-bezier(0.22,1,0.36,1);
         }
 
-        /* ⚠️ NOMBRE EN LISTA - NEGRITA Y OSCURO */
+        /*  NOMBRE EN LISTA - NEGRITA Y OSCURO */
         .contributor-name {
             font-size: 0.875rem;
             font-weight: 700;
@@ -322,7 +328,7 @@
             color: #f1f5f9;
         }
 
-        /* Botones */
+        /* Botones de colaboradores */
         .btn-contributors {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 6px 14px; border-radius: 10px;
@@ -353,9 +359,13 @@
     </style>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
+    <!-- Lienzo para el fondo de partículas -->
     <canvas id="particle-canvas"></canvas>
 
-    <!-- ══════════════ SUGGESTION MODAL ══════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════
+         MODAL DE SUGERENCIA DE DOCSTRING
+         Aparece cuando el usuario hace clic en "💡 Sugerencia"
+         ════════════════════════════════════════════════════════════════ -->
     <div id="suggestion-modal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="modal-title-text" onclick="if(event.target===this)closeModal()">
         <div class="glass p-8 rounded-3xl w-full max-w-lg modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]" onclick="event.stopPropagation()">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -380,20 +390,24 @@
         </div>
     </div>
 
-    <!-- ══════════════ PDF LOADING MODAL ══════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════
+         MODAL DE CARGA PARA EXPORTACIÓN PDF
+         ════════════════════════════════════════════════════════════════ -->
     <div id="pdf-loading-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closePdfLoadingModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Generando PDF</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6">Por favor espere mientras generamos el documento...</p>
+            <p class="text-on-surface-variant/60 text-sm mb-6"style="color: #BFBDBD;">Por favor espere mientras generamos el documento...</p>
             <div class="flex flex-col items-center gap-4 py-8">
                 <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin"></div>
-                <p class="text-center text-on-surface-variant/60 text-sm">Procesando documentación...</p>
+                <p class="text-center text-on-surface-variant/60 text-sm"style="color: #BFBDBD;">Procesando documentación...</p>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════ PDF SUCCESS MODAL ══════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════
+         MODAL DE ÉXITO PARA EXPORTACIÓN PDF
+         ════════════════════════════════════════════════════════════════ -->
     <div id="pdf-success-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closePdfSuccessModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -407,10 +421,13 @@
         </div>
     </div>
 
-    <!-- ══════════════ CONTRIBUTORS MODAL ══════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════
+         MODAL DE COLABORADORES
+         Muestra el MVP, podio y lista de colaboradores del proyecto
+         ════════════════════════════════════════════════════════════════ -->
     <div id="contributors-modal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" role="dialog" aria-modal="true" onclick="if(event.target===this)closeContributorsModal()">
         <div class="glass p-6 rounded-3xl w-full max-w-2xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]" onclick="event.stopPropagation()" style="max-height:90vh;overflow:hidden;display:flex;flex-direction:column;">
-            <!-- Header -->
+            <!-- Header del modal -->
             <div class="flex items-center justify-between mb-5 flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center">
@@ -430,7 +447,7 @@
                 </div>
             </div>
 
-            <!-- Scroll container -->
+            <!-- Contenido del modal (scrollable) -->
             <div id="contributors-body" style="overflow-y:auto;flex:1;" class="pr-1">
                 <div class="flex flex-col items-center gap-3 py-8 text-on-surface-variant/60">
                     <div class="w-8 h-8 border-[3px] border-solid border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -440,8 +457,11 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         LAYOUT PRINCIPAL
+         ============================================================ -->
     <div class="flex min-h-screen w-full relative z-10">
-        <!-- Sidebar -->
+        <!-- Sidebar: Navegación lateral con iconos -->
         <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
             <div class="mb-12">
                 <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
@@ -476,12 +496,12 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Contenido principal -->
         <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
-            <!-- Top bar -->
+            <!-- Barra superior: navegación y botones de acción -->
             <header class="flex justify-between items-center stagger-in" style="animation-delay: 0.15s;">
-                <a href="/dashboard" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline flex items-center gap-1 font-code-md">
-                    <span class="material-symbols-outlined text-sm">arrow_back</span> Volver al dashboard
+                <a href="/dashboard" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline flex items-center gap-1 font-code-md"style="color: #BFBDBD;">
+                    <span class="material-symbols-outlined text-sm"style="color: #BFBDBD;">arrow_back</span> Volver al dashboard
                 </a>
                 <div class="flex gap-3 items-center">
                     <button onclick="openContributorsModal()" class="btn-contributors">
@@ -498,7 +518,7 @@
                 </div>
             </header>
 
-            <!-- Project Header Card -->
+            <!-- Tarjeta del proyecto: título, lenguaje, fecha, estado -->
             <div class="stagger-in" style="animation-delay: 0.2s;">
                 <div class="glass p-6 rounded-2xl glass-hover card-interaction tilt-card">
                     <div class="flex items-start justify-between">
@@ -514,7 +534,7 @@
                 </div>
             </div>
 
-            <!-- Loading State -->
+            <!-- Estado de carga mientras se analiza el proyecto -->
             <div id="loading-state" style="display:none;" class="stagger-in">
                 <div class="glass p-12 rounded-3xl text-center text-on-surface-variant/50">
                     <div class="w-12 h-12 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
@@ -523,33 +543,33 @@
                 </div>
             </div>
 
-            <!-- Results Section -->
+            <!-- Resultados del análisis -->
             <div id="results-section" style="display:none;" class="flex flex-col gap-12">
-                <!-- Metrics Row -->
+                <!-- Métricas: archivos, funciones, clases, endpoints, lenguajes -->
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 stagger-in" style="animation-delay: 0.3s;">
                     <div class="tilt-card"><div class="glass p-4 rounded-2xl text-center card-interaction">
                         <div class="text-3xl font-bold text-on-surface" id="m-files">0</div>
-                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md">Archivos</div>
+                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md"style="color: #BFBDBD;">Archivos</div>
                     </div></div>
                     <div class="tilt-card"><div class="glass p-4 rounded-2xl text-center card-interaction">
                         <div class="text-3xl font-bold text-on-surface" id="m-funcs">0</div>
-                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md">Funciones</div>
+                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md"style="color: #BFBDBD;">Funciones</div>
                     </div></div>
                     <div class="tilt-card"><div class="glass p-4 rounded-2xl text-center card-interaction">
                         <div class="text-3xl font-bold text-on-surface" id="m-classes">0</div>
-                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md">Clases</div>
+                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md"style="color: #BFBDBD;">Clases</div>
                     </div></div>
                     <div class="tilt-card"><div class="glass p-4 rounded-2xl text-center card-interaction">
                         <div class="text-3xl font-bold text-on-surface" id="m-endpoints">0</div>
-                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md">Endpoints</div>
+                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md"style="color: #BFBDBD;">Endpoints</div>
                     </div></div>
                     <div class="tilt-card"><div class="glass p-4 rounded-2xl text-center card-interaction">
                         <div class="text-3xl font-bold text-on-surface" id="m-langs">0</div>
-                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md">Lenguajes</div>
+                        <div class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-1 font-code-md"style="color: #BFBDBD;">Lenguajes</div>
                     </div></div>
                 </div>
 
-                <!-- Quality Card -->
+                <!-- Tarjeta de calidad: score con anillo SVG -->
                 <div class="glass p-6 rounded-2xl glass-hover stagger-in tilt-card card-interaction" style="animation-delay: 0.4s;">
                     <div class="flex items-center gap-8">
                         <div class="relative w-24 h-24">
@@ -559,17 +579,17 @@
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
                                 <span class="text-xl font-bold text-on-surface" id="q-score">—</span>
-                                <span class="text-[10px] text-on-surface-variant/50 font-code-md">/100</span>
+                                <span class="text-[10px] text-on-surface-variant/50 font-code-md"style="color: #BFBDBD;">/100</span>
                             </div>
                         </div>
                         <div>
                             <h3 class="text-lg font-bold text-on-surface">Score de Calidad</h3>
-                            <p class="text-sm text-on-surface-variant/70 mt-1" id="quality-desc">Calculando métricas...</p>
+                            <p class="text-sm text-on-surface-variant/70 mt-1" id="quality-desc"style="color: #BFBDBD;">Calculando métricas...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tabs -->
+                <!-- Pestañas de navegación entre vistas -->
                 <div class="flex gap-2 border-b border-outline-variant/20 pb-2 stagger-in" style="animation-delay: 0.5s;">
                     <button class="tab active" onclick="showTab('endpoints')">API Endpoints</button>
                     <button class="tab" onclick="showTab('functions')">Funciones</button>
@@ -577,7 +597,8 @@
                     <button class="tab" onclick="showTab('structure')">Estructura</button>
                 </div>
 
-                <!-- Endpoints Tab -->
+                <!-- Contenido de cada pestaña (tablas) -->
+                <!-- Endpoints -->
                 <div id="tab-endpoints">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
@@ -589,15 +610,15 @@
                                 </label>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="text-xs font-code-md text-on-surface-variant/50" id="ep-count">0 endpoints</span>
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="ep-count"style="color: #BFBDBD;">0 endpoints</span>
                                 <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
                                     <span class="material-symbols-outlined text-sm">save</span> Guardar cambios
                                 </button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto" style="max-height:400px;overflow-y:auto;">
                             <table class="w-full text-left">
-                                <thead class="bg-surface-container-high text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
+                                <thead class="bg-primary/10 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10 sticky top-0 z-10">
                                     <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Método</th><th class="px-6 py-3">Ruta</th><th class="px-6 py-3">Framework</th><th class="px-6 py-3">Archivo</th></tr>
                                 </thead>
                                 <tbody id="endpoints-table" class="divide-y divide-outline-variant/10"></tbody>
@@ -606,7 +627,7 @@
                     </div>
                 </div>
 
-                <!-- Functions Tab -->
+                <!-- Funciones -->
                 <div id="tab-functions" style="display:none;">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
@@ -618,15 +639,15 @@
                                 </label>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="text-xs font-code-md text-on-surface-variant/50" id="fn-count">0 funciones</span>
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="fn-count"style="color: #BFBDBD;>0 funciones</span>
                                 <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
                                     <span class="material-symbols-outlined text-sm">save</span> Guardar cambios
                                 </button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto" style="max-height:400px;overflow-y:auto;">
                             <table class="w-full text-left">
-                                <thead class="bg-surface-container-high text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
+                                <thead class="bg-primary/10 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10 sticky top-0 z-10">
                                     <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Nombre</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Parámetros</th><th class="px-6 py-3">Complejidad</th><th class="px-6 py-3">Documentada</th></tr>
                                 </thead>
                                 <tbody id="functions-table" class="divide-y divide-outline-variant/10"></tbody>
@@ -635,7 +656,7 @@
                     </div>
                 </div>
 
-                <!-- Classes Tab -->
+                <!-- Clases -->
                 <div id="tab-classes" style="display:none;">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
@@ -647,16 +668,16 @@
                                 </label>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="text-xs font-code-md text-on-surface-variant/50" id="cls-count">0 clases</span>
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="cls-count"style="color: #BFBDBD;>0 clases</span>
                                 <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
                                     <span class="material-symbols-outlined text-sm">save</span> Guardar cambios
                                 </button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto" style="max-height:400px;overflow-y:auto;">
                             <table class="w-full text-left">
-                                <thead class="bg-surface-container-high text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
-                                    <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Clase</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Métodos</th><th class="px-6 py-3">Hereda de</th><th class="px-6 py-3">Documentada</th></tr>
+                                <thead class="bg-primary/10 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10 sticky top-0 z-10">
+                                    <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Clase</th><th class="px-6 py-3">Archivo</th><th class="px-6 py-3">Métodos</th><th class="px-6 py-3">Bases</th><th class="px-6 py-3">Documentada</th></tr>
                                 </thead>
                                 <tbody id="classes-table" class="divide-y divide-outline-variant/10"></tbody>
                             </table>
@@ -664,7 +685,7 @@
                     </div>
                 </div>
 
-                <!-- Structure Tab -->
+                <!-- Estructura -->
                 <div id="tab-structure" style="display:none;">
                     <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
                         <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
@@ -676,15 +697,15 @@
                                 </label>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="text-xs font-code-md text-on-surface-variant/50" id="struct-count">0 archivos</span>
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="struct-count"style="color: #BFBDBD;>0 archivos</span>
                                 <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
                                     <span class="material-symbols-outlined text-sm">save</span> Guardar cambios
                                 </button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto" style="max-height:400px;overflow-y:auto;">
                             <table class="w-full text-left">
-                                <thead class="bg-surface-container-high text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10">
+                                <thead class="bg-primary/10 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10 sticky top-0 z-10">
                                     <tr><th class="px-6 py-3 w-10">Incluir</th><th class="px-6 py-3">Ruta</th><th class="px-6 py-3">Lenguaje</th><th class="px-6 py-3">Tamaño</th></tr>
                                 </thead>
                                 <tbody id="structure-table" class="divide-y divide-outline-variant/10"></tbody>
@@ -696,12 +717,15 @@
         </main>
     </div>
 
+    <!-- ============================================================
+         JAVASCRIPT — LÓGICA DE LA APLICACIÓN
+         ============================================================ -->
     <script>
-    // ══════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     //  ESTADO GLOBAL
-    // ══════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/';
+    if (!token) window.location.href = '/';  // Redirige al login si no hay token
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.name) {
@@ -710,30 +734,166 @@
         document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
     }
 
-    const projectId = window.location.pathname.split('/').pop();
-    let pollInterval;
-    let cachedResults = null;
-    let cachedContributors = null;
+    const projectId = window.location.pathname.split('/').pop(); // ID del proyecto desde la URL
+    let pollInterval;               // Intervalo para verificar el análisis
+    let cachedResults = null;       // Resultados del análisis en caché
+    let cachedContributors = null;  // Datos de colaboradores en caché
     let isRefreshingContributors = false;
     const SELECTION_STORAGE_KEY = `selections_${projectId}`;
 
-    const chartColors = [
-        '#38bdf8','#818cf8','#10b981','#f59e0b','#ef4444',
-        '#ec4899','#8b5cf6','#14b8a6','#f97316','#6366f1',
-        '#06b6d4','#84cc16','#f472b6','#a78bfa','#34d399'
-    ];
+    // ──────────────────────────────────────────────────────────────
+    //  FUNCIONES AUXILIARES
+    // ──────────────────────────────────────────────────────────────
 
+    /** Devuelve un color asociado a un lenguaje de programación */
+    function getProjectColor(language) {
+        const languageColors = {
+            'Python': '#38bdf8',
+            'JavaScript': '#f59e0b',
+            'TypeScript': '#3178c6',
+            'Java': '#ef4444',
+            'C++': '#00599c',
+            'C#': '#9b4993',
+            'Go': '#00add8',
+            'Rust': '#dea584',
+            'Ruby': '#cc342d',
+            'PHP': '#777bb4',
+            'Swift': '#f05138',
+            'Kotlin': '#7f52ff',
+            'Dart': '#0175c2',
+            'HTML': '#e34c26',
+            'CSS': '#264de4',
+            'SQL': '#336791',
+            'Shell': '#89e051',
+            'R': '#198ce7',
+            'MATLAB': '#e16737',
+            'Scala': '#dc322f',
+            'Haskell': '#5e5086',
+            'Lua': '#000080',
+            'Perl': '#39457e',
+            'Elixir': '#6e4a7e',
+            'Clojure': '#db5855',
+            'F#': '#b845fc',
+            'Groovy': '#4a86d6',
+            'Julia': '#9558b2',
+            'Crystal': '#000000',
+            'Nim': '#ffc200',
+            'V': '#5bb5f5',
+            'Zig': '#f7a41d',
+            'Assembly': '#6e4c7e',
+            'COBOL': '#905532',
+            'Fortran': '#4d41b9',
+            'Pascal': '#e3f171',
+            'Ada': '#02f88c',
+            'Erlang': '#a90533',
+            'OCaml': '#ec681a',
+            'Reason': '#ff4228',
+            'Forth': '#343434',
+            'Prolog': '#74283c',
+            'Scheme': '#1e4aec',
+            'Lisp': '#3fb68b',
+            'Racket': '#22228f',
+            'Smalltalk': '#596706',
+            'Tcl': '#e4cc98',
+            'Verilog': '#8b79f3',
+            'VHDL': '#adb2cb',
+            'SystemVerilog': '#8b79f3',
+            'HDL': '#8b79f3',
+            'ABAP': '#00858f',
+            'Apex': '#1797c0',
+            'Visual Basic': '#945db7',
+            'PowerShell': '#5391fe',
+            'Batch': '#452cc1',
+            'CoffeeScript': '#244776',
+            'D': '#ba595e',
+            'Eiffel': '#946238',
+            'Fantom': '#dbded5',
+            'Factor': '#636746',
+            'Forth': '#343434',
+            'Hack': '#8a2be2',
+            'Idris': '#b30000',
+            'J': '#9ca9b7',
+            'LiveScript': '#499886',
+            'Logo': '#00a944',
+            'Mercury': '#ff2b2b',
+            'Nemerle': '#3d3c6e',
+            'Newspeak': '#d78d3f',
+            'OCaml': '#ec681a',
+            'Oz': '#fab738',
+            'Parrot': '#f3ca0a',
+            'PicoLisp': '#609130',
+            'Pike': '#005390',
+            'Pony': '#e56799',
+            'Prolog': '#74283c',
+            'PureScript': '#1d222d',
+            'Racket': '#22228f',
+            'Rebol': '#358a5b',
+            'Red': '#f50000',
+            'SAS': '#b52a1d',
+            'Scratch': '#4a2a12',
+            'Self': '#c7a833',
+            'Shell': '#89e051',
+            'Slash': '#7efff5',
+            'Smalltalk': '#596706',
+            'SourcePawn': '#f5e05a',
+            'SuperCollider': '#4636b3',
+            'Tcl': '#e4cc98',
+            'TeX': '#3d6117',
+            'Turing': '#cf142b',
+            'UnrealScript': '#a54c4d',
+            'Vala': '#a5672f',
+            'VimL': '#199f4b',
+            'WebAssembly': '#04133b',
+            'X10': '#4b6be4',
+            'XC': '#99a0c5',
+            'Zephir': '#118f9e',
+            'ZIL': '#dc756f'
+        };
+        return languageColors[language] || '#38bdf8'; // Azul por defecto
+    }
+
+    /** Convierte un color hexadecimal a formato RGB para uso en CSS */
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? 
+            `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+            '56, 189, 248';
+    }
+
+    /** Detecta si el modo oscuro está activo */
+    function isDarkMode() {
+        return document.documentElement.classList.contains('dark') || 
+               window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    /** Obtiene el color de texto principal según el modo */
+    function getTextColor() {
+        return isDarkMode() ? '#FFFFFF' : '#0f172a';
+    }
+
+    /** Obtiene el color de texto secundario según el modo */
+    function getSecondaryTextColor() {
+        return isDarkMode() ? '#7188AD' : '#475569';
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  FUNCIONES DE SELECCIÓN (Checkboxes)
+    // ──────────────────────────────────────────────────────────────
+
+    /** Guarda las selecciones en localStorage */
     function saveSelections() {
         const selections = getSelectedItems();
         localStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(selections));
     }
 
+    /** Carga las selecciones desde localStorage */
     function loadSelections() {
         const saved = localStorage.getItem(SELECTION_STORAGE_KEY);
         if (saved) { try { return JSON.parse(saved); } catch(e) { return null; } }
         return null;
     }
 
+    /** Aplica las selecciones guardadas a los checkboxes */
     function applySelections(selections) {
         if (!selections) return;
         ['endpoints','functions','classes','structure'].forEach(type => {
@@ -745,15 +905,18 @@
         });
     }
 
+    /** Retorna los encabezados de autenticación para las peticiones fetch */
     function headers() { return { 'Authorization': `Bearer ${token}` }; }
     function jsonHeaders() { return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
 
-    // ══════════════════════════════════════════════════════════
-    //  CONTRIBUTORS MODAL — CON NOMBRES EN NEGRITA
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  MODAL DE COLABORADORES
+    // ──────────────────────────────────────────────────────────────
+
+    /** Abre el modal de colaboradores y carga los datos desde el servidor */
     async function openContributorsModal() {
         const modal = document.getElementById('contributors-modal');
-        const body  = document.getElementById('contributors-body');
+        const body = document.getElementById('contributors-body');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
 
@@ -785,142 +948,221 @@
                     <div class="flex flex-col items-center gap-2 py-10 text-on-surface-variant/60">
                         <span class="material-symbols-outlined text-4xl">group_off</span>
                         <p class="text-sm">Sin colaboradores detectados.</p>
-                        <p class="text-xs">Los colaboradores se detectan desde el historial de Git.</p>
+                        <p class="text-xs text-on-surface-variant/50">Los colaboradores se detectan desde el historial de Git.</p>
                     </div>`;
                 return;
             }
 
+            // ── MVP (colaborador más activo) ──
             const mvp = contributors[0];
             const mvpName = mvp.name || mvp.username || 'Desconocido';
             const mvpInitials = mvpName.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
             const mvpCommits = mvp.commits || 0;
             const mvpPct = totalCommits > 0 ? ((mvpCommits/totalCommits)*100).toFixed(1) : 0;
-            const mvpColor = chartColors[0];
+            const projectLanguage = document.getElementById('proj-lang').textContent;
+            const mvpColor = getProjectColor(projectLanguage);
+            const textColor = getTextColor();
+            const secondaryTextColor = getSecondaryTextColor();
 
-            // MVP card con nombre en negrita
+            // Tarjeta del MVP
             const mvpCard = `
-                <div class="mvp-card mb-4">
-                    <span class="mvp-crown"><span class="material-symbols-outlined" style="font-size:1.5rem;color:#f59e0b;display:block;">emoji_events</span></span>
-                    <div class="flex items-center gap-4">
+                <div style="position:relative;overflow:hidden;border-radius:16px;padding:20px;margin-bottom:16px;background:linear-gradient(135deg,rgba(${hexToRgb(mvpColor)},0.12) 0%,rgba(${hexToRgb(mvpColor)},0.08) 100%);border:1px solid rgba(${hexToRgb(mvpColor)},0.25);">
+                    <div style="position:absolute;top:12px;right:16px;font-size:2rem;filter:drop-shadow(0 2px 8px rgba(251,191,36,0.5));animation:crownPulse 2.5s ease-in-out infinite;">
+                        <span class="material-symbols-outlined" style="font-size:2rem;color:#f59e0b;display:block;">workspace_premium</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:16px;">
                         ${mvp.avatar_url
-                            ? `<img src="${mvp.avatar_url}" class="mvp-avatar" alt="${mvpName}" style="object-fit:cover;">`
-                            : `<div class="mvp-avatar" style="background:${mvpColor}">${mvpInitials}</div>`
+                            ? `<img src="${mvp.avatar_url}" style="width:60px;height:60px;border-radius:50%;border:3px solid ${mvpColor};box-shadow:0 0 0 4px rgba(${hexToRgb(mvpColor)},0.2),0 0 30px rgba(${hexToRgb(mvpColor)},0.3);object-fit:cover;flex-shrink:0;">`
+                            : `<div style="width:60px;height:60px;border-radius:50%;border:3px solid ${mvpColor};box-shadow:0 0 0 4px rgba(${hexToRgb(mvpColor)},0.2),0 0 30px rgba(${hexToRgb(mvpColor)},0.3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:white;background:linear-gradient(135deg,${mvpColor},${mvpColor}cc);flex-shrink:0;">${mvpInitials}</div>`
                         }
-                        <div class="flex-1 min-w-0">
-                            <div class="mvp-label">Mas activo del equipo</div>
-                            <div class="mvp-name">${mvpName}</div>
-                            ${mvp.email ? `<div class="text-xs text-on-surface-variant/40 font-mono mt-0.5 truncate">${mvp.email}</div>` : ''}
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:6px;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;font-weight:800;color:${mvpColor};font-family:'JetBrains Mono',monospace;margin-bottom:2px;">
+                                <span class="material-symbols-outlined" style="font-size:0.8rem;">stars</span>
+                                Más activo del equipo
+                            </div>
+                            <div style="font-size:1.2rem;font-weight:800;color:${textColor};line-height:1.2;">${mvpName}</div>
+                            ${mvp.email ? `<div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:${secondaryTextColor};font-family:monospace;margin-top:2px;opacity:0.7;">
+                                <span class="material-symbols-outlined" style="font-size:0.8rem;">mail</span>
+                                ${mvp.email}
+                            </div>` : ''}
                         </div>
                     </div>
-                    <div class="mvp-stats mt-3">
-                        <div class="mvp-stat">
-                            <div class="mvp-stat-val">${mvpCommits}</div>
-                            <div class="mvp-stat-label">commits</div>
+                    <div style="display:flex;gap:12px;margin-top:16px;">
+                        <div style="text-align:center;background:rgba(${hexToRgb(mvpColor)},0.1);border-radius:10px;padding:12px 16px;border:1px solid rgba(${hexToRgb(mvpColor)},0.2);flex:1;">
+                            <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:1.6rem;font-weight:800;color:${mvpColor};line-height:1.1;">
+                                <span class="material-symbols-outlined" style="font-size:1.4rem;">commit</span>
+                                ${mvpCommits}
+                            </div>
+                            <div style="font-size:0.7rem;color:${secondaryTextColor};font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">Commits</div>
                         </div>
-                        <div class="mvp-stat">
-                            <div class="mvp-stat-val">${mvpPct}%</div>
-                            <div class="mvp-stat-label">del total</div>
+                        <div style="text-align:center;background:rgba(${hexToRgb(mvpColor)},0.1);border-radius:10px;padding:12px 16px;border:1px solid rgba(${hexToRgb(mvpColor)},0.2);flex:1;">
+                            <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:1.6rem;font-weight:800;color:#f59e0b;line-height:1.1;">
+                                <span class="material-symbols-outlined" style="font-size:1.4rem;">percent</span>
+                                ${mvpPct}%
+                            </div>
+                            <div style="font-size:0.7rem;color:${secondaryTextColor};font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">Del total</div>
                         </div>
-                        <div class="mvp-stat">
-                            <div class="mvp-stat-val">#1</div>
-                            <div class="mvp-stat-label">ranking</div>
+                        <div style="text-align:center;background:rgba(${hexToRgb(mvpColor)},0.1);border-radius:10px;padding:12px 16px;border:1px solid rgba(${hexToRgb(mvpColor)},0.2);flex:1;">
+                            <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:1.6rem;font-weight:800;color:#10b981;line-height:1.1;">
+                                <span class="material-symbols-outlined" style="font-size:1.4rem;">leaderboard</span>
+                                #1
+                            </div>
+                            <div style="font-size:0.7rem;color:${secondaryTextColor};font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">Ranking</div>
                         </div>
                     </div>
                 </div>`;
 
-            // Podio top-3
+            // ── Podio (top 3) ──
             const medalIcons = [
-                `<span class="material-symbols-outlined" style="font-size:1.3rem;color:#f59e0b;filter:drop-shadow(0 1px 3px rgba(245,158,11,0.4))">emoji_events</span>`,
-                `<span class="material-symbols-outlined" style="font-size:1.1rem;color:#94a3b8">military_tech</span>`,
-                `<span class="material-symbols-outlined" style="font-size:1.1rem;color:#cd7c4a">workspace_premium</span>`
+                '<span class="material-symbols-outlined" style="font-size:1.8rem;color:#f59e0b;filter:drop-shadow(0 2px 4px rgba(245,158,11,0.4));">workspace_premium</span>',
+                '<span class="material-symbols-outlined" style="font-size:1.5rem;color:#94a3b8;">military_tech</span>',
+                '<span class="material-symbols-outlined" style="font-size:1.5rem;color:#cd7c4a;">workspace_premium</span>'
             ];
-            let podiumHtml = `<div class="podium-row">`;
+            const rankColors = ['#f59e0b', '#94a3b8', '#cd7c4a'];
+            
+            let podiumHtml = `<div style="display:flex;gap:8px;margin-bottom:16px;">`;
             contributors.slice(0, Math.min(3, count)).forEach((c, i) => {
                 const n = c.name || c.username || 'Desconocido';
                 const ini = n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
-                const col = chartColors[i];
+                const col = rankColors[i];
+                const bgColor = i === 0 ? 'rgba(251,191,36,0.12)' : i === 1 ? 'rgba(148,163,184,0.08)' : 'rgba(205,124,74,0.08)';
+                const borderColor = i === 0 ? 'rgba(251,191,36,0.5)' : i === 1 ? 'rgba(148,163,184,0.3)' : 'rgba(205,124,74,0.3)';
                 const pct = totalCommits > 0 ? (((c.commits||0)/totalCommits)*100).toFixed(1) : 0;
+                
                 podiumHtml += `
-                    <div class="podium-item rank-${i+1}">
+                    <div style="flex:1;border-radius:12px;padding:12px 10px;border:1px solid ${borderColor};background:${bgColor};display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.2s;">
                         ${medalIcons[i]}
                         ${c.avatar_url
-                            ? `<img src="${c.avatar_url}" class="podium-mini-avatar w-9 h-9 rounded-full object-cover border-2" style="border-color:${col}" alt="${n}">`
-                            : `<div class="podium-mini-avatar" style="background:${col}">${ini}</div>`
+                            ? `<img src="${c.avatar_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid ${col};flex-shrink:0;" alt="${n}">`
+                            : `<div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:white;background:${col};border:2px solid rgba(255,255,255,0.3);flex-shrink:0;">${ini}</div>`
                         }
-                        <span class="podium-name">${n}</span>
-                        <span class="podium-commits">${c.commits||0} commits</span>
-                        <span class="text-[10px] text-on-surface-variant/40 font-mono">${pct}%</span>
+                        <div style="font-size:0.7rem;font-weight:700;color:${textColor};text-align:center;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;">${n}</div>
+                        <div style="display:flex;align-items:center;gap:4px;font-size:0.8rem;font-family:'JetBrains Mono',monospace;color:${secondaryTextColor};font-weight:600;">
+                            <span class="material-symbols-outlined" style="font-size:0.7rem;">commit</span>
+                            ${c.commits||0}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:${secondaryTextColor};font-family:monospace;background:rgba(0,0,0,0.05);padding:2px 8px;border-radius:10px;">
+                            <span class="material-symbols-outlined" style="font-size:0.6rem;">percent</span>
+                            ${pct}%
+                        </div>
                     </div>`;
             });
             podiumHtml += `</div>`;
 
-            // Lista ranking con nombres en negrita
+            // ── Lista del resto de colaboradores ──
             const listStart = count <= 3 ? 0 : 3;
             let listHtml = '';
             if (count > 3) {
-                listHtml = `<div class="mb-2 mt-1">
-                    <span class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/40 font-mono">Resto del equipo</span>
+                listHtml = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;margin-top:4px;">
+                    <span class="material-symbols-outlined" style="font-size:0.9rem;color:#94a3b8;">groups</span>
+                    <span style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;color:#94a3b8;font-family:'JetBrains Mono',monospace;">Resto del equipo</span>
                 </div>`;
             }
+
             contributors.slice(listStart).forEach((c, idx) => {
                 const rank = listStart + idx + 1;
                 const n = c.name || c.username || 'Desconocido';
                 const email = c.email || '';
                 const commits = c.commits || 0;
                 const pct = totalCommits > 0 ? ((commits/totalCommits)*100).toFixed(1) : 0;
-                const col = chartColors[(listStart+idx) % chartColors.length];
+                const projectLanguage = document.getElementById('proj-lang').textContent;
+                const col = getProjectColor(projectLanguage);
                 const ini = n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
                 const role = c.role || 'contributor';
-                const roleIcon = role==='admin'
-                    ? `<span class="contributor-role-badge admin"><span class="material-symbols-outlined" style="font-size:0.7rem;vertical-align:middle;">manage_accounts</span> Admin</span>`
-                    : role==='owner'
-                    ? `<span class="contributor-role-badge owner"><span class="material-symbols-outlined" style="font-size:0.7rem;vertical-align:middle;">verified</span> Owner</span>`
-                    : '';
+                const textColor = getTextColor();
+                const secondaryTextColor = getSecondaryTextColor();
+                
+                let roleDisplay = '';
+                if (role === 'admin') {
+                    roleDisplay = `<span style="font-size:0.55rem;padding:2px 8px;border-radius:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;background:rgba(56,189,248,0.15);color:#38bdf8;display:inline-flex;align-items:center;gap:3px;">
+                        <span class="material-symbols-outlined" style="font-size:0.6rem;">admin_panel_settings</span> Admin
+                    </span>`;
+                } else if (role === 'owner') {
+                    roleDisplay = `<span style="font-size:0.55rem;padding:2px 8px;border-radius:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;background:rgba(129,140,248,0.15);color:#818cf8;display:inline-flex;align-items:center;gap:3px;">
+                        <span class="material-symbols-outlined" style="font-size:0.6rem;">verified</span> Owner
+                    </span>`;
+                }
 
                 listHtml += `
-                    <div class="contributor-item-new">
-                        <div class="rank-badge">${rank}</div>
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(${hexToRgb(col)},0.15);transition:all 0.18s;margin-bottom:8px;background:rgba(${hexToRgb(col)},0.05);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:rgba(${hexToRgb(col)},0.15);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:${col};flex-shrink:0;font-family:'JetBrains Mono',monospace;">${rank}</div>
                         ${c.avatar_url
-                            ? `<img src="${c.avatar_url}" class="w-8 h-8 rounded-full object-cover border-2 border-white/10 flex-shrink-0" alt="${n}">`
-                            : `<div class="contributor-avatar-sm flex-shrink-0" style="background:${col}">${ini}</div>`
+                            ? `<img src="${c.avatar_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(${hexToRgb(col)},0.3);flex-shrink:0;" alt="${n}">`
+                            : `<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:white;flex-shrink:0;background:${col};border:2px solid rgba(255,255,255,0.2);">${ini}</div>`
                         }
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="contributor-name">${n}</span>
-                                ${roleIcon}
-                                ${email ? `<span class="text-[10px] text-on-surface-variant/40 font-mono truncate">${email}</span>` : ''}
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="font-size:1rem;font-weight:700;color:${textColor};line-height:1.3;">${n}</span>
+                                ${roleDisplay}
+                                ${email ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;color:${secondaryTextColor};font-family:monospace;opacity:0.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    <span class="material-symbols-outlined" style="font-size:0.7rem;">mail</span> ${email}
+                                </span>` : ''}
                             </div>
-                            <div class="flex items-center gap-2 mt-1.5">
-                                <div class="contrib-bar-track">
-                                    <div class="contrib-bar-fill" style="width:${pct}%"></div>
+                            <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+                                <div style="flex:1;height:8px;border-radius:4px;background:rgba(${hexToRgb(col)},0.15);overflow:hidden;">
+                                    <div style="height:100%;border-radius:4px;background:linear-gradient(90deg,${col},${col}cc);transition:width 1.2s cubic-bezier(0.22,1,0.36,1);width:${pct}%;"></div>
                                 </div>
-                                <span class="text-[10px] font-mono text-on-surface-variant/50 whitespace-nowrap">${commits} · ${pct}%</span>
+                                <div style="display:flex;align-items:center;gap:8px;font-size:0.75rem;font-family:monospace;color:${secondaryTextColor};font-weight:600;white-space:nowrap;">
+                                    <span style="display:inline-flex;align-items:center;gap:3px;color:${col};">
+                                        <span class="material-symbols-outlined" style="font-size:0.9rem;">commit</span> ${commits}
+                                    </span>
+                                    <span style="color:#94a3b8;">·</span>
+                                    <span style="display:inline-flex;align-items:center;gap:3px;color:#10b981;">
+                                        <span class="material-symbols-outlined" style="font-size:0.9rem;">percent</span> ${pct}%
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>`;
             });
 
-            // Estadísticas
+            // ── Estadísticas generales ──
             let statsHtml = '';
             if (data.total_commits || data.active_days || data.unique_authors) {
                 statsHtml = `
-                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-outline-variant/10">
-                        ${data.total_commits ? `<div class="text-center p-2 rounded-lg" style="background:rgba(56,189,248,0.05)">
-                            <p class="text-[10px] text-on-surface-variant/50 font-mono uppercase">Commits</p>
-                            <p class="text-base font-bold text-primary">${data.total_commits}</p>
-                        </div>` : ''}
-                        ${data.unique_authors ? `<div class="text-center p-2 rounded-lg" style="background:rgba(129,140,248,0.05)">
-                            <p class="text-[10px] text-on-surface-variant/50 font-mono uppercase">Autores</p>
-                            <p class="text-base font-bold text-secondary">${data.unique_authors}</p>
-                        </div>` : ''}
-                        ${data.active_days ? `<div class="text-center p-2 rounded-lg" style="background:rgba(16,185,129,0.05)">
-                            <p class="text-[10px] text-on-surface-variant/50 font-mono uppercase">Dias activos</p>
-                            <p class="text-base font-bold" style="color:#10b981">${data.active_days}</p>
-                        </div>` : ''}
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(148,163,184,0.1);">
+                        ${data.total_commits ? `
+                            <div style="text-align:center;padding:12px;border-radius:10px;background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.1);">
+                                <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:0.55rem;color:#64748b;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;">
+                                    <span class="material-symbols-outlined" style="font-size:0.7rem;">commit</span> Total Commits
+                                </div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#38bdf8;margin-top:4px;">${data.total_commits}</div>
+                            </div>
+                        ` : ''}
+                        ${data.unique_authors ? `
+                            <div style="text-align:center;padding:12px;border-radius:10px;background:rgba(129,140,248,0.06);border:1px solid rgba(129,140,248,0.1);">
+                                <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:0.55rem;color:#64748b;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;">
+                                    <span class="material-symbols-outlined" style="font-size:0.7rem;">people</span> Autores
+                                </div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#818cf8;margin-top:4px;">${data.unique_authors}</div>
+                            </div>
+                        ` : ''}
+                        ${data.active_days ? `
+                            <div style="text-align:center;padding:12px;border-radius:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.1);">
+                                <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-size:0.55rem;color:#64748b;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;">
+                                    <span class="material-symbols-outlined" style="font-size:0.7rem;">calendar_today</span> Días activos
+                                </div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#10b981;margin-top:4px;">${data.active_days}</div>
+                            </div>
+                        ` : ''}
                     </div>`;
             }
 
-            body.innerHTML = mvpCard + (count >= 2 ? podiumHtml : '') + listHtml + statsHtml;
+            // ── Ensamblar todo ──
+            body.innerHTML = mvpCard + podiumHtml + listHtml + statsHtml;
+
+            // Inyectar keyframes para la animación de la corona (si no existen)
+            if (!document.getElementById('crown-keyframes')) {
+                const styleSheet = document.createElement("style");
+                styleSheet.id = 'crown-keyframes';
+                styleSheet.textContent = `
+                    @keyframes crownPulse {
+                        0%, 100% { transform: scale(1) rotate(-5deg); }
+                        50% { transform: scale(1.1) rotate(5deg); }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+            }
 
         } catch (err) {
             console.error('Error loading contributors:', err);
@@ -934,53 +1176,35 @@
         }
     }
 
+    /** Cierra el modal de colaboradores */
     function closeContributorsModal() {
         const modal = document.getElementById('contributors-modal');
         modal.classList.remove('flex');
         modal.classList.add('hidden');
     }
 
+    /** Función para refrescar los colaboradores manualmente */
     async function refreshContributors() {
         if (isRefreshingContributors) return;
         isRefreshingContributors = true;
         const btn = document.getElementById('refresh-contributors-btn');
         btn.disabled = true;
-        btn.innerHTML = `<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Actualizando...`;
-
-        const body = document.getElementById('contributors-body');
-        body.innerHTML = `<div class="flex flex-col items-center gap-3 py-10 text-on-surface-variant/60">
-            <div class="w-8 h-8 border-[3px] border-solid border-primary/20 border-t-primary rounded-full animate-spin"></div>
-            <span class="text-sm">Actualizando desde GitHub...</span>
-        </div>`;
-
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Actualizando...';
         try {
-            const res = await fetch(`/api/projects/${projectId}/contributors/refresh`, { method: 'POST', headers: headers() });
-            if (!res.ok) throw new Error('Error al actualizar colaboradores');
-            const data = await res.json();
-            document.getElementById('contributors-count-badge').textContent = (data.contributors||[]).length;
             await openContributorsModal();
-        } catch (err) {
-            body.innerHTML = `<div class="flex flex-col items-center gap-2 py-10 text-red-400">
-                <span class="material-symbols-outlined text-4xl">error</span>
-                <p class="text-sm">Error al actualizar colaboradores</p>
-                <button onclick="refreshContributors()" class="mt-2 px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-all">Reintentar</button>
-            </div>`;
-        }
-
-        isRefreshingContributors = false;
+        } catch (e) { console.error(e); }
         btn.disabled = false;
-        btn.innerHTML = `<span class="material-symbols-outlined text-sm">refresh</span> Actualizar`;
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">refresh</span> Actualizar';
+        isRefreshingContributors = false;
     }
 
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { closeContributorsModal(); closeModal(); }
-    });
+    // ──────────────────────────────────────────────────────────────
+    //  MODAL DE SUGERENCIA DE DOCSTRING
+    // ──────────────────────────────────────────────────────────────
 
-    // ══════════════════════════════════════════════════════════
-    //  SUGGESTION MODAL
-    // ══════════════════════════════════════════════════════════
-    let currentSuggestionText = '';
+    let currentSuggestionText = '';  // Almacena el texto de la sugerencia actual
 
+    /** Abre el modal de sugerencia para una función o clase */
     function openSuggestionModal(name, file, params, kind) {
         document.getElementById('modal-fn-label').textContent = `${kind==='class'?'class':'def'} ${name}(${params}) — ${file}`;
         document.getElementById('modal-loading').style.display = 'flex';
@@ -989,10 +1213,13 @@
         generateSuggestion(name, file, params, kind);
     }
 
+    /** Cierra el modal de sugerencia */
     function closeModal() { document.getElementById('suggestion-modal').classList.remove('open'); }
 
+    // Cerrar modal al hacer clic en el overlay
     document.getElementById('suggestion-modal').addEventListener('click', function(e) { if (e.target===this) closeModal(); });
 
+    /** Genera una sugerencia de docstring mediante la API */
     async function generateSuggestion(name, file, params, kind) {
         const lang = cachedResults?.primary_language || 'Python';
         try {
@@ -1004,6 +1231,7 @@
             currentSuggestionText = data.suggestion;
             document.getElementById('modal-code').textContent = currentSuggestionText;
         } catch (err) {
+            // Fallback si la API falla
             currentSuggestionText = kind==='class'
                 ? `    """\n    ${name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """`
                 : `    """\n    ${name} — descripción de la función.\n\n    Args:\n${(params||'').split(',').filter(p=>p.trim()).map(p=>`        ${p.trim()}: Descripción del parámetro.`).join('\n')||'        Sin parámetros.'}\n\n    Returns:\n        Describe el valor de retorno.\n    """`;
@@ -1013,6 +1241,7 @@
         document.getElementById('modal-content').style.display = 'block';
     }
 
+    /** Copia el texto de la sugerencia al portapapeles */
     function copySuggestion() {
         navigator.clipboard.writeText(currentSuggestionText).then(() => {
             const btn = document.getElementById('copy-btn');
@@ -1021,18 +1250,23 @@
         });
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  RENDER RESULTS
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  RENDERIZADO DE RESULTADOS DEL ANÁLISIS
+    // ──────────────────────────────────────────────────────────────
+
+    /** Renderiza los resultados del análisis en la interfaz */
     function renderResults(r) {
         cachedResults = r;
         document.getElementById('results-section').style.display = 'block';
+
+        // Métricas
         document.getElementById('m-files').textContent = r.total_files || 0;
         document.getElementById('m-funcs').textContent = (r.functions||[]).length;
         document.getElementById('m-classes').textContent = (r.classes||[]).length;
         document.getElementById('m-endpoints').textContent = (r.endpoints||[]).length;
         document.getElementById('m-langs').textContent = Object.keys(r.languages||{}).length;
 
+        // Score de calidad (anillo SVG)
         const q = r.quality_score || 0;
         document.getElementById('q-score').textContent = q;
         const circumference = 251.2;
@@ -1041,7 +1275,7 @@
         document.getElementById('quality-circle').style.stroke = color;
         document.getElementById('quality-desc').textContent = q>=70?'Buen nivel de documentación y código limpio.':q>=40?'Nivel aceptable, hay margen de mejora.':'Se recomienda mejorar la documentación.';
 
-        // Endpoints
+        // ── Endpoints ──
         const eps = r.endpoints || [];
         document.getElementById('ep-count').textContent = eps.length + ' endpoints';
         document.getElementById('endpoints-table').innerHTML = eps.length
@@ -1052,12 +1286,12 @@
                     <td class="px-6 py-3"><span class="px-2 py-0.5 rounded text-xs font-bold uppercase ${mColor}">${ep.method}</span></td>
                     <td class="px-6 py-3 font-code-md text-sm"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${ep.path}</code></td>
                     <td class="px-6 py-3 text-sm text-on-surface-variant">${ep.framework||'—'}</td>
-                    <td class="px-6 py-3 text-sm text-on-surface-variant/50">${ep.file}</td>
+                    <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${ep.file}</td>
                 </tr>`;
             }).join('')
             : '<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron endpoints</td></tr>';
 
-        // Functions
+        // ── Funciones ──
         const fns = r.functions || [];
         document.getElementById('fn-count').textContent = fns.length + ' funciones';
         document.getElementById('functions-table').innerHTML = fns.slice(0,100).map((fn,i)=>{
@@ -1072,14 +1306,14 @@
             return `<tr class="hover:bg-primary/5 transition-colors">
                 <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="functions" data-index="${i}" onchange="updateSelectAll('functions')"></td>
                 <td class="px-6 py-3">${asyncTag}<code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${fn.name}</code></td>
-                <td class="px-6 py-3 text-sm text-on-surface-variant/50">${fn.file}</td>
+                <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${fn.file}</td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant">${params}</td>
                 <td class="px-6 py-3 font-code-md font-bold ${cxClass}">${cx}</td>
                 <td class="px-6 py-3">${docCell}</td>
             </tr>`;
         }).join('') || '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron funciones</td></tr>';
 
-        // Classes
+        // ── Clases ──
         const cls = r.classes || [];
         document.getElementById('cls-count').textContent = cls.length + ' clases';
         document.getElementById('classes-table').innerHTML = cls.map((c,i)=>{
@@ -1090,26 +1324,27 @@
             return `<tr class="hover:bg-primary/5 transition-colors">
                 <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="classes" data-index="${i}" onchange="updateSelectAll('classes')"></td>
                 <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${c.name}</code></td>
-                <td class="px-6 py-3 text-sm text-on-surface-variant/50">${c.file}</td>
+                <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${c.file}</td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant">${(c.methods||[]).length}</td>
                 <td class="px-6 py-3 text-sm text-on-surface-variant">${(c.bases||[]).join(', ')||'—'}</td>
                 <td class="px-6 py-3">${docCell}</td>
             </tr>`;
         }).join('') || '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron clases</td></tr>';
 
-        // Structure
+        // ── Estructura del proyecto ──
         const struct = r.structure || [];
         document.getElementById('struct-count').textContent = struct.length + ' archivos';
         document.getElementById('structure-table').innerHTML = struct.slice(0,50).map((f,i)=>{
             const size = f.size > 1024 ? (f.size/1024).toFixed(1)+'KB' : f.size+'B';
             return `<tr class="hover:bg-primary/5 transition-colors">
                 <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="structure" data-index="${i}" onchange="updateSelectAll('structure')"></td>
-                <td class="px-6 py-3 text-sm text-on-surface-variant/70 font-code-md">${f.path}</td>
+                <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${f.path}</td>
                 <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${f.language}</code></td>
-                <td class="px-6 py-3 text-sm text-on-surface-variant/50">${size}</td>
+                <td class="px-6 py-3 text-sm font-code-md text-red-500 dark:text-red-400">${size}</td>
             </tr>`;
         }).join('') || '<tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron archivos</td></tr>';
 
+        // Aplicar selecciones guardadas o marcar todos por defecto
         const savedSelections = loadSelections();
         if (savedSelections) {
             applySelections(savedSelections);
@@ -1123,9 +1358,10 @@
         loadContributorsCount();
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  LOAD CONTRIBUTORS COUNT
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  CARGA DEL CONTADOR DE COLABORADORES
+    // ──────────────────────────────────────────────────────────────
+
     async function loadContributorsCount() {
         try {
             const res = await fetch(`/api/projects/${projectId}/contributors`, { headers: headers() });
@@ -1137,21 +1373,25 @@
         } catch (err) { console.error('Error loading contributors count:', err); }
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  SELECTIONS
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  FUNCIONES DE SELECCIÓN PARA CHECKBOXES
+    // ──────────────────────────────────────────────────────────────
+
+    /** Marca o desmarca todos los elementos de una tabla */
     function toggleSelectAll(type) {
         const cb = document.getElementById(`select-all-${type}`);
         document.querySelectorAll(`.item-checkbox[data-type="${type}"]`).forEach(x => x.checked = cb.checked);
         saveSelections();
     }
 
+    /** Actualiza el estado del checkbox "Seleccionar todos" */
     function updateSelectAll(type) {
         const cbs = document.querySelectorAll(`.item-checkbox[data-type="${type}"]`);
         document.getElementById(`select-all-${type}`).checked = Array.from(cbs).every(x=>x.checked);
         saveSelections();
     }
 
+    /** Obtiene los índices de los elementos seleccionados por tipo */
     function getSelectedItems() {
         const selected = { endpoints:[], functions:[], classes:[], structure:[] };
         ['endpoints','functions','classes','structure'].forEach(type => {
@@ -1162,9 +1402,10 @@
         return selected;
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  TABS
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  NAVEGACIÓN POR PESTAÑAS
+    // ──────────────────────────────────────────────────────────────
+
     function showTab(tab) {
         ['endpoints','functions','classes','structure'].forEach(t => {
             document.getElementById(`tab-${t}`).style.display = t===tab?'block':'none';
@@ -1174,9 +1415,10 @@
         });
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  EXPORT
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  EXPORTACIÓN A PDF
+    // ──────────────────────────────────────────────────────────────
+
     async function exportPdf() {
         const selected = getSelectedItems();
         document.getElementById('pdf-loading-modal').classList.add('flex');
@@ -1215,9 +1457,10 @@
         document.getElementById('pdf-loading-modal').classList.add('hidden');
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  LOAD PROJECT / RESULTS
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  CARGA DEL PROYECTO Y RESULTADOS
+    // ──────────────────────────────────────────────────────────────
+
     async function loadProject() {
         const res = await fetch(`/api/projects/${projectId}`, { headers: headers() });
         if (!res.ok) return;
@@ -1255,9 +1498,10 @@
         document.getElementById('export-btns').style.display = 'flex';
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  PARTICLES & TILT
-    // ══════════════════════════════════════════════════════════
+    // ──────────────────────────────────────────────────────────────
+    //  FONDO DE PARTÍCULAS (Canvas)
+    // ──────────────────────────────────────────────────────────────
+
     const canvas = document.getElementById('particle-canvas');
     const pctx = canvas.getContext('2d');
     let particles = [];
@@ -1295,6 +1539,10 @@
     function setupParticles() { particles = []; for (let i=0;i<80;i++) particles.push(new Particle()); }
     function animate() { pctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animate); }
 
+    // ──────────────────────────────────────────────────────────────
+    //  EFECTO TILT EN TARJETAS
+    // ──────────────────────────────────────────────────────────────
+
     function initTilt() {
         document.querySelectorAll('.tilt-card').forEach(card => {
             if (card.hasTilt) return; card.hasTilt = true;
@@ -1312,6 +1560,10 @@
             });
         });
     }
+
+    // ──────────────────────────────────────────────────────────────
+    //  INICIALIZACIÓN
+    // ──────────────────────────────────────────────────────────────
 
     window.addEventListener('resize', initCanvas);
     window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });

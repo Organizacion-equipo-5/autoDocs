@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Política de Privacidad — AutoDocs AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "var(--color-background)",
+                        "surface": "var(--color-surface)",
+                        "surface-container": "var(--color-surface-container)",
+                        "surface-container-high": "var(--color-surface-container-high)",
+                        "on-surface": "var(--color-on-surface)",
+                        "on-surface-variant": "var(--color-on-surface-variant)",
+                        "primary": "var(--color-primary)",
+                        "secondary": "var(--color-secondary)",
+                        "outline-variant": "var(--color-outline-variant)",
+                        "error": "var(--color-error)",
+                        "green-accent": "var(--color-green-accent)",
+                        "tertiary": "var(--color-tertiary)",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-caps": ["Geist"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ====== TEMA OSCURO (por defecto) ====== */
+        :root,
+        body[data-theme="dark"] {
+            --color-background: #0f1418;
+            --color-surface: rgba(27,32,36,0.4);
+            --color-surface-container: #1b2024;
+            --color-surface-container-high: #252b2e;
+            --color-on-surface: #dee3e8;
+            --color-on-surface-variant: #bdc8d1;
+            --color-primary: #39b2f8;
+            --color-secondary: #c0c1ff;
+            --color-outline-variant: #3e484f;
+            --color-error: #ffb4ab;
+            --color-green-accent: #10b981;
+            --color-tertiary: #ffc176;
+            --glass-border: rgba(123,208,255,0.1);
+            --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --glass-hover-border: rgba(123,208,255,0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --particle-color-1: rgba(142,213,255,0.4);
+            --particle-color-2: rgba(192,193,255,0.2);
+            --particle-line: rgba(142,213,255,0.12);
+        }
+
+        /* ====== TEMA CLARO ====== */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;
+            --color-surface: rgba(255,255,255,0.7);
+            --color-surface-container: #ffffff;
+            --color-surface-container-high: #e2e8f0;
+            --color-on-surface: #0f172a;
+            --color-on-surface-variant: #334155;
+            --color-primary: #38bdf8;
+            --color-secondary: #818cf8;
+            --color-outline-variant: #cbd5e1;
+            --color-error: #ba1a1a;
+            --color-green-accent: #10b981;
+            --color-tertiary: #7c5800;
+            --glass-border: rgba(0,0,0,0.04);
+            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            --glass-hover-border: rgba(56,189,248,0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            --particle-color-1: rgba(56,189,248,0.25);
+            --particle-color-2: rgba(129,140,248,0.2);
+            --particle-line: rgba(56,189,248,0.12);
+        }
+
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transform: translate3d(0, 0, 0);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+        }
+
+        .glow-cyan { text-shadow: 0 0 12px var(--color-primary); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+
+        .theme-float-switch {
+            position: fixed; bottom: 2.5rem; right: 2.5rem; z-index: 2000;
+            border-radius: 50%; box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+            padding: 0.5rem; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, border 0.2s;
+        }
+        .theme-float-switch:hover { transform: scale(1.05); }
+
+        .privacy-content h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-on-surface);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .privacy-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-on-surface);
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .privacy-content p, .privacy-content li {
+            color: var(--color-on-surface-variant);
+            line-height: 1.7;
+        }
+        .privacy-content ul {
+            list-style: disc;
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .privacy-content ul li {
+            margin-bottom: 0.25rem;
+        }
+        .privacy-content .highlight-box {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid var(--color-primary);
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        .privacy-content .highlight-box p {
+            margin: 0;
+        }
+        .privacy-content .badge-mx {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--color-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body class="font-body-md" data-theme="dark">
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Botón flotante de tema -->
+    <div class="theme-float-switch glass">
+        <button id="themeButton" type="button" aria-label="Alternar tema" class="bg-transparent border-0 p-0 cursor-pointer text-2xl">
+            <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+        </button>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto py-16 px-6">
+        <!-- Cabecera -->
+        <div class="glass rounded-3xl p-8 mb-8 border border-outline-variant/20">
+            <a href="/" class="text-primary hover:text-primary/80 transition-colors font-semibold text-sm flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">arrow_back</span> Volver al inicio
+            </a>
+            <div class="flex items-center gap-3 mt-4">
+                <h1 class="text-4xl lg:text-5xl font-bold text-on-surface">
+                    Política de <span class="text-primary">Privacidad</span>
+                </h1>
+                <span class="badge-mx">🇲🇽 México</span>
+            </div>
+            <p class="text-on-surface-variant/60 text-sm font-code-md mt-2">
+                Última actualización: <span class="text-primary">agosto 2026</span>
+            </p>
+        </div>
+
+        <!-- Contenido -->
+        <div class="glass rounded-3xl p-8 lg:p-12 border border-outline-variant/20 privacy-content">
+
+            <div class="highlight-box">
+                <p><strong>Resumen:</strong> En AutoDocs AI, la privacidad de tus datos es nuestra prioridad. Cumplimos con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento. Solo recopilamos la información necesaria para ofrecerte un servicio excelente y nunca compartimos tus datos personales o código fuente con terceros sin tu consentimiento explícito.</p>
+            </div>
+
+            <section>
+                <h2>1. Información que recopilamos</h2>
+                <p>Para proporcionar nuestros servicios, recopilamos los siguientes tipos de información:</p>
+
+                <h3>1.1 Datos personales</h3>
+                <ul>
+                    <li><strong>Datos de registro:</strong> Nombre completo, dirección de correo electrónico, contraseña cifrada.</li>
+                    <li><strong>Datos de facturación:</strong> Información de pago procesada a través de Mercado Pago (no almacenamos datos de tarjetas de crédito completas).</li>
+                    <li><strong>Datos de perfil:</strong> Foto de perfil, biografía, preferencias de usuario.</li>
+                </ul>
+
+                <h3>1.2 Datos técnicos</h3>
+                <ul>
+                    <li><strong>Código fuente:</strong> El código que subes o conectas a través de GitHub para su análisis.</li>
+                    <li><strong>Metadatos del proyecto:</strong> Estructura de archivos, lenguajes utilizados, estadísticas de código.</li>
+                    <li><strong>Logs de uso:</strong> Actividad en la plataforma, proyectos creados, análisis realizados.</li>
+                </ul>
+
+                <h3>1.3 Datos de navegación</h3>
+                <ul>
+                    <li><strong>Información del dispositivo:</strong> Tipo de navegador, sistema operativo, resolución de pantalla.</li>
+                    <li><strong>Datos de uso:</strong> Páginas visitadas, tiempo de sesión, interacciones con la plataforma.</li>
+                    <li><strong>Cookies:</strong> Utilizamos cookies para mejorar tu experiencia de navegación y recordar tus preferencias.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>2. Fundamento legal y finalidades del tratamiento</h2>
+                <p>El tratamiento de tus datos personales se fundamenta en lo dispuesto por la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento.</p>
+                <p>Las finalidades principales del tratamiento son:</p>
+                <ul>
+                    <li><strong>Prestación del servicio:</strong> Analizar tu código y generar documentación técnica.</li>
+                    <li><strong>Gestión de cuenta:</strong> Crear y administrar tu cuenta, procesar pagos y suscripciones.</li>
+                    <li><strong>Mejora continua:</strong> Optimizar nuestro motor de análisis y la experiencia de usuario.</li>
+                    <li><strong>Comunicación:</strong> Enviar notificaciones sobre el servicio, actualizaciones y ofertas relevantes.</li>
+                    <li><strong>Soporte técnico:</strong> Ayudarte con cualquier consulta o problema relacionado con el servicio.</li>
+                    <li><strong>Cumplimiento legal:</strong> Cumplir con obligaciones legales y regulatorias aplicables.</li>
+                </ul>
+                <p class="mt-2">Las finalidades secundarias (opcionales) incluyen el envío de comunicaciones comerciales y promociones, para las cuales solicitaremos tu consentimiento expreso.</p>
+            </section>
+
+            <section>
+                <h2>3. Derechos ARCO (Acceso, Rectificación, Cancelación y Oposición)</h2>
+                <p>De conformidad con la <strong>LFPDPPP</strong>, tienes derecho a ejercer los siguientes derechos:</p>
+                <ul>
+                    <li><strong>Acceso:</strong> Conocer qué datos personales tenemos sobre ti y cómo los utilizamos.</li>
+                    <li><strong>Rectificación:</strong> Corregir o actualizar tus datos personales cuando sean inexactos o incompletos.</li>
+                    <li><strong>Cancelación:</strong> Solicitar la eliminación de tus datos personales cuando ya no sean necesarios.</li>
+                    <li><strong>Oposición:</strong> Oponerte al tratamiento de tus datos para fines específicos.</li>
+                    <li><strong>Revocación del consentimiento:</strong> Revocar el consentimiento que nos hayas otorgado.</li>
+                    <li><strong>Limitación de uso:</strong> Solicitar que tus datos solo se utilicen para fines específicos.</li>
+                </ul>
+                <div class="highlight-box">
+                    <p><strong>¿Cómo ejercer tus derechos ARCO?</strong> Envía un correo a <a href="mailto:privacy@autodocs.ai" class="text-primary hover:underline">privacy@autodocs.ai</a> con el asunto "Derechos ARCO" e incluye: tu nombre completo, correo electrónico registrado y una descripción clara de tu solicitud. Atenderemos tu petición en un plazo máximo de 20 días hábiles, conforme a la ley.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>4. Uso de tu código fuente</h2>
+                <p>El código fuente que subes a AutoDocs AI es tratado con la máxima confidencialidad:</p>
+                <ul>
+                    <li><strong>Propiedad:</strong> El código sigue siendo de tu propiedad exclusiva en todo momento, protegido por la <strong>Ley Federal de Protección a la Propiedad Industrial</strong> y la <strong>Ley Federal de Derechos de Autor</strong>.</li>
+                    <li><strong>Análisis:</strong> Solo se utiliza para realizar el análisis y generar la documentación solicitada.</li>
+                    <li><strong>Almacenamiento:</strong> Se almacena de forma segura mientras mantengas una cuenta activa.</li>
+                    <li><strong>Eliminación:</strong> Puedes eliminar tu código en cualquier momento desde el panel de control.</li>
+                    <li><strong>No compartimos:</strong> No compartimos, vendemos ni distribuimos tu código a terceros.</li>
+                    <li><strong>Anonimización:</strong> Podemos utilizar estadísticas agregadas y anónimas para mejorar el servicio.</li>
+                </ul>
+                <div class="highlight-box">
+                    <p><strong>Importante:</strong> Tu código nunca se utiliza para entrenar modelos de IA sin tu consentimiento explícito. Tienes control total sobre tus datos en todo momento, conforme a la <strong>LFPDPPP</strong>.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>5. Transferencia de datos personales</h2>
+                <p>AutoDocs AI no vende ni alquila tus datos personales. Las transferencias de datos se realizan únicamente en los siguientes casos:</p>
+                <ul>
+                    <li><strong>Procesadores de pago:</strong> Mercado Pago para gestionar suscripciones y pagos (no almacenamos datos de tarjetas).</li>
+                    <li><strong>Servicios de infraestructura:</strong> Proveedores de hosting y almacenamiento (todos con altos estándares de seguridad).</li>
+                    <li><strong>Integraciones:</strong> GitHub únicamente cuando conectas tu repositorio (con tu autorización).</li>
+                    <li><strong>Obligaciones legales:</strong> Cuando sea requerido por autoridad competente o para proteger nuestros derechos legales.</li>
+                </ul>
+                <p class="mt-2">En caso de transferencias internacionales, nos aseguramos de que los proveedores cumplan con estándares de protección equivalentes a los exigidos por la <strong>LFPDPPP</strong>, mediante la firma de acuerdos de confidencialidad y cláusulas contractuales adecuadas.</p>
+            </section>
+
+            <section>
+                <h2>6. Seguridad de tus datos</h2>
+                <p>Implementamos múltiples capas de seguridad para proteger tu información, conforme a lo dispuesto en el <strong>Reglamento de la LFPDPPP</strong>:</p>
+                <ul>
+                    <li><strong>Cifrado:</strong> Todos los datos se transmiten mediante TLS/SSL y se almacenan con cifrado AES-256.</li>
+                    <li><strong>Control de acceso:</strong> Solo personal autorizado tiene acceso a los sistemas, con autenticación de dos factores.</li>
+                    <li><strong>Monitoreo continuo:</strong> Nuestros sistemas son monitoreados 24/7 para detectar y prevenir accesos no autorizados.</li>
+                    <li><strong>Copias de seguridad:</strong> Realizamos copias de seguridad periódicas para garantizar la integridad de tus datos.</li>
+                    <li><strong>Auditorías:</strong> Realizamos auditorías de seguridad regulares para identificar y corregir vulnerabilidades.</li>
+                    <li><strong>Medidas físicas:</strong> Nuestros servidores están en centros de datos con control de acceso físico y sistemas contra incendios.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>7. Retención de datos</h2>
+                <p>Conservamos tus datos mientras mantengas una cuenta activa en AutoDocs AI. Si eliminas tu cuenta:</p>
+                <ul>
+                    <li><strong>Datos personales:</strong> Se eliminan inmediatamente, excepto aquellos que debamos conservar por obligaciones legales (conforme a la legislación fiscal y mercantil mexicana).</li>
+                    <li><strong>Código fuente:</strong> Se elimina de nuestros servidores dentro de los 30 días posteriores a la cancelación.</li>
+                    <li><strong>Documentación generada:</strong> Puedes descargarla antes de eliminar tu cuenta; luego se eliminará.</li>
+                    <li><strong>Datos anonimizados:</strong> Podemos conservar datos estadísticos agregados y anónimos para mejorar el servicio.</li>
+                </ul>
+                <p class="mt-2">El plazo máximo de conservación de datos es de 5 años posteriores a la terminación de la relación comercial, conforme a la legislación fiscal aplicable en México.</p>
+            </section>
+
+            <section>
+                <h2>8. Cookies y tecnologías similares</h2>
+                <p>Utilizamos cookies para mejorar tu experiencia en la plataforma:</p>
+                <ul>
+                    <li><strong>Cookies esenciales:</strong> Necesarias para el funcionamiento básico de la plataforma (autenticación, sesiones).</li>
+                    <li><strong>Cookies de preferencias:</strong> Recuerdan tus preferencias (tema oscuro/claro, idioma).</li>
+                    <li><strong>Cookies de análisis:</strong> Nos ayudan a entender cómo usas la plataforma para mejorarla.</li>
+                </ul>
+                <p class="mt-2">Puedes gestionar tus preferencias de cookies en cualquier momento desde la configuración de tu navegador, de acuerdo con las <strong>Directrices de la INAI</strong> sobre el uso de cookies.</p>
+            </section>
+
+            <section>
+                <h2>9. Transferencia internacional de datos</h2>
+                <p>AutoDocs AI opera desde México, pero podemos utilizar servicios de infraestructura ubicados en otros países. En todos los casos:</p>
+                <ul>
+                    <li>Nos aseguramos de que los proveedores cumplan con estándares de protección de datos equivalentes o superiores a los exigidos por la <strong>LFPDPPP</strong>.</li>
+                    <li>Utilizamos cláusulas contractuales estándar aprobadas por las autoridades competentes.</li>
+                    <li>Tu información siempre se maneja con el mismo nivel de protección, independientemente de su ubicación física.</li>
+                    <li>En caso de transferencias internacionales, informamos al titular y obtenemos su consentimiento cuando sea requerido.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>10. Privacidad de menores</h2>
+                <p>AutoDocs AI no está dirigido a menores de 18 años. No recopilamos conscientemente información de menores de edad en cumplimiento de la <strong>Ley General de los Derechos de Niñas, Niños y Adolescentes</strong>. Si descubrimos que hemos recopilado datos de un menor sin verificación de consentimiento parental, eliminaremos esa información inmediatamente.</p>
+            </section>
+
+            <section>
+                <h2>11. Cambios a la política de privacidad</h2>
+                <p>Podemos actualizar esta Política de Privacidad ocasionalmente para reflejar cambios en nuestras prácticas o por requisitos legales:</p>
+                <ul>
+                    <li>Notificaremos cambios significativos a través de la plataforma o por correo electrónico.</li>
+                    <li>La fecha de "última actualización" al inicio de esta página siempre reflejará la versión más reciente.</li>
+                    <li>Te recomendamos revisar esta política periódicamente para estar informado sobre cómo protegemos tu privacidad.</li>
+                    <li>En caso de cambios sustanciales, solicitaremos tu consentimiento nuevamente cuando sea requerido por la <strong>LFPDPPP</strong>.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>12. Autoridad de protección de datos</h2>
+                <p>En México, la autoridad encargada de la protección de datos personales es el <strong>Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales (INAI)</strong>.</p>
+                <p>Si consideras que tus derechos han sido vulnerados, puedes presentar una queja ante el INAI dentro de los 15 días hábiles siguientes a la respuesta de nuestra parte, o cuando hayan transcurrido 20 días hábiles sin obtener respuesta.</p>
+                <p>Más información en: <a href="https://www.inai.org.mx" target="_blank" class="text-primary hover:underline">www.inai.org.mx</a></p>
+            </section>
+
+            <section>
+                <h2>13. Contacto</h2>
+                <p>Si tienes preguntas, comentarios o inquietudes sobre esta Política de Privacidad, o deseas ejercer tus derechos ARCO, no dudes en contactarnos:</p>
+                <ul>
+                    <li><strong>Correo electrónico:</strong> <a href="mailto:privacy@autodocs.ai" class="text-primary hover:underline">privacy@autodocs.ai</a></li>
+                    <li><strong>Teléfono:</strong> +52 55 1234-5678</li>
+                    <li><strong>Dirección:</strong> Ciudad de México, México</li>
+                    <li><strong>Horario de atención:</strong> Lunes a viernes, 9:00 AM - 6:00 PM (CST)</li>
+                    <li><strong>Responsable de Privacidad:</strong> Departamento de Protección de Datos</li>
+                </ul>
+                <p class="mt-2">Para ejercer tus derechos ARCO, envía un correo con los siguientes datos:</p>
+                <ul>
+                    <li>Nombre completo y correo electrónico registrado</li>
+                    <li>Descripción clara del derecho que deseas ejercer</li>
+                    <li>Copia de identificación oficial (opcional, para verificar tu identidad)</li>
+                </ul>
+            </section>
+
+            <div class="mt-8 pt-6 border-t border-outline-variant/20 text-on-surface-variant/50 text-xs font-code-md">
+                <p>AutoDocs AI — Política de Privacidad v2.0 · agosto 2026 · 🇲🇽 <span class="text-primary">Aplicable en México</span></p>
+                <p class="mt-1">Conforme a la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== TEMA ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        });
+
+        document.getElementById('themeButton').addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+
+        // ==================== PARTÍCULAS ====================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+        const particleCount = 60;
+        const repulsionRadius = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setupParticles();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (mouse.x !== null) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < repulsionRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (repulsionRadius - distance) / repulsionRadius;
+                        this.x -= Math.cos(angle) * force * 2;
+                        this.y -= Math.sin(angle) * force * 2;
+                    }
+                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                const style = getComputedStyle(document.body);
+                const color1 = style.getPropertyValue('--particle-color-1').trim() || 'rgba(56,189,248,0.25)';
+                const color2 = style.getPropertyValue('--particle-color-2').trim() || 'rgba(129,140,248,0.2)';
+                const lineColor = style.getPropertyValue('--particle-line').trim() || 'rgba(56,189,248,0.12)';
+                ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                particles.forEach(p => {
+                    const d = Math.hypot(this.x - p.x, this.y - p.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = lineColor;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        function setupParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            animate();
+        });
+    </script>
+</body>
+</html>

@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- ==================== METADATOS Y CONFIGURACIÓN ==================== -->
+    <!-- Define el conjunto de caracteres UTF-8 para soportar caracteres especiales -->
     <meta charset="UTF-8" />
+    <!-- Configura la vista para dispositivos móviles con escala inicial 1.0 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>AutoDocs AI — Documentación Inteligente</title>
+    
+    <!-- ==================== LIBRERÍAS EXTERNAS ==================== -->
+    <!-- TailwindCSS: Framework de CSS utilitario para estilos rápidos -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Google Fonts: Fuentes personalizadas para mejor tipografía -->
+    <!-- JetBrains Mono: Fuente monoespaciada para código -->
+    <!-- Geist: Fuente moderna para texto general -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols: Iconos de Google Material Design -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- ==================== CONFIGURACIÓN DE TAILWIND ==================== -->
     <script id="tailwind-config">
+        // Extiende la configuración de TailwindCSS para agregar colores personalizados y temas
         tailwind.config = {
-            darkMode: "class",
+            darkMode: "class", // Habilita el modo oscuro basado en clases CSS
             theme: {
                 extend: {
+                    // Colores personalizados que usan variables CSS para soportar temas claro/oscuro
                     colors: {
                         "background": "var(--color-background)",
                         "surface": "var(--color-surface)",
@@ -26,104 +43,125 @@
                         "green-accent": "var(--color-green-accent)",
                         "tertiary": "var(--color-tertiary)",
                     },
+                    // Bordes redondeados personalizados
                     borderRadius: {
                         "DEFAULT": "0.125rem",
                         "lg": "0.25rem",
                         "xl": "0.5rem",
                         "full": "0.75rem"
                     },
+                    // Fuentes personalizadas para diferentes contextos
                     fontFamily: {
-                        "body-md": ["Geist"],
-                        "headline-lg": ["Geist"],
-                        "display-lg": ["Geist"],
-                        "code-md": ["JetBrains Mono"],
-                        "label-caps": ["Geist"]
+                        "body-md": ["Geist"],        // Texto general
+                        "headline-lg": ["Geist"],    // Títulos grandes
+                        "display-lg": ["Geist"],     // Display
+                        "code-md": ["JetBrains Mono"], // Código
+                        "label-caps": ["Geist"]      // Etiquetas en mayúsculas
                     }
                 },
             },
         }
     </script>
+    
+    <!-- ==================== ESTILOS PERSONALIZADOS ==================== -->
     <style>
         /* ====== TEMA OSCURO (por defecto) ====== */
+        /* Variables CSS para el modo oscuro - colores base y acentos */
         :root,
         body[data-theme="dark"] {
-            --color-background: #0f1418;
-            --color-surface: rgba(27,32,36,0.4);
-            --color-surface-container: #1b2024;
-            --color-surface-container-high: #252b2e;
-            --color-on-surface: #dee3e8;
-            --color-on-surface-variant: #bdc8d1;
-            --color-primary: #39b2f8;
-            --color-secondary: #c0c1ff;
-            --color-outline-variant: #3e484f;
-            --color-error: #ffb4ab;
-            --color-green-accent: #10b981;
-            --color-tertiary: #ffc176;
+            --color-background: #0f1418;              /* Fondo principal oscuro */
+            --color-surface: rgba(27,32,36,0.4);      /* Superficies con transparencia */
+            --color-surface-container: #1b2024;       /* Contenedores sólidos */
+            --color-surface-container-high: #252b2e;  /* Contenedores más claros */
+            --color-on-surface: #dee3e8;              /* Texto sobre superficies */
+            --color-on-surface-variant: #bdc8d1;      /* Texto secundario */
+            --color-primary: #39b2f8;                 /* Color principal (azul) */
+            --color-secondary: #c0c1ff;               /* Color secundario (violeta) */
+            --color-outline-variant: #3e484f;         /* Bordes y líneas */
+            --color-error: #ffb4ab;                   /* Color de error */
+            --color-green-accent: #10b981;            /* Verde para éxito */
+            --color-tertiary: #ffc176;                /* Color terciario */
+            /* Efectos de vidrio (glassmorphism) */
             --glass-border: rgba(123,208,255,0.1);
             --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
             --glass-hover-border: rgba(123,208,255,0.3);
             --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            /* Colores de partículas para el fondo animado */
             --particle-color-1: rgba(142,213,255,0.4);
             --particle-color-2: rgba(192,193,255,0.2);
             --particle-line: rgba(142,213,255,0.12);
         }
 
         /* ====== TEMA CLARO ====== */
+        /* Variables CSS para el modo claro - colores más suaves */
         body[data-theme="light"] {
-            --color-background: #f1f5f9;
-            --color-surface: rgba(255,255,255,0.7);
-            --color-surface-container: #ffffff;
-            --color-surface-container-high: #e2e8f0;
-            --color-on-surface: #0f172a;
-            --color-on-surface-variant: #334155;
-            --color-primary: #38bdf8;
-            --color-secondary: #818cf8;
-            --color-outline-variant: #cbd5e1;
-            --color-error: #ba1a1a;
-            --color-green-accent: #10b981;
-            --color-tertiary: #7c5800;
+            --color-background: #f1f5f9;              /* Fondo claro grisáceo */
+            --color-surface: rgba(255,255,255,0.7);    /* Superficies blancas */
+            --color-surface-container: #ffffff;       /* Contenedores blancos sólidos */
+            --color-surface-container-high: #e2e8f0;  /* Contenedores grises */
+            --color-on-surface: #0f172a;              /* Texto oscuro */
+            --color-on-surface-variant: #334155;      /* Texto secundario oscuro */
+            --color-primary: #38bdf8;                 /* Azul claro */
+            --color-secondary: #818cf8;               /* Violeta claro */
+            --color-outline-variant: #cbd5e1;         /* Bordes grises */
+            --color-error: #ba1a1a;                   /* Rojo para errores */
+            --color-green-accent: #10b981;            /* Verde */
+            --color-tertiary: #7c5800;                /* Amarillo oscuro */
+            /* Efectos de vidrio más sutiles para modo claro */
             --glass-border: rgba(0,0,0,0.04);
             --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
             --glass-hover-border: rgba(56,189,248,0.3);
             --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            /* Partículas más sutiles */
             --particle-color-1: rgba(56,189,248,0.25);
             --particle-color-2: rgba(129,140,248,0.2);
             --particle-line: rgba(56,189,248,0.12);
         }
 
+        /* ====== ESTILOS GLOBALES ====== */
+        /* Aplica colores de fondo y texto usando variables CSS */
         body {
             background: var(--color-background);
             color: var(--color-on-surface);
-            overflow-x: hidden;
-            min-height: 100vh;
-            transition: background 0.25s ease, color 0.25s ease;
+            overflow-x: hidden;           /* Oculta scroll horizontal */
+            min-height: 100vh;            /* Altura mínima de pantalla completa */
+            transition: background 0.25s ease, color 0.25s ease; /* Transición suave al cambiar tema */
         }
 
+        /* ====== CANVAS DE PARTÍCULAS ====== */
+        /* Contenedor fijo para el fondo animado de partículas */
         #particle-canvas {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            z-index: 0;
-            pointer-events: none;
+            z-index: 0;                  /* Detrás de todo el contenido */
+            pointer-events: none;         /* Permite hacer clic a través del canvas */
         }
 
+        /* ====== ESTILO DE VIDRIO (GLASSMORPHISM) ====== */
+        /* Efecto de vidrio con desenfoque y transparencia */
         .glass {
             background: var(--color-surface);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px); /* Desenfoque del fondo */
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
-            transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0); /* Acelera GPU para mejor rendimiento */
             transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
+        /* Efecto hover para elementos de vidrio */
         .glass-hover:hover {
             border-color: var(--glass-hover-border);
             box-shadow: var(--glass-hover-shadow);
         }
 
+        /* ====== EFECTOS DE BRILLO (GLOW) ====== */
+        /* Sombra de texto con color primario */
         .glow-cyan { text-shadow: 0 0 12px var(--color-primary); }
         .glow-violet { text-shadow: 0 0 12px var(--color-secondary); }
 
+        /* ====== ANIMACIÓN DE ENTRADA (STAGGER) ====== */
+        /* Elementos que aparecen gradualmente con desplazamiento */
         .stagger-in {
             opacity: 0;
             transform: translateY(20px) translate3d(0,0,0);
@@ -133,13 +171,17 @@
             to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
         }
 
+        /* Desactiva animaciones si el usuario prefiere movimiento reducido */
         @media (prefers-reduced-motion: reduce) {
             .stagger-in { animation: none !important; opacity: 1 !important; transform: none !important; }
         }
 
+        /* ====== EFECTO TILT 3D ====== */
+        /* Contenedor con perspectiva para efecto 3D al inclinar */
         .tilt-card { perspective: 1000px; }
 
-        /* Modal overlay styles */
+        /* ====== MODAL OVERLAY ====== */
+        /* Fondo oscuro con desenfoque para modales */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -149,6 +191,7 @@
             align-items: center;
             justify-content: center;
         }
+        /* Fondo del modal en modo claro */
         body[data-theme="light"] .modal-overlay {
             background: rgba(241, 245, 249, 0.7);
         }
@@ -156,9 +199,13 @@
             background: rgba(0, 0, 0, 0.7);
         }
 
+        /* ====== SCROLLBAR PERSONALIZADA ====== */
+        /* Scrollbar más delgada y con color primario */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
 
+        /* ====== CURSOR PARPADEANTE ====== */
+        /* Simula cursor de terminal */
         .cursor-blink {
             display: inline-block; width: 8px; height: 16px;
             background: var(--color-primary); vertical-align: middle;
@@ -166,12 +213,15 @@
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
+        /* ====== ANIMACIÓN DE MODAL ====== */
         @keyframes fadeDown {
             from { opacity: 0; transform: translateY(-15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .modal-anim { animation: fadeDown 0.2s ease; }
 
+        /* ====== BOTÓN FLOTANTE DE TEMA ====== */
+        /* Botón circular fijo en la esquina inferior derecha */
         .theme-float-switch {
             position: fixed; bottom: 2.5rem; right: 2.5rem; z-index: 2000;
             border-radius: 50%; box-shadow: 0 2px 16px rgba(0,0,0,0.13);
@@ -179,47 +229,272 @@
             transition: background 0.2s, border 0.2s;
         }
         .theme-float-switch:hover { transform: scale(1.05); }
+
+        /* ====== ESTILOS PARA SELECCIÓN DE PLAN ====== */
+        /* Botones de selección de plan en el registro */
+        .reg-plan-btn {
+            background: transparent;
+            border: 2px solid var(--color-outline-variant);
+            color: var(--color-on-surface-variant);
+            padding: 1rem 0.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+        .reg-plan-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+        .reg-plan-btn.selected {
+            border-color: var(--color-primary);
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--color-primary);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
+        }
+        .reg-plan-btn .plan-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-top: 0.25rem;
+        }
+        .reg-plan-btn .plan-features {
+            font-size: 0.7rem;
+            font-weight: 400;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        /* ====== INDICADOR DE PASOS (STEPPER) ====== */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 700;
+            border: 2px solid var(--color-outline-variant);
+            color: var(--color-on-surface-variant);
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        .step-dot.active {
+            border-color: var(--color-primary);
+            background: var(--color-primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+        .step-dot.completed {
+            border-color: var(--color-green-accent);
+            background: var(--color-green-accent);
+            color: white;
+        }
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: var(--color-outline-variant);
+            transition: background 0.3s ease;
+        }
+        .step-line.completed {
+            background: var(--color-green-accent);
+        }
+
+        /* ====== CONTENIDO DE PASOS ====== */
+        .step-content {
+            display: none;
+            animation: fadeDown 0.3s ease;
+        }
+        .step-content.active {
+            display: block;
+        }
+
+        /* ====== ESTILOS DE INPUT CON FONDO NEGRO Y TEXTO BLANCO ====== */
+        /* Fuerza fondo negro en inputs para mejor contraste */
+        .form-input {
+            width: 100%;
+            background: #000000 !important;
+            border: 1px solid var(--color-outline-variant);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #ffffff !important;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+        .form-input:focus {
+            border-color: var(--color-primary);
+        }
+        /* Fuerza autocompletado con fondo negro */
+        .form-input:-webkit-autofill,
+        .form-input:-webkit-autofill:hover,
+        .form-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #000000 inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            border-color: var(--color-primary);
+        }
+        .form-input {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+        }
+
+        /* ====== INPUT CON BOTÓN DE MOSTRAR CONTRASEÑA ====== */
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .password-wrapper .form-input {
+            padding-right: 3rem;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            color: var(--color-primary);
+        }
+        .password-toggle .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        /* ====== SPINNER DE CARGA ====== */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ====== REQUISITOS DE CONTRASEÑA ====== */
+        .pwd-requirement {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        .pwd-requirement.met {
+            color: var(--color-green-accent);
+            opacity: 1;
+        }
+        .pwd-requirement .req-icon {
+            font-size: 0.875rem;
+        }
+
+        /* ====== LABELS DE FORMULARIO ====== */
+        .form-label {
+            display: block;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.25rem;
+        }
+
+        /* ====== BADGE DE MÉXICO ====== */
+        .badge-mx {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--color-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
     </style>
 </head>
+
+<!-- ==================== CUERPO DE LA PÁGINA ==================== -->
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface" data-theme="dark">
+    
+    <!-- ====== CANVAS DE PARTÍCULAS (FONDO ANIMADO) ====== -->
     <canvas id="particle-canvas"></canvas>
 
-    <!-- Navegación -->
+    <!-- ====== BARRA DE NAVEGACIÓN ====== -->
+    <!-- fija en la parte superior con efecto de vidrio y sombra -->
     <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-outline-variant/20 px-6 py-4 flex items-center justify-between transition-colors">
+        <!-- Logo - enlace a la página principal -->
         <a href="/" class="font-code-md text-xl font-bold text-on-surface glow-cyan no-underline flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">terminal</span>
             Auto<span class="text-primary">Docs</span> AI
         </a>
+        <!-- Navegación derecha - enlaces y botones de autenticación -->
         <div class="flex gap-6 items-center">
             <a href="#features" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Funciones</a>
             <a href="#how" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Cómo funciona</a>
             <a href="#stack" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Stack</a>
             <a href="#pricing" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Planes</a>
-            <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary bg-transparent hover:bg-primary/5 transition-all" onclick="openModal()">Iniciar sesión</button>
+            <!-- Botón de inicio de sesión - abre modal de login -->
+            <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary bg-transparent hover:bg-primary/5 transition-all" onclick="openModal('login')">Iniciar sesión</button>
+            <!-- Botón de registro - abre modal de registro -->
             <button class="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95" onclick="openModal('register')">Comenzar gratis</button>
         </div>
     </nav>
 
-    <!-- Botón flotante de tema -->
+    <!-- ====== BOTÓN FLOTANTE PARA CAMBIAR TEMA ====== -->
+    <!-- Botón circular fijo para alternar entre modo claro y oscuro -->
     <div class="theme-float-switch glass">
         <button id="themeButton" type="button" aria-label="Alternar tema" class="bg-transparent border-0 p-0 cursor-pointer text-2xl">
             <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
         </button>
     </div>
 
-    <!-- Hero -->
+    <!-- ====== SECCIÓN HERO (PRINCIPAL) ====== -->
+    <!-- Sección de presentación principal de la aplicación -->
     <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-8 pt-28 pb-16 z-10">
+        <!-- Badge de tecnología -->
         <div class="stagger-in" style="animation-delay: 0.1s;">
             <span class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-xs font-code-md text-primary border border-primary/20 mb-8">
                 <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span> Powered by Python + AI Analysis
             </span>
         </div>
+        <!-- Título principal con efecto de degradado -->
         <h1 class="stagger-in font-display-lg text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight tracking-tight text-on-surface mb-6" style="animation-delay: 0.15s;">
             Documenta tu código<br /><span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">automáticamente</span>
         </h1>
+        <!-- Descripción del producto -->
         <p class="stagger-in text-lg text-on-surface-variant/70 max-w-xl mb-10" style="animation-delay: 0.2s;">
             AutoDocs AI analiza tu proyecto, detecta funciones, clases y endpoints, y genera documentación técnica profesional en segundos.
         </p>
+        <!-- Botones de acción principal -->
         <div class="stagger-in flex gap-4 flex-wrap justify-center" style="animation-delay: 0.3s;">
             <button class="px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
                 Empieza ahora — gratis
@@ -229,8 +504,10 @@
             </a>
         </div>
 
-        <!-- Terminal mockup -->
+        <!-- ====== MOCKUP DE TERMINAL ====== -->
+        <!-- Simulación de terminal mostrando el análisis de código -->
         <div class="stagger-in mt-20 w-full max-w-3xl glass rounded-3xl overflow-hidden shadow-[0_20px_60px_var(--color-primary)] border border-outline-variant/20" style="animation-delay: 0.4s;">
+            <!-- Barra superior de la terminal -->
             <div class="bg-surface-container/20 backdrop-blur-md px-6 py-3 border-b border-outline-variant/10 flex items-center gap-3">
                 <div class="flex gap-2">
                     <div class="w-3 h-3 rounded-full bg-red-400/60"></div>
@@ -239,6 +516,7 @@
                 </div>
                 <span class="ml-auto mr-auto font-code-md text-xs text-on-surface-variant/50 uppercase tracking-widest">autodocs — análisis en curso</span>
             </div>
+            <!-- Contenido de la terminal - simula la salida del comando -->
             <div class="p-6 font-code-md text-sm space-y-2 text-on-surface-variant/80">
                 <div><span class="text-green-accent font-bold">$</span> <span class="text-on-surface">autodocs analyze ./mi-proyecto</span></div>
                 <div class="pl-6"> Escaneando estructura del proyecto...</div>
@@ -252,101 +530,133 @@
         </div>
     </section>
 
-    <!-- Stats bar -->
+    <!-- ====== BARRA DE ESTADÍSTICAS ====== -->
+    <!-- Muestra métricas clave del producto -->
     <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-outline-variant/20 border-y border-outline-variant/20 stagger-in" style="animation-delay: 0.5s;">
+        <!-- Lenguajes soportados -->
         <div class="glass text-center py-10 rounded-none border-none">
             <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">12<span class="text-primary">+</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Lenguajes soportados</p>
         </div>
+        <!-- Formatos de exportación -->
         <div class="glass text-center py-10 rounded-none border-none">
             <span class="font-code-md text-5xl font-bold glow-violet text-on-surface">3<span class="text-secondary">×</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Formatos de exportación</p>
         </div>
+        <!-- Código abierto -->
         <div class="glass text-center py-10 rounded-none border-none">
             <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">100<span class="text-primary">%</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Código abierto-listo</p>
         </div>
+        <!-- Velocidad de análisis -->
         <div class="glass text-center py-10 rounded-none border-none">
             <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">&lt;30<span class="text-primary">s</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Análisis completo</p>
         </div>
     </div>
 
-    <!-- Features -->
+    <!-- ====== SECCIÓN DE FUNCIONALIDADES ====== -->
     <section id="features" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
+        <!-- Encabezado de la sección -->
         <div class="stagger-in text-center mb-16">
             <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// funcionalidades</span>
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Todo lo que necesitas para documentar</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">De subir un .zip a tener documentación completa lista para entregar.</p>
         </div>
+        <!-- Grid de tarjetas de funcionalidades -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="tilt-card stagger-in" style="animation-delay: 0.2s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">search</span>
-                <h3 class="text-xl font-bold text-on-surface mb-2">Escaneo automático</h3>
-                <p class="text-on-surface-variant/70 text-sm">Analiza tu árbol de archivos, detecta el lenguaje primario y extrae funciones, clases e imports con AST.</p>
-                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">ast · regex · pathlib</span>
-            </div></div>
-            <div class="tilt-card stagger-in" style="animation-delay: 0.25s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">api</span>
-                <h3 class="text-xl font-bold text-on-surface mb-2">Detección de endpoints API</h3>
-                <p class="text-on-surface-variant/70 text-sm">Encuentra rutas Flask, FastAPI, Django REST y Express.js automáticamente y las documenta como OpenAPI.</p>
-                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Flask · FastAPI · Express</span>
-            </div></div>
-            <div class="tilt-card stagger-in" style="animation-delay: 0.3s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">description</span>
-                <h3 class="text-xl font-bold text-on-surface mb-2">Generación de README</h3>
-                <p class="text-on-surface-variant/70 text-sm">README profesional con estadísticas del proyecto, instrucciones de instalación y estructura generado en segundos.</p>
-                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Markdown · AI</span>
-            </div></div>
-            <div class="tilt-card stagger-in" style="animation-delay: 0.35s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">analytics</span>
-                <h3 class="text-xl font-bold text-on-surface mb-2">Dashboard de calidad</h3>
-                <p class="text-on-surface-variant/70 text-sm">Score de calidad, complejidad ciclomática, porcentaje de funciones documentadas y detección de code smells.</p>
-                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">McCabe · métricas</span>
-            </div></div>
-            <div class="tilt-card stagger-in" style="animation-delay: 0.4s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">file_save</span>
-                <h3 class="text-xl font-bold text-on-surface mb-2">Exportación profesional</h3>
-                <p class="text-on-surface-variant/70 text-sm">Exporta tu documentación en PDF, Markdown o HTML listo para GitHub Pages o entrega universitaria.</p>
-                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">PDF · Markdown · HTML</span>
-            </div></div>
-            <div class="tilt-card stagger-in" style="animation-delay: 0.45s;"><div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                <span class="material-symbols-outlined text-3xl text-primary mb-4 block">link</span>
-                <h3 class="text-xl font-bold text-on-surface mb-2">Integración GitHub</h3>
-                <p class="text-on-surface-variant/70 text-sm">Conecta directamente tu repositorio de GitHub y analiza el código sin necesidad de descargar nada.</p>
-                <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">GitHub API · OAuth</span>
-            </div></div>
+            <!-- Tarjeta 1: Escaneo automático -->
+            <div class="tilt-card stagger-in" style="animation-delay: 0.2s;">
+                <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">search</span>
+                    <h3 class="text-xl font-bold text-on-surface mb-2">Escaneo automático</h3>
+                    <p class="text-on-surface-variant/70 text-sm">Analiza tu árbol de archivos, detecta el lenguaje primario y extrae funciones, clases e imports con AST.</p>
+                    <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">ast · regex · pathlib</span>
+                </div>
+            </div>
+            <!-- Tarjeta 2: Detección de endpoints API -->
+            <div class="tilt-card stagger-in" style="animation-delay: 0.25s;">
+                <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">api</span>
+                    <h3 class="text-xl font-bold text-on-surface mb-2">Detección de endpoints API</h3>
+                    <p class="text-on-surface-variant/70 text-sm">Encuentra rutas Flask, FastAPI, Django REST y Express.js automáticamente y las documenta como OpenAPI.</p>
+                    <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Flask · FastAPI · Express</span>
+                </div>
+            </div>
+            <!-- Tarjeta 3: Generación de README -->
+            <div class="tilt-card stagger-in" style="animation-delay: 0.3s;">
+                <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">description</span>
+                    <h3 class="text-xl font-bold text-on-surface mb-2">Generación de README</h3>
+                    <p class="text-on-surface-variant/70 text-sm">README profesional con estadísticas del proyecto, instrucciones de instalación y estructura generado en segundos.</p>
+                    <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Markdown · AI</span>
+                </div>
+            </div>
+            <!-- Tarjeta 4: Dashboard de calidad -->
+            <div class="tilt-card stagger-in" style="animation-delay: 0.35s;">
+                <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">analytics</span>
+                    <h3 class="text-xl font-bold text-on-surface mb-2">Dashboard de calidad</h3>
+                    <p class="text-on-surface-variant/70 text-sm">Score de calidad, complejidad ciclomática, porcentaje de funciones documentadas y detección de code smells.</p>
+                    <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">McCabe · métricas</span>
+                </div>
+            </div>
+            <!-- Tarjeta 5: Exportación profesional -->
+            <div class="tilt-card stagger-in" style="animation-delay: 0.4s;">
+                <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">file_save</span>
+                    <h3 class="text-xl font-bold text-on-surface mb-2">Exportación profesional</h3>
+                    <p class="text-on-surface-variant/70 text-sm">Exporta tu documentación en PDF, Markdown o HTML listo para GitHub Pages o entrega universitaria.</p>
+                    <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">PDF · Markdown · HTML</span>
+                </div>
+            </div>
+            <!-- Tarjeta 6: Integración GitHub -->
+            <div class="tilt-card stagger-in" style="animation-delay: 0.45s;">
+                <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
+                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">link</span>
+                    <h3 class="text-xl font-bold text-on-surface mb-2">Integración GitHub</h3>
+                    <p class="text-on-surface-variant/70 text-sm">Conecta directamente tu repositorio de GitHub y analiza el código sin necesidad de descargar nada.</p>
+                    <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">GitHub API · OAuth</span>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- How it works -->
+    <!-- ====== SECCIÓN "CÓMO FUNCIONA" ====== -->
     <section id="how" class="relative z-10 glass rounded-3xl max-w-6xl mx-auto py-24 px-8 my-16">
+        <!-- Encabezado de la sección -->
         <div class="text-center mb-16 stagger-in">
             <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// flujo del sistema</span>
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Cómo funciona</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">Arquitectura moderna y desacoplada. Desde el upload hasta el PDF en 5 pasos.</p>
         </div>
+        <!-- Grid de pasos del flujo -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            <!-- Paso 1: Subir proyecto -->
             <div class="text-center stagger-in" style="animation-delay: 0.1s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">01</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Subir proyecto</h3>
                 <p class="text-on-surface-variant/60 text-sm">Sube un .zip, .tar.gz o conecta tu repo de GitHub directamente desde el dashboard.</p>
             </div>
+            <!-- Paso 2: Análisis estático -->
             <div class="text-center stagger-in" style="animation-delay: 0.2s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">02</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Análisis estático</h3>
                 <p class="text-on-surface-variant/60 text-sm">El motor Python usa AST para analizar funciones, clases, imports y detectar endpoints de API.</p>
             </div>
+            <!-- Paso 3: Generación de docs -->
             <div class="text-center stagger-in" style="animation-delay: 0.3s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">03</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Generación de docs</h3>
                 <p class="text-on-surface-variant/60 text-sm">DocGenerator produce README, referencia de API, documentación de clases y arquitectura del proyecto.</p>
             </div>
+            <!-- Paso 4: Dashboard visual -->
             <div class="text-center stagger-in" style="animation-delay: 0.4s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">04</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Dashboard visual</h3>
                 <p class="text-on-surface-variant/60 text-sm">React muestra métricas de calidad, diagramas de estructura y la documentación navegable.</p>
             </div>
+            <!-- Paso 5: Exportar -->
             <div class="text-center stagger-in" style="animation-delay: 0.5s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">05</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Exportar</h3>
@@ -355,13 +665,14 @@
         </div>
     </section>
 
-    <!-- Stack -->
+    <!-- ====== SECCIÓN DE STACK TECNOLÓGICO ====== -->
     <section id="stack" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
         <div class="text-center mb-16 stagger-in">
             <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// tecnologías</span>
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Stack tecnológico</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">Herramientas modernas y probadas en producción.</p>
         </div>
+        <!-- Grid de tecnologías con iconos -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🐍</span><span class="font-code-md font-bold text-on-surface">Python</span><p class="text-xs text-on-surface-variant/50 mt-1">Backend · Análisis</p></div>
             <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">⚡</span><span class="font-code-md font-bold text-on-surface">Flask</span><p class="text-xs text-on-surface-variant/50 mt-1">API REST</p></div>
@@ -374,7 +685,7 @@
         </div>
     </section>
 
-    <!-- Planes Promocionales -->
+    <!-- ====== SECCIÓN DE PLANES ====== -->
     <section id="pricing" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
         <div class="text-center mb-16 stagger-in">
             <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// planes</span>
@@ -393,9 +704,9 @@
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis básico</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Exportación PDF</li>
                 </ul>
-                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register')">Empezar gratis</button>
+                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register', 'free')">Empezar gratis</button>
             </div>
-            <!-- Plan Pro -->
+            <!-- Plan Pro (destacado) -->
             <div class="glass rounded-3xl p-8 border border-primary/40 plan-featured stagger-in relative">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
                 <div class="text-center mb-6">
@@ -403,12 +714,12 @@
                     <p class="text-4xl font-bold text-primary mb-1">$350<span class="text-lg text-on-surface-variant/60">/mes</span></p>
                 </div>
                 <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Proyectos ilimitados</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> 20 proyectos</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis avanzado</li>
-                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Exportación HTML</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Documentación con IA</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario</li>
                 </ul>
-                <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register')">Comenzar</button>
+                <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register', 'pro')">Comenzar</button>
             </div>
             <!-- Plan Enterprise -->
             <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
@@ -417,19 +728,20 @@
                     <p class="text-4xl font-bold text-secondary mb-1">$850<span class="text-lg text-on-surface-variant/60">/mes</span></p>
                 </div>
                 <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Todo en Pro</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Proyectos ilimitados</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Análisis ilimitado</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> API dedicada</li>
-                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Integración personalizada</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Soporte 24/7</li>
                 </ul>
-                <button class="w-full py-3 bg-secondary text-white rounded-xl hover:bg-secondary/80 transition-all font-semibold" onclick="openModal('register')">Comenzar</button>
+                <button class="w-full py-3 bg-secondary text-white rounded-xl hover:bg-secondary/80 transition-all font-semibold" onclick="openModal('register', 'enterprise')">Comenzar</button>
             </div>
         </div>
     </section>
 
-    <!-- CTA -->
+    <!-- ====== SECCIÓN DE LLAMADA A LA ACCIÓN (CTA) ====== -->
     <section class="relative z-10 max-w-6xl mx-auto py-16 px-8">
         <div class="glass rounded-3xl p-16 text-center relative overflow-hidden shadow-[0_0_80px_var(--color-primary)] stagger-in">
+            <!-- Efecto de fondo de brillo -->
             <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/5 blur-[100px] pointer-events-none"></div>
             <h2 class="text-4xl font-bold text-on-surface relative z-10 mb-4">Empieza a documentar en 30 segundos</h2>
             <p class="text-on-surface-variant/60 relative z-10 mb-8">Crea tu cuenta gratis y analiza tu primer proyecto hoy mismo.</p>
@@ -439,35 +751,40 @@
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- ====== PIE DE PÁGINA ====== -->
     <footer class="relative z-10 glass border-t border-outline-variant/20 py-10 text-center">
         <p class="text-on-surface-variant/50 text-sm font-code-md">
-            AutoDocs AI — construido con <span class="text-primary">BIBFUJ</span> usando Python + Flask + HTML · 2026
+            AutoDocs AI — construido con <span class="text-primary">BIBFUJ</span> usando Python + Flask + HTML · 2026 · <a href="/terms" class="text-primary hover:underline">Términos y Condiciones</a>
         </p>
     </footer>
 
-    <!-- Auth Modal -->
+    <!-- ====== MODAL DE AUTENTICACIÓN (LOGIN / REGISTRO) ====== -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="authModal" onclick="if(event.target===this)closeModal()">
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+        <div class="glass p-8 rounded-3xl w-full max-w-lg modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-y-auto">
+            <!-- Botón para cerrar el modal -->
             <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            
+            <!-- Título del modal -->
             <h3 class="text-2xl font-bold text-on-surface mb-1">AutoDocs AI</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Accede a tu cuenta o crea una nueva</p>
+            
+            <!-- Pestañas de Login / Registro -->
             <div class="flex gap-0 mb-6">
-                <button class="flex-1 py-2.5 bg-primary text-white font-bold border border-primary rounded-l-xl transition-all active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</button>
+                <button class="flex-1 py-2.5 bg-primary text-white font-bold border border-primary rounded-l-xl transition-all" id="tab-login" onclick="switchTab('login')">Iniciar sesión</button>
                 <button class="flex-1 py-2.5 bg-transparent text-on-surface-variant border border-outline-variant/20 rounded-r-xl transition-all" id="tab-register" onclick="switchTab('register')">Registrarse</button>
             </div>
 
-            <!-- LOGIN FORM -->
+            <!-- ====== FORMULARIO DE LOGIN ====== -->
             <div id="form-login">
                 <div class="mb-4">
-                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
-                    <input type="email" id="login-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" id="login-email" placeholder="tu@email.com" class="form-input" />
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
-                    <div class="relative">
-                        <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
-                        <button type="button" onclick="togglePassword('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                    <label class="form-label">Contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" placeholder="••••••••" class="form-input" />
+                        <button type="button" class="password-toggle" onclick="togglePassword('login-password', this)">
                             <span class="material-symbols-outlined">visibility</span>
                         </button>
                     </div>
@@ -480,54 +797,152 @@
                 <div class="text-green-accent text-sm text-center mt-4 hidden" id="login-success">¡Bienvenido! Redirigiendo...</div>
             </div>
 
-            <!-- REGISTER FORM -->
+            <!-- ====== FORMULARIO DE REGISTRO (STEPPER) ====== -->
             <div id="form-register" style="display:none;">
-                <div class="mb-4">
-                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre completo</label>
-                    <input type="text" id="reg-name" placeholder="Tu nombre" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                <!-- Indicadores de pasos -->
+                <div class="step-indicator">
+                    <div class="step-dot active" id="step-dot-1">1</div>
+                    <div class="step-line" id="step-line-1"></div>
+                    <div class="step-dot" id="step-dot-2">2</div>
+                    <div class="step-line" id="step-line-2"></div>
+                    <div class="step-dot" id="step-dot-3">3</div>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
-                    <input type="email" id="reg-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+
+                <!-- PASO 1: Datos del usuario -->
+                <div class="step-content active" id="step-1">
+                    <h4 class="text-lg font-bold text-on-surface mb-4">Datos personales</h4>
+                    <div class="mb-4">
+                        <label class="form-label">Nombre completo</label>
+                        <input type="text" id="reg-name" placeholder="Tu nombre" class="form-input" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Correo electrónico</label>
+                        <input type="email" id="reg-email" placeholder="tu@email.com" class="form-input" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Contraseña</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" class="form-input" oninput="checkPasswordStrength(this.value)" />
+                            <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                        </div>
+                        <!-- Indicador de fortaleza de contraseña -->
+                        <div id="pwd-strength-bar" class="hidden mt-3">
+                            <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
+                                <div id="pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                            <p id="pwd-strength-label" class="text-xs mt-1 font-semibold text-white"></p>
+                            <div class="mt-2 space-y-0.5">
+                                <div id="req-length" class="pwd-requirement">✗ Mínimo 8 caracteres</div>
+                                <div id="req-upper" class="pwd-requirement">✗ Al menos 1 mayúscula</div>
+                                <div id="req-lower" class="pwd-requirement">✗ Al menos 1 minúscula</div>
+                                <div id="req-number" class="pwd-requirement">✗ Al menos 1 número</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="flex items-start gap-2 text-xs text-on-surface-variant/70 cursor-pointer">
+                            <input type="checkbox" id="reg-terms" class="mt-0.5 w-4 h-4 rounded border-outline-variant/20 text-primary focus:ring-primary cursor-pointer" />
+                            <span class="text-white/70">Acepto los <a href="/terms" target="_blank" class="text-primary hover:underline">Términos y Condiciones</a></span>
+                        </label>
+                    </div>
+                    <div class="text-error text-xs font-code-md mb-2 hidden" id="step1-error"></div>
+                    <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="goToStep(2)">
+                        Siguiente →
+                    </button>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Contraseña</label>
-                    <div class="relative">
-                        <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres" oninput="checkPasswordStrength(this.value)" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
-                        <button type="button" onclick="togglePassword('reg-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined">visibility</span>
+
+                <!-- PASO 2: Selección de plan -->
+                <div class="step-content" id="step-2">
+                    <h4 class="text-lg font-bold text-on-surface mb-4">Elige tu plan</h4>
+                    <div class="grid grid-cols-1 gap-3 mb-6" id="reg-plan-selector">
+                        <button type="button" data-plan="free" onclick="selectRegPlan('free')" class="reg-plan-btn selected">
+                            Gratuito
+                            <span class="plan-price">$0 MXN</span>
+                            <span class="plan-features">3 proyectos · Análisis básico · PDF</span>
+                        </button>
+                        <button type="button" data-plan="pro" onclick="selectRegPlan('pro')" class="reg-plan-btn">
+                            Pro
+                            <span class="plan-price">$350 MXN</span>
+                            <span class="plan-features">20 proyectos · Análisis avanzado · IA · Soporte prioritario</span>
+                        </button>
+                        <button type="button" data-plan="enterprise" onclick="selectRegPlan('enterprise')" class="reg-plan-btn">
+                            Enterprise
+                            <span class="plan-price">$850 MXN</span>
+                            <span class="plan-features">Ilimitado · Análisis ilimitado · API dedicada · 24/7</span>
                         </button>
                     </div>
-                    <!-- Indicador de fortaleza de contraseña -->
-                    <div id="pwd-strength-bar" class="hidden mt-2">
-                        <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
-                            <div id="pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
-                        </div>
-                        <p id="pwd-strength-label" class="text-xs mt-1 font-semibold"></p>
-                        <ul id="pwd-requirements" class="text-xs mt-1 space-y-0.5 text-on-surface-variant/70">
-                            <li id="req-length">✗ Mínimo 8 caracteres</li>
-                            <li id="req-upper">✗ Al menos 1 mayúscula</li>
-                            <li id="req-lower">✗ Al menos 1 minúscula</li>
-                            <li id="req-number">✗ Al menos 1 número</li>
-                        </ul>
+                    <div class="flex gap-3">
+                        <button class="flex-1 py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="goToStep(1)">
+                            ← Atrás
+                        </button>
+                        <button id="step2-next-btn" class="flex-1 py-3 bg-green-accent text-white font-bold rounded-xl hover:bg-green-accent/80 transition-colors active:scale-95" onclick="handleStep2Next()">
+                            Registrarse
+                        </button>
                     </div>
                 </div>
-                <div class="text-error text-xs font-code-md mb-2 hidden" id="reg-error">Error al registrar. Intenta de nuevo.</div>
-                <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleRegister()">Crear cuenta</button>
-                <div class="text-green-accent text-sm text-center mt-4 hidden" id="reg-success">¡Cuenta creada! Redirigiendo...</div>
+
+                <!-- PASO 3: Pago con PayPal -->
+                <div class="step-content" id="step-3">
+                    <h4 class="text-lg font-bold text-on-surface mb-4">Completa tu pago</h4>
+                    
+                    <div class="text-center mb-6">
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-3xl text-primary">payments</span>
+                            <span class="badge-mx">🇲🇽 PayPal</span>
+                        </div>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Pago seguro a través de PayPal</p>
+                        <p class="text-3xl font-bold text-on-surface mt-4">
+                            $<span id="paypal-price">1</span> <span class="text-base text-on-surface-variant/60">MXN</span>
+                        </p>
+                        <p class="text-on-surface-variant/50 text-sm" id="paypal-plan-label">Plan Pro</p>
+                    </div>
+
+                    <!-- Contenedor de botones de PayPal -->
+                    <div id="paypal-button-container">
+                        <div class="paypal-loading" id="paypal-loading">
+                            <div class="spinner"></div>
+                            <span>Cargando PayPal...</span>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de éxito después del pago -->
+                    <div class="pago-exitoso" id="pago-exitoso">
+                        <div class="icon-success"><span class="material-symbols-outlined text-5xl text-green-accent">check_circle</span></div>
+                        <h3 class="text-2xl font-bold text-green-accent mt-4">¡Pago exitoso!</h3>
+                        <p class="text-on-surface-variant/70 mt-2">Tu suscripción ha sido activada correctamente.</p>
+                        <p class="text-on-surface-variant/50 text-sm mt-1" id="transaction-id">ID de transacción: ---</p>
+                        <a href="/dashboard" class="inline-block mt-6 px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all">
+                            Ir al Dashboard →
+                        </a>
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        <button class="flex-1 py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="goToStep(2)">
+                            ← Atrás
+                        </button>
+                        <button class="flex-1 py-3 bg-green-accent text-white font-bold rounded-xl hover:bg-green-accent/80 transition-colors active:scale-95" onclick="handleRegisterWithPayPal()">
+                            Pagar y registrarse
+                        </button>
+                    </div>
+                    <p class="text-center text-xs text-on-surface-variant/50 mt-3">
+                        <span class="material-symbols-outlined text-xs align-middle">lock</span> Pago seguro a través de PayPal · Tus datos están protegidos
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
+    <!-- ====== MODAL DE RECUPERACIÓN DE CONTRASEÑA ====== -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="forgotModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Recuperar contraseña</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu correo para recibir un código de recuperación</p>
             <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Correo electrónico</label>
-                <input type="email" id="forgot-email" placeholder="tu@email.com" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors" />
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" id="forgot-email" placeholder="tu@email.com" class="form-input" />
             </div>
             <div class="text-error text-xs font-code-md mb-2 hidden" id="forgot-error">Error al enviar código. Intenta de nuevo.</div>
             <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleForgotPassword()">Enviar código</button>
@@ -535,15 +950,15 @@
         </div>
     </div>
 
-    <!-- Verify Code Modal -->
+    <!-- ====== MODAL DE VERIFICACIÓN DE CÓDIGO ====== -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="verifyModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Verificar código</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa el código de 6 dígitos que recibiste en tu correo</p>
             <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Código de recuperación</label>
-                <input type="text" id="verify-code" placeholder="123456" maxlength="6" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors text-center text-2xl tracking-widest font-code-md" />
+                <label class="form-label">Código de recuperación</label>
+                <input type="text" id="verify-code" placeholder="123456" maxlength="6" class="form-input text-center text-2xl tracking-widest font-code-md" />
             </div>
             <div class="text-error text-xs font-code-md mb-2 hidden" id="verify-error">Código inválido o expirado. Intenta de nuevo.</div>
             <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="handleVerifyCode()">Verificar código</button>
@@ -553,32 +968,31 @@
         </div>
     </div>
 
-    <!-- Reset Password Modal -->
+    <!-- ====== MODAL DE RESTABLECIMIENTO DE CONTRASEÑA ====== -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="resetModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeResetModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Nueva contraseña</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu nueva contraseña</p>
             <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nueva contraseña</label>
-                <div class="relative">
-                    <input type="password" id="reset-password" placeholder="Mínimo 8 caracteres" oninput="checkResetPasswordStrength(this.value)" class="w-full bg-surface-container border border-outline-variant/20 rounded-xl p-3 text-on-surface placeholder-on-surface-variant/40 focus:border-primary focus:outline-none transition-colors pr-10" />
-                    <button type="button" onclick="togglePassword('reset-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors">
+                <label class="form-label">Nueva contraseña</label>
+                <div class="password-wrapper">
+                    <input type="password" id="reset-password" placeholder="Mínimo 8 caracteres" class="form-input" oninput="checkResetPasswordStrength(this.value)" />
+                    <button type="button" class="password-toggle" onclick="togglePassword('reset-password', this)">
                         <span class="material-symbols-outlined">visibility</span>
                     </button>
                 </div>
-                <!-- Indicador de fortaleza de contraseña -->
-                <div id="reset-pwd-strength-bar" class="hidden mt-2">
+                <div id="reset-pwd-strength-bar" class="hidden mt-3">
                     <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
                         <div id="reset-pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
                     </div>
-                    <p id="reset-pwd-strength-label" class="text-xs mt-1 font-semibold"></p>
-                    <ul id="reset-pwd-requirements" class="text-xs mt-1 space-y-0.5 text-on-surface-variant/70">
-                        <li id="reset-req-length">✗ Mínimo 8 caracteres</li>
-                        <li id="reset-req-upper">✗ Al menos 1 mayúscula</li>
-                        <li id="reset-req-lower">✗ Al menos 1 minúscula</li>
-                        <li id="reset-req-number">✗ Al menos 1 número</li>
-                    </ul>
+                    <p id="reset-pwd-strength-label" class="text-xs mt-1 font-semibold text-white"></p>
+                    <div class="mt-2 space-y-0.5">
+                        <div id="reset-req-length" class="pwd-requirement">✗ Mínimo 8 caracteres</div>
+                        <div id="reset-req-upper" class="pwd-requirement">✗ Al menos 1 mayúscula</div>
+                        <div id="reset-req-lower" class="pwd-requirement">✗ Al menos 1 minúscula</div>
+                        <div id="reset-req-number" class="pwd-requirement">✗ Al menos 1 número</div>
+                    </div>
                 </div>
             </div>
             <div class="text-error text-xs font-code-md mb-2 hidden" id="reset-error">Error al cambiar contraseña. Intenta de nuevo.</div>
@@ -587,24 +1001,534 @@
         </div>
     </div>
 
+    <!-- ====== PAYPAL SDK ====== -->
+    <!-- Carga el SDK de PayPal con el Client ID y moneda MXN (Pesos Mexicanos) -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AUpaSRsR3sXeor6g7PcBfSvB8QeMY6Ic3dApd_VejRgRWWCkpU-ypbCvOM1l7WLze8s-UO_P51xGeD-l&currency=MXN"></script>
+
+    <!-- ==================== JAVASCRIPT PRINCIPAL ==================== -->
     <script>
-        // ==================== LÓGICA DE AUTENTICACIÓN ====================
-        function openModal(tab = 'login') {
-            document.getElementById('authModal').classList.add('flex');
-            document.getElementById('authModal').classList.remove('hidden');
-            switchTab(tab);
-        }
-        function closeModal() {
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('authModal').classList.remove('flex');
-        }
-        document.getElementById('authModal').addEventListener('click', e => {
-            if (e.target === e.currentTarget) closeModal();
-        });
+        // ==================== VARIABLES GLOBALES ====================
+        let currentStep = 1;              // Paso actual en el registro (1, 2 o 3)
+        let regSelectedPlan = 'free';     // Plan seleccionado en el registro
+        let regData = {};                 // Datos del usuario en el registro
+        let isRegistering = false;        // Bandera para evitar registros duplicados
+        let forgotEmail = '';             // Email para recuperación de contraseña
+        let paypalRendered = false;       // Bandera para saber si PayPal ya se renderizó
 
-        // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
-        let forgotEmail = '';
+        // Precios en MXN para los planes de pago
+        const PRICES = {
+            pro: 350,
+            enterprise: 850
+        };
 
+        const PLAN_NAMES = {
+            pro: 'Pro',
+            enterprise: 'Enterprise'
+        };
+
+        // ==================== FUNCIÓN: MOSTRAR/OCULTAR CONTRASEÑA ====================
+        /**
+         * Alterna la visibilidad de un campo de contraseña
+         * @param {string} inputId - ID del input de contraseña
+         * @param {HTMLElement} button - Botón que activa la función
+         */
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        // ==================== FUNCIONES DEL STEPPER ====================
+        /**
+         * Navega a un paso específico del registro
+         * @param {number} step - Número del paso (1, 2 o 3)
+         */
+        function goToStep(step) {
+            // Validación antes de avanzar
+            if (step > currentStep) {
+                if (currentStep === 1 && !validateStep1()) return;
+                if (currentStep === 2) {
+                    if (regSelectedPlan === 'free') {
+                        handleRegisterFree();
+                        return;
+                    }
+                    if (!validateStep2()) return;
+                }
+            }
+
+            // Mostrar el contenido del paso seleccionado
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            // Actualizar indicadores de pasos (dots y líneas)
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById(`step-dot-${i}`);
+                const line = document.getElementById(`step-line-${i}`);
+                dot.classList.remove('active', 'completed');
+                if (i < step) {
+                    dot.classList.add('completed');
+                    dot.textContent = '✓';
+                } else if (i === step) {
+                    dot.classList.add('active');
+                    dot.textContent = i;
+                } else {
+                    dot.textContent = i;
+                }
+                if (line) {
+                    line.classList.toggle('completed', i < step);
+                }
+            }
+
+            currentStep = step;
+
+            // Renderizar PayPal al llegar al paso 3 si el plan no es gratuito
+            if (step === 3 && regSelectedPlan !== 'free') {
+                setTimeout(() => {
+                    if (!paypalRendered) {
+                        renderPayPal();
+                        paypalRendered = true;
+                    }
+                }, 300);
+            }
+        }
+
+        /**
+         * Valida el paso 1 (datos del usuario)
+         * @returns {boolean} - true si los datos son válidos
+         */
+        function validateStep1() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const terms = document.getElementById('reg-terms').checked;
+            const errEl = document.getElementById('step1-error');
+
+            errEl.classList.add('hidden');
+
+            // Validaciones
+            if (!name) {
+                errEl.textContent = 'Ingresa tu nombre completo';
+                errEl.classList.remove('hidden');
+                return false;
+            }
+            if (!email || !email.includes('@')) {
+                errEl.textContent = 'Ingresa un correo electrónico válido';
+                errEl.classList.remove('hidden');
+                return false;
+            }
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                errEl.textContent = 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
+                errEl.classList.remove('hidden');
+                return false;
+            }
+            if (!terms) {
+                errEl.textContent = 'Debes aceptar los Términos y Condiciones';
+                errEl.classList.remove('hidden');
+                return false;
+            }
+
+            // Guardar datos para uso posterior
+            regData = { name, email, password, terms };
+            return true;
+        }
+
+        /**
+         * Valida el paso 2 (selección de plan)
+         * @returns {boolean} - siempre true (la selección es válida por defecto)
+         */
+        function validateStep2() {
+            return true;
+        }
+
+        /**
+         * Maneja el clic en "Siguiente" del paso 2
+         * Si el plan es gratuito, registra directamente
+         * Si es de pago, avanza al paso 3
+         */
+        function handleStep2Next() {
+            if (regSelectedPlan === 'free') {
+                handleRegisterFree();
+            } else {
+                goToStep(3);
+            }
+        }
+
+        // ==================== FUNCIÓN: SELECCIONAR PLAN ====================
+        /**
+         * Selecciona un plan en el paso 2 del registro
+         * @param {string} plan - Nombre del plan ('free', 'pro', 'enterprise')
+         */
+        function selectRegPlan(plan) {
+            regSelectedPlan = plan;
+            // Actualizar visualmente los botones
+            document.querySelectorAll('.reg-plan-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.plan === plan);
+            });
+
+            // Cambiar texto del botón según el plan seleccionado
+            const btn = document.getElementById('step2-next-btn');
+            if (plan === 'free') {
+                btn.textContent = 'Registrarse';
+                btn.classList.remove('bg-primary');
+                btn.classList.add('bg-green-accent');
+            } else {
+                btn.textContent = 'Siguiente →';
+                btn.classList.remove('bg-green-accent');
+                btn.classList.add('bg-primary');
+            }
+        }
+
+        // ==================== FUNCIÓN: RENDERIZAR PAYPAL ====================
+        /**
+         * Renderiza los botones de PayPal en el paso 3
+         * Configura el pago con el precio del plan seleccionado
+         */
+        function renderPayPal() {
+            const container = document.getElementById('paypal-button-container');
+            if (!container) return;
+
+            // Limpiar contenedor y crear div para el botón
+            container.innerHTML = '<div id="paypal-button"></div>';
+
+            const price = PRICES[regSelectedPlan] || 0;
+            const planName = PLAN_NAMES[regSelectedPlan] || '';
+
+            // Actualizar datos de precio en la UI
+            document.getElementById('paypal-price').textContent = price.toLocaleString('es-MX');
+            document.getElementById('paypal-plan-label').textContent = `Plan ${planName}`;
+
+            // Crear botón de PayPal
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'gold',
+                    shape: 'rect',
+                    label: 'paypal'
+                },
+
+                // Crear la orden de compra
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                currency_code: 'MXN',
+                                value: price.toString()
+                            },
+                            description: `Suscripción AutoDocs AI - Plan ${planName}`
+                        }]
+                    });
+                },
+
+                // Manejar aprobación del pago
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(orderData) {
+                        console.log('Pago exitoso:', orderData);
+                        
+                        // Mostrar mensaje de éxito
+                        document.getElementById('pago-exitoso').style.display = 'block';
+                        document.getElementById('transaction-id').textContent = 'ID de transacción: ' + orderData.id;
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        
+                        const payBtn = document.querySelector('#step-3 .bg-green-accent');
+                        if (payBtn) payBtn.style.display = 'none';
+                        
+                        // Guardar ID de la orden para el registro
+                        regData.paypal_order_id = orderData.id;
+                        
+                        // Registrar al usuario después del pago
+                        handleRegisterWithPayPal(orderData.id);
+                    });
+                },
+
+                // Manejar errores de PayPal
+                onError: function(err) {
+                    console.error('Error en PayPal:', err);
+                    alert('El pago no pudo procesarse. Por favor, verifica tus datos e intenta de nuevo.');
+                },
+
+                // Manejar cancelación del pago
+                onCancel: function(data) {
+                    console.log('Pago cancelado por el usuario');
+                    alert('Has cancelado el proceso de pago. Puedes intentarlo nuevamente cuando quieras.');
+                }
+            }).render('#paypal-button').catch(function(err) {
+                console.error('Error al renderizar PayPal:', err);
+                document.getElementById('paypal-button').innerHTML = `
+                    <div class="text-center p-4 border border-error/30 rounded-xl bg-error/5 text-error">
+                        <span class="material-symbols-outlined text-2xl">error</span>
+                        <p class="mt-2">No se pudo cargar PayPal. Por favor, recarga la página.</p>
+                    </div>
+                `;
+            });
+
+            // Ocultar el spinner de carga
+            document.getElementById('paypal-loading').style.display = 'none';
+        }
+
+        // ==================== FUNCIÓN: REGISTRO GRATUITO ====================
+        /**
+         * Registra un usuario con el plan gratuito (sin pago)
+         * Envía los datos al backend y redirige al dashboard
+         */
+        async function handleRegisterFree() {
+            if (isRegistering) return;
+            if (!validateStep1()) return;
+
+            // Deshabilitar el botón mientras se procesa
+            const btn = document.getElementById('step2-next-btn');
+            const originalText = btn.textContent;
+            btn.innerHTML = '<span class="spinner"></span> Registrando...';
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            isRegistering = true;
+
+            const { name, email, password, terms } = regData;
+
+            try {
+                // Enviar petición al backend
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        plan: 'free',
+                        accepted_terms: terms
+                    })
+                });
+                const data = await res.json();
+                
+                // Manejar errores
+                if (!res.ok) {
+                    const errEl = document.getElementById('step1-error');
+                    errEl.textContent = data.error || 'Error al registrar';
+                    errEl.classList.remove('hidden');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    isRegistering = false;
+                    return;
+                }
+                
+                // Guardar token y datos del usuario
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                // Redirigir según el rol
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 800);
+            } catch {
+                const errEl = document.getElementById('step1-error');
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+                btn.textContent = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                isRegistering = false;
+            }
+        }
+
+        // ==================== FUNCIÓN: REGISTRO CON PAYPAL ====================
+        /**
+         * Registra un usuario después de un pago exitoso con PayPal
+         * @param {string} orderId - ID de la orden de PayPal (opcional)
+         */
+        async function handleRegisterWithPayPal(orderId = null) {
+            if (isRegistering) return;
+            if (!validateStep1()) return;
+
+            // Deshabilitar el botón mientras se procesa
+            const btn = document.querySelector('#step-3 .bg-green-accent');
+            if (btn) {
+                const originalText = btn.textContent;
+                btn.innerHTML = '<span class="spinner"></span> Procesando...';
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            isRegistering = true;
+
+            const { name, email, password, terms } = regData;
+
+            try {
+                // Enviar petición al backend con datos de pago
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        plan: regSelectedPlan,
+                        accepted_terms: terms,
+                        payment_method: 'paypal',
+                        paypal_order_id: orderId || regData.paypal_order_id || null,
+                        currency: 'MXN'
+                    })
+                });
+                const data = await res.json();
+                
+                // Manejar errores
+                if (!res.ok) {
+                    const errEl = document.getElementById('step1-error');
+                    errEl.textContent = data.error || 'Error al registrar';
+                    errEl.classList.remove('hidden');
+                    if (btn) {
+                        btn.textContent = 'Pagar y registrarse';
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                    isRegistering = false;
+                    return;
+                }
+                
+                // Guardar token y datos del usuario
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                // Redirigir según el rol
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 800);
+            } catch {
+                const errEl = document.getElementById('step1-error');
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+                if (btn) {
+                    btn.textContent = 'Pagar y registrarse';
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                isRegistering = false;
+            }
+        }
+
+        // ==================== FUNCIONES DE VALIDACIÓN DE CONTRASEÑA ====================
+        /**
+         * Verifica la fortaleza de la contraseña en tiempo real (registro)
+         * @param {string} password - Contraseña a evaluar
+         */
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('pwd-strength-bar');
+            const fill = document.getElementById('pwd-strength-fill');
+            const label = document.getElementById('pwd-strength-label');
+
+            if (!password) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
+
+            // Evaluar criterios de seguridad
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            // Actualizar visualmente cada requisito
+            const updateReq = (id, ok) => {
+                const el = document.getElementById(id);
+                el.innerHTML = (ok ? '<span class="material-symbols-outlined text-green-accent text-sm">check</span>' : '✗') + ' ' + el.textContent.slice(2);
+                el.classList.toggle('met', ok);
+            };
+            updateReq('req-length', hasLength);
+            updateReq('req-upper', hasUpper);
+            updateReq('req-lower', hasLower);
+            updateReq('req-number', hasNumber);
+
+            // Calcular puntaje y mostrar barra de progreso
+            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+            const percentage = (score / 4) * 100;
+            fill.style.width = percentage + '%';
+
+            // Asignar color y texto según el nivel
+            if (score <= 1) {
+                fill.style.background = '#ef4444';
+                label.textContent = 'Contraseña débil';
+                label.style.color = '#ef4444';
+            } else if (score <= 2) {
+                fill.style.background = '#f97316';
+                label.textContent = 'Contraseña media';
+                label.style.color = '#f97316';
+            } else if (score <= 3) {
+                fill.style.background = '#eab308';
+                label.textContent = 'Contraseña buena';
+                label.style.color = '#eab308';
+            } else {
+                fill.style.background = '#10b981';
+                label.textContent = 'Contraseña segura';
+                label.style.color = '#10b981';
+            }
+        }
+
+        /**
+         * Verifica la fortaleza de la contraseña en el restablecimiento
+         * @param {string} password - Contraseña a evaluar
+         */
+        function checkResetPasswordStrength(password) {
+            const bar = document.getElementById('reset-pwd-strength-bar');
+            const fill = document.getElementById('reset-pwd-strength-fill');
+            const label = document.getElementById('reset-pwd-strength-label');
+
+            if (!password) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
+
+            // Misma lógica que checkPasswordStrength para restablecimiento
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            const updateReq = (id, ok) => {
+                const el = document.getElementById(id);
+                el.textContent = (ok ? '✓' : '✗') + ' ' + el.textContent.slice(2);
+                el.classList.toggle('met', ok);
+            };
+            updateReq('reset-req-length', hasLength);
+            updateReq('reset-req-upper', hasUpper);
+            updateReq('reset-req-lower', hasLower);
+            updateReq('reset-req-number', hasNumber);
+
+            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+            const percentage = (score / 4) * 100;
+            fill.style.width = percentage + '%';
+
+            if (score <= 1) {
+                fill.style.background = '#ef4444';
+                label.textContent = 'Contraseña débil';
+                label.style.color = '#ef4444';
+            } else if (score <= 2) {
+                fill.style.background = '#f97316';
+                label.textContent = 'Contraseña media';
+                label.style.color = '#f97316';
+            } else if (score <= 3) {
+                fill.style.background = '#eab308';
+                label.textContent = 'Contraseña buena';
+                label.style.color = '#eab308';
+            } else {
+                fill.style.background = '#10b981';
+                label.textContent = 'Contraseña segura';
+                label.style.color = '#10b981';
+            }
+        }
+
+        // ==================== FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA ====================
+        /**
+         * Muestra el modal para recuperar contraseña
+         * Copia el email del campo de login si existe
+         */
         function showForgotPassword() {
             closeModal();
             document.getElementById('forgotModal').classList.add('flex');
@@ -612,6 +1536,9 @@
             document.getElementById('forgot-email').value = document.getElementById('login-email').value;
         }
 
+        /**
+         * Cierra el modal de recuperación de contraseña
+         */
         function closeForgotModal() {
             document.getElementById('forgotModal').classList.add('hidden');
             document.getElementById('forgotModal').classList.remove('flex');
@@ -619,6 +1546,10 @@
             document.getElementById('forgot-success').classList.add('hidden');
         }
 
+        /**
+         * Muestra el modal de verificación de código
+         * @param {string} email - Email del usuario que solicita recuperación
+         */
         function showVerifyModal(email) {
             forgotEmail = email;
             closeForgotModal();
@@ -627,12 +1558,18 @@
             document.getElementById('verify-code').value = '';
         }
 
+        /**
+         * Cierra el modal de verificación de código
+         */
         function closeVerifyModal() {
             document.getElementById('verifyModal').classList.add('hidden');
             document.getElementById('verifyModal').classList.remove('flex');
             document.getElementById('verify-error').classList.add('hidden');
         }
 
+        /**
+         * Muestra el modal para establecer nueva contraseña
+         */
         function showResetModal() {
             closeVerifyModal();
             document.getElementById('resetModal').classList.add('flex');
@@ -641,6 +1578,9 @@
             document.getElementById('reset-pwd-strength-bar').classList.add('hidden');
         }
 
+        /**
+         * Cierra el modal de restablecimiento de contraseña
+         */
         function closeResetModal() {
             document.getElementById('resetModal').classList.add('hidden');
             document.getElementById('resetModal').classList.remove('flex');
@@ -648,6 +1588,9 @@
             document.getElementById('reset-success').classList.add('hidden');
         }
 
+        /**
+         * Maneja el envío del código de recuperación al email
+         */
         async function handleForgotPassword() {
             const email = document.getElementById('forgot-email').value;
             const errEl = document.getElementById('forgot-error');
@@ -681,6 +1624,9 @@
             }
         }
 
+        /**
+         * Maneja la verificación del código de 6 dígitos
+         */
         async function handleVerifyCode() {
             const code = document.getElementById('verify-code').value;
             const errEl = document.getElementById('verify-error');
@@ -711,6 +1657,9 @@
             }
         }
 
+        /**
+         * Maneja el cambio de contraseña con el nuevo password
+         */
         async function handleResetPassword() {
             const newPassword = document.getElementById('reset-password').value;
             const errEl = document.getElementById('reset-error');
@@ -724,11 +1673,21 @@
                 return;
             }
 
+            if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+                errEl.textContent = 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
             try {
                 const res = await fetch('/api/auth/reset-password', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: forgotEmail, code: document.getElementById('verify-code').value, new_password: newPassword})
+                    body: JSON.stringify({
+                        email: forgotEmail,
+                        code: document.getElementById('verify-code').value,
+                        new_password: newPassword
+                    })
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -747,61 +1706,73 @@
             }
         }
 
-        function checkResetPasswordStrength(password) {
-            const bar = document.getElementById('reset-pwd-strength-bar');
-            const fill = document.getElementById('reset-pwd-strength-fill');
-            const label = document.getElementById('reset-pwd-strength-label');
-            const reqLength = document.getElementById('reset-req-length');
-            const reqUpper = document.getElementById('reset-req-upper');
-            const reqLower = document.getElementById('reset-req-lower');
-            const reqNumber = document.getElementById('reset-req-number');
-
-            if (!password) {
-                bar.classList.add('hidden');
-                return;
-            }
-
-            bar.classList.remove('hidden');
-
-            const hasLength = password.length >= 8;
-            const hasUpper = /[A-Z]/.test(password);
-            const hasLower = /[a-z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-
-            reqLength.innerHTML = hasLength ? '✓ Mínimo 8 caracteres' : '✗ Mínimo 8 caracteres';
-            reqLength.style.color = hasLength ? '#10b981' : '';
-            reqUpper.innerHTML = hasUpper ? '✓ Al menos 1 mayúscula' : '✗ Al menos 1 mayúscula';
-            reqUpper.style.color = hasUpper ? '#10b981' : '';
-            reqLower.innerHTML = hasLower ? '✓ Al menos 1 minúscula' : '✗ Al menos 1 minúscula';
-            reqLower.style.color = hasLower ? '#10b981' : '';
-            reqNumber.innerHTML = hasNumber ? '✓ Al menos 1 número' : '✗ Al menos 1 número';
-            reqNumber.style.color = hasNumber ? '#10b981' : '';
-
-            const strength = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
-            const percentage = (strength / 4) * 100;
-            fill.style.width = percentage + '%';
-
-            if (strength <= 1) {
-                fill.style.background = '#ef4444';
-                label.textContent = 'Débil';
-                label.style.color = '#ef4444';
-            } else if (strength <= 2) {
-                fill.style.background = '#f97316';
-                label.textContent = 'Media';
-                label.style.color = '#f97316';
-            } else if (strength <= 3) {
-                fill.style.background = '#eab308';
-                label.textContent = 'Buena';
-                label.style.color = '#eab308';
-            } else {
-                fill.style.background = '#10b981';
-                label.textContent = 'Fuerte';
-                label.style.color = '#10b981';
+        // ==================== FUNCIONES DE MODALES ====================
+        /**
+         * Abre el modal de autenticación
+         * @param {string} tab - Pestaña a mostrar ('login' o 'register')
+         * @param {string} plan - Plan a preseleccionar en el registro ('free', 'pro', 'enterprise')
+         */
+        function openModal(tab = 'login', plan = 'free') {
+            document.getElementById('authModal').classList.add('flex');
+            document.getElementById('authModal').classList.remove('hidden');
+            switchTab(tab);
+            
+            // Configurar registro si se selecciona
+            if (tab === 'register') {
+                selectRegPlan(plan);
+                currentStep = 1;
+                document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+                document.getElementById('step-1').classList.add('active');
+                for (let i = 1; i <= 3; i++) {
+                    const dot = document.getElementById(`step-dot-${i}`);
+                    const line = document.getElementById(`step-line-${i}`);
+                    dot.classList.remove('active', 'completed');
+                    if (i === 1) dot.classList.add('active');
+                    dot.textContent = i;
+                    if (line) line.classList.remove('completed');
+                }
+                document.getElementById('step1-error').classList.add('hidden');
+                document.getElementById('pago-exitoso').style.display = 'none';
+                document.getElementById('paypal-button-container').style.display = 'block';
+                document.getElementById('paypal-loading').style.display = 'flex';
+                paypalRendered = false;
+                const payBtn = document.querySelector('#step-3 .bg-green-accent');
+                if (payBtn) payBtn.style.display = 'block';
+                
+                // Configurar botón según el plan seleccionado
+                const btn = document.getElementById('step2-next-btn');
+                if (plan === 'free') {
+                    btn.textContent = 'Registrarse';
+                    btn.classList.remove('bg-primary');
+                    btn.classList.add('bg-green-accent');
+                } else {
+                    btn.textContent = 'Siguiente →';
+                    btn.classList.remove('bg-green-accent');
+                    btn.classList.add('bg-primary');
+                }
+                isRegistering = false;
+                regData = {};
             }
         }
+
+        /**
+         * Cierra el modal de autenticación
+         */
+        function closeModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('flex');
+        }
+
+        /**
+         * Cambia entre pestañas de Login y Registro
+         * @param {string} tab - 'login' o 'register'
+         */
         function switchTab(tab) {
+            // Mostrar/ocultar formularios
             document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
             document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+            
+            // Actualizar estilos de las pestañas
             const tabLogin = document.getElementById('tab-login');
             const tabRegister = document.getElementById('tab-register');
             if (tab === 'login') {
@@ -817,19 +1788,58 @@
             }
         }
 
-        function togglePassword(inputId, button) {
-            const input = document.getElementById(inputId);
-            const icon = button.querySelector('.material-symbols-outlined');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.textContent = 'visibility_off';
-            } else {
-                input.type = 'password';
-                icon.textContent = 'visibility';
+        // ==================== FUNCIÓN DE LOGIN ====================
+        /**
+         * Maneja el inicio de sesión enviando credenciales al backend
+         */
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errEl = document.getElementById('login-error');
+            const succEl = document.getElementById('login-success');
+            errEl.classList.add('hidden');
+            succEl.classList.add('hidden');
+
+            if (!email || !password) {
+                errEl.textContent = 'Completa todos los campos';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errEl.textContent = data.error || 'Credenciales inválidas';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                
+                // Guardar autenticación
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                succEl.classList.remove('hidden');
+                
+                // Redirigir según rol
+                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
+                setTimeout(() => {
+                    document.getElementById('login-email').value = '';
+                    document.getElementById('login-password').value = '';
+                    window.location.href = redirectUrl;
+                }, 800);
+            } catch {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
             }
         }
 
-        // Event listener para Enter en login
+        // ==================== FUNCIONES DE TEMA (CLARO/OSCURO) ====================
+        // Event listeners para login con tecla Enter
         document.getElementById('login-email').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
@@ -837,123 +1847,41 @@
             if (e.key === 'Enter') handleLogin();
         });
 
-        // Event listener para Enter en registro
-        document.getElementById('reg-name').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleRegister();
-        });
-        document.getElementById('reg-email').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleRegister();
-        });
-        document.getElementById('reg-password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleRegister();
-        });
-
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const errEl = document.getElementById('login-error');
-            const succEl = document.getElementById('login-success');
-            errEl.classList.add('hidden');
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, password})
-                });
-                const data = await res.json();
-                if (!res.ok) { errEl.classList.remove('hidden'); return; }
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                succEl.classList.remove('hidden');
-                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
-                setTimeout(() => {
-                    document.getElementById('login-email').value = '';
-                    document.getElementById('login-password').value = '';
-                    window.location.href = redirectUrl;
-                }, 1000);
-            } catch { errEl.classList.remove('hidden'); }
-        }
-
-        function checkPasswordStrength(password) {
-            const bar = document.getElementById('pwd-strength-bar');
-            const fill = document.getElementById('pwd-strength-fill');
-            const label = document.getElementById('pwd-strength-label');
-
-            if (!password) { bar.classList.add('hidden'); return; }
-            bar.classList.remove('hidden');
-
-            const hasLength = password.length >= 8;
-            const hasUpper  = /[A-Z]/.test(password);
-            const hasLower  = /[a-z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-
-            const mark = (id, ok) => {
-                const el = document.getElementById(id);
-                el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
-                el.style.color = ok ? 'var(--md-sys-color-tertiary, #4caf50)' : '';
-            };
-            mark('req-length', hasLength);
-            mark('req-upper',  hasUpper);
-            mark('req-lower',  hasLower);
-            mark('req-number', hasNumber);
-
-            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
-
-            if (score <= 1) {
-                fill.style.width = '25%';
-                fill.style.background = '#ef4444';
-                label.textContent = 'Contraseña débil';
-                label.style.color = '#ef4444';
-            } else if (score === 2 || score === 3) {
-                fill.style.width = '60%';
-                fill.style.background = '#f97316';
-                label.textContent = 'Contraseña media';
-                label.style.color = '#f97316';
-            } else {
-                fill.style.width = '100%';
-                fill.style.background = '#22c55e';
-                label.textContent = 'Contraseña segura';
-                label.style.color = '#22c55e';
+        /**
+         * Inicializa el tema al cargar la página
+         * Carga el tema guardado o usa oscuro por defecto
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+            // Redirigir al dashboard si ya hay sesión
+            if (localStorage.getItem('token')) {
+                window.location.href = '/dashboard';
             }
+        });
+
+        /**
+         * Alterna entre modo claro y oscuro
+         */
+        document.getElementById('themeButton').addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        /**
+         * Actualiza el ícono del botón de tema
+         * @param {string} theme - 'dark' o 'light'
+         */
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
         }
 
-        async function handleRegister() {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const errEl = document.getElementById('reg-error');
-            const succEl = document.getElementById('reg-success');
-            errEl.classList.add('hidden');
-
-            // Validación de contraseña
-            if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-                errEl.textContent = 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
-                errEl.classList.remove('hidden');
-                return;
-            }
-            try {
-                const res = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({name, email, password})
-                });
-                const data = await res.json();
-                if (!res.ok) { errEl.textContent = data.error || 'Error al registrar'; errEl.classList.remove('hidden'); return; }
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                succEl.classList.remove('hidden');
-                const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
-                setTimeout(() => {
-                    document.getElementById('reg-name').value = '';
-                    document.getElementById('reg-email').value = '';
-                    document.getElementById('reg-password').value = '';
-                    document.getElementById('pwd-strength-bar').classList.add('hidden');
-                    window.location.href = redirectUrl;
-                }, 1000);
-            } catch { errEl.classList.remove('hidden'); }
-        }
-
-        // ==================== PARTÍCULAS ====================
+        // ==================== SISTEMA DE PARTÍCULAS (FONDO ANIMADO) ====================
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -961,14 +1889,24 @@
         const particleCount = 80;
         const repulsionRadius = 180;
 
+        /**
+         * Inicializa el canvas con el tamaño de la ventana
+         */
         function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             setupParticles();
         }
 
+        /**
+         * Clase que representa una partícula individual
+         */
         class Particle {
             constructor() { this.reset(); }
+            
+            /**
+             * Reinicia la partícula en una posición aleatoria
+             */
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
@@ -976,9 +1914,15 @@
                 this.vx = (Math.random() - 0.5) * 0.4;
                 this.vy = (Math.random() - 0.5) * 0.4;
             }
+            
+            /**
+             * Actualiza la posición de la partícula y aplica repulsión del mouse
+             */
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
+                
+                // Efecto de repulsión al pasar el mouse cerca
                 if (mouse.x !== null) {
                     const dx = mouse.x - this.x;
                     const dy = mouse.y - this.y;
@@ -990,20 +1934,31 @@
                         this.y -= Math.sin(angle) * force * 2;
                     }
                 }
+                
+                // Rebote en los bordes del canvas
                 if (this.x < 0) this.x = canvas.width;
                 if (this.x > canvas.width) this.x = 0;
                 if (this.y < 0) this.y = canvas.height;
                 if (this.y > canvas.height) this.y = 0;
             }
+            
+            /**
+             * Dibuja la partícula y las líneas de conexión con otras cercanas
+             */
             draw() {
+                // Obtener colores del tema actual
                 const style = getComputedStyle(document.body);
-                const color1 = style.getPropertyValue('--particle-color-1').trim();
-                const color2 = style.getPropertyValue('--particle-color-2').trim();
-                const lineColor = style.getPropertyValue('--particle-line').trim();
+                const color1 = style.getPropertyValue('--particle-color-1').trim() || 'rgba(56,189,248,0.25)';
+                const color2 = style.getPropertyValue('--particle-color-2').trim() || 'rgba(129,140,248,0.2)';
+                const lineColor = style.getPropertyValue('--particle-line').trim() || 'rgba(56,189,248,0.12)';
+                
+                // Dibujar la partícula
                 ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
+                
+                // Dibujar líneas de conexión con partículas cercanas
                 particles.forEach(p => {
                     const d = Math.hypot(this.x - p.x, this.y - p.y);
                     if (d < 120) {
@@ -1017,22 +1972,33 @@
             }
         }
 
+        /**
+         * Configura las partículas iniciales
+         */
         function setupParticles() {
             particles = [];
             for (let i = 0; i < particleCount; i++) particles.push(new Particle());
         }
 
+        /**
+         * Bucle de animación de las partículas
+         */
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
 
+        // ==================== EFECTO TILT 3D EN TARJETAS ====================
+        /**
+         * Inicializa el efecto de inclinación 3D en las tarjetas
+         */
         function initTilt() {
             const cards = document.querySelectorAll('.tilt-card');
             cards.forEach(card => {
                 if (card.hasTilt) return;
                 card.hasTilt = true;
+                
                 card.addEventListener('mousemove', (e) => {
                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
                     const rect = card.getBoundingClientRect();
@@ -1045,6 +2011,7 @@
                     const target = card.querySelector('.card-interaction');
                     if (target) target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
                 });
+                
                 card.addEventListener('mouseleave', () => {
                     const target = card.querySelector('.card-interaction');
                     if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
@@ -1052,15 +2019,28 @@
             });
         }
 
+        // ==================== EVENT LISTENERS GLOBALES ====================
+        // Redimensionar canvas al cambiar tamaño de ventana
         window.addEventListener('resize', initCanvas);
+        
+        // Seguir la posición del mouse para efecto de partículas
         window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
 
+        // Inicializar todo al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             animate();
             initTilt();
+            // Redirigir si ya hay sesión activa
+            if (localStorage.getItem('token')) {
+                window.location.href = '/dashboard';
+            }
+        });
+
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
         });
     </script>
-    <script src="/static/theme.js"></script>
 </body>
 </html>

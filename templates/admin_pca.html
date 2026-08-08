@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+     ANÁLISIS PCA - AutoDocs AI
+     ═══════════════════════════════════════════════════════════════════════════════
+     - Panel de administración para visualización de Análisis de Componentes Principales
+     - Muestra la proyección de proyectos en 2 dimensiones basado en métricas
+     - Incluye gráfico interactivo, conclusiones y sugerencias automáticas
+════════════════════════════════════════════════════════════════════════════════ -->
+<html lang="es">
+<head>
+    <!-- ============================================================
+         METADATOS Y CONFIGURACIÓN DEL DOCUMENTO
+         ============================================================ -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Análisis PCA — AutoDocs AI</title>
+    
+    <!-- ============================================================
+         LIBRERÍAS EXTERNAS
+         ============================================================ -->
+    <!-- Tailwind CSS: Framework de estilos utilitario -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Fuentes de Google: JetBrains Mono (código) y Geist (UI) -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Material Symbols: Sistema de iconos de Google Material Design -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- ============================================================
+         CONFIGURACIÓN DE TAILWIND
+         ============================================================ -->
+    <script id="tailwind-config">
+        // Extiende la configuración de Tailwind con colores personalizados y fuentes
+        tailwind.config = {
+            theme: {
+                extend: {
+                    // Colores personalizados que usan variables CSS para soportar temas
+                    colors: {
+                        background: 'var(--color-background)',
+                        surface: 'var(--color-surface)',
+                        'surface-container': 'var(--color-surface-container)',
+                        'surface-container-high': 'var(--color-surface-container-high)',
+                        'on-surface': 'var(--color-on-surface)',
+                        'on-surface-variant': 'var(--color-on-surface-variant)',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        'outline-variant': 'var(--color-outline-variant)',
+                        error: 'var(--color-error)',
+                        'green-accent': 'var(--color-green-accent)',
+                        tertiary: 'var(--color-tertiary)',
+                    },
+                    // Fuentes personalizadas
+                    fontFamily: {
+                        body: ['Geist', 'sans-serif'],      // Texto general
+                        mono: ['JetBrains Mono', 'monospace'], // Código
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        /* ============================================================
+           VARIABLES CSS - TEMA OSCURO (por defecto)
+           ============================================================ */
+        :root, body[data-theme="dark"] {
+            --color-background: #0f1418;              /* Fondo principal oscuro */
+            --color-surface: rgba(27,32,36,0.4);      /* Superficies con transparencia */
+            --color-surface-container: #1b2024;       /* Contenedores sólidos */
+            --color-surface-container-high: #252b2e;  /* Contenedores más claros */
+            --color-on-surface: #dee3e8;              /* Texto sobre superficies */
+            --color-on-surface-variant: #bdc8d1;      /* Texto secundario */
+            --color-primary: #8ed5ff;                 /* Color principal (azul claro) */
+            --color-secondary: #c0c1ff;               /* Color secundario (violeta) */
+            --color-outline-variant: #3e484f;         /* Bordes y líneas */
+            --color-error: #ffb4ab;                   /* Color de error */
+            --color-green-accent: #10b981;            /* Verde para éxito */
+            --color-tertiary: #ffc176;                /* Color terciario */
+            /* Efectos de vidrio (glassmorphism) */
+            --glass-border: rgba(123,208,255,0.1);
+            --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --glass-hover-border: rgba(123,208,255,0.3);
+            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            /* Colores de partículas para el fondo animado */
+            --particle-color-1: rgba(142,213,255,0.4);
+            --particle-color-2: rgba(192,193,255,0.2);
+            --particle-line: rgba(142,213,255,0.12);
+        }
+
+        /* ============================================================
+           VARIABLES CSS - TEMA CLARO
+           ============================================================ */
+        body[data-theme="light"] {
+            --color-background: #f1f5f9;              /* Fondo claro grisáceo */
+            --color-surface: rgba(255,255,255,0.7);    /* Superficies blancas */
+            --color-surface-container: #ffffff;       /* Contenedores blancos sólidos */
+            --color-surface-container-high: #e2e8f0;  /* Contenedores grises */
+            --color-on-surface: #0f172a;              /* Texto oscuro */
+            --color-on-surface-variant: #334155;      /* Texto secundario oscuro */
+            --color-primary: #38bdf8;                 /* Azul claro */
+            --color-secondary: #818cf8;               /* Violeta claro */
+            --color-outline-variant: #cbd5e1;         /* Bordes grises */
+            --color-error: #ba1a1a;                   /* Rojo para errores */
+            --color-green-accent: #10b981;            /* Verde */
+            --color-tertiary: #7c5800;                /* Amarillo oscuro */
+            /* Efectos de vidrio más sutiles para modo claro */
+            --glass-border: rgba(0,0,0,0.04);
+            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            --glass-hover-border: rgba(56,189,248,0.3);
+            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            /* Partículas más sutiles */
+            --particle-color-1: rgba(56,189,248,0.25);
+            --particle-color-2: rgba(129,140,248,0.2);
+            --particle-line: rgba(56,189,248,0.12);
+        }
+
+        /* ============================================================
+           ESTILOS GLOBALES
+           ============================================================ */
+        body {
+            background: var(--color-background);
+            color: var(--color-on-surface);
+            font-family: 'Geist', sans-serif;
+            transition: background 0.25s ease, color 0.25s ease;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ============================================================
+           CANVAS DE PARTÍCULAS (FONDO ANIMADO)
+           ============================================================ */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;                  /* Detrás de todo el contenido */
+            pointer-events: none;         /* Permite hacer clic a través del canvas */
+        }
+
+        /* ============================================================
+           EFECTO GLASS (VIDRIO ESMERILADO)
+           ============================================================ */
+        .glass {
+            background: var(--color-surface);
+            backdrop-filter: blur(16px); /* Desenfoque del fondo */
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
+        }
+
+        /* Efecto hover para elementos glass */
+        .glass-hover:hover {
+            border-color: var(--glass-hover-border);
+            box-shadow: var(--glass-hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           ANIMACIONES DE ENTRADA
+           ============================================================ */
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Desactiva animaciones si el usuario prefiere movimiento reducido */
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-in, .glass-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+        }
+
+        /* ============================================================
+           SCROLLBAR PERSONALIZADA
+           ============================================================ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+
+        /* ============================================================
+           SIDEBAR ESTILO "USUARIOS" (hover-expand)
+           ============================================================ */
+        .sidebar-shell {
+            width: 72px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* En escritorio, el sidebar se expande al hacer hover */
+        @media (min-width: 1024px) {
+            .sidebar-shell:hover { width: 240px; }
+            .sidebar-shell:hover .nav-label,
+            .sidebar-shell:hover .nav-badge,
+            .sidebar-shell:hover .sidebar-user-info,
+            .sidebar-shell:hover .sidebar-brand-label { opacity: 1; }
+        }
+
+        /* Elementos del sidebar que se ocultan/muestran al hacer hover */
+        .nav-label, .nav-badge, .sidebar-user-info, .sidebar-brand-label {
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        /* Navegación del sidebar */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            padding: 0 8px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: var(--color-on-surface-variant);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            position: relative;
+            width: 100%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(142,213,255,0.08);
+            color: var(--color-primary);
+        }
+
+        .sidebar-nav-item.active {
+            background: rgba(142,213,255,0.12);
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        .sidebar-nav-item .material-symbols-outlined {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-item .nav-badge {
+            margin-left: auto;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(142,213,255,0.15);
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+    </style>
+    
+    <!-- ============================================================
+         CHART.JS - LIBRERÍA PARA GRÁFICOS
+         ============================================================ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+
+<!-- ============================================================
+     CUERPO DE LA PÁGINA
+     ============================================================ -->
+<body data-theme="dark">
+    
+    <!-- Canvas para partículas de fondo (efecto visual dinámico) -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Contenedor principal con layout flex de pantalla completa -->
+    <div class="flex min-h-screen w-full relative z-10">
+        
+        <!-- ============================================================
+             SIDEBAR (MENÚ LATERAL) - ESTILO HOVER-EXPAND
+             ============================================================ -->
+        <aside class="sidebar-shell h-screen sticky top-0 flex flex-col items-center py-6 sidebar stagger-in" style="animation-delay:0.05s;">
+            
+            <!-- Logo de la aplicación -->
+            <div class="mb-8 flex-shrink-0 flex items-center gap-2 px-3 w-full">
+                <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
+                </div>
+                <span class="sidebar-brand-label font-mono text-lg font-bold">Auto<span class="text-primary">Docs</span></span>
+            </div>
+
+            <!-- Navegación principal del sidebar -->
+            <nav class="flex-1 w-full overflow-y-auto overflow-x-hidden">
+                <div class="sidebar-nav">
+                    <!-- Enlace al panel de administración general -->
+                    <a href="/admin" id="nav-resumen" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">shield_person</span>
+                        <span class="nav-label">Admin</span>
+                    </a>
+                    <!-- Enlace a la gestión de usuarios con badge contador -->
+                    <a href="/admin/users" id="nav-users" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">group</span>
+                        <span class="nav-label">Usuarios</span>
+                        <span class="nav-badge" id="sidebar-user-count">0</span>
+                    </a>
+                    <!-- Enlace a la gestión de proyectos con badge contador -->
+                    <a href="/admin/projects" id="nav-projects" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        <span class="nav-label">Proyectos</span>
+                        <span class="nav-badge" id="sidebar-project-count">0</span>
+                    </a>
+                    <!-- Enlace al análisis PCA (activo por defecto) -->
+                    <a href="/admin/pca" class="sidebar-nav-item">
+                        <span class="material-symbols-outlined">scatter_plot</span>
+                        <span class="nav-label">Análisis PCA</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Perfil de usuario y cierre de sesión en la parte inferior -->
+            <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
+                <!-- Información del usuario -->
+                <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-background flex-shrink-0" id="user-avatar">A</div>
+                    <div class="sidebar-user-info min-w-0">
+                        <div class="font-bold text-sm truncate" id="user-name">Administrador</div>
+                        <div class="text-xs text-on-surface-variant/70 truncate" id="user-role">Admin</div>
+                    </div>
+                </a>
+                <!-- Botón de cerrar sesión -->
+                <button onclick="logout()" class="sidebar-nav-item mt-2" style="justify-content:flex-start;">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="nav-label">Cerrar sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ============================================================
+             CONTENIDO PRINCIPAL
+             ============================================================ -->
+        <main class="flex-1 p-8 relative z-10 overflow-x-hidden">
+            
+            <!-- HEADER DE LA PÁGINA -->
+            <div class="flex justify-between items-center mb-8 stagger-in" style="animation-delay:0.1s;">
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight">Análisis PCA</h1>
+                    <p class="text-on-surface-variant/60">Proyección de los proyectos analizados en 2 componentes principales</p>
+                </div>
+                <div class="flex gap-3">
+                    <!-- Botón para cambiar entre tema claro/oscuro -->
+                    <button id="themeButton" class="glass glass-hover p-2 rounded-full w-10 h-10 flex items-center justify-center">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 CONTENIDO PCA - CARD PRINCIPAL
+                 ============================================================ -->
+            <div class="glass rounded-2xl p-6 mb-10 stagger-in" style="animation-delay:0.2s;">
+                
+                <!-- Encabezado de la sección PCA -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold section-title flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">scatter_plot</span>
+                            Proyección PCA
+                        </h2>
+                        <p class="text-on-surface-variant/70 text-sm">Visualización de la relación entre proyectos basada en métricas de calidad y estructura.</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-on-surface-variant">Varianza explicada</div>
+                        <div class="text-lg font-semibold text-primary" id="pca-variance">Cargando...</div>
+                    </div>
+                </div>
+
+                <!-- Contenedor del gráfico PCA (Chart.js) -->
+                <div style="position:relative;height:450px;">
+                    <canvas id="chart-pca"></canvas>
+                </div>
+
+                <!-- ============================================================
+                     SECCIÓN DE MÉTRICAS Y AYUDA (2 columnas)
+                     ============================================================ -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                    
+                    <!-- Columna izquierda: Lista de métricas utilizadas -->
+                    <div class="glass rounded-2xl p-4">
+                        <h3 class="font-semibold mb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary" style="font-size:18px;">data_object</span>
+                            Métricas utilizadas
+                        </h3>
+                        <ul class="text-sm space-y-2" id="pca-metrics-list"></ul>
+                    </div>
+                    
+                    <!-- Columna derecha: Explicación del gráfico -->
+                    <div class="glass rounded-2xl p-4">
+                        <h3 class="font-semibold mb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary" style="font-size:18px;">lightbulb</span>
+                            ¿Qué muestra este gráfico?
+                        </h3>
+                        <p class="text-sm text-on-surface-variant" id="pca-help-text">
+                            El PCA ayuda a ver la relación entre proyectos, identificar grupos similares y entender qué proyectos se desvían en calidad o estructura.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     SECCIÓN: LISTA DE PROYECTOS EN EL ESPACIO PCA
+                     ============================================================ -->
+                <div class="glass rounded-2xl p-4 mt-4">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary" style="font-size:18px;">list</span>
+                        Proyectos en el espacio PCA
+                    </h3>
+                    <div id="pca-projects-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm"></div>
+                </div>
+
+                <!-- ============================================================
+                     SECCIÓN: CONCLUSIÓN DEL ANÁLISIS
+                     ============================================================ -->
+                <div class="glass rounded-2xl p-4 mt-4">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary" style="font-size:18px;">insights</span>
+                        Conclusión
+                    </h3>
+                    <div id="pca-conclusion" class="space-y-2 text-sm text-on-surface-variant"></div>
+                </div>
+
+                <!-- ============================================================
+                     SECCIÓN: SUGERENCIAS (destacada en color secundario)
+                     ============================================================ -->
+                <div class="glass rounded-2xl p-4 mt-4 bg-secondary/10 border border-secondary/30">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2 text-secondary">
+                        <span class="material-symbols-outlined" style="font-size:18px;">lightbulb</span>
+                        Sugerencias
+                    </h3>
+                    <div id="pca-suggestions" class="space-y-2 text-sm text-on-surface-variant"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================================
+         JAVASCRIPT - LÓGICA PRINCIPAL
+         ============================================================ -->
+    <script>
+        // ============================================================
+        // AUTENTICACIÓN Y VERIFICACIÓN DE PERMISOS
+        // ============================================================
+        
+        // Obtener token de autenticación del localStorage
+        const token = localStorage.getItem('token');
+        // Si no hay token, redirigir al login
+        if (!token) window.location.href = '/';
+        
+        // Obtener datos del usuario del localStorage
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Si no es administrador, redirigir al dashboard de usuario
+        if (user.role !== 'admin') window.location.href = '/dashboard';
+        
+        // Actualizar elementos de la UI con la información del usuario
+        document.getElementById('user-name').innerText = user.name || 'Admin';
+        document.getElementById('user-avatar').innerText = (user.name?.[0] || 'A').toUpperCase();
+
+        /**
+         * Devuelve los headers necesarios para peticiones autenticadas
+         * @returns {Object} Headers con token JWT
+         */
+        function authHeaders() {
+            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        }
+
+        /**
+         * Cierra sesión del usuario
+         */
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // ============================================================
+        // CARGA DEL ANÁLISIS PCA
+        // ============================================================
+        
+        /**
+         * Carga los datos del análisis PCA desde el backend y renderiza el gráfico
+         * Esta función es asíncrona y maneja todo el flujo de datos
+         */
+        async function loadPCA() {
+            try {
+                // Detectar si el tema es oscuro para ajustar colores del gráfico
+                const isDark = document.body.getAttribute('data-theme') !== 'light';
+                const textColor = isDark ? '#dee3e8' : '#0f172a';
+                const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
+                // ============================================================
+                // PETICIÓN AL BACKEND PARA OBTENER DATOS PCA
+                // ============================================================
+                const res = await fetch('/api/admin/pca', { headers: authHeaders() });
+                
+                // Verificar respuesta
+                if (!res.ok) {
+                    console.warn('PCA no disponible:', res.status);
+                    document.getElementById('pca-variance').innerText = 'No disponible';
+                    return;
+                }
+                
+                const data = await res.json();
+                if (data.status !== 'ok' || !data.pca) {
+                    console.warn('PCA response invalid', data);
+                    document.getElementById('pca-variance').innerText = 'No disponible';
+                    return;
+                }
+
+                // ============================================================
+                // PROCESAMIENTO DE DATOS PCA
+                // ============================================================
+                const pca = data.pca;
+                
+                // Calcular varianza total explicada
+                const varTotal = pca.explained_variance_ratio.reduce((sum, val) => sum + val, 0) * 100;
+                document.getElementById('pca-variance').innerText = `${varTotal.toFixed(1)}% varianza`;
+                
+                // Extraer coordenadas de los proyectos
+                const labels = pca.project_coordinates.map(item => item.name || item.project_id);
+                const valuesX = pca.project_coordinates.map(item => item.component_1);
+                const valuesY = pca.project_coordinates.map(item => item.component_2);
+
+                // ============================================================
+                // RENDERIZADO DEL GRÁFICO PCA CON CHART.JS
+                // ============================================================
+                const ctxPCA = document.getElementById('chart-pca').getContext('2d');
+                
+                // ============================================================
+                // LISTA DE MÉTRICAS UTILIZADAS
+                // ============================================================
+                const metrics = [
+                    'total_files', 'total_funcs', 'total_classes', 'total_endpoints',
+                    'total_issues', 'total_langs', 'doc_ratio', 'async_funcs',
+                    'test_funcs', 'avg_complexity', 'max_complexity', 'high_cx_funcs',
+                    'quality_score', 'total_size_kb'
+                ];
+
+                // Renderizar lista de métricas
+                document.getElementById('pca-metrics-list').innerHTML = metrics
+                    .map(metric => `<li class="flex items-start gap-2"><span class="inline-flex h-2.5 w-2.5 rounded-full bg-primary mt-1"></span><span>${metric.replace(/_/g, ' ')}</span></li>`)
+                    .join('');
+
+                // ============================================================
+                // TEXTO DE AYUDA
+                // ============================================================
+                document.getElementById('pca-help-text').innerText =
+                    'El PCA usa estas métricas cuantitativas para proyectar cada proyecto en un espacio de dos dimensiones. Esto ayuda a detectar grupos de proyectos similares, distinguir los outliers y entender cómo variables como la complejidad, documentación y tamaño impactan la calidad general.';
+
+                // ============================================================
+                // LISTA DE PROYECTOS (primeros 9)
+                // ============================================================
+                const projectList = document.getElementById('pca-projects-list');
+                projectList.innerHTML = pca.project_coordinates.slice(0, 9).map(item =>
+                    `<div class="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+                        <div class="font-semibold">${item.name}</div>
+                        <div class="text-xs text-on-surface-variant mt-1">PC1: ${item.component_1.toFixed(3)}, PC2: ${item.component_2.toFixed(3)}</div>
+                    </div>`
+                ).join('');
+
+                // ============================================================
+                // CONCLUSIÓN DEL ANÁLISIS
+                // ============================================================
+                const conclusionContainer = document.getElementById('pca-conclusion');
+                if (pca.conclusion && Array.isArray(pca.conclusion) && pca.conclusion.length > 0) {
+                    conclusionContainer.innerHTML = pca.conclusion
+                        .map(text => `<p class="mb-2">${text}</p>`)
+                        .join('');
+                } else if (pca.interpretacion) {
+                    conclusionContainer.innerHTML = `<p class="mb-2">${pca.interpretacion}</p>`;
+                } else {
+                    conclusionContainer.innerHTML = `<p class="text-on-surface-variant/60">No hay conclusión disponible para este análisis.</p>`;
+                }
+
+                // ============================================================
+                // SUGERENCIAS AUTOMÁTICAS
+                // ============================================================
+                const suggestionsContainer = document.getElementById('pca-suggestions');
+                if (pca.sugerencias && Array.isArray(pca.sugerencias) && pca.sugerencias.length > 0) {
+                    suggestionsContainer.innerHTML = pca.sugerencias
+                        .map(text => `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>${text}</span></div>`)
+                        .join('');
+                } else {
+                    suggestionsContainer.innerHTML = `<div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary" style="font-size:18px;">arrow_right_alt</span><span>No hay sugerencias disponibles para este análisis.</span></div>`;
+                }
+
+                // ============================================================
+                // CREACIÓN DEL GRÁFICO DE DISPERSIÓN (SCATTER PLOT)
+                // ============================================================
+                // Destruir gráfico anterior si existe (evita duplicados)
+                if (window._chartPCA) window._chartPCA.destroy();
+                
+                // Crear nuevo gráfico
+                window._chartPCA = new Chart(ctxPCA, {
+                    type: 'scatter', // Gráfico de dispersión
+                    data: {
+                        datasets: [{
+                            label: 'Proyectos',
+                            data: labels.map((label, index) => ({
+                                x: valuesX[index],
+                                y: valuesY[index],
+                                label
+                            })),
+                            // Estilo de los puntos
+                            backgroundColor: '#c084fc',
+                            borderColor: '#a855f0',
+                            pointRadius: 8,
+                            pointHoverRadius: 12,
+                            pointBorderWidth: 3,
+                            pointBorderColor: '#ffffff',
+                            pointBackgroundColor: '#c084fc',
+                            pointHoverBackgroundColor: '#a855f7',
+                            pointHoverBorderColor: '#ffffff',
+                            pointShadowColor: 'rgba(192, 132, 252, 0.5)',
+                            pointShadowBlur: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,        // Se adapta al contenedor
+                        maintainAspectRatio: false, // Altura controlada por el contenedor
+                        plugins: {
+                            // Tooltip personalizado que muestra el nombre del proyecto y coordenadas
+                            tooltip: {
+                                callbacks: {
+                                    label(ctx) {
+                                        const item = ctx.raw;
+                                        return `${item.label}: (${item.x.toFixed(2)}, ${item.y.toFixed(2)})`;
+                                    }
+                                },
+                                backgroundColor: 'rgba(15, 20, 24, 0.9)',
+                                titleColor: '#dee3e8',
+                                bodyColor: '#bdc8d1',
+                                borderColor: '#3e484f',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 8
+                            },
+                            legend: { display: false } // Ocultar leyenda
+                        },
+                        scales: {
+                            // Eje X: Complejidad y Tamaño
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Complejidad y Tamaño',
+                                    color: textColor,
+                                    font: { size: 20, weight: '600' }
+                                },
+                                grid: { color: gridColor, drawBorder: false },
+                                ticks: { color: textColor, font: { size: 14 } }
+                            },
+                            // Eje Y: Calidad y Documentación
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Calidad y Documentación',
+                                    color: textColor,
+                                    font: { size: 20, weight: '600' }
+                                },
+                                grid: { color: gridColor, drawBorder: false },
+                                ticks: { color: textColor, font: { size: 14 } }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                // Manejo de errores: mostrar mensaje en la UI
+                console.error('Error loading PCA:', err);
+                document.getElementById('pca-variance').innerText = 'Error';
+            }
+        }
+
+        // ============================================================
+        // GESTIÓN DE TEMA (CLARO/OSCURO)
+        // ============================================================
+        
+        const themeBtn = document.getElementById('themeButton');
+        const themeIcon = document.getElementById('themeIcon');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+
+        /**
+         * Aplica el tema seleccionado y guarda la preferencia
+         * @param {string} theme - 'light' o 'dark'
+         */
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            themeIcon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
+            localStorage.setItem('theme', theme);
+        }
+        
+        // Aplicar tema guardado
+        applyTheme(savedTheme);
+        
+        // Event listener para el botón de tema
+        themeBtn?.addEventListener('click', () => {
+            const cur = document.body.getAttribute('data-theme');
+            const newTheme = cur === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            // Recargar el gráfico para adaptar colores al nuevo tema
+            loadPCA();
+        });
+
+        // ============================================================
+        // SISTEMA DE PARTÍCULAS (FONDO ANIMADO)
+        // ============================================================
+        
+        const canvas = document.getElementById('particle-canvas');
+        let ctx = canvas.getContext('2d');
+        let particles = [], mouse = { x: null, y: null };
+
+        /**
+         * Redimensiona el canvas al tamaño de la ventana
+         */
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        /**
+         * Clase que representa una partícula individual
+         */
+        class Particle {
+            constructor() { this.reset(); }
+            
+            /**
+             * Reinicia la partícula en una posición aleatoria
+             */
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+            
+            /**
+             * Actualiza la posición de la partícula
+             */
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Efecto de repulsión del mouse
+                if (mouse.x) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let d = Math.hypot(dx, dy);
+                    if (d < 150) {
+                        let angle = Math.atan2(dy, dx);
+                        let force = (150 - d) / 150;
+                        this.x -= Math.cos(angle) * force * 1.2;
+                        this.y -= Math.sin(angle) * force * 1.2;
+                    }
+                }
+                
+                // Rebote en los bordes
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            
+            /**
+             * Dibuja la partícula y las conexiones con otras cercanas
+             */
+            draw() {
+                // Obtener colores del tema actual
+                const style = getComputedStyle(document.body);
+                const c1 = style.getPropertyValue('--particle-color-1').trim();
+                const c2 = style.getPropertyValue('--particle-color-2').trim();
+                
+                // Dibujar la partícula
+                ctx.fillStyle = Math.random() > 0.7 ? c1 : c2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Dibujar líneas de conexión con partículas cercanas
+                particles.forEach(p => {
+                    if (Math.hypot(this.x - p.x, this.y - p.y) < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.strokeStyle = style.getPropertyValue('--particle-line').trim();
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        /**
+         * Inicializa las partículas
+         */
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 70; i++) particles.push(new Particle());
+        }
+
+        /**
+         * Bucle de animación de las partículas
+         */
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        // ============================================================
+        // EVENT LISTENERS GLOBALES
+        // ============================================================
+        
+        // Redimensionar canvas al cambiar tamaño de ventana
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+        
+        // Seguir la posición del mouse para efecto de partículas
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        
+        // Inicializar canvas y partículas
+        resizeCanvas();
+        initParticles();
+        animate();
+
+        // ============================================================
+        // CARGA INICIAL DE DATOS PCA
+        // ============================================================
+        loadPCA();
+    </script>
+</body>
+</html>

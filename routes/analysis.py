@@ -1,3 +1,4 @@
+#routes/analysis.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.db import get_db
@@ -6,6 +7,7 @@ from services.doc_generator import DocGenerator
 from services.etl_pipeline import ETLPipeline
 from services.ai_enhancer import AIEnhancer
 from services.ml_analyzer import run_ml_analysis
+from utils.project_timeout import mark_stale_projects_as_error
 from datetime import datetime
 from utils.usage_tracker import log_usage_manual
 import threading
@@ -194,6 +196,8 @@ def get_results(project_id):
 def get_status(project_id):
     user_id = get_jwt_identity()
     db = get_db()
+    # Antes de devolver el estado, revisa si este proyecto quedó atascado
+    mark_stale_projects_as_error(db, {"_id": project_id, "user_id": user_id})
     project = db.projects.find_one(
         {"_id": project_id, "user_id": user_id},
         {"status": 1, "error_message": 1}
@@ -1041,4 +1045,3 @@ def analyze_document():
             }
         )
     
-    # ... resto del código ...

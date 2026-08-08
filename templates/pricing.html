@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- ============================================================
+         METADATOS Y CONFIGURACION DEL DOCUMENTO
+         ============================================================ -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Planes — AutoDocs AI</title>
+    
+    <!-- ============================================================
+         LIBRERIAS EXTERNAS
+         ============================================================ -->
+    <!-- Tailwind CSS: Framework utilitario para estilos rapidos y responsive -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Fuentes de Google: JetBrains Mono para codigo, Geist para UI -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Material Symbols: Sistema de iconos de Google Material Design -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- ============================================================
+         CONFIGURACION DE TAILWIND
+         ============================================================ -->
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
+            darkMode: "class", // Habilita el modo oscuro basado en clases CSS
             theme: {
                 extend: {
+                    // Paleta de colores personalizada usando variables CSS
                     colors: {
                         "background": "var(--color-background)",
                         "surface": "var(--color-surface)",
@@ -26,12 +43,14 @@
                         "green-accent": "var(--color-green-accent)",
                         "tertiary": "var(--color-tertiary)",
                     },
+                    // Bordes redondeados personalizados
                     borderRadius: {
                         "DEFAULT": "0.125rem",
                         "lg": "0.25rem",
                         "xl": "0.5rem",
                         "full": "0.75rem"
                     },
+                    // Fuentes personalizadas para diferentes contextos
                     fontFamily: {
                         "body-md": ["Geist"],
                         "headline-lg": ["Geist"],
@@ -43,8 +62,11 @@
             },
         }
     </script>
+    
     <style>
-        /* ====== TEMA OSCURO (por defecto) ====== */
+        /* ============================================================
+           VARIABLES CSS - MODO OSCURO (por defecto)
+           ============================================================ */
         :root,
         body[data-theme="dark"] {
             --color-background: #0f1418;
@@ -68,7 +90,9 @@
             --particle-line: rgba(142,213,255,0.12);
         }
 
-        /* ====== TEMA CLARO ====== */
+        /* ============================================================
+           VARIABLES CSS - MODO CLARO
+           ============================================================ */
         body[data-theme="light"] {
             --color-background: #f1f5f9;
             --color-surface: rgba(255,255,255,0.7);
@@ -91,6 +115,9 @@
             --particle-line: rgba(56,189,248,0.12);
         }
 
+        /* ============================================================
+           ESTILOS GLOBALES
+           ============================================================ */
         body {
             background: var(--color-background);
             color: var(--color-on-surface);
@@ -99,6 +126,9 @@
             transition: background 0.25s ease, color 0.25s ease;
         }
 
+        /* ============================================================
+           EFECTO GLASSMORPHISM
+           ============================================================ */
         .glass {
             background: var(--color-surface);
             backdrop-filter: blur(16px);
@@ -112,10 +142,16 @@
             box-shadow: var(--glass-hover-shadow);
         }
 
+        /* ============================================================
+           EFECTO DE RESPLANDOR
+           ============================================================ */
         .glow-cyan {
             text-shadow: 0 0 12px rgba(56,189,248,0.4);
         }
 
+        /* ============================================================
+           ANIMACIONES
+           ============================================================ */
         .stagger-in {
             opacity: 0;
             transform: translateY(20px);
@@ -129,6 +165,9 @@
             }
         }
 
+        /* ============================================================
+           SCROLLBAR PERSONALIZADA
+           ============================================================ */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -138,12 +177,17 @@
             border-radius: 10px;
         }
 
+        /* ============================================================
+           TARJETA DESTACADA (PLAN PRO)
+           ============================================================ */
         .plan-featured {
             border-color: rgba(56,189,248,0.4) !important;
             box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 12px 40px rgba(56,189,248,0.1);
         }
 
-        /* Modal overlay styles */
+        /* ============================================================
+           MODAL DE PAGO - OVERLAY
+           ============================================================ */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -160,7 +204,9 @@
             background: rgba(0, 0, 0, 0.7);
         }
 
-        /* Modal */
+        /* ============================================================
+           MODAL DE PAGO - CONTENEDOR
+           ============================================================ */
         #payment-modal {
             display: none;
             position: fixed;
@@ -176,6 +222,9 @@
             display: flex;
         }
 
+        /* ============================================================
+           ANIMACION DE ENTRADA DEL MODAL
+           ============================================================ */
         @keyframes modalIn {
             from {
                 opacity: 0;
@@ -191,7 +240,9 @@
             animation: modalIn 0.25s ease;
         }
 
-        /* Tarjeta animada */
+        /* ============================================================
+           VISTA PREVIA DE LA TARJETA DE CREDITO
+           ============================================================ */
         .card-preview {
             background: linear-gradient(135deg, #0ea5e9, #6366f1);
             border-radius: 14px;
@@ -202,6 +253,7 @@
             overflow: hidden;
         }
 
+        /* Decoracion: circulo superior derecho */
         .card-preview::before {
             content: '';
             position: absolute;
@@ -213,6 +265,7 @@
             background: rgba(255,255,255,0.1);
         }
 
+        /* Decoracion: circulo inferior izquierdo */
         .card-preview::after {
             content: '';
             position: absolute;
@@ -224,7 +277,9 @@
             background: rgba(255,255,255,0.07);
         }
 
-        /* Input estilo glass */
+        /* ============================================================
+           INPUTS DE TARJETA (estilo glass)
+           ============================================================ */
         .card-input {
             background: rgba(27,32,36,0.6);
             border: 1px solid rgba(255,255,255,0.15);
@@ -255,7 +310,9 @@
             color: rgba(0,0,0,0.4);
         }
 
-        /* Success state */
+        /* ============================================================
+           ANIMACION DE EXITO (check)
+           ============================================================ */
         @keyframes checkIn {
             from {
                 transform: scale(0);
@@ -269,6 +326,9 @@
             animation: checkIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
         }
 
+        /* ============================================================
+           CANVAS DE PARTICULAS (FONDO ANIMADO)
+           ============================================================ */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -279,149 +339,191 @@
             pointer-events: none;
         }
     </style>
+</head>
 <body data-theme="dark" class="font-body-md selection:bg-primary/20 selection:text-on-surface">
-<canvas id="particle-canvas"></canvas>
-<div class="flex min-h-screen w-full relative z-10">
+    
+    <!-- Lienzo para particulas de fondo -->
+    <canvas id="particle-canvas"></canvas>
+    
+    <!-- Contenedor principal con layout flex de pantalla completa -->
+    <div class="flex min-h-screen w-full relative z-10">
 
-    <!-- Sidebar -->
-    <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay:.1s;">
-        <div class="mb-12">
-            <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
-                <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
-            </div>
-        </div>
-        <nav class="flex-1 flex flex-col gap-8">
-            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform cursor-pointer" onclick="window.location.href='/?#pricing'">
-                <span class="material-symbols-outlined text-primary text-2xl glow-cyan">workspace_premium</span>
-                <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Planes</span>
-            </a>
-            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/perfil">
-                <span class="material-symbols-outlined text-on-surface-variant hover:text-primary text-2xl transition-colors">person</span>
-                <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Perfil</span>
-            </a>
-        </nav>
-        <div class="mt-auto">
-            <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative inline-flex">
-                <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
-                <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
-                    <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
-                </span>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Main -->
-    <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
-
-        <!-- Header -->
-        <header class="flex justify-between items-center stagger-in" style="animation-delay:.15s;">
-            <div>
-                <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">Planes <span class="text-primary/80">& Precios</span></h1>
-                <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]">Elige el plan que se adapta a tu equipo</p>
-            </div>
-            <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
-                <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
-            </button>
-        </header>
-
-        <!-- Plan actual -->
-        <div id="plans" class="stagger-in" style="animation-delay:.2s;">
-            <div class="glass rounded-3xl p-5 border border-outline-variant/20 flex items-center gap-4">
-                <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
-                <div>
-                    <p class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold">Tu plan actual</p>
-                    <p class="text-on-surface font-bold text-lg" id="current-plan-label">Cargando...</p>
+        <!-- ============================================================
+             SIDEBAR (MENU LATERAL)
+             ============================================================ -->
+        <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay:.1s;">
+            <!-- Logo de la aplicacion - icono de terminal -->
+            <div class="mb-12">
+                <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
                 </div>
-                <div class="ml-auto" id="current-plan-badge"></div>
             </div>
-        </div>
-
-        <!-- Cards de planes -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:.25s;">
-
-            <!-- FREE -->
-            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
-                <div>
-                    <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant/60 mb-3">Free</p>
-                    <div class="flex items-end gap-1">
-                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$0</span>
-                        <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
-                    </div>
-                    <p class="text-on-surface-variant/60 text-sm mt-2">Para proyectos personales y pruebas.</p>
+            
+            <!-- Navegacion principal -->
+            <nav class="flex-1 flex flex-col gap-8">
+                <!-- Enlace a Planes (activo) -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform cursor-pointer" onclick="window.location.href='/?#pricing'">
+                    <span class="material-symbols-outlined text-primary text-2xl glow-cyan">workspace_premium</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Planes</span>
+                </a>
+                <!-- Enlace a Perfil -->
+                <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/perfil">
+                    <span class="material-symbols-outlined text-on-surface-variant hover:text-primary text-2xl transition-colors">person</span>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">Perfil</span>
+                </a>
+            </nav>
+            
+            <!-- Avatar del usuario en la parte inferior -->
+            <div class="mt-auto">
+                <div class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer group relative inline-flex">
+                    <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
+                    <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-on-surface-variant group-hover:text-primary pointer-events-none">
+                        <span id="sidebar-user-name">Usuario</span> · <span id="sidebar-user-plan" class="text-primary">Plan Gratuito</span>
+                    </span>
                 </div>
-                <div class="border-t border-outline-variant/20"></div>
-                <ul class="flex flex-col gap-3 flex-1 text-sm">
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>3 proyectos</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
-                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Mejoras con IA</li>
-                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
-                </ul>
-                <button onclick="openModal('free')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
-                    Seleccionar Free
+            </div>
+        </aside>
+
+        <!-- ============================================================
+             CONTENIDO PRINCIPAL
+             ============================================================ -->
+        <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
+
+            <!-- ============================================================
+                 HEADER
+                 ============================================================ -->
+            <header class="flex justify-between items-center stagger-in" style="animation-delay:.15s;">
+                <div>
+                    <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">Planes <span class="text-primary/80">& Precios</span></h1>
+                    <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]">Elige el plan que se adapta a tu equipo</p>
+                </div>
+                <!-- Boton para cambiar entre tema claro/oscuro -->
+                <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                    <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
                 </button>
-            </div>
+            </header>
 
-            <!-- PRO -->
-            <div class="glass rounded-3xl p-8 border plan-featured flex flex-col gap-6 relative">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold tracking-wide shadow-lg">Más popular</div>
-                <div>
-                    <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Pro</p>
-                    <div class="flex items-end gap-1">
-                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$350</span>
-                        <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+            <!-- ============================================================
+                 PLAN ACTUAL DEL USUARIO
+                 ============================================================ -->
+            <div id="plans" class="stagger-in" style="animation-delay:.2s;">
+                <div class="glass rounded-3xl p-5 border border-outline-variant/20 flex items-center gap-4">
+                    <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
+                    <div>
+                        <p class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold">Tu plan actual</p>
+                        <p class="text-on-surface font-bold text-lg" id="current-plan-label">Cargando...</p>
                     </div>
-                    <p class="text-on-surface-variant/60 text-sm mt-2">Para desarrolladores y equipos.</p>
+                    <div class="ml-auto" id="current-plan-badge"></div>
                 </div>
-                <div class="border-t border-primary/20"></div>
-                <ul class="flex flex-col gap-3 flex-1 text-sm">
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>20 proyectos</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA</li>
-                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
-                    <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>SSO / CI/CD</li>
-                </ul>
-                <button onclick="openModal('pro')" class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
-                    Suscribirse a Pro
-                </button>
             </div>
 
-            <!-- ENTERPRISE -->
-            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
-                <div>
-                    <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-3">Enterprise</p>
-                    <div class="flex items-end gap-1">
-                        <span class="text-5xl font-bold tracking-tighter text-on-surface">$850</span>
-                        <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+            <!-- ============================================================
+                 TARJETAS DE PLANES (3 columnas en desktop)
+                 ============================================================ -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:.25s;">
+
+                <!-- ==========================================================
+                     PLAN FREE
+                     ========================================================== -->
+                <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
+                    <div>
+                        <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant/60 mb-3">Free</p>
+                        <div class="flex items-end gap-1">
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$0</span>
+                            <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                        </div>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Para proyectos personales y pruebas.</p>
                     </div>
-                    <p class="text-on-surface-variant/60 text-sm mt-2">Equipos grandes, acceso ilimitado.</p>
+                    <div class="border-t border-outline-variant/20"></div>
+                    <!-- Lista de caracteristicas del plan Free -->
+                    <ul class="flex flex-col gap-3 flex-1 text-sm">
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>3 proyectos</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                        <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Mejoras con IA</li>
+                        <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
+                    </ul>
+                    <!-- Boton para seleccionar plan Free -->
+                    <button onclick="openModal('free')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
+                        Seleccionar Free
+                    </button>
                 </div>
-                <div class="border-t border-outline-variant/20"></div>
-                <ul class="flex flex-col gap-3 flex-1 text-sm">
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Proyectos ilimitados</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA avanzadas</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Soporte prioritario 24/7</li>
-                    <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>SSO / integración CI/CD</li>
-                </ul>
-                <button onclick="openModal('enterprise')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/5 transition-all">
-                    Suscribirse a Enterprise
-                </button>
+
+                <!-- ==========================================================
+                     PLAN PRO (DESTACADO)
+                     ========================================================== -->
+                <div class="glass rounded-3xl p-8 border plan-featured flex flex-col gap-6 relative">
+                    <!-- Badge "Mas popular" en la parte superior -->
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold tracking-wide shadow-lg">Mas popular</div>
+                    <div>
+                        <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Pro</p>
+                        <div class="flex items-end gap-1">
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$350</span>
+                            <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                        </div>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Para desarrolladores y equipos.</p>
+                    </div>
+                    <div class="border-t border-primary/20"></div>
+                    <!-- Lista de caracteristicas del plan Pro -->
+                    <ul class="flex flex-col gap-3 flex-1 text-sm">
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>20 proyectos</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA</li>
+                        <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
+                        <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>SSO / CI/CD</li>
+                    </ul>
+                    <!-- Boton para suscribirse a Pro -->
+                    <button onclick="openModal('pro')" class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
+                        Suscribirse a Pro
+                    </button>
+                </div>
+
+                <!-- ==========================================================
+                     PLAN ENTERPRISE
+                     ========================================================== -->
+                <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
+                    <div>
+                        <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-3">Enterprise</p>
+                        <div class="flex items-end gap-1">
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$850</span>
+                            <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                        </div>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Equipos grandes, acceso ilimitado.</p>
+                    </div>
+                    <div class="border-t border-outline-variant/20"></div>
+                    <!-- Lista de caracteristicas del plan Enterprise -->
+                    <ul class="flex flex-col gap-3 flex-1 text-sm">
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Proyectos ilimitados</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA avanzadas</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Soporte prioritario 24/7</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>SSO / integracion CI/CD</li>
+                    </ul>
+                    <!-- Boton para suscribirse a Enterprise -->
+                    <button onclick="openModal('enterprise')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/5 transition-all">
+                        Suscribirse a Enterprise
+                    </button>
+                </div>
             </div>
-        </div>
 
-    </main>
-</div>
+        </main>
+    </div>
 
-<!-- ===== MODAL DE PAGO ===== -->
-<div id="payment-modal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="closeModalOutside(event)">
-    <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]" id="modal-box" onclick="event.stopPropagation()">
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-        <h3 class="text-2xl font-bold text-on-surface mb-1">Suscribirse a plan</h3>
-        <p class="text-on-surface-variant/60 text-sm mb-6">Completa el pago para activar tu plan</p>
+    <!-- ============================================================
+         MODAL DE PAGO
+         ============================================================ -->
+    <div id="payment-modal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="closeModalOutside(event)">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]" id="modal-box" onclick="event.stopPropagation()">
+            <!-- Boton para cerrar el modal -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Suscribirse a plan</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Completa el pago para activar tu plan</p>
 
-        <!-- Estado: formulario -->
-        <div id="modal-form-state">
-                <!-- Tarjeta visual -->
+            <!-- ============================================================
+                 ESTADO: FORMULARIO DE PAGO
+                 ============================================================ -->
+            <div id="modal-form-state">
+                <!-- Vista previa de la tarjeta de credito -->
                 <div class="card-preview">
                     <div class="text-xs opacity-60 mb-4 tracking-widest">AUTODOCS AI</div>
                     <div class="text-lg tracking-[0.2em] mb-4" id="card-display">•••• •••• •••• ••••</div>
@@ -431,312 +533,489 @@
                     </div>
                 </div>
 
-                <!-- Nombre del titular -->
+                <!-- Campo: Nombre del titular -->
                 <div>
                     <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Nombre del titular</label>
-                    <input type="text" id="card-name" class="card-input" placeholder="Juan Pérez"
+                    <input type="text" id="card-name" class="card-input" placeholder="Juan Perez"
                         oninput="document.getElementById('name-display').textContent = this.value.toUpperCase() || 'NOMBRE APELLIDO'">
                 </div>
 
-                <!-- Número de tarjeta -->
+                <!-- Campo: Numero de tarjeta -->
                 <div>
-                    <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Número de tarjeta</label>
+                    <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Numero de tarjeta</label>
                     <input type="text" id="card-number" class="card-input" placeholder="1234 5678 9012 3456" maxlength="19"
                         oninput="formatCard(this)">
                 </div>
 
                 <div class="flex gap-4">
-                    <!-- Vencimiento -->
+                    <!-- Campo: Fecha de vencimiento -->
                     <div class="flex-1">
                         <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">Vencimiento</label>
                         <input type="text" id="card-expiry" class="card-input" placeholder="MM/AA" maxlength="5"
                             oninput="formatExpiry(this)">
                     </div>
-                    <!-- CVV -->
+                    <!-- Campo: CVV -->
                     <div class="flex-1">
                         <label class="text-xs uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1 block">CVV</label>
                         <input type="text" id="card-cvv" class="card-input" placeholder="123" maxlength="3">
                     </div>
                 </div>
 
+                <!-- Mensaje de error -->
                 <p id="modal-error" class="text-error text-sm hidden"></p>
 
+                <!-- Boton de confirmacion de pago -->
                 <button onclick="submitPayment()" id="pay-btn"
                     class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)] flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-base">lock</span>
                     <span id="pay-btn-text">Confirmar pago</span>
                 </button>
-                <p class="text-center text-xs text-on-surface-variant/40">🔒 Pago seguro simulado · Sin cobro real</p>
+                <p class="text-center text-xs text-on-surface-variant/40">Pago seguro simulado · Sin cobro real</p>
             </div>
-        </div>
 
-        <!-- Estado: éxito -->
-        <div id="modal-success-state" class="hidden p-10 flex flex-col items-center gap-5 text-center">
-            <div class="w-20 h-20 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center check-anim">
-                <span class="material-symbols-outlined text-primary text-4xl">check_circle</span>
+            <!-- ============================================================
+                 ESTADO: EXITO (PAGO COMPLETADO)
+                 ============================================================ -->
+            <div id="modal-success-state" class="hidden p-10 flex flex-col items-center gap-5 text-center">
+                <div class="w-20 h-20 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center check-anim">
+                    <span class="material-symbols-outlined text-primary text-4xl">check_circle</span>
+                </div>
+                <div>
+                    <p class="font-bold text-xl text-on-surface mb-1">Pago exitoso!</p>
+                    <p class="text-on-surface-variant/60 text-sm">Tu plan ha sido actualizado a <strong id="success-plan-name" class="text-primary"></strong></p>
+                </div>
+                <!-- Boton para continuar y recargar la pagina -->
+                <button onclick="closeModal(); location.reload();"
+                    class="px-8 py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95">
+                    Continuar
+                </button>
             </div>
-            <div>
-                <p class="font-bold text-xl text-on-surface mb-1">¡Pago exitoso!</p>
-                <p class="text-on-surface-variant/60 text-sm">Tu plan ha sido actualizado a <strong id="success-plan-name" class="text-primary"></strong></p>
-            </div>
-            <button onclick="closeModal(); location.reload();"
-                class="px-8 py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95">
-                Continuar
-            </button>
-        </div>
 
+        </div>
     </div>
-</div>
 
-<!-- Toast -->
-<div id="toast" class="fixed bottom-6 right-6 z-50 glass rounded-2xl px-5 py-3 border border-outline-variant/20 text-sm text-on-surface shadow-lg translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none"></div>
+    <!-- ============================================================
+         TOAST (NOTIFICACIONES TEMPORALES)
+         ============================================================ -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 glass rounded-2xl px-5 py-3 border border-outline-variant/20 text-sm text-on-surface shadow-lg translate-y-16 opacity-0 transition-all duration-300 flex items-center gap-2 pointer-events-none"></div>
 
-<script>
-    const API = window.location.origin;
-    let selectedPlan = 'pro';
-    const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+    <!-- ============================================================
+         JAVASCRIPT - LOGICA PRINCIPAL
+         ============================================================ -->
+    <script>
+        // ============================================================
+        //  CONFIGURACION GENERAL
+        // ============================================================
+        
+        // Base de la API: mismo origen donde se sirve esta pagina
+        var API = window.location.origin;
+        
+        // Plan seleccionado actualmente (por defecto 'pro')
+        var selectedPlan = 'pro';
+        
+        // Mapeo de nombres de planes para mostrar en la UI
+        var planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
 
-    // Scroll a sección
-    function scrollToSection(sectionId) {
-        const element = document.getElementById(sectionId);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    // Tema
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
-    document.getElementById('themeButton').addEventListener('click', () => {
-        const currentTheme = document.body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        document.getElementById('themeIcon').textContent = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
-    });
-
-    // Cargar usuario
-    async function loadUser() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            document.getElementById('current-plan-label').textContent = 'No autenticado';
-            return;
-        }
-        try {
-            const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!res.ok) {
-                if (res.status === 422) {
-                    console.error('Token inválido o expirado');
-                    localStorage.removeItem('token');
-                    document.getElementById('current-plan-label').textContent = 'Sesión expirada';
-                    return;
-                }
-                throw new Error(`HTTP ${res.status}`);
+        // ============================================================
+        //  FUNCION DE NAVEGACION POR SECCION
+        // ============================================================
+        
+        /**
+         * Desplaza la vista a una seccion especifica de la pagina
+         * @param {string} sectionId - ID de la seccion a la que navegar
+         */
+        function scrollToSection(sectionId) {
+            var element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
             }
-            const user = await res.json();
-            document.getElementById('user-avatar-sidebar').textContent = (user.name || 'U')[0].toUpperCase();
-            document.getElementById('sidebar-user-name').textContent = user.name || 'Usuario';
-            const plan = user.plan || 'free';
-            document.getElementById('sidebar-user-plan').textContent = planNames[plan] || plan;
-            document.getElementById('current-plan-label').textContent = planNames[plan] || plan;
-            const badgeColors = { free: 'bg-primary/15 border-primary/30 text-primary', pro: 'bg-primary/20 border-primary/40 text-primary', enterprise: 'bg-secondary/20 border-secondary/40 text-secondary' };
-            document.getElementById('current-plan-badge').innerHTML = `<span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColors[plan]}">${(planNames[plan] || plan).toUpperCase()}</span>`;
-        } catch(e) {
-            console.error('Error cargando usuario:', e);
-            document.getElementById('current-plan-label').textContent = 'Error de conexión';
-        }
-    }
-    loadUser();
-
-    // Modal
-    function openModal(plan) {
-        selectedPlan = plan;
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showToast('Inicia sesión primero.');
-            return;
         }
 
-        if (plan === 'free') {
-            // Para free, actualizar directo sin pago
-            fetch(`${API}/api/payments/upgrade`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ plan: 'free', card: { number: '0', expiry: '00/00', cvv: '000' } })
-            })
-            .then(res => {
+        // ============================================================
+        //  GESTION DE TEMA (CLARO/OSCURO)
+        // ============================================================
+        
+        // Cargar tema guardado o usar 'dark' por defecto
+        var savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+        
+        // Event listener para el boton de tema
+        document.getElementById('themeButton').addEventListener('click', function() {
+            var currentTheme = document.body.getAttribute('data-theme');
+            var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
+        });
+
+        // ============================================================
+        //  CARGA DE DATOS DEL USUARIO
+        // ============================================================
+        
+        /**
+         * Carga los datos del usuario desde el backend y actualiza la UI
+         */
+        async function loadUser() {
+            var token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('current-plan-label').textContent = 'No autenticado';
+                return;
+            }
+            try {
+                var res = await fetch(API + '/api/auth/me', { 
+                    headers: { 'Authorization': 'Bearer ' + token } 
+                });
                 if (!res.ok) {
                     if (res.status === 422) {
+                        console.error('Token invalido o expirado');
                         localStorage.removeItem('token');
-                        showToast('Sesión expirada. Inicia sesión nuevamente.');
-                        setTimeout(() => location.href = '/', 2000);
+                        document.getElementById('current-plan-label').textContent = 'Sesion expirada';
                         return;
                     }
-                    throw new Error(`HTTP ${res.status}`);
+                    throw new Error('HTTP ' + res.status);
                 }
-                return res.json();
-            })
-            .then(() => {
-                showToast('Cambiaste al plan Free.');
-                setTimeout(() => location.reload(), 1500);
-            })
-            .catch(e => {
-                console.error('Error cambiando a plan free:', e);
-                showToast('Error al cambiar de plan. Intenta nuevamente.');
-            });
-            return;
+                var user = await res.json();
+                
+                // Actualizar avatar en el sidebar
+                document.getElementById('user-avatar-sidebar').textContent = (user.name || 'U')[0].toUpperCase();
+                document.getElementById('sidebar-user-name').textContent = user.name || 'Usuario';
+                
+                // Actualizar plan del usuario
+                var plan = user.plan || 'free';
+                document.getElementById('sidebar-user-plan').textContent = planNames[plan] || plan;
+                document.getElementById('current-plan-label').textContent = planNames[plan] || plan;
+                
+                // Badge del plan actual
+                var badgeColors = { 
+                    free: 'bg-primary/15 border-primary/30 text-primary', 
+                    pro: 'bg-primary/20 border-primary/40 text-primary', 
+                    enterprise: 'bg-secondary/20 border-secondary/40 text-secondary' 
+                };
+                document.getElementById('current-plan-badge').innerHTML = 
+                    '<span class="px-3 py-1 rounded-full text-xs font-bold border ' + badgeColors[plan] + '">' + 
+                    (planNames[plan] || plan).toUpperCase() + 
+                    '</span>';
+            } catch(e) {
+                console.error('Error cargando usuario:', e);
+                document.getElementById('current-plan-label').textContent = 'Error de conexion';
+            }
         }
-        const modalPlanNameEl = document.getElementById('modal-plan-name');
-        if (modalPlanNameEl) modalPlanNameEl.textContent = planNames[plan];
-        document.getElementById('modal-form-state').classList.remove('hidden');
-        document.getElementById('modal-success-state').classList.add('hidden');
-        // Reset campos
-        ['card-name','card-number','card-expiry','card-cvv'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('card-display').textContent = '•••• •••• •••• ••••';
-        document.getElementById('name-display').textContent = 'NOMBRE APELLIDO';
-        document.getElementById('expiry-display').textContent = 'MM/AA';
-        document.getElementById('modal-error').classList.add('hidden');
-        document.getElementById('payment-modal').classList.add('open');
-    }
+        loadUser();
 
-    function closeModal() {
-        document.getElementById('payment-modal').classList.remove('open');
-    }
-
-    function closeModalOutside(e) {
-        if (e.target === document.getElementById('payment-modal')) closeModal();
-    }
-
-    // Formateo tarjeta
-    function formatCard(input) {
-        let v = input.value.replace(/\D/g, '').substring(0, 16);
-        input.value = v.replace(/(.{4})/g, '$1 ').trim();
-        const display = v.padEnd(16, '•');
-        document.getElementById('card-display').textContent =
-            display.substring(0,4) + ' ' + display.substring(4,8) + ' ' + display.substring(8,12) + ' ' + display.substring(12,16);
-    }
-
-    function formatExpiry(input) {
-        let v = input.value.replace(/\D/g, '').substring(0, 4);
-        if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2);
-        input.value = v;
-        document.getElementById('expiry-display').textContent = v || 'MM/AA';
-    }
-
-    // Enviar pago
-    async function submitPayment() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showToast('Inicia sesión primero.');
-            closeModal();
-            return;
-        }
-
-        const number = document.getElementById('card-number').value.replace(/\s/g,'');
-        const expiry = document.getElementById('card-expiry').value;
-        const cvv = document.getElementById('card-cvv').value;
-        const name = document.getElementById('card-name').value;
-        const errEl = document.getElementById('modal-error');
-
-        if (!name || number.length < 16 || expiry.length < 5 || cvv.length < 3) {
-            errEl.textContent = 'Por favor completa todos los campos correctamente.';
-            errEl.classList.remove('hidden');
-            return;
-        }
-        errEl.classList.add('hidden');
-
-        const btn = document.getElementById('pay-btn');
-        btn.disabled = true;
-        const payBtnText = document.getElementById('pay-btn-text');
-        if (payBtnText) payBtnText.textContent = 'Procesando…';
-
-        // Simular delay de procesamiento
-        await new Promise(r => setTimeout(r, 1800));
-
-        try {
-            const res = await fetch(`${API}/api/payments/upgrade`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ plan: selectedPlan, card: { number, expiry, cvv } })
-            });
-
-            if (!res.ok) {
-                if (res.status === 422) {
-                    localStorage.removeItem('token');
-                    errEl.textContent = 'Sesión expirada. Inicia sesión nuevamente.';
-                    errEl.classList.remove('hidden');
-                    btn.disabled = false;
-                    document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
-                    setTimeout(() => location.href = '/', 2000);
-                    return;
-                }
-                const data = await res.json();
-                errEl.textContent = data.error || 'Error al procesar el pago.';
-                errEl.classList.remove('hidden');
-                btn.disabled = false;
-                if (document.getElementById('pay-btn-text')) document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+        // ============================================================
+        //  GESTION DEL MODAL DE PAGO
+        // ============================================================
+        
+        /**
+         * Abre el modal de pago para el plan seleccionado
+         * @param {string} plan - Nombre del plan ('free', 'pro', 'enterprise')
+         */
+        function openModal(plan) {
+            selectedPlan = plan;
+            var token = localStorage.getItem('token');
+            
+            // Verificar autenticacion
+            if (!token) {
+                showToast('Inicia sesion primero.');
                 return;
             }
 
-            const data = await res.json();
-            document.getElementById('modal-form-state').classList.add('hidden');
-            document.getElementById('modal-success-state').classList.remove('hidden');
-            document.getElementById('success-plan-name').textContent = planNames[selectedPlan];
-        } catch(e) {
-            console.error('Error procesando pago:', e);
-            errEl.textContent = 'Error de conexión. Intenta de nuevo.';
-            errEl.classList.remove('hidden');
-            btn.disabled = false;
-                if (document.getElementById('pay-btn-text')) document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
-        }
-    }
-
-    // Toast
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerHTML = `<span class="material-symbols-outlined text-primary text-base">info</span> ${msg}`;
-        t.classList.remove('translate-y-16','opacity-0');
-        t.classList.add('translate-y-0','opacity-100');
-        setTimeout(() => { t.classList.add('translate-y-16','opacity-0'); t.classList.remove('translate-y-0','opacity-100'); }, 4000);
-    }
-
-    function logout() { localStorage.removeItem('token'); }
-
-    // Partículas
-    const canvas = document.getElementById('particle-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
-    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
-    for (let i = 0; i < 40; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3, size:Math.random()*2+.5, opacity:Math.random()*.4+.1 });
-    function animateParticles() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        const style = getComputedStyle(document.body);
-        const color1 = style.getPropertyValue('--particle-color-1').trim();
-        const color2 = style.getPropertyValue('--particle-color-2').trim();
-        const lineColor = style.getPropertyValue('--particle-line').trim();
-        particles.forEach(p => {
-            p.x+=p.vx; p.y+=p.vy;
-            if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
-            if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
-            ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
-            ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-            ctx.fill();
-            particles.forEach(p2 => {
-                const d = Math.hypot(p.x - p2.x, p.y - p2.y);
-                if (d < 120) {
-                    ctx.strokeStyle = lineColor;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                }
+            // Para el plan Free, actualizar directamente sin formulario de pago
+            if (plan === 'free') {
+                fetch(API + '/api/payments/upgrade', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    body: JSON.stringify({ 
+                        plan: 'free', 
+                        card: { number: '0', expiry: '00/00', cvv: '000' } 
+                    })
+                })
+                .then(function(res) {
+                    if (!res.ok) {
+                        if (res.status === 422) {
+                            localStorage.removeItem('token');
+                            showToast('Sesion expirada. Inicia sesion nuevamente.');
+                            setTimeout(function() { location.href = '/'; }, 2000);
+                            return;
+                        }
+                        throw new Error('HTTP ' + res.status);
+                    }
+                    return res.json();
+                })
+                .then(function() {
+                    showToast('Cambiaste al plan Free.');
+                    setTimeout(function() { location.reload(); }, 1500);
+                })
+                .catch(function(e) {
+                    console.error('Error cambiando a plan free:', e);
+                    showToast('Error al cambiar de plan. Intenta nuevamente.');
+                });
+                return;
+            }
+            
+            // Para planes de pago, abrir el modal con el formulario
+            var modalPlanNameEl = document.getElementById('modal-plan-name');
+            if (modalPlanNameEl) modalPlanNameEl.textContent = planNames[plan];
+            
+            // Resetear el formulario
+            document.getElementById('modal-form-state').classList.remove('hidden');
+            document.getElementById('modal-success-state').classList.add('hidden');
+            
+            // Limpiar campos del formulario
+            ['card-name','card-number','card-expiry','card-cvv'].forEach(function(id) {
+                document.getElementById(id).value = '';
             });
-        });
-        requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
-</script>
+            
+            // Resetear vista previa de la tarjeta
+            document.getElementById('card-display').textContent = '•••• •••• •••• ••••';
+            document.getElementById('name-display').textContent = 'NOMBRE APELLIDO';
+            document.getElementById('expiry-display').textContent = 'MM/AA';
+            document.getElementById('modal-error').classList.add('hidden');
+            
+            // Abrir el modal
+            document.getElementById('payment-modal').classList.add('open');
+        }
+
+        /**
+         * Cierra el modal de pago
+         */
+        function closeModal() {
+            document.getElementById('payment-modal').classList.remove('open');
+        }
+
+        /**
+         * Cierra el modal si se hace clic fuera del contenido
+         * @param {Event} e - Evento de click
+         */
+        function closeModalOutside(e) {
+            if (e.target === document.getElementById('payment-modal')) closeModal();
+        }
+
+        // ============================================================
+        //  FUNCIONES DE FORMATEO DE TARJETA
+        // ============================================================
+        
+        /**
+         * Formatea el numero de tarjeta con espacios cada 4 digitos
+         * @param {HTMLElement} input - Campo de entrada del numero de tarjeta
+         */
+        function formatCard(input) {
+            var v = input.value.replace(/\D/g, '').substring(0, 16);
+            input.value = v.replace(/(.{4})/g, '$1 ').trim();
+            var display = v.padEnd(16, '•');
+            document.getElementById('card-display').textContent =
+                display.substring(0,4) + ' ' + display.substring(4,8) + ' ' + 
+                display.substring(8,12) + ' ' + display.substring(12,16);
+        }
+
+        /**
+         * Formatea la fecha de vencimiento con formato MM/AA
+         * @param {HTMLElement} input - Campo de entrada de la fecha de vencimiento
+         */
+        function formatExpiry(input) {
+            var v = input.value.replace(/\D/g, '').substring(0, 4);
+            if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2);
+            input.value = v;
+            document.getElementById('expiry-display').textContent = v || 'MM/AA';
+        }
+
+        // ============================================================
+        //  ENVIO DEL PAGO
+        // ============================================================
+        
+        /**
+         * Procesa el pago enviando los datos al backend
+         */
+        async function submitPayment() {
+            var token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Inicia sesion primero.');
+                closeModal();
+                return;
+            }
+
+            // Obtener datos del formulario
+            var number = document.getElementById('card-number').value.replace(/\s/g,'');
+            var expiry = document.getElementById('card-expiry').value;
+            var cvv = document.getElementById('card-cvv').value;
+            var name = document.getElementById('card-name').value;
+            var errEl = document.getElementById('modal-error');
+
+            // Validar campos del formulario
+            if (!name || number.length < 16 || expiry.length < 5 || cvv.length < 3) {
+                errEl.textContent = 'Por favor completa todos los campos correctamente.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            errEl.classList.add('hidden');
+
+            // Deshabilitar boton y mostrar estado de procesamiento
+            var btn = document.getElementById('pay-btn');
+            btn.disabled = true;
+            var payBtnText = document.getElementById('pay-btn-text');
+            if (payBtnText) payBtnText.textContent = 'Procesando…';
+
+            // Simular delay de procesamiento (efecto visual)
+            await new Promise(function(r) { setTimeout(r, 1800); });
+
+            try {
+                var res = await fetch(API + '/api/payments/upgrade', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    body: JSON.stringify({ 
+                        plan: selectedPlan, 
+                        card: { number: number, expiry: expiry, cvv: cvv } 
+                    })
+                });
+
+                if (!res.ok) {
+                    // Manejar sesion expirada
+                    if (res.status === 422) {
+                        localStorage.removeItem('token');
+                        errEl.textContent = 'Sesion expirada. Inicia sesion nuevamente.';
+                        errEl.classList.remove('hidden');
+                        btn.disabled = false;
+                        document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                        setTimeout(function() { location.href = '/'; }, 2000);
+                        return;
+                    }
+                    var data = await res.json();
+                    errEl.textContent = data.error || 'Error al procesar el pago.';
+                    errEl.classList.remove('hidden');
+                    btn.disabled = false;
+                    if (document.getElementById('pay-btn-text')) {
+                        document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                    }
+                    return;
+                }
+
+                var data = await res.json();
+                
+                // Mostrar estado de exito
+                document.getElementById('modal-form-state').classList.add('hidden');
+                document.getElementById('modal-success-state').classList.remove('hidden');
+                document.getElementById('success-plan-name').textContent = planNames[selectedPlan];
+            } catch(e) {
+                console.error('Error procesando pago:', e);
+                errEl.textContent = 'Error de conexion. Intenta de nuevo.';
+                errEl.classList.remove('hidden');
+                btn.disabled = false;
+                if (document.getElementById('pay-btn-text')) {
+                    document.getElementById('pay-btn-text').textContent = 'Confirmar pago';
+                }
+            }
+        }
+
+        // ============================================================
+        //  TOAST (NOTIFICACIONES TEMPORALES)
+        // ============================================================
+        
+        /**
+         * Muestra un mensaje temporal en la esquina inferior derecha
+         * @param {string} msg - Mensaje a mostrar
+         */
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.innerHTML = '<span class="material-symbols-outlined text-primary text-base">info</span> ' + msg;
+            t.classList.remove('translate-y-16','opacity-0');
+            t.classList.add('translate-y-0','opacity-100');
+            setTimeout(function() { 
+                t.classList.add('translate-y-16','opacity-0'); 
+                t.classList.remove('translate-y-0','opacity-100'); 
+            }, 4000);
+        }
+
+        /**
+         * Cierra la sesion del usuario
+         */
+        function logout() { 
+            localStorage.removeItem('token'); 
+        }
+
+        // ============================================================
+        //  SISTEMA DE PARTICULAS (FONDO ANIMADO)
+        //  Dibuja puntos que flotan lentamente y se conectan con lineas
+        //  finas cuando estan cerca.
+        // ============================================================
+        
+        var canvas = document.getElementById('particle-canvas');
+        var ctx = canvas.getContext('2d');
+        var particles = [];
+        
+        /**
+         * Ajusta el tamaño del canvas al de la ventana
+         */
+        function resizeCanvas() { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        }
+        resizeCanvas(); 
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Crear particulas
+        for (var i = 0; i < 40; i++) {
+            particles.push({ 
+                x: Math.random() * canvas.width, 
+                y: Math.random() * canvas.height, 
+                vx: (Math.random() - .5) * .3, 
+                vy: (Math.random() - .5) * .3, 
+                size: Math.random() * 2 + .5, 
+                opacity: Math.random() * .4 + .1 
+            });
+        }
+        
+        /**
+         * Bucle de animacion de particulas
+         */
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Obtener colores del tema actual
+            var style = getComputedStyle(document.body);
+            var color1 = style.getPropertyValue('--particle-color-1').trim();
+            var color2 = style.getPropertyValue('--particle-color-2').trim();
+            var lineColor = style.getPropertyValue('--particle-line').trim();
+            
+            particles.forEach(function(p) {
+                // Mover particula
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                // Rebote en los bordes
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                
+                // Dibujar particula
+                ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Dibujar conexiones entre particulas cercanas
+                particles.forEach(function(p2) {
+                    var d = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = lineColor;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                });
+            });
+            
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
 </body>
 </html>
