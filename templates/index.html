@@ -1,240 +1,396 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- ==================== METADATOS Y CONFIGURACIÓN ==================== -->
-    <!-- Define el conjunto de caracteres UTF-8 para soportar caracteres especiales -->
+    <!-- ==========================================================================
+    METADATOS Y CONFIGURACIÓN DEL DOCUMENTO
+    ========================================================================== -->
+    <!-- 
+        charset="UTF-8": Define la codificación de caracteres UTF-8 que soporta 
+        todos los caracteres Unicode incluyendo letras con acentos, ñ, símbolos 
+        especiales y caracteres de múltiples idiomas.
+    -->
     <meta charset="UTF-8" />
-    <!-- Configura la vista para dispositivos móviles con escala inicial 1.0 -->
+    
+    <!-- 
+        viewport: Controla cómo se muestra la página en dispositivos móviles.
+        width=device-width: Ajusta el ancho al tamaño de la pantalla.
+        initial-scale=1.0: Establece el nivel de zoom inicial al 100%.
+    -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Título de la página que aparece en la pestaña del navegador -->
+    
+    <!-- 
+        Título de la página: Se muestra en la pestaña del navegador, en los 
+        resultados de búsqueda y en los marcadores.
+    -->
     <title>AutoDocs AI — Documentación Inteligente</title>
     
-    <!-- ==================== LIBRERÍAS EXTERNAS ==================== -->
-    <!-- TailwindCSS: Framework de CSS utilitario para estilos rápidos -->
+    <!-- ==========================================================================
+    LIBRERÍAS Y RECURSOS EXTERNOS
+    ========================================================================== -->
+    
+    <!-- 
+        TailwindCSS: Framework de CSS utilitario.
+        plugins=forms,container-queries: Habilita estilos predefinidos para 
+        formularios y soporte para container queries.
+        Se carga desde CDN para no tener que compilarlo localmente.
+    -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
-    <!-- Google Fonts: Fuentes personalizadas para mejor tipografía -->
-    <!-- JetBrains Mono: Fuente monoespaciada para código -->
-    <!-- Geist: Fuente moderna para texto general -->
+    <!-- 
+        Google Fonts: Fuentes personalizadas para mejorar la tipografía.
+        JetBrains Mono: Fuente monoespaciada diseñada para código, con buena 
+        legibilidad en pantalla.
+        Geist: Fuente sans-serif moderna y limpia para textos generales.
+    -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Material Symbols: Iconos de Google Material Design -->
+    <!-- 
+        Material Symbols: Iconos de Google Material Design.
+        wght: Rango de peso de la fuente (100-700).
+        FILL: Nivel de relleno del icono (0=outline, 1=filled).
+        Permite usar iconos escalables como fuentes en lugar de imágenes.
+    -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
-    <!-- ==================== CONFIGURACIÓN DE TAILWIND ==================== -->
+    <!-- ==========================================================================
+    CONFIGURACIÓN DE TAILWINDCSS
+    ========================================================================== -->
     <script id="tailwind-config">
-        // Extiende la configuración de TailwindCSS para agregar colores personalizados y temas
+        /*
+            Extiende la configuración base de TailwindCSS para agregar 
+            colores personalizados que usan variables CSS.
+            Esto permite que los colores cambien dinámicamente entre 
+            modo claro y oscuro sin recargar la página.
+        */
         tailwind.config = {
-            darkMode: "class", // Habilita el modo oscuro basado en clases CSS
+            // darkMode: "class": Habilita el modo oscuro mediante una clase CSS.
+            // Esto permite controlar el tema desde JavaScript añadiendo/quitando 
+            // la clase 'dark' en el elemento html.
+            darkMode: "class",
             theme: {
                 extend: {
-                    // Colores personalizados que usan variables CSS para soportar temas claro/oscuro
+                    // Colores personalizados: Cada color referencia una variable CSS
+                    // que se define en el bloque <style> de la página.
                     colors: {
-                        "background": "var(--color-background)",
-                        "surface": "var(--color-surface)",
-                        "surface-container": "var(--color-surface-container)",
-                        "surface-container-high": "var(--color-surface-container-high)",
-                        "on-surface": "var(--color-on-surface)",
-                        "on-surface-variant": "var(--color-on-surface-variant)",
-                        "primary": "var(--color-primary)",
-                        "secondary": "var(--color-secondary)",
-                        "outline-variant": "var(--color-outline-variant)",
-                        "error": "var(--color-error)",
-                        "green-accent": "var(--color-green-accent)",
-                        "tertiary": "var(--color-tertiary)",
+                        "background": "var(--color-background)",               // Fondo principal
+                        "surface": "var(--color-surface)",                     // Superficies con transparencia
+                        "surface-container": "var(--color-surface-container)", // Contenedores sólidos
+                        "surface-container-high": "var(--color-surface-container-high)", // Contenedores más claros
+                        "on-surface": "var(--color-on-surface)",               // Texto sobre superficies
+                        "on-surface-variant": "var(--color-on-surface-variant)", // Texto secundario
+                        "primary": "var(--color-primary)",                     // Color principal (azul)
+                        "secondary": "var(--color-secondary)",                 // Color secundario (violeta)
+                        "outline-variant": "var(--color-outline-variant)",     // Bordes y líneas
+                        "error": "var(--color-error)",                         // Mensajes de error
+                        "green-accent": "var(--color-green-accent)",           // Acentos verdes (éxito)
+                        "tertiary": "var(--color-tertiary)",                   // Color terciario
                     },
                     // Bordes redondeados personalizados
                     borderRadius: {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
+                        "DEFAULT": "0.125rem",    // 2px - redondeo mínimo
+                        "lg": "0.25rem",          // 4px - redondeo mediano
+                        "xl": "0.5rem",           // 8px - redondeo grande
+                        "full": "0.75rem"         // 12px - redondeo completo
                     },
                     // Fuentes personalizadas para diferentes contextos
                     fontFamily: {
-                        "body-md": ["Geist"],        // Texto general
-                        "headline-lg": ["Geist"],    // Títulos grandes
-                        "display-lg": ["Geist"],     // Display
-                        "code-md": ["JetBrains Mono"], // Código
-                        "label-caps": ["Geist"]      // Etiquetas en mayúsculas
+                        "body-md": ["Geist"],           // Texto general del cuerpo
+                        "headline-lg": ["Geist"],       // Títulos grandes
+                        "display-lg": ["Geist"],        // Textos de display/presentación
+                        "code-md": ["JetBrains Mono"],  // Código y texto monoespaciado
+                        "label-caps": ["Geist"]         // Etiquetas en mayúsculas
                     }
                 },
             },
         }
     </script>
     
-    <!-- ==================== ESTILOS PERSONALIZADOS ==================== -->
+    <!-- ==========================================================================
+    ESTILOS PERSONALIZADOS
+    ========================================================================== -->
     <style>
-        /* ====== TEMA OSCURO (por defecto) ====== */
-        /* Variables CSS para el modo oscuro - colores base y acentos */
+        /* 
+            TEMA OSCURO (por defecto)
+            ====================================================================
+            Define todas las variables CSS para el modo oscuro.
+            :root es el selector de nivel más alto, aplica a todo el documento.
+            body[data-theme="dark"] es un selector alternativo que también aplica 
+            el tema oscuro cuando el atributo data-theme está configurado como "dark".
+            Esto permite cambiar el tema dinámicamente desde JavaScript.
+        */
         :root,
         body[data-theme="dark"] {
-            --color-background: #0f1418;              /* Fondo principal oscuro */
-            --color-surface: rgba(27,32,36,0.4);      /* Superficies con transparencia */
-            --color-surface-container: #1b2024;       /* Contenedores sólidos */
-            --color-surface-container-high: #252b2e;  /* Contenedores más claros */
-            --color-on-surface: #dee3e8;              /* Texto sobre superficies */
-            --color-on-surface-variant: #bdc8d1;      /* Texto secundario */
-            --color-primary: #39b2f8;                 /* Color principal (azul) */
-            --color-secondary: #c0c1ff;               /* Color secundario (violeta) */
-            --color-outline-variant: #3e484f;         /* Bordes y líneas */
-            --color-error: #ffb4ab;                   /* Color de error */
-            --color-green-accent: #10b981;            /* Verde para éxito */
-            --color-tertiary: #ffc176;                /* Color terciario */
+            /* Colores base del modo oscuro */
+            --color-background: #0f1418;              /* Fondo principal oscuro - azul muy oscuro */
+            --color-surface: rgba(27,32,36,0.4);      /* Superficies con transparencia para el efecto glass */
+            --color-surface-container: #1b2024;       /* Contenedores sólidos - ligeramente más claro que el fondo */
+            --color-surface-container-high: #252b2e;  /* Contenedores más claros - para jerarquía visual */
+            --color-on-surface: #dee3e8;              /* Texto principal - blanco grisáceo para reducir fatiga visual */
+            --color-on-surface-variant: #bdc8d1;      /* Texto secundario - gris más claro */
+            --color-primary: #39b2f8;                 /* Color principal - azul brillante para acentos */
+            --color-secondary: #c0c1ff;               /* Color secundario - violeta claro */
+            --color-outline-variant: #3e484f;         /* Bordes y líneas - gris oscuro */
+            --color-error: #ffb4ab;                   /* Color de error - rojo suave */
+            --color-green-accent: #10b981;            /* Verde para éxito/confirmación */
+            --color-tertiary: #ffc176;                /* Color terciario - amarillo/naranja */
+            
             /* Efectos de vidrio (glassmorphism) */
-            --glass-border: rgba(123,208,255,0.1);
-            --glass-shadow: 0 0 40px rgba(123,208,255,0.1);
-            --glass-hover-border: rgba(123,208,255,0.3);
-            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1);
+            --glass-border: rgba(123,208,255,0.1);          /* Borde sutil azulado para elementos glass */
+            --glass-shadow: 0 0 40px rgba(123,208,255,0.1); /* Sombra con tono azul para profundidad */
+            --glass-hover-border: rgba(123,208,255,0.3);    /* Borde más visible al hacer hover */
+            --glass-hover-shadow: 0 0 40px rgba(123,208,255,0.1); /* Sombra ampliada al hover */
+            
             /* Colores de partículas para el fondo animado */
-            --particle-color-1: rgba(142,213,255,0.4);
-            --particle-color-2: rgba(192,193,255,0.2);
-            --particle-line: rgba(142,213,255,0.12);
+            --particle-color-1: rgba(142,213,255,0.4);   /* Color principal de partículas - azul translúcido */
+            --particle-color-2: rgba(192,193,255,0.2);   /* Color secundario de partículas - violeta translúcido */
+            --particle-line: rgba(142,213,255,0.12);     /* Color de líneas de conexión entre partículas */
         }
 
-        /* ====== TEMA CLARO ====== */
-        /* Variables CSS para el modo claro - colores más suaves */
+        /* 
+            TEMA CLARO
+            ====================================================================
+            Reemplaza todas las variables CSS para el modo claro.
+            body[data-theme="light"] se activa cuando JavaScript cambia el 
+            atributo data-theme del elemento body.
+        */
         body[data-theme="light"] {
-            --color-background: #f1f5f9;              /* Fondo claro grisáceo */
-            --color-surface: rgba(255,255,255,0.7);    /* Superficies blancas */
+            /* Colores base del modo claro */
+            --color-background: #f1f5f9;              /* Fondo claro - gris muy claro con tono azulado */
+            --color-surface: rgba(255,255,255,0.7);    /* Superficies con transparencia blanca */
             --color-surface-container: #ffffff;       /* Contenedores blancos sólidos */
-            --color-surface-container-high: #e2e8f0;  /* Contenedores grises */
-            --color-on-surface: #0f172a;              /* Texto oscuro */
-            --color-on-surface-variant: #334155;      /* Texto secundario oscuro */
-            --color-primary: #38bdf8;                 /* Azul claro */
-            --color-secondary: #818cf8;               /* Violeta claro */
-            --color-outline-variant: #cbd5e1;         /* Bordes grises */
-            --color-error: #ba1a1a;                   /* Rojo para errores */
-            --color-green-accent: #10b981;            /* Verde */
-            --color-tertiary: #7c5800;                /* Amarillo oscuro */
+            --color-surface-container-high: #e2e8f0;  /* Contenedores grises para jerarquía */
+            --color-on-surface: #0f172a;              /* Texto principal - azul muy oscuro */
+            --color-on-surface-variant: #334155;      /* Texto secundario - gris oscuro */
+            --color-primary: #38bdf8;                 /* Color principal - azul cielo */
+            --color-secondary: #818cf8;               /* Color secundario - violeta medio */
+            --color-outline-variant: #cbd5e1;         /* Bordes y líneas - gris claro */
+            --color-error: #ba1a1a;                   /* Color de error - rojo intenso para modo claro */
+            --color-green-accent: #10b981;            /* Verde para éxito */
+            --color-tertiary: #7c5800;                /* Color terciario - amarillo oscuro */
+            
             /* Efectos de vidrio más sutiles para modo claro */
-            --glass-border: rgba(0,0,0,0.04);
-            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            --glass-hover-border: rgba(56,189,248,0.3);
-            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12);
-            /* Partículas más sutiles */
-            --particle-color-1: rgba(56,189,248,0.25);
-            --particle-color-2: rgba(129,140,248,0.2);
-            --particle-line: rgba(56,189,248,0.12);
+            --glass-border: rgba(0,0,0,0.04);                  /* Borde muy sutil */
+            --glass-shadow: 0 4px 12px rgba(0,0,0,0.02);       /* Sombra mínima */
+            --glass-hover-border: rgba(56,189,248,0.3);        /* Borde azul al hover */
+            --glass-hover-shadow: 0 12px 30px rgba(56,189,248,0.12); /* Sombra con tono azul */
+            
+            /* Partículas más sutiles para el modo claro */
+            --particle-color-1: rgba(56,189,248,0.25);   /* Azul menos opaco */
+            --particle-color-2: rgba(129,140,248,0.2);   /* Violeta menos opaco */
+            --particle-line: rgba(56,189,248,0.12);      /* Líneas más sutiles */
         }
 
-        /* ====== ESTILOS GLOBALES ====== */
-        /* Aplica colores de fondo y texto usando variables CSS */
+        /* 
+            ESTILOS GLOBALES DEL BODY
+            ====================================================================
+            Aplica colores de fondo y texto usando variables CSS para que 
+            cambien automáticamente con el tema.
+        */
         body {
-            background: var(--color-background);
-            color: var(--color-on-surface);
-            overflow-x: hidden;           /* Oculta scroll horizontal */
-            min-height: 100vh;            /* Altura mínima de pantalla completa */
+            background: var(--color-background);    /* Fondo dinámico según tema */
+            color: var(--color-on-surface);         /* Texto dinámico según tema */
+            overflow-x: hidden;                     /* Evita scroll horizontal */
+            min-height: 100vh;                      /* Ocupa al menos toda la altura de la pantalla */
             transition: background 0.25s ease, color 0.25s ease; /* Transición suave al cambiar tema */
         }
 
-        /* ====== CANVAS DE PARTÍCULAS ====== */
-        /* Contenedor fijo para el fondo animado de partículas */
+        /* 
+            CANVAS DE PARTÍCULAS
+            ====================================================================
+            Contenedor fijo que ocupa toda la pantalla y se posiciona detrás 
+            de todo el contenido.
+        */
         #particle-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;                  /* Detrás de todo el contenido */
-            pointer-events: none;         /* Permite hacer clic a través del canvas */
+            position: fixed;          /* Fijo en la ventana */
+            top: 0; left: 0;          /* Esquina superior izquierda */
+            width: 100%; height: 100%; /* Ocupa toda la pantalla */
+            z-index: 0;               /* Detrás de todo el contenido */
+            pointer-events: none;     /* Permite hacer clic a través del canvas */
         }
 
-        /* ====== ESTILO DE VIDRIO (GLASSMORPHISM) ====== */
-        /* Efecto de vidrio con desenfoque y transparencia */
+        /* 
+            EFECTO DE VIDRIO (GLASSMORPHISM)
+            ====================================================================
+            Crea un efecto de vidrio esmerilado con desenfoque, transparencia 
+            y bordes sutiles.
+        */
         .glass {
-            background: var(--color-surface);
-            backdrop-filter: blur(16px); /* Desenfoque del fondo */
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            transform: translate3d(0, 0, 0); /* Acelera GPU para mejor rendimiento */
-            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+            background: var(--color-surface);        /* Fondo con transparencia */
+            backdrop-filter: blur(16px);             /* Desenfoque del fondo subyacente */
+            border: 1px solid var(--glass-border);   /* Borde sutil */
+            box-shadow: var(--glass-shadow);         /* Sombra ligera */
+            transform: translate3d(0, 0, 0);         /* Acelera GPU para mejor rendimiento */
+            transition: border-color 0.4s ease, box-shadow 0.4s ease; /* Transiciones suaves */
         }
 
-        /* Efecto hover para elementos de vidrio */
+        /* 
+            Efecto hover para elementos de vidrio
+            Intensifica el borde y la sombra al pasar el mouse.
+        */
         .glass-hover:hover {
             border-color: var(--glass-hover-border);
             box-shadow: var(--glass-hover-shadow);
         }
 
-        /* ====== EFECTOS DE BRILLO (GLOW) ====== */
-        /* Sombra de texto con color primario */
-        .glow-cyan { text-shadow: 0 0 12px var(--color-primary); }
-        .glow-violet { text-shadow: 0 0 12px var(--color-secondary); }
+        /* 
+            EFECTOS DE BRILLO (GLOW)
+            ====================================================================
+            Sombra de texto con color primario para dar efecto de "resplandor".
+        */
+        .glow-cyan { 
+            text-shadow: 0 0 12px var(--color-primary); 
+        }
+        .glow-violet { 
+            text-shadow: 0 0 12px var(--color-secondary); 
+        }
 
-        /* ====== ANIMACIÓN DE ENTRADA (STAGGER) ====== */
-        /* Elementos que aparecen gradualmente con desplazamiento */
+        /* 
+            ANIMACIÓN DE ENTRADA (STAGGER)
+            ====================================================================
+            Los elementos con esta clase aparecen gradualmente con un 
+            desplazamiento vertical y desvanecimiento.
+        */
         .stagger-in {
-            opacity: 0;
-            transform: translateY(20px) translate3d(0,0,0);
-            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;                               /* Inicialmente invisible */
+            transform: translateY(20px) translate3d(0,0,0); /* Desplazado hacia abajo */
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; /* Animación */
         }
+        
+        /* Keyframes de la animación */
         @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
+            to { 
+                opacity: 1;                                    /* Visible */
+                transform: translateY(0) translate3d(0,0,0);   /* Posición original */
+            }
         }
 
-        /* Desactiva animaciones si el usuario prefiere movimiento reducido */
+        /* 
+            Desactiva animaciones si el usuario prefiere movimiento reducido
+            Esto respeta la configuración de accesibilidad del sistema.
+        */
         @media (prefers-reduced-motion: reduce) {
-            .stagger-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+            .stagger-in { 
+                animation: none !important; 
+                opacity: 1 !important; 
+                transform: none !important; 
+            }
         }
 
-        /* ====== EFECTO TILT 3D ====== */
-        /* Contenedor con perspectiva para efecto 3D al inclinar */
-        .tilt-card { perspective: 1000px; }
+        /* 
+            EFECTO TILT 3D
+            ====================================================================
+            Contenedor que aplica perspectiva para el efecto de inclinación 3D.
+            Los hijos pueden rotar en 3D simulando profundidad.
+        */
+        .tilt-card { 
+            perspective: 1000px; 
+        }
 
-        /* ====== MODAL OVERLAY ====== */
-        /* Fondo oscuro con desenfoque para modales */
+        /* 
+            MODAL OVERLAY
+            ====================================================================
+            Fondo oscuro semitransparente con desenfoque que cubre toda la 
+            pantalla cuando se muestra un modal.
+        */
         .modal-overlay {
             position: fixed;
-            inset: 0;
+            inset: 0;               /* Top:0, Right:0, Bottom:0, Left:0 */
             z-index: 50;
-            background: rgba(15, 20, 24, 0.6);
-            backdrop-filter: blur(12px);
+            background: rgba(15, 20, 24, 0.6);    /* Fondo oscuro semitransparente */
+            backdrop-filter: blur(12px);          /* Desenfoque del fondo */
             align-items: center;
             justify-content: center;
         }
-        /* Fondo del modal en modo claro */
+        
+        /* Ajuste del fondo del overlay para modo claro */
         body[data-theme="light"] .modal-overlay {
-            background: rgba(241, 245, 249, 0.7);
+            background: rgba(241, 245, 249, 0.7);   /* Fondo claro semitransparente */
         }
         body[data-theme="dark"] .modal-overlay {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.7);          /* Fondo oscuro para modo oscuro */
         }
 
-        /* ====== SCROLLBAR PERSONALIZADA ====== */
-        /* Scrollbar más delgada y con color primario */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 10px; }
+        /* 
+            SCROLLBAR PERSONALIZADA
+            ====================================================================
+            Modifica la apariencia de la barra de desplazamiento.
+        */
+        ::-webkit-scrollbar { 
+            width: 4px;               /* Ancho reducido de la scrollbar */
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--color-primary);    /* Color primario para el pulgar */
+            border-radius: 10px;                 /* Bordes redondeados */
+        }
 
-        /* ====== CURSOR PARPADEANTE ====== */
-        /* Simula cursor de terminal */
+        /* 
+            CURSOR PARPADEANTE
+            ====================================================================
+            Simula un cursor de terminal con parpadeo intermitente.
+        */
         .cursor-blink {
-            display: inline-block; width: 8px; height: 16px;
-            background: var(--color-primary); vertical-align: middle;
-            animation: blink 1s step-end infinite;
+            display: inline-block; 
+            width: 8px; 
+            height: 16px;
+            background: var(--color-primary);     /* Color del cursor */
+            vertical-align: middle;
+            animation: blink 1s step-end infinite; /* Parpadeo continuo */
         }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes blink { 
+            0%,100%{ opacity: 1; } 
+            50%{ opacity: 0; } 
+        }
 
-        /* ====== ANIMACIÓN DE MODAL ====== */
+        /* 
+            ANIMACIÓN DE MODAL
+            ====================================================================
+            Entrada suave del modal desde arriba.
+        */
         @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(-15px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
-        .modal-anim { animation: fadeDown 0.2s ease; }
+        .modal-anim { 
+            animation: fadeDown 0.2s ease; 
+        }
 
-        /* ====== BOTÓN FLOTANTE DE TEMA ====== */
-        /* Botón circular fijo en la esquina inferior derecha */
+        /* 
+            BOTÓN FLOTANTE DE TEMA
+            ====================================================================
+            Botón circular fijo en la esquina inferior derecha para cambiar 
+            entre modo claro y oscuro.
+        */
         .theme-float-switch {
-            position: fixed; bottom: 2.5rem; right: 2.5rem; z-index: 2000;
-            border-radius: 50%; box-shadow: 0 2px 16px rgba(0,0,0,0.13);
-            padding: 0.5rem; display: flex; align-items: center; justify-content: center;
+            position: fixed; 
+            bottom: 2.5rem; 
+            right: 2.5rem; 
+            z-index: 2000;               /* Siempre visible por encima de todo */
+            border-radius: 50%;          /* Forma circular */
+            box-shadow: 0 2px 16px rgba(0,0,0,0.13); /* Sombra ligera */
+            padding: 0.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
             transition: background 0.2s, border 0.2s;
         }
-        .theme-float-switch:hover { transform: scale(1.05); }
+        .theme-float-switch:hover { 
+            transform: scale(1.05);      /* Efecto de zoom al hover */
+        }
 
-        /* ====== ESTILOS PARA SELECCIÓN DE PLAN ====== */
-        /* Botones de selección de plan en el registro */
+        /* 
+            ESTILOS PARA SELECCIÓN DE PLAN (REGISTRO)
+            ====================================================================
+            Botones de selección de plan en el paso 2 del registro.
+        */
         .reg-plan-btn {
             background: transparent;
-            border: 2px solid var(--color-outline-variant);
+            border: 2px solid var(--color-outline-variant);  /* Borde con color del tema */
             color: var(--color-on-surface-variant);
             padding: 1rem 0.5rem;
             border-radius: 0.75rem;
@@ -246,15 +402,15 @@
             text-align: center;
         }
         .reg-plan-btn:hover {
-            border-color: var(--color-primary);
+            border-color: var(--color-primary);    /* Borde azul al hover */
             color: var(--color-primary);
-            transform: translateY(-2px);
+            transform: translateY(-2px);            /* Levanta ligeramente el botón */
         }
         .reg-plan-btn.selected {
             border-color: var(--color-primary);
-            background: rgba(56, 189, 248, 0.12);
+            background: rgba(56, 189, 248, 0.12);   /* Fondo azul transparente */
             color: var(--color-primary);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15); /* Resplandor azul */
         }
         .reg-plan-btn .plan-price {
             font-size: 1.5rem;
@@ -270,7 +426,11 @@
             line-height: 1.4;
         }
 
-        /* ====== INDICADOR DE PASOS (STEPPER) ====== */
+        /* 
+            INDICADOR DE PASOS (STEPPER)
+            ====================================================================
+            Muestra visualmente el progreso del formulario de registro.
+        */
         .step-indicator {
             display: flex;
             align-items: center;
@@ -296,7 +456,7 @@
             border-color: var(--color-primary);
             background: var(--color-primary);
             color: white;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); /* Resplandor */
         }
         .step-dot.completed {
             border-color: var(--color-green-accent);
@@ -310,37 +470,48 @@
             transition: background 0.3s ease;
         }
         .step-line.completed {
-            background: var(--color-green-accent);
+            background: var(--color-green-accent); /* Línea verde cuando se completa */
         }
 
-        /* ====== CONTENIDO DE PASOS ====== */
+        /* 
+            CONTENIDO DE PASOS
+            ====================================================================
+            Cada paso del formulario es un contenedor que se muestra/oculta.
+        */
         .step-content {
-            display: none;
+            display: none;              /* Oculto por defecto */
             animation: fadeDown 0.3s ease;
         }
         .step-content.active {
-            display: block;
+            display: block;             /* Visible cuando tiene la clase active */
         }
 
-        /* ====== ESTILOS DE INPUT CON FONDO NEGRO Y TEXTO BLANCO ====== */
-        /* Fuerza fondo negro en inputs para mejor contraste */
+        /* 
+            ESTILOS DE INPUT CON FONDO NEGRO Y TEXTO BLANCO
+            ====================================================================
+            Inputs con contraste alto: fondo negro, texto blanco.
+            Se usa !important para sobrescribir estilos de Tailwind y otros frameworks.
+        */
         .form-input {
             width: 100%;
-            background: #000000 !important;
+            background: #000000 !important;          /* Fondo negro sólido */
             border: 1px solid var(--color-outline-variant);
             border-radius: 0.75rem;
             padding: 0.75rem 1rem;
-            color: #ffffff !important;
+            color: #ffffff !important;               /* Texto blanco */
             outline: none;
             transition: border-color 0.2s;
         }
         .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.4) !important;
+            color: rgba(255, 255, 255, 0.4) !important; /* Placeholder gris claro */
         }
         .form-input:focus {
-            border-color: var(--color-primary);
+            border-color: var(--color-primary);      /* Borde azul al enfocar */
         }
-        /* Fuerza autocompletado con fondo negro */
+        /* 
+            Fuerza el autocompletado con fondo negro y texto blanco.
+            Esto evita que el navegador aplique estilos amarillos de autocomplete.
+        */
         .form-input:-webkit-autofill,
         .form-input:-webkit-autofill:hover,
         .form-input:-webkit-autofill:focus {
@@ -348,18 +519,18 @@
             -webkit-text-fill-color: #ffffff !important;
             border-color: var(--color-primary);
         }
-        .form-input {
-            background-color: #000000 !important;
-            color: #ffffff !important;
-        }
 
-        /* ====== INPUT CON BOTÓN DE MOSTRAR CONTRASEÑA ====== */
+        /* 
+            INPUT CON BOTÓN DE MOSTRAR CONTRASEÑA
+            ====================================================================
+            Wrapper relativo que contiene el input y el botón de toggle.
+        */
         .password-wrapper {
             position: relative;
             width: 100%;
         }
         .password-wrapper .form-input {
-            padding-right: 3rem;
+            padding-right: 3rem;          /* Espacio para el botón */
         }
         .password-toggle {
             position: absolute;
@@ -377,27 +548,33 @@
             justify-content: center;
         }
         .password-toggle:hover {
-            color: var(--color-primary);
-        }
-        .password-toggle .material-symbols-outlined {
-            font-size: 1.25rem;
+            color: var(--color-primary);   /* Color primario al hover */
         }
 
-        /* ====== SPINNER DE CARGA ====== */
+        /* 
+            SPINNER DE CARGA
+            ====================================================================
+            Animación circular para indicar procesos en curso.
+        */
         .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3);   /* Borde gris claro */
             border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s ease-in-out infinite;
+            border-top-color: #fff;                     /* Borde superior blanco */
+            animation: spin 0.8s ease-in-out infinite;  /* Rotación infinita */
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* ====== REQUISITOS DE CONTRASEÑA ====== */
+        /* 
+            REQUISITOS DE CONTRASEÑA
+            ====================================================================
+            Lista de requisitos que se actualizan en tiempo real mientras 
+            el usuario escribe su contraseña.
+        */
         .pwd-requirement {
             display: flex;
             align-items: center;
@@ -408,31 +585,40 @@
             transition: all 0.3s ease;
         }
         .pwd-requirement.met {
-            color: var(--color-green-accent);
+            color: var(--color-green-accent);  /* Verde cuando se cumple */
             opacity: 1;
         }
         .pwd-requirement .req-icon {
             font-size: 0.875rem;
         }
 
-        /* ====== LABELS DE FORMULARIO ====== */
+        /* 
+            LABELS DE FORMULARIO
+            ====================================================================
+            Estilo para las etiquetas de los campos de formulario.
+            Texto en mayúsculas con espaciado para mejor legibilidad.
+        */
         .form-label {
             display: block;
             font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: uppercase;        /* Texto en mayúsculas */
+            letter-spacing: 0.1em;            /* Espaciado entre letras */
             font-weight: 700;
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 0.25rem;
         }
 
-        /* ====== BADGE DE MÉXICO ====== */
+        /* 
+            BADGE DE MÉXICO
+            ====================================================================
+            Insignia que indica que los precios están en pesos mexicanos.
+        */
         .badge-mx {
             display: inline-block;
-            background: rgba(56, 189, 248, 0.15);
+            background: rgba(56, 189, 248, 0.15); /* Fondo azul transparente */
             color: var(--color-primary);
             padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
+            border-radius: 9999px;                 /* Forma de píldora */
             font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -442,58 +628,100 @@
     </style>
 </head>
 
-<!-- ==================== CUERPO DE LA PÁGINA ==================== -->
+<!-- ===========================================================================
+CUERPO DE LA PÁGINA
+=========================================================================== -->
+<!-- 
+    data-theme="dark": Atributo personalizado que controla el tema.
+    font-body-md: Clase de Tailwind que aplica la fuente Geist.
+    selection:bg-primary/20 selection:text-on-surface: Estilos de Tailwind 
+    para el texto seleccionado (color primario con opacidad).
+-->
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface" data-theme="dark">
     
-    <!-- ====== CANVAS DE PARTÍCULAS (FONDO ANIMADO) ====== -->
+    <!-- =====================================================================
+    CANVAS DE PARTÍCULAS (FONDO ANIMADO)
+    ====================================================================== -->
+    <!-- 
+        Este canvas se renderiza en el fondo y crea un efecto de partículas
+        que se mueven lentamente y se conectan entre sí con líneas.
+        Las partículas también reaccionan al movimiento del mouse.
+    -->
     <canvas id="particle-canvas"></canvas>
 
-    <!-- ====== BARRA DE NAVEGACIÓN ====== -->
-    <!-- fija en la parte superior con efecto de vidrio y sombra -->
+    <!-- =====================================================================
+    BARRA DE NAVEGACIÓN
+    ====================================================================== -->
+    <!-- 
+        Navbar fija en la parte superior con efecto de vidrio (glass).
+        border-b: Borde inferior sutil.
+        flex: Flexbox para alinear el logo y los enlaces.
+        items-center: Centra verticalmente los elementos.
+        justify-between: Distribuye el espacio entre el logo y los enlaces.
+    -->
     <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-outline-variant/20 px-6 py-4 flex items-center justify-between transition-colors">
-        <!-- Logo - enlace a la página principal -->
+        <!-- Logo: Enlace a la página principal -->
         <a href="/" class="font-code-md text-xl font-bold text-on-surface glow-cyan no-underline flex items-center gap-2">
+            <!-- Icono de terminal de Material Symbols -->
             <span class="material-symbols-outlined text-primary">terminal</span>
             Auto<span class="text-primary">Docs</span> AI
         </a>
-        <!-- Navegación derecha - enlaces y botones de autenticación -->
+        
+        <!-- Navegación derecha: Enlaces y botones de autenticación -->
         <div class="flex gap-6 items-center">
             <a href="#features" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Funciones</a>
             <a href="#how" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Cómo funciona</a>
             <a href="#stack" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Stack</a>
             <a href="#pricing" class="text-on-surface-variant/70 text-sm hover:text-primary transition-colors no-underline">Planes</a>
-            <!-- Botón de inicio de sesión - abre modal de login -->
+            
+            <!-- Botón de inicio de sesión - abre el modal de login -->
             <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary bg-transparent hover:bg-primary/5 transition-all" onclick="openModal('login')">Iniciar sesión</button>
-            <!-- Botón de registro - abre modal de registro -->
+            
+            <!-- Botón de registro - abre el modal de registro -->
             <button class="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-white border-none hover:bg-primary/80 transition-all active:scale-95" onclick="openModal('register')">Comenzar gratis</button>
         </div>
     </nav>
 
-    <!-- ====== BOTÓN FLOTANTE PARA CAMBIAR TEMA ====== -->
-    <!-- Botón circular fijo para alternar entre modo claro y oscuro -->
+    <!-- =====================================================================
+    BOTÓN FLOTANTE PARA CAMBIAR TEMA
+    ====================================================================== -->
+    <!-- 
+        Botón circular fijo en la esquina inferior derecha que alterna 
+        entre modo claro y oscuro.
+    -->
     <div class="theme-float-switch glass">
         <button id="themeButton" type="button" aria-label="Alternar tema" class="bg-transparent border-0 p-0 cursor-pointer text-2xl">
             <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
         </button>
     </div>
 
-    <!-- ====== SECCIÓN HERO (PRINCIPAL) ====== -->
-    <!-- Sección de presentación principal de la aplicación -->
+    <!-- =====================================================================
+    SECCIÓN HERO (PRINCIPAL)
+    ====================================================================== -->
+    <!-- 
+        Sección principal de presentación. Ocupa al menos el 100% de la altura 
+        de la pantalla (min-h-screen) y centra su contenido.
+    -->
     <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-8 pt-28 pb-16 z-10">
-        <!-- Badge de tecnología -->
+        <!-- Badge de tecnología: Muestra "Powered by Python + AI Analysis" -->
         <div class="stagger-in" style="animation-delay: 0.1s;">
             <span class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-xs font-code-md text-primary border border-primary/20 mb-8">
                 <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span> Powered by Python + AI Analysis
             </span>
         </div>
+        
         <!-- Título principal con efecto de degradado -->
         <h1 class="stagger-in font-display-lg text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight tracking-tight text-on-surface mb-6" style="animation-delay: 0.15s;">
-            Documenta tu código<br /><span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">automáticamente</span>
+            Documenta tu código<br />
+            <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">automáticamente</span>
         </h1>
+        
         <!-- Descripción del producto -->
         <p class="stagger-in text-lg text-on-surface-variant/70 max-w-xl mb-10" style="animation-delay: 0.2s;">
-            AutoDocs AI analiza tu proyecto, detecta funciones, clases y endpoints, y genera documentación técnica profesional en segundos.
+            AutoDocs AI analiza tu proyecto, detecta funciones, clases y endpoints, 
+            y genera documentación técnica profesional en segundos.
         </p>
+        
         <!-- Botones de acción principal -->
         <div class="stagger-in flex gap-4 flex-wrap justify-center" style="animation-delay: 0.3s;">
             <button class="px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
@@ -504,11 +732,17 @@
             </a>
         </div>
 
-        <!-- ====== MOCKUP DE TERMINAL ====== -->
-        <!-- Simulación de terminal mostrando el análisis de código -->
+        <!-- =================================================================
+        MOCKUP DE TERMINAL
+        ================================================================== -->
+        <!-- 
+            Simulación de una terminal mostrando el análisis de código.
+            Este mockup da una idea visual de cómo funciona el producto.
+        -->
         <div class="stagger-in mt-20 w-full max-w-3xl glass rounded-3xl overflow-hidden shadow-[0_20px_60px_var(--color-primary)] border border-outline-variant/20" style="animation-delay: 0.4s;">
-            <!-- Barra superior de la terminal -->
+            <!-- Barra superior de la terminal (similar a las ventanas de macOS) -->
             <div class="bg-surface-container/20 backdrop-blur-md px-6 py-3 border-b border-outline-variant/10 flex items-center gap-3">
+                <!-- Botones de control (rojo, amarillo, verde) -->
                 <div class="flex gap-2">
                     <div class="w-3 h-3 rounded-full bg-red-400/60"></div>
                     <div class="w-3 h-3 rounded-full bg-yellow-400/60"></div>
@@ -516,7 +750,7 @@
                 </div>
                 <span class="ml-auto mr-auto font-code-md text-xs text-on-surface-variant/50 uppercase tracking-widest">autodocs — análisis en curso</span>
             </div>
-            <!-- Contenido de la terminal - simula la salida del comando -->
+            <!-- Contenido de la terminal: Simula la salida del comando -->
             <div class="p-6 font-code-md text-sm space-y-2 text-on-surface-variant/80">
                 <div><span class="text-green-accent font-bold">$</span> <span class="text-on-surface">autodocs analyze ./mi-proyecto</span></div>
                 <div class="pl-6"> Escaneando estructura del proyecto...</div>
@@ -530,8 +764,13 @@
         </div>
     </section>
 
-    <!-- ====== BARRA DE ESTADÍSTICAS ====== -->
-    <!-- Muestra métricas clave del producto -->
+    <!-- =====================================================================
+    BARRA DE ESTADÍSTICAS
+    ====================================================================== -->
+    <!-- 
+        Sección que muestra métricas clave del producto como números que 
+        destacan las capacidades de la herramienta.
+    -->
     <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-outline-variant/20 border-y border-outline-variant/20 stagger-in" style="animation-delay: 0.5s;">
         <!-- Lenguajes soportados -->
         <div class="glass text-center py-10 rounded-none border-none">
@@ -555,7 +794,13 @@
         </div>
     </div>
 
-    <!-- ====== SECCIÓN DE FUNCIONALIDADES ====== -->
+    <!-- =====================================================================
+    SECCIÓN DE FUNCIONALIDADES
+    ====================================================================== -->
+    <!-- 
+        Presenta las 6 características principales del producto en un grid 
+        de 3 columnas.
+    -->
     <section id="features" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
         <!-- Encabezado de la sección -->
         <div class="stagger-in text-center mb-16">
@@ -563,8 +808,10 @@
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Todo lo que necesitas para documentar</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">De subir un .zip a tener documentación completa lista para entregar.</p>
         </div>
+        
         <!-- Grid de tarjetas de funcionalidades -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
             <!-- Tarjeta 1: Escaneo automático -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.2s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
@@ -574,6 +821,7 @@
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">ast · regex · pathlib</span>
                 </div>
             </div>
+            
             <!-- Tarjeta 2: Detección de endpoints API -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.25s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
@@ -583,6 +831,7 @@
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Flask · FastAPI · Express</span>
                 </div>
             </div>
+            
             <!-- Tarjeta 3: Generación de README -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.3s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
@@ -592,6 +841,7 @@
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Markdown · AI</span>
                 </div>
             </div>
+            
             <!-- Tarjeta 4: Dashboard de calidad -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.35s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
@@ -601,6 +851,7 @@
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">McCabe · métricas</span>
                 </div>
             </div>
+            
             <!-- Tarjeta 5: Exportación profesional -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.4s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
@@ -610,6 +861,7 @@
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">PDF · Markdown · HTML</span>
                 </div>
             </div>
+            
             <!-- Tarjeta 6: Integración GitHub -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.45s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
@@ -622,7 +874,13 @@
         </div>
     </section>
 
-    <!-- ====== SECCIÓN "CÓMO FUNCIONA" ====== -->
+    <!-- =====================================================================
+    SECCIÓN "CÓMO FUNCIONA"
+    ====================================================================== -->
+    <!-- 
+        Explica el flujo del sistema en 5 pasos, desde subir el proyecto 
+        hasta exportar la documentación.
+    -->
     <section id="how" class="relative z-10 glass rounded-3xl max-w-6xl mx-auto py-24 px-8 my-16">
         <!-- Encabezado de la sección -->
         <div class="text-center mb-16 stagger-in">
@@ -630,6 +888,7 @@
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Cómo funciona</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">Arquitectura moderna y desacoplada. Desde el upload hasta el PDF en 5 pasos.</p>
         </div>
+        
         <!-- Grid de pasos del flujo -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
             <!-- Paso 1: Subir proyecto -->
@@ -638,24 +897,28 @@
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Subir proyecto</h3>
                 <p class="text-on-surface-variant/60 text-sm">Sube un .zip, .tar.gz o conecta tu repo de GitHub directamente desde el dashboard.</p>
             </div>
+            
             <!-- Paso 2: Análisis estático -->
             <div class="text-center stagger-in" style="animation-delay: 0.2s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">02</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Análisis estático</h3>
                 <p class="text-on-surface-variant/60 text-sm">El motor Python usa AST para analizar funciones, clases, imports y detectar endpoints de API.</p>
             </div>
+            
             <!-- Paso 3: Generación de docs -->
             <div class="text-center stagger-in" style="animation-delay: 0.3s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">03</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Generación de docs</h3>
                 <p class="text-on-surface-variant/60 text-sm">DocGenerator produce README, referencia de API, documentación de clases y arquitectura del proyecto.</p>
             </div>
+            
             <!-- Paso 4: Dashboard visual -->
             <div class="text-center stagger-in" style="animation-delay: 0.4s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">04</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Dashboard visual</h3>
                 <p class="text-on-surface-variant/60 text-sm">React muestra métricas de calidad, diagramas de estructura y la documentación navegable.</p>
             </div>
+            
             <!-- Paso 5: Exportar -->
             <div class="text-center stagger-in" style="animation-delay: 0.5s;">
                 <span class="font-code-md text-5xl font-bold text-primary/20">05</span>
@@ -665,13 +928,20 @@
         </div>
     </section>
 
-    <!-- ====== SECCIÓN DE STACK TECNOLÓGICO ====== -->
+    <!-- =====================================================================
+    SECCIÓN DE STACK TECNOLÓGICO
+    ====================================================================== -->
+    <!-- 
+        Muestra las tecnologías utilizadas en el proyecto con iconos 
+        representativos y nombres.
+    -->
     <section id="stack" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
         <div class="text-center mb-16 stagger-in">
             <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// tecnologías</span>
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Stack tecnológico</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">Herramientas modernas y probadas en producción.</p>
         </div>
+        
         <!-- Grid de tecnologías con iconos -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🐍</span><span class="font-code-md font-bold text-on-surface">Python</span><p class="text-xs text-on-surface-variant/50 mt-1">Backend · Análisis</p></div>
@@ -685,13 +955,20 @@
         </div>
     </section>
 
-    <!-- ====== SECCIÓN DE PLANES ====== -->
+    <!-- =====================================================================
+    SECCIÓN DE PLANES
+    ====================================================================== -->
+    <!-- 
+        Muestra los tres planes de suscripción: Gratuito, Pro y Enterprise,
+        con sus características y precios.
+    -->
     <section id="pricing" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
         <div class="text-center mb-16 stagger-in">
             <span class="font-code-md text-xs text-primary uppercase tracking-[0.3em]">// planes</span>
             <h2 class="text-4xl lg:text-5xl font-bold text-on-surface mt-4 mb-4">Elige tu plan</h2>
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">Comienza gratis y escala cuando lo necesites.</p>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Plan Gratuito -->
             <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
@@ -706,8 +983,10 @@
                 </ul>
                 <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register', 'free')">Empezar gratis</button>
             </div>
+            
             <!-- Plan Pro (destacado) -->
             <div class="glass rounded-3xl p-8 border border-primary/40 plan-featured stagger-in relative">
+                <!-- Badge "POPULAR" flotante -->
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-on-surface mb-2">Pro</h3>
@@ -721,6 +1000,7 @@
                 </ul>
                 <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register', 'pro')">Comenzar</button>
             </div>
+            
             <!-- Plan Enterprise -->
             <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
                 <div class="text-center mb-6">
@@ -738,10 +1018,16 @@
         </div>
     </section>
 
-    <!-- ====== SECCIÓN DE LLAMADA A LA ACCIÓN (CTA) ====== -->
+    <!-- =====================================================================
+    SECCIÓN DE LLAMADA A LA ACCIÓN (CTA)
+    ====================================================================== -->
+    <!-- 
+        Sección final que invita al usuario a registrarse con un llamado 
+        a la acción claro.
+    -->
     <section class="relative z-10 max-w-6xl mx-auto py-16 px-8">
         <div class="glass rounded-3xl p-16 text-center relative overflow-hidden shadow-[0_0_80px_var(--color-primary)] stagger-in">
-            <!-- Efecto de fondo de brillo -->
+            <!-- Efecto de fondo de brillo: un círculo difuso detrás del texto -->
             <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/5 blur-[100px] pointer-events-none"></div>
             <h2 class="text-4xl font-bold text-on-surface relative z-10 mb-4">Empieza a documentar en 30 segundos</h2>
             <p class="text-on-surface-variant/60 relative z-10 mb-8">Crea tu cuenta gratis y analiza tu primer proyecto hoy mismo.</p>
@@ -751,14 +1037,22 @@
         </div>
     </section>
 
-    <!-- ====== PIE DE PÁGINA ====== -->
+    <!-- =====================================================================
+    PIE DE PÁGINA
+    ====================================================================== -->
     <footer class="relative z-10 glass border-t border-outline-variant/20 py-10 text-center">
         <p class="text-on-surface-variant/50 text-sm font-code-md">
             AutoDocs AI — construido con <span class="text-primary">BIBFUJ</span> usando Python + Flask + HTML · 2026 · <a href="/terms" class="text-primary hover:underline">Términos y Condiciones</a>
         </p>
     </footer>
 
-    <!-- ====== MODAL DE AUTENTICACIÓN (LOGIN / REGISTRO) ====== -->
+    <!-- =====================================================================
+    MODAL DE AUTENTICACIÓN (LOGIN / REGISTRO)
+    ====================================================================== -->
+    <!-- 
+        Modal que contiene los formularios de inicio de sesión y registro.
+        Se muestra/oculta mediante JavaScript.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="authModal" onclick="if(event.target===this)closeModal()">
         <div class="glass p-8 rounded-3xl w-full max-w-lg modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-y-auto">
             <!-- Botón para cerrar el modal -->
@@ -774,7 +1068,9 @@
                 <button class="flex-1 py-2.5 bg-transparent text-on-surface-variant border border-outline-variant/20 rounded-r-xl transition-all" id="tab-register" onclick="switchTab('register')">Registrarse</button>
             </div>
 
-            <!-- ====== FORMULARIO DE LOGIN ====== -->
+            <!-- =============================================================
+            FORMULARIO DE LOGIN
+            ============================================================= -->
             <div id="form-login">
                 <div class="mb-4">
                     <label class="form-label">Correo electrónico</label>
@@ -797,9 +1093,11 @@
                 <div class="text-green-accent text-sm text-center mt-4 hidden" id="login-success">¡Bienvenido! Redirigiendo...</div>
             </div>
 
-            <!-- ====== FORMULARIO DE REGISTRO (STEPPER) ====== -->
+            <!-- =============================================================
+            FORMULARIO DE REGISTRO (STEPPER)
+            ============================================================= -->
             <div id="form-register" style="display:none;">
-                <!-- Indicadores de pasos -->
+                <!-- Indicadores de pasos (Stepper) -->
                 <div class="step-indicator">
                     <div class="step-dot active" id="step-dot-1">1</div>
                     <div class="step-line" id="step-line-1"></div>
@@ -934,7 +1232,12 @@
         </div>
     </div>
 
-    <!-- ====== MODAL DE RECUPERACIÓN DE CONTRASEÑA ====== -->
+    <!-- =====================================================================
+    MODAL DE RECUPERACIÓN DE CONTRASEÑA
+    ====================================================================== -->
+    <!-- 
+        Modal para solicitar un código de recuperación por correo electrónico.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="forgotModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -950,7 +1253,12 @@
         </div>
     </div>
 
-    <!-- ====== MODAL DE VERIFICACIÓN DE CÓDIGO ====== -->
+    <!-- =====================================================================
+    MODAL DE VERIFICACIÓN DE CÓDIGO
+    ====================================================================== -->
+    <!-- 
+        Modal para ingresar el código de 6 dígitos recibido por correo.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="verifyModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -968,7 +1276,12 @@
         </div>
     </div>
 
-    <!-- ====== MODAL DE RESTABLECIMIENTO DE CONTRASEÑA ====== -->
+    <!-- =====================================================================
+    MODAL DE RESTABLECIMIENTO DE CONTRASEÑA
+    ====================================================================== -->
+    <!-- 
+        Modal para establecer una nueva contraseña después de verificar el código.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="resetModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeResetModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -982,6 +1295,7 @@
                         <span class="material-symbols-outlined">visibility</span>
                     </button>
                 </div>
+                <!-- Indicador de fortaleza para reset -->
                 <div id="reset-pwd-strength-bar" class="hidden mt-3">
                     <div class="w-full bg-outline-variant/20 rounded-full h-1.5">
                         <div id="reset-pwd-strength-fill" class="h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -1001,13 +1315,22 @@
         </div>
     </div>
 
-    <!-- ====== PAYPAL SDK ====== -->
-    <!-- Carga el SDK de PayPal con el Client ID y moneda MXN (Pesos Mexicanos) -->
+    <!-- =====================================================================
+    PAYPAL SDK
+    ====================================================================== -->
+    <!-- 
+        Carga el SDK de PayPal con el Client ID específico y la moneda MXN 
+        (Pesos Mexicanos) para procesar pagos en el paso 3 del registro.
+    -->
     <script src="https://www.paypal.com/sdk/js?client-id=AUpaSRsR3sXeor6g7PcBfSvB8QeMY6Ic3dApd_VejRgRWWCkpU-ypbCvOM1l7WLze8s-UO_P51xGeD-l&currency=MXN"></script>
 
-    <!-- ==================== JAVASCRIPT PRINCIPAL ==================== -->
+    <!-- =====================================================================
+    JAVASCRIPT PRINCIPAL
+    ====================================================================== -->
     <script>
-        // ==================== VARIABLES GLOBALES ====================
+        // ===================================================================
+        // VARIABLES GLOBALES
+        // ===================================================================
         let currentStep = 1;              // Paso actual en el registro (1, 2 o 3)
         let regSelectedPlan = 'free';     // Plan seleccionado en el registro
         let regData = {};                 // Datos del usuario en el registro
@@ -1021,39 +1344,46 @@
             enterprise: 850
         };
 
+        // Nombres de los planes para mostrar
         const PLAN_NAMES = {
             pro: 'Pro',
             enterprise: 'Enterprise'
         };
 
-        // ==================== FUNCIÓN: MOSTRAR/OCULTAR CONTRASEÑA ====================
+        // ===================================================================
+        // FUNCIÓN: MOSTRAR/OCULTAR CONTRASEÑA
+        // ===================================================================
         /**
-         * Alterna la visibilidad de un campo de contraseña
-         * @param {string} inputId - ID del input de contraseña
-         * @param {HTMLElement} button - Botón que activa la función
+         * Alterna la visibilidad de un campo de contraseña entre texto y password.
+         * @param {string} inputId - ID del input de contraseña.
+         * @param {HTMLElement} button - Botón que activa la función.
          */
         function togglePassword(inputId, button) {
             const input = document.getElementById(inputId);
             const icon = button.querySelector('.material-symbols-outlined');
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.textContent = 'visibility_off';
+                icon.textContent = 'visibility_off';   // Icono de ojo tachado
             } else {
                 input.type = 'password';
-                icon.textContent = 'visibility';
+                icon.textContent = 'visibility';       // Icono de ojo abierto
             }
         }
 
-        // ==================== FUNCIONES DEL STEPPER ====================
+        // ===================================================================
+        // FUNCIONES DEL STEPPER
+        // ===================================================================
         /**
-         * Navega a un paso específico del registro
-         * @param {number} step - Número del paso (1, 2 o 3)
+         * Navega a un paso específico del registro.
+         * Valida los datos del paso actual antes de avanzar.
+         * @param {number} step - Número del paso (1, 2 o 3).
          */
         function goToStep(step) {
             // Validación antes de avanzar
             if (step > currentStep) {
                 if (currentStep === 1 && !validateStep1()) return;
                 if (currentStep === 2) {
+                    // Si el plan seleccionado es gratuito, registra directamente
                     if (regSelectedPlan === 'free') {
                         handleRegisterFree();
                         return;
@@ -1073,12 +1403,12 @@
                 dot.classList.remove('active', 'completed');
                 if (i < step) {
                     dot.classList.add('completed');
-                    dot.textContent = '✓';
+                    dot.textContent = '✓';      // Check para pasos completados
                 } else if (i === step) {
                     dot.classList.add('active');
-                    dot.textContent = i;
+                    dot.textContent = i;        // Número para el paso activo
                 } else {
-                    dot.textContent = i;
+                    dot.textContent = i;        // Número para pasos pendientes
                 }
                 if (line) {
                     line.classList.toggle('completed', i < step);
@@ -1099,8 +1429,9 @@
         }
 
         /**
-         * Valida el paso 1 (datos del usuario)
-         * @returns {boolean} - true si los datos son válidos
+         * Valida el paso 1 (datos del usuario).
+         * Verifica que todos los campos requeridos estén completos y válidos.
+         * @returns {boolean} - true si los datos son válidos, false en caso contrario.
          */
         function validateStep1() {
             const name = document.getElementById('reg-name').value.trim();
@@ -1111,7 +1442,7 @@
 
             errEl.classList.add('hidden');
 
-            // Validaciones
+            // Validaciones de cada campo
             if (!name) {
                 errEl.textContent = 'Ingresa tu nombre completo';
                 errEl.classList.remove('hidden');
@@ -1133,23 +1464,23 @@
                 return false;
             }
 
-            // Guardar datos para uso posterior
+            // Guardar datos para uso posterior en el registro
             regData = { name, email, password, terms };
             return true;
         }
 
         /**
-         * Valida el paso 2 (selección de plan)
-         * @returns {boolean} - siempre true (la selección es válida por defecto)
+         * Valida el paso 2 (selección de plan).
+         * @returns {boolean} - siempre true (la selección es válida por defecto).
          */
         function validateStep2() {
             return true;
         }
 
         /**
-         * Maneja el clic en "Siguiente" del paso 2
-         * Si el plan es gratuito, registra directamente
-         * Si es de pago, avanza al paso 3
+         * Maneja el clic en "Siguiente" del paso 2.
+         * Si el plan es gratuito, registra directamente.
+         * Si es de pago, avanza al paso 3 para el pago con PayPal.
          */
         function handleStep2Next() {
             if (regSelectedPlan === 'free') {
@@ -1159,10 +1490,12 @@
             }
         }
 
-        // ==================== FUNCIÓN: SELECCIONAR PLAN ====================
+        // ===================================================================
+        // FUNCIÓN: SELECCIONAR PLAN
+        // ===================================================================
         /**
-         * Selecciona un plan en el paso 2 del registro
-         * @param {string} plan - Nombre del plan ('free', 'pro', 'enterprise')
+         * Selecciona un plan en el paso 2 del registro y actualiza la UI.
+         * @param {string} plan - Nombre del plan ('free', 'pro', 'enterprise').
          */
         function selectRegPlan(plan) {
             regSelectedPlan = plan;
@@ -1171,7 +1504,7 @@
                 btn.classList.toggle('selected', btn.dataset.plan === plan);
             });
 
-            // Cambiar texto del botón según el plan seleccionado
+            // Cambiar texto y estilo del botón según el plan seleccionado
             const btn = document.getElementById('step2-next-btn');
             if (plan === 'free') {
                 btn.textContent = 'Registrarse';
@@ -1184,16 +1517,18 @@
             }
         }
 
-        // ==================== FUNCIÓN: RENDERIZAR PAYPAL ====================
+        // ===================================================================
+        // FUNCIÓN: RENDERIZAR PAYPAL
+        // ===================================================================
         /**
-         * Renderiza los botones de PayPal en el paso 3
-         * Configura el pago con el precio del plan seleccionado
+         * Renderiza los botones de PayPal en el paso 3.
+         * Configura el pago con el precio y moneda del plan seleccionado.
          */
         function renderPayPal() {
             const container = document.getElementById('paypal-button-container');
             if (!container) return;
 
-            // Limpiar contenedor y crear div para el botón
+            // Limpiar contenedor y crear div para el botón de PayPal
             container.innerHTML = '<div id="paypal-button"></div>';
 
             const price = PRICES[regSelectedPlan] || 0;
@@ -1203,16 +1538,21 @@
             document.getElementById('paypal-price').textContent = price.toLocaleString('es-MX');
             document.getElementById('paypal-plan-label').textContent = `Plan ${planName}`;
 
-            // Crear botón de PayPal
+            // Crear botón de PayPal usando el SDK cargado
             paypal.Buttons({
                 style: {
-                    layout: 'vertical',
-                    color: 'gold',
-                    shape: 'rect',
-                    label: 'paypal'
+                    layout: 'vertical',    // Disposición vertical
+                    color: 'gold',         // Color dorado (estilo PayPal)
+                    shape: 'rect',         // Forma rectangular
+                    label: 'paypal'        // Etiqueta "PayPal"
                 },
 
-                // Crear la orden de compra
+                /**
+                 * Crea la orden de compra en PayPal.
+                 * @param {Object} data - Datos de la orden.
+                 * @param {Object} actions - Acciones de PayPal.
+                 * @returns {string} - ID de la orden.
+                 */
                 createOrder: function(data, actions) {
                     return actions.order.create({
                         purchase_units: [{
@@ -1225,7 +1565,11 @@
                     });
                 },
 
-                // Manejar aprobación del pago
+                /**
+                 * Maneja la aprobación del pago por parte del usuario.
+                 * @param {Object} data - Datos de la orden aprobada.
+                 * @param {Object} actions - Acciones de PayPal.
+                 */
                 onApprove: function(data, actions) {
                     return actions.order.capture().then(function(orderData) {
                         console.log('Pago exitoso:', orderData);
@@ -1246,18 +1590,25 @@
                     });
                 },
 
-                // Manejar errores de PayPal
+                /**
+                 * Maneja errores en el proceso de pago.
+                 * @param {Object} err - Error de PayPal.
+                 */
                 onError: function(err) {
                     console.error('Error en PayPal:', err);
                     alert('El pago no pudo procesarse. Por favor, verifica tus datos e intenta de nuevo.');
                 },
 
-                // Manejar cancelación del pago
+                /**
+                 * Maneja la cancelación del pago por parte del usuario.
+                 * @param {Object} data - Datos de la cancelación.
+                 */
                 onCancel: function(data) {
                     console.log('Pago cancelado por el usuario');
                     alert('Has cancelado el proceso de pago. Puedes intentarlo nuevamente cuando quieras.');
                 }
             }).render('#paypal-button').catch(function(err) {
+                // Manejar errores de renderizado
                 console.error('Error al renderizar PayPal:', err);
                 document.getElementById('paypal-button').innerHTML = `
                     <div class="text-center p-4 border border-error/30 rounded-xl bg-error/5 text-error">
@@ -1271,10 +1622,12 @@
             document.getElementById('paypal-loading').style.display = 'none';
         }
 
-        // ==================== FUNCIÓN: REGISTRO GRATUITO ====================
+        // ===================================================================
+        // FUNCIÓN: REGISTRO GRATUITO
+        // ===================================================================
         /**
-         * Registra un usuario con el plan gratuito (sin pago)
-         * Envía los datos al backend y redirige al dashboard
+         * Registra un usuario con el plan gratuito (sin pago).
+         * Envía los datos al backend y redirige al dashboard.
          */
         async function handleRegisterFree() {
             if (isRegistering) return;
@@ -1291,7 +1644,7 @@
             const { name, email, password, terms } = regData;
 
             try {
-                // Enviar petición al backend
+                // Enviar petición POST al endpoint de registro
                 const res = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -1305,7 +1658,7 @@
                 });
                 const data = await res.json();
                 
-                // Manejar errores
+                // Manejar errores de la respuesta
                 if (!res.ok) {
                     const errEl = document.getElementById('step1-error');
                     errEl.textContent = data.error || 'Error al registrar';
@@ -1317,16 +1670,17 @@
                     return;
                 }
                 
-                // Guardar token y datos del usuario
+                // Guardar token y datos del usuario en localStorage
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
-                // Redirigir según el rol
+                // Redirigir según el rol del usuario
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
                 setTimeout(() => {
                     window.location.href = redirectUrl;
                 }, 800);
             } catch {
+                // Manejar errores de conexión
                 const errEl = document.getElementById('step1-error');
                 errEl.textContent = 'Error de conexión. Intenta de nuevo.';
                 errEl.classList.remove('hidden');
@@ -1337,10 +1691,12 @@
             }
         }
 
-        // ==================== FUNCIÓN: REGISTRO CON PAYPAL ====================
+        // ===================================================================
+        // FUNCIÓN: REGISTRO CON PAYPAL
+        // ===================================================================
         /**
-         * Registra un usuario después de un pago exitoso con PayPal
-         * @param {string} orderId - ID de la orden de PayPal (opcional)
+         * Registra un usuario después de un pago exitoso con PayPal.
+         * @param {string} orderId - ID de la orden de PayPal (opcional).
          */
         async function handleRegisterWithPayPal(orderId = null) {
             if (isRegistering) return;
@@ -1359,7 +1715,7 @@
             const { name, email, password, terms } = regData;
 
             try {
-                // Enviar petición al backend con datos de pago
+                // Enviar petición POST con los datos de pago
                 const res = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -1376,7 +1732,7 @@
                 });
                 const data = await res.json();
                 
-                // Manejar errores
+                // Manejar errores de la respuesta
                 if (!res.ok) {
                     const errEl = document.getElementById('step1-error');
                     errEl.textContent = data.error || 'Error al registrar';
@@ -1400,6 +1756,7 @@
                     window.location.href = redirectUrl;
                 }, 800);
             } catch {
+                // Manejar errores de conexión
                 const errEl = document.getElementById('step1-error');
                 errEl.textContent = 'Error de conexión. Intenta de nuevo.';
                 errEl.classList.remove('hidden');
@@ -1412,80 +1769,88 @@
             }
         }
 
-        // ==================== FUNCIONES DE VALIDACIÓN DE CONTRASEÑA ====================
+        // ===================================================================
+        // FUNCIONES DE VALIDACIÓN DE CONTRASEÑA
+        // ===================================================================
         /**
-         * Verifica la fortaleza de la contraseña en tiempo real (registro)
-         * @param {string} password - Contraseña a evaluar
+         * Verifica la fortaleza de la contraseña en tiempo real (registro).
+         * Actualiza la barra de progreso y los requisitos visuales.
+         * @param {string} password - Contraseña a evaluar.
          */
         function checkPasswordStrength(password) {
-    const bar = document.getElementById('pwd-strength-bar');
-    const fill = document.getElementById('pwd-strength-fill');
-    const label = document.getElementById('pwd-strength-label');
+            const bar = document.getElementById('pwd-strength-bar');
+            const fill = document.getElementById('pwd-strength-fill');
+            const label = document.getElementById('pwd-strength-label');
 
-    if (!password) {
-        bar.classList.add('hidden');
-        return;
-    }
-    bar.classList.remove('hidden');
+            if (!password) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
 
-    const hasLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
+            // Verificar cada requisito
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
 
-    // Guardar los textos base en atributos data si no existen
-    const reqLength = document.getElementById('req-length');
-    const reqUpper = document.getElementById('req-upper');
-    const reqLower = document.getElementById('req-lower');
-    const reqNumber = document.getElementById('req-number');
+            // Guardar los textos base en atributos data si no existen
+            const reqLength = document.getElementById('req-length');
+            const reqUpper = document.getElementById('req-upper');
+            const reqLower = document.getElementById('req-lower');
+            const reqNumber = document.getElementById('req-number');
 
-    // Almacenar el texto base solo una vez
-    if (!reqLength.dataset.baseText) {
-        reqLength.dataset.baseText = 'Mínimo 8 caracteres';
-        reqUpper.dataset.baseText = 'Al menos 1 mayúscula';
-        reqLower.dataset.baseText = 'Al menos 1 minúscula';
-        reqNumber.dataset.baseText = 'Al menos 1 número';
-    }
+            // Almacenar el texto base solo una vez para preservar los textos originales
+            if (!reqLength.dataset.baseText) {
+                reqLength.dataset.baseText = 'Mínimo 8 caracteres';
+                reqUpper.dataset.baseText = 'Al menos 1 mayúscula';
+                reqLower.dataset.baseText = 'Al menos 1 minúscula';
+                reqNumber.dataset.baseText = 'Al menos 1 número';
+            }
 
-    const updateReq = (el, ok) => {
-        const icon = ok ? '✓' : '✗';
-        el.textContent = `${icon} ${el.dataset.baseText}`;
-        el.classList.toggle('met', ok);
-    };
-    
-    updateReq(reqLength, hasLength);
-    updateReq(reqUpper, hasUpper);
-    updateReq(reqLower, hasLower);
-    updateReq(reqNumber, hasNumber);
+            // Función para actualizar cada requisito
+            const updateReq = (el, ok) => {
+                const icon = ok ? '✓' : '✗';
+                el.textContent = `${icon} ${el.dataset.baseText}`;
+                el.classList.toggle('met', ok);
+            };
+            
+            updateReq(reqLength, hasLength);
+            updateReq(reqUpper, hasUpper);
+            updateReq(reqLower, hasLower);
+            updateReq(reqNumber, hasNumber);
 
-    // Calcular puntaje y mostrar barra de progreso
-    const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
-    const percentage = (score / 4) * 100;
-    fill.style.width = percentage + '%';
+            // Calcular puntaje y mostrar barra de progreso
+            const score = [hasLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+            const percentage = (score / 4) * 100;
+            fill.style.width = percentage + '%';
 
-    if (score <= 1) {
-        fill.style.background = '#ef4444';
-        label.textContent = 'Contraseña débil';
-        label.style.color = '#ef4444';
-    } else if (score <= 2) {
-        fill.style.background = '#f97316';
-        label.textContent = 'Contraseña media';
-        label.style.color = '#f97316';
-    } else if (score <= 3) {
-        fill.style.background = '#eab308';
-        label.textContent = 'Contraseña buena';
-        label.style.color = '#eab308';
-    } else {
-        fill.style.background = '#10b981';
-        label.textContent = 'Contraseña segura';
-        label.style.color = '#10b981';
-    }
-}
+            // Asignar color y texto según la fortaleza
+            if (score <= 1) {
+                fill.style.background = '#ef4444';   // Rojo - débil
+                label.textContent = 'Contraseña débil';
+                label.style.color = '#ef4444';
+            } else if (score <= 2) {
+                fill.style.background = '#f97316';   // Naranja - media
+                label.textContent = 'Contraseña media';
+                label.style.color = '#f97316';
+            } else if (score <= 3) {
+                fill.style.background = '#eab308';   // Amarillo - buena
+                label.textContent = 'Contraseña buena';
+                label.style.color = '#eab308';
+            } else {
+                fill.style.background = '#10b981';   // Verde - segura
+                label.textContent = 'Contraseña segura';
+                label.style.color = '#10b981';
+            }
+        }
+
         /**
-         * Verifica la fortaleza de la contraseña en el restablecimiento
-         * @param {string} password - Contraseña a evaluar
+         * Verifica la fortaleza de la contraseña en el restablecimiento.
+         * @param {string} password - Contraseña a evaluar.
          */
         function checkResetPasswordStrength(password) {
+            // Misma lógica que checkPasswordStrength pero para el modal de reset
             const bar = document.getElementById('reset-pwd-strength-bar');
             const fill = document.getElementById('reset-pwd-strength-fill');
             const label = document.getElementById('reset-pwd-strength-label');
@@ -1496,7 +1861,6 @@
             }
             bar.classList.remove('hidden');
 
-            // Misma lógica que checkPasswordStrength para restablecimiento
             const hasLength = password.length >= 8;
             const hasUpper = /[A-Z]/.test(password);
             const hasLower = /[a-z]/.test(password);
@@ -1516,6 +1880,7 @@
             const percentage = (score / 4) * 100;
             fill.style.width = percentage + '%';
 
+            // Mismos colores y textos que en el registro
             if (score <= 1) {
                 fill.style.background = '#ef4444';
                 label.textContent = 'Contraseña débil';
@@ -1535,20 +1900,23 @@
             }
         }
 
-        // ==================== FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA ====================
+        // ===================================================================
+        // FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA
+        // ===================================================================
         /**
-         * Muestra el modal para recuperar contraseña
-         * Copia el email del campo de login si existe
+         * Muestra el modal para recuperar contraseña.
+         * Copia el email del campo de login si existe.
          */
         function showForgotPassword() {
             closeModal();
             document.getElementById('forgotModal').classList.add('flex');
             document.getElementById('forgotModal').classList.remove('hidden');
+            // Autocompletar con el email del login
             document.getElementById('forgot-email').value = document.getElementById('login-email').value;
         }
 
         /**
-         * Cierra el modal de recuperación de contraseña
+         * Cierra el modal de recuperación de contraseña.
          */
         function closeForgotModal() {
             document.getElementById('forgotModal').classList.add('hidden');
@@ -1558,8 +1926,8 @@
         }
 
         /**
-         * Muestra el modal de verificación de código
-         * @param {string} email - Email del usuario que solicita recuperación
+         * Muestra el modal de verificación de código.
+         * @param {string} email - Email del usuario que solicita recuperación.
          */
         function showVerifyModal(email) {
             forgotEmail = email;
@@ -1570,7 +1938,7 @@
         }
 
         /**
-         * Cierra el modal de verificación de código
+         * Cierra el modal de verificación de código.
          */
         function closeVerifyModal() {
             document.getElementById('verifyModal').classList.add('hidden');
@@ -1579,7 +1947,7 @@
         }
 
         /**
-         * Muestra el modal para establecer nueva contraseña
+         * Muestra el modal para establecer nueva contraseña.
          */
         function showResetModal() {
             closeVerifyModal();
@@ -1590,7 +1958,7 @@
         }
 
         /**
-         * Cierra el modal de restablecimiento de contraseña
+         * Cierra el modal de restablecimiento de contraseña.
          */
         function closeResetModal() {
             document.getElementById('resetModal').classList.add('hidden');
@@ -1600,7 +1968,8 @@
         }
 
         /**
-         * Maneja el envío del código de recuperación al email
+         * Maneja el envío del código de recuperación al email.
+         * Llama al endpoint forgot-password.
          */
         async function handleForgotPassword() {
             const email = document.getElementById('forgot-email').value;
@@ -1628,6 +1997,7 @@
                     return;
                 }
                 succEl.classList.remove('hidden');
+                // Mostrar modal de verificación después de 1.5 segundos
                 setTimeout(() => showVerifyModal(email), 1500);
             } catch(e) {
                 errEl.textContent = 'Error de conexión. Intenta de nuevo.';
@@ -1636,7 +2006,8 @@
         }
 
         /**
-         * Maneja la verificación del código de 6 dígitos
+         * Maneja la verificación del código de 6 dígitos.
+         * Llama al endpoint verify-code.
          */
         async function handleVerifyCode() {
             const code = document.getElementById('verify-code').value;
@@ -1661,6 +2032,7 @@
                     errEl.classList.remove('hidden');
                     return;
                 }
+                // Si el código es válido, mostrar el modal de reset
                 showResetModal();
             } catch(e) {
                 errEl.textContent = 'Error de conexión. Intenta de nuevo.';
@@ -1669,7 +2041,8 @@
         }
 
         /**
-         * Maneja el cambio de contraseña con el nuevo password
+         * Maneja el cambio de contraseña con el nuevo password.
+         * Llama al endpoint reset-password.
          */
         async function handleResetPassword() {
             const newPassword = document.getElementById('reset-password').value;
@@ -1684,6 +2057,7 @@
                 return;
             }
 
+            // Validar fortaleza de la nueva contraseña
             if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
                 errEl.textContent = 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.';
                 errEl.classList.remove('hidden');
@@ -1707,6 +2081,7 @@
                     return;
                 }
                 succEl.classList.remove('hidden');
+                // Cerrar modal y redirigir al login después de 2 segundos
                 setTimeout(() => {
                     closeResetModal();
                     openModal('login');
@@ -1717,11 +2092,13 @@
             }
         }
 
-        // ==================== FUNCIONES DE MODALES ====================
+        // ===================================================================
+        // FUNCIONES DE MODALES
+        // ===================================================================
         /**
-         * Abre el modal de autenticación
-         * @param {string} tab - Pestaña a mostrar ('login' o 'register')
-         * @param {string} plan - Plan a preseleccionar en el registro ('free', 'pro', 'enterprise')
+         * Abre el modal de autenticación.
+         * @param {string} tab - Pestaña a mostrar ('login' o 'register').
+         * @param {string} plan - Plan a preseleccionar en el registro.
          */
         function openModal(tab = 'login', plan = 'free') {
             document.getElementById('authModal').classList.add('flex');
@@ -1734,6 +2111,7 @@
                 currentStep = 1;
                 document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
                 document.getElementById('step-1').classList.add('active');
+                // Resetear indicadores de pasos
                 for (let i = 1; i <= 3; i++) {
                     const dot = document.getElementById(`step-dot-${i}`);
                     const line = document.getElementById(`step-line-${i}`);
@@ -1767,7 +2145,7 @@
         }
 
         /**
-         * Cierra el modal de autenticación
+         * Cierra el modal de autenticación.
          */
         function closeModal() {
             document.getElementById('authModal').classList.add('hidden');
@@ -1775,15 +2153,15 @@
         }
 
         /**
-         * Cambia entre pestañas de Login y Registro
-         * @param {string} tab - 'login' o 'register'
+         * Cambia entre pestañas de Login y Registro.
+         * @param {string} tab - 'login' o 'register'.
          */
         function switchTab(tab) {
             // Mostrar/ocultar formularios
             document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
             document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
             
-            // Actualizar estilos de las pestañas
+            // Actualizar estilos de las pestañas (visual active/inactive)
             const tabLogin = document.getElementById('tab-login');
             const tabRegister = document.getElementById('tab-register');
             if (tab === 'login') {
@@ -1799,9 +2177,12 @@
             }
         }
 
-        // ==================== FUNCIÓN DE LOGIN ====================
+        // ===================================================================
+        // FUNCIÓN DE LOGIN
+        // ===================================================================
         /**
-         * Maneja el inicio de sesión enviando credenciales al backend
+         * Maneja el inicio de sesión enviando credenciales al backend.
+         * Redirige según el rol del usuario.
          */
         async function handleLogin() {
             const email = document.getElementById('login-email').value;
@@ -1831,14 +2212,15 @@
                     return;
                 }
                 
-                // Guardar autenticación
+                // Guardar autenticación en localStorage
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 succEl.classList.remove('hidden');
                 
-                // Redirigir según rol
+                // Redirigir según el rol del usuario
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
                 setTimeout(() => {
+                    // Limpiar campos del formulario
                     document.getElementById('login-email').value = '';
                     document.getElementById('login-password').value = '';
                     window.location.href = redirectUrl;
@@ -1849,7 +2231,9 @@
             }
         }
 
-        // ==================== FUNCIONES DE TEMA (CLARO/OSCURO) ====================
+        // ===================================================================
+        // FUNCIONES DE TEMA (CLARO/OSCURO)
+        // ===================================================================
         // Event listeners para login con tecla Enter
         document.getElementById('login-email').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleLogin();
@@ -1859,21 +2243,22 @@
         });
 
         /**
-         * Inicializa el tema al cargar la página
-         * Carga el tema guardado o usa oscuro por defecto
+         * Inicializa el tema al cargar la página.
+         * Carga el tema guardado en localStorage o usa oscuro por defecto.
          */
         document.addEventListener('DOMContentLoaded', () => {
             const theme = localStorage.getItem('theme') || 'dark';
             document.body.setAttribute('data-theme', theme);
             updateThemeIcon(theme);
-            // Redirigir al dashboard si ya hay sesión
+            // Redirigir al dashboard si ya hay sesión activa
             if (localStorage.getItem('token')) {
                 window.location.href = '/dashboard';
             }
         });
 
         /**
-         * Alterna entre modo claro y oscuro
+         * Alterna entre modo claro y oscuro.
+         * Cambia el atributo data-theme y guarda la preferencia.
          */
         document.getElementById('themeButton').addEventListener('click', () => {
             const currentTheme = document.body.getAttribute('data-theme');
@@ -1884,24 +2269,26 @@
         });
 
         /**
-         * Actualiza el ícono del botón de tema
-         * @param {string} theme - 'dark' o 'light'
+         * Actualiza el ícono del botón de tema.
+         * @param {string} theme - 'dark' o 'light'.
          */
         function updateThemeIcon(theme) {
             const icon = document.getElementById('themeIcon');
             icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
         }
 
-        // ==================== SISTEMA DE PARTÍCULAS (FONDO ANIMADO) ====================
+        // ===================================================================
+        // SISTEMA DE PARTÍCULAS (FONDO ANIMADO)
+        // ===================================================================
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
         let mouse = { x: null, y: null };
-        const particleCount = 80;
-        const repulsionRadius = 180;
+        const particleCount = 80;           // Número de partículas
+        const repulsionRadius = 180;        // Radio de repulsión del mouse
 
         /**
-         * Inicializa el canvas con el tamaño de la ventana
+         * Inicializa el canvas con el tamaño de la ventana.
          */
         function initCanvas() {
             canvas.width = window.innerWidth;
@@ -1910,24 +2297,25 @@
         }
 
         /**
-         * Clase que representa una partícula individual
+         * Clase que representa una partícula individual.
+         * Cada partícula tiene posición, velocidad y tamaño.
          */
         class Particle {
             constructor() { this.reset(); }
             
             /**
-             * Reinicia la partícula en una posición aleatoria
+             * Reinicia la partícula en una posición aleatoria.
              */
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.vx = (Math.random() - 0.5) * 0.4;
-                this.vy = (Math.random() - 0.5) * 0.4;
+                this.size = Math.random() * 2 + 0.5;  // Tamaño entre 0.5 y 2.5
+                this.vx = (Math.random() - 0.5) * 0.4; // Velocidad horizontal
+                this.vy = (Math.random() - 0.5) * 0.4; // Velocidad vertical
             }
             
             /**
-             * Actualiza la posición de la partícula y aplica repulsión del mouse
+             * Actualiza la posición de la partícula y aplica repulsión del mouse.
              */
             update() {
                 this.x += this.vx;
@@ -1946,7 +2334,7 @@
                     }
                 }
                 
-                // Rebote en los bordes del canvas
+                // Rebote en los bordes del canvas (efecto de borde infinito)
                 if (this.x < 0) this.x = canvas.width;
                 if (this.x > canvas.width) this.x = 0;
                 if (this.y < 0) this.y = canvas.height;
@@ -1954,22 +2342,22 @@
             }
             
             /**
-             * Dibuja la partícula y las líneas de conexión con otras cercanas
+             * Dibuja la partícula y las líneas de conexión con otras cercanas.
              */
             draw() {
-                // Obtener colores del tema actual
+                // Obtener colores del tema actual desde las variables CSS
                 const style = getComputedStyle(document.body);
                 const color1 = style.getPropertyValue('--particle-color-1').trim() || 'rgba(56,189,248,0.25)';
                 const color2 = style.getPropertyValue('--particle-color-2').trim() || 'rgba(129,140,248,0.2)';
                 const lineColor = style.getPropertyValue('--particle-line').trim() || 'rgba(56,189,248,0.12)';
                 
-                // Dibujar la partícula
+                // Dibujar la partícula con colores aleatorios entre los dos colores
                 ctx.fillStyle = Math.random() > 0.6 ? color1 : color2;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Dibujar líneas de conexión con partículas cercanas
+                // Dibujar líneas de conexión con partículas cercanas (distancia < 120px)
                 particles.forEach(p => {
                     const d = Math.hypot(this.x - p.x, this.y - p.y);
                     if (d < 120) {
@@ -1984,7 +2372,7 @@
         }
 
         /**
-         * Configura las partículas iniciales
+         * Configura las partículas iniciales.
          */
         function setupParticles() {
             particles = [];
@@ -1992,7 +2380,7 @@
         }
 
         /**
-         * Bucle de animación de las partículas
+         * Bucle de animación de las partículas (requestAnimationFrame).
          */
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2000,23 +2388,28 @@
             requestAnimationFrame(animate);
         }
 
-        // ==================== EFECTO TILT 3D EN TARJETAS ====================
+        // ===================================================================
+        // EFECTO TILT 3D EN TARJETAS
+        // ===================================================================
         /**
-         * Inicializa el efecto de inclinación 3D en las tarjetas
+         * Inicializa el efecto de inclinación 3D en las tarjetas.
+         * Rota las tarjetas según la posición del mouse.
          */
         function initTilt() {
             const cards = document.querySelectorAll('.tilt-card');
             cards.forEach(card => {
-                if (card.hasTilt) return;
+                if (card.hasTilt) return;  // Evita duplicar event listeners
                 card.hasTilt = true;
                 
                 card.addEventListener('mousemove', (e) => {
+                    // Respetar preferencia de movimiento reducido
                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
+                    // Calcular rotación en X e Y basado en la posición del mouse
                     const rotateX = (y - centerY) / 40;
                     const rotateY = (centerX - x) / 40;
                     const target = card.querySelector('.card-interaction');
@@ -2024,13 +2417,16 @@
                 });
                 
                 card.addEventListener('mouseleave', () => {
+                    // Restaurar posición al salir
                     const target = card.querySelector('.card-interaction');
                     if (target) target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                 });
             });
         }
 
-        // ==================== EVENT LISTENERS GLOBALES ====================
+        // ===================================================================
+        // EVENT LISTENERS GLOBALES
+        // ===================================================================
         // Redimensionar canvas al cambiar tamaño de ventana
         window.addEventListener('resize', initCanvas);
         

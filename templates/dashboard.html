@@ -1,42 +1,75 @@
 <!DOCTYPE html>
-<!-- ============================================================
-     DASHBOARD - AutoDocs AI
+<!-- 
+    ============================================================
+    DASHBOARD - AutoDocs AI
      
-     Panel principal de usuario para gestion de proyectos
-     Incluye estadisticas, lista de proyectos, modales y funcionalidades de edicion
-     Soporta temas claro/oscuro y modo responsive
-     ============================================================ -->
+    Panel principal de usuario para gestión de proyectos
+    Incluye estadísticas, lista de proyectos, modales y funcionalidades de edición
+    Soporta temas claro/oscuro y modo responsive
+    ============================================================ 
+-->
 <html class="light" lang="es">
 <head>
     <!-- ============================================================
-         METADATOS Y CONFIGURACION DEL DOCUMENTO
-         ============================================================ -->
+    METADATOS Y CONFIGURACIÓN DEL DOCUMENTO
+    ============================================================ -->
+    <!-- 
+        charset="UTF-8": Define la codificación de caracteres UTF-8 que soporta 
+        todos los caracteres Unicode incluyendo letras con acentos, ñ y símbolos especiales.
+    -->
     <meta charset="UTF-8" />
+    
+    <!-- 
+        viewport: Controla cómo se muestra la página en dispositivos móviles.
+        width=device-width: Ajusta el ancho al tamaño de la pantalla.
+        initial-scale=1.0: Establece el nivel de zoom inicial al 100%.
+    -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>Dashboard — AutoDocs AI</title>
     
     <!-- ============================================================
-         LIBRERIAS EXTERNAS
-         ============================================================ -->
-    <!-- Tailwind CSS: Framework utilitario para estilos rapidos y responsive -->
+    LIBRERÍAS EXTERNAS
+    ============================================================ -->
+    <!-- 
+        Tailwind CSS: Framework utilitario para estilos rápidos y responsive.
+        plugins=forms,container-queries: Habilita estilos predefinidos para 
+        formularios y soporte para container queries.
+    -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
-    <!-- Fuentes de Google: JetBrains Mono para codigo, Geist para UI -->
+    <!-- 
+        Fuentes de Google: JetBrains Mono para código, Geist para UI.
+        JetBrains Mono: Fuente monoespaciada diseñada para código con buena legibilidad.
+        Geist: Fuente sans-serif moderna y limpia para textos generales.
+    -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Iconos Material Symbols: Sistema de iconos de Google Material Design -->
+    <!-- 
+        Iconos Material Symbols: Sistema de iconos de Google Material Design.
+        wght: Rango de peso de la fuente (100-700).
+        FILL: Nivel de relleno del icono (0=outline, 1=filled).
+    -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
     <!-- ============================================================
-         CONFIGURACION DE TAILWIND
-         ============================================================ -->
+    CONFIGURACIÓN DE TAILWIND
+    ============================================================ -->
     <script id="tailwind-config">
-        // Extiende la configuracion de Tailwind con colores personalizados del tema Material Design
+        /*
+            Extiende la configuración de Tailwind con colores personalizados 
+            siguiendo el sistema de diseño Material Design.
+            Estos colores se usan en todo el dashboard para mantener consistencia.
+        */
         tailwind.config = {
-            darkMode: "class", // Habilita el modo oscuro basado en clases CSS
+            // darkMode: "class": Habilita el modo oscuro basado en clases CSS
+            // Se activa añadiendo la clase "dark" al elemento html
+            darkMode: "class",
             theme: {
                 extend: {
-                    // Paleta de colores completa siguiendo el sistema de diseno Material Design
+                    // Paleta de colores completa siguiendo el sistema de diseño Material Design
+                    // Cada color se define con un nombre semántico para facilitar su uso
                     colors: {
                         "on-primary-container": "#001f2b",
                         "tertiary-container": "#ffdbb7",
@@ -44,31 +77,31 @@
                         "on-secondary-fixed-variant": "#2f2ebe",
                         "on-error-container": "#ffdad6",
                         "on-secondary-fixed": "#07006c",
-                        "secondary": "#818cf8",
-                        "primary": "#38bdf8",
+                        "secondary": "#818cf8",           // Color secundario (violeta)
+                        "primary": "#38bdf8",             // Color principal (azul)
                         "surface-container-high": "#e2e8f0",
                         "on-tertiary-container": "#613b00",
                         "on-tertiary-fixed": "#2a1700",
                         "surface-variant": "#cbd5e1",
                         "secondary-container": "#e0e7ff",
-                        "on-surface-variant": "#334155",
+                        "on-surface-variant": "#334155",   // Texto secundario
                         "primary-fixed": "#bae6fd",
                         "surface-container-highest": "#e2e8f0",
                         "surface-dim": "#cbd5e1",
                         "outline-variant": "#94a3b8",
-                        "on-surface": "#0f172a",
+                        "on-surface": "#0f172a",           // Texto principal
                         "on-secondary-container": "#1e1b4b",
                         "secondary-fixed": "#e0e7ff",
                         "tertiary": "#7c5800",
                         "primary-fixed-dim": "#7dd3fc",
-                        "background": "#f1f5f9",
+                        "background": "#f1f5f9",           // Fondo principal
                         "primary-container": "#e0f2fe",
                         "tertiary-fixed-dim": "#ffb960",
                         "surface-bright": "#ffffff",
                         "surface-container-lowest": "#ffffff",
                         "on-primary-fixed": "#001e2c",
                         "inverse-on-surface": "#eef2f5",
-                        "error": "#ba1a1a",
+                        "error": "#ba1a1a",                // Color de error
                         "error-container": "#ffdad6",
                         "secondary-fixed-dim": "#c7d2fe",
                         "on-tertiary": "#ffffff",
@@ -88,30 +121,38 @@
                     },
                     // Bordes redondeados personalizados
                     borderRadius: {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
+                        "DEFAULT": "0.125rem",    // 2px - redondeo mínimo
+                        "lg": "0.25rem",          // 4px - redondeo mediano
+                        "xl": "0.5rem",           // 8px - redondeo grande
+                        "full": "0.75rem"         // 12px - redondeo completo
                     },
                     // Fuentes personalizadas para diferentes contextos
                     fontFamily: {
-                        "body-md": ["Geist"],        // Texto general
-                        "headline-lg": ["Geist"],    // Titulos grandes
-                        "display-lg": ["Geist"],     // Display
-                        "code-md": ["JetBrains Mono"], // Codigo
-                        "label-caps": ["Geist"]      // Etiquetas en mayusculas
+                        "body-md": ["Geist"],        // Texto general del cuerpo
+                        "headline-lg": ["Geist"],    // Títulos grandes
+                        "display-lg": ["Geist"],     // Textos de display/presentación
+                        "code-md": ["JetBrains Mono"], // Código y texto monoespaciado
+                        "label-caps": ["Geist"]      // Etiquetas en mayúsculas
                     }
                 },
             },
         }
     </script>
     
+    <!-- ============================================================
+    ESTILOS PERSONALIZADOS
+    ============================================================ -->
     <style>
         /* ============================================================
-           ESTILOS GLOBALES Y VARIABLES CSS
-           ============================================================ */
+        ESTILOS GLOBALES Y VARIABLES CSS
+        ============================================================ */
         
-        /* Estilos base para el body en modo claro */
+        /* 
+            Estilos base para el body en modo claro.
+            body: Fondo gris claro y texto oscuro por defecto.
+            overflow-x: hidden: Evita scroll horizontal.
+            min-height: 100vh: Ocupa al menos toda la altura de la pantalla.
+        */
         body {
             background: #f1f5f9;
             overflow-x: hidden;
@@ -119,13 +160,19 @@
             color: #0f172a;
         }
 
-        /* Estilos para el modo oscuro (se activa con la clase .dark en html) */
+        /* 
+            Estilos para el modo oscuro (se activa con la clase .dark en html).
+            Reemplaza los colores de fondo y texto para el tema oscuro.
+        */
         html.dark body {
             background: #0f1418;
             color: #e2e8f0;
         }
 
-        /* Efecto glass en modo oscuro */
+        /* 
+            Efecto glass en modo oscuro.
+            Fondo semitransparente, borde sutil y sombra para profundidad.
+        */
         html.dark .glass {
             background: rgba(15, 20, 24, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -133,15 +180,21 @@
         }
 
         /* ============================================================
-           ESTILOS PERSONALIZADOS - TEMA OSCURO
-           ============================================================ */
-        /* Hover para elementos glass en modo oscuro */
+        ESTILOS PERSONALIZADOS - TEMA OSCURO
+        ============================================================ */
+        /* 
+            Hover para elementos glass en modo oscuro.
+            Intensifica el borde y la sombra al pasar el mouse.
+        */
         html.dark .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.4);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
 
-        /* Colores de texto en modo oscuro */
+        /* 
+            Colores de texto en modo oscuro.
+            Usan !important para sobrescribir estilos de Tailwind.
+        */
         html.dark .text-on-surface { color: #f1f5f9 !important; }
         html.dark .text-on-surface-variant { color: #94a3b8 !important; }
         html.dark .text-primary { color: #38bdf8 !important; }
@@ -151,9 +204,14 @@
         html.dark .bg-primary\/5 { background: rgba(56, 189, 248, 0.05) !important; }
 
         /* ============================================================
-           CANVAS DE PARTICULAS (FONDO ANIMADO)
-           ============================================================ */
-        /* Contenedor fijo para el fondo animado de particulas */
+        CANVAS DE PARTÍCULAS (FONDO ANIMADO)
+        ============================================================ */
+        /* 
+            Contenedor fijo para el fondo animado de partículas.
+            position: fixed: Se mantiene fijo en la ventana.
+            z-index: 0: Detrás de todo el contenido.
+            pointer-events: none: Permite hacer clic a través del canvas.
+        */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -161,15 +219,22 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            pointer-events: none; /* Permite hacer clic a traves del canvas */
+            pointer-events: none;
         }
 
         /* ============================================================
-           EFECTO GLASS (VIDRIO ESMERILADO)
-           ============================================================ */
+        EFECTO GLASS (VIDRIO ESMERILADO)
+        ============================================================ */
+        /* 
+            Efecto de vidrio esmerilado con desenfoque, transparencia 
+            y bordes sutiles.
+            backdrop-filter: blur(16px): Desenfoca el fondo subyacente.
+            transform: translate3d: Acelera GPU para mejor rendimiento.
+            will-change: transform: Optimiza para transformaciones.
+        */
         .glass {
             background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px); /* Desenfoque del fondo */
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(0, 0, 0, 0.04);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
             transform: translate3d(0, 0, 0);
@@ -177,16 +242,23 @@
             will-change: transform, opacity;
         }
 
-        /* Efecto hover para elementos glass */
+        /* 
+            Efecto hover para elementos glass.
+            Intensifica borde y sombra al pasar el mouse.
+        */
         .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.3);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
         }
 
         /* ============================================================
-           ANIMACIONES
-           ============================================================ */
-        /* Animacion de entrada para elementos que aparecen con retraso */
+        ANIMACIONES
+        ============================================================ */
+        /* 
+            Animación de entrada para elementos que aparecen con retraso.
+            Los elementos con clase .stagger-in aparecen con desplazamiento 
+            vertical y desvanecimiento.
+        */
         .stagger-in {
             opacity: 0;
             transform: translateY(20px) translate3d(0,0,0);
@@ -196,7 +268,10 @@
             to { opacity: 1; transform: translateY(0) translate3d(0,0,0); }
         }
 
-        /* Desactiva animaciones si el usuario prefiere movimiento reducido */
+        /* 
+            Desactiva animaciones si el usuario prefiere movimiento reducido.
+            Esto respeta la configuración de accesibilidad del sistema.
+        */
         @media (prefers-reduced-motion: reduce) {
             .stagger-in, .animate-float, .glass-hover {
                 animation: none !important;
@@ -206,17 +281,30 @@
             }
         }
 
-        /* Anillo de progreso circular */
+        /* 
+            Anillo de progreso circular.
+            transform: rotate(-90deg): Rota el SVG para que el progreso comience desde arriba.
+        */
         .progress-ring { transform: rotate(-90deg); }
 
-        /* Efecto de inclinacion 3D */
+        /* 
+            Efecto de inclinación 3D para tarjetas.
+            perspective: 1000px: Aplica perspectiva 3D al contenedor.
+        */
         .tilt-card { perspective: 1000px; }
 
-        /* Scrollbar personalizada */
+        /* 
+            Scrollbar personalizada.
+            width: 4px: Barra de desplazamiento más delgada.
+            border-radius: 10px: Bordes redondeados en el pulgar.
+        */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
 
-        /* Animacion de entrada para modales */
+        /* 
+            Animación de entrada para modales.
+            Aparece desde arriba con desvanecimiento.
+        */
         @keyframes fadeDown {
             from { opacity: 0; transform: translateY(-15px); }
             to { opacity: 1; transform: translateY(0); }
@@ -224,8 +312,12 @@
         .modal-anim { animation: fadeDown 0.2s ease; }
 
         /* ============================================================
-           ESTILOS DEL MENU LATERAL (SIDEBAR)
-           ============================================================ */
+        ESTILOS DEL MENÚ LATERAL (SIDEBAR)
+        ============================================================ */
+        /* 
+            Contenedor de navegación del sidebar.
+            Flex column con espacio entre elementos y padding horizontal.
+        */
         .sidebar-nav {
             display: flex;
             flex-direction: column;
@@ -234,6 +326,11 @@
             padding: 0 8px;
         }
 
+        /* 
+            Elemento individual de navegación del sidebar.
+            Flex con icono y etiqueta, fondo transparente y transiciones suaves.
+            position: relative: Para posicionar badges absolutos.
+        */
         .sidebar-nav-item {
             display: flex;
             align-items: center;
@@ -252,27 +349,51 @@
             cursor: pointer;
         }
 
+        /* 
+            Hover del elemento de navegación.
+            Fondo azul transparente y texto azul.
+        */
         .sidebar-nav-item:hover {
             background: rgba(56, 189, 248, 0.08);
             color: #38bdf8;
         }
 
+        /* 
+            Elemento de navegación activo.
+            Fondo azul más intenso y texto azul.
+        */
         .sidebar-nav-item.active {
             background: rgba(56, 189, 248, 0.12);
             color: #38bdf8;
         }
 
+        /* 
+            Iconos del sidebar.
+            font-size: 1.3rem: Tamaño consistente.
+            flex-shrink: 0: Evita que el icono se encoja.
+        */
         .sidebar-nav-item .material-symbols-outlined {
             font-size: 1.3rem;
             flex-shrink: 0;
         }
 
+        /* 
+            Etiqueta de texto del sidebar.
+            white-space: nowrap: Evita saltos de línea.
+            overflow: hidden y text-overflow: ellipsis: Trunca texto largo.
+        */
         .sidebar-nav-item .nav-label {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
+        /* 
+            Badge contador del sidebar.
+            margin-left: auto: Empuja el badge a la derecha.
+            padding: 2px 8px: Espaciado interno pequeño.
+            border-radius: 20px: Forma de píldora.
+        */
         .sidebar-nav-item .nav-badge {
             margin-left: auto;
             font-size: 0.6rem;
@@ -283,7 +404,10 @@
             font-weight: 700;
         }
 
-        /* Estilos del sidebar en modo oscuro */
+        /* 
+            Estilos del sidebar en modo oscuro.
+            Texto gris más claro y fondos más sutiles.
+        */
         html.dark .sidebar-nav-item {
             color: #94a3b8;
         }
@@ -298,7 +422,13 @@
             color: #38bdf8;
         }
 
-        /* Sidebar expandible en hover para escritorio */
+        /* 
+            Sidebar expandible en hover para escritorio.
+            En pantallas grandes (>= 1024px):
+            - Sidebar colapsado por defecto (solo iconos, 72px de ancho)
+            - Al hacer hover, se expande a 220px mostrando etiquetas
+            - Transición suave de 0.3s para el ancho
+        */
         @media (min-width: 1024px) {
             /* Sidebar colapsado por defecto (solo iconos) */
             aside {
@@ -310,13 +440,14 @@
             aside:hover {
                 width: 220px;
             }
-            /* Muestra las etiquetas al hacer hover */
+            /* Muestra las etiquetas al hacer hover (opacidad 1) */
             aside:hover .sidebar-nav-item .nav-label {
                 opacity: 1;
             }
             aside:hover .sidebar-nav-item .nav-badge {
                 opacity: 1;
             }
+            /* Etiquetas ocultas por defecto (opacidad 0) */
             .sidebar-nav-item .nav-label {
                 opacity: 0;
                 transition: opacity 0.2s;
@@ -325,6 +456,7 @@
                 opacity: 0;
                 transition: opacity 0.2s;
             }
+            /* Información del usuario oculta por defecto */
             aside:hover .sidebar-user-info {
                 opacity: 1;
             }
@@ -336,20 +468,32 @@
         }
 
         /* ============================================================
-           ESTILOS PARA TARJETAS DE PROYECTOS
-           ============================================================ */
+        ESTILOS PARA TARJETAS DE PROYECTOS
+        ============================================================ */
+        /* 
+            Tarjeta de proyecto.
+            Transición suave, posición relativa para badges absolutos,
+            overflow: hidden: Oculta el contenido que sobresale.
+        */
         .project-card {
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
 
+        /* 
+            Hover de la tarjeta de proyecto.
+            Levanta la tarjeta 4px y aumenta la sombra.
+        */
         .project-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
         }
 
-        /* Badge de estado del proyecto (posicion absoluta en esquina superior derecha) */
+        /* 
+            Badge de estado del proyecto.
+            Posición absoluta en esquina superior derecha.
+        */
         .project-card .status-badge {
             position: absolute;
             top: 12px;
@@ -362,7 +506,13 @@
             letter-spacing: 0.04em;
         }
 
-        /* Estados de los badges */
+        /* 
+            Estados de los badges con colores específicos.
+            completed: Verde para proyectos terminados.
+            analyzing: Amarillo para proyectos en análisis.
+            pending: Gris para proyectos pendientes.
+            error: Rojo para proyectos con error.
+        */
         .project-card .status-badge.completed {
             background: rgba(16, 185, 129, 0.12);
             color: #10b981;
@@ -387,7 +537,10 @@
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        /* Metricas del proyecto en grid de 3 columnas */
+        /* 
+            Métricas del proyecto en grid de 3 columnas.
+            Separador superior con borde sutil.
+        */
         .project-metrics {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -397,16 +550,25 @@
             border-top: 1px solid rgba(148, 163, 184, 0.1);
         }
 
+        /* 
+            Cada métrica centrada.
+        */
         .project-metrics .metric {
             text-align: center;
         }
 
+        /* 
+            Valor de la métrica: grande y en negrita.
+        */
         .project-metrics .metric .value {
             font-size: 1rem;
             font-weight: 700;
             color: #0f172a;
         }
 
+        /* 
+            Etiqueta de la métrica: pequeña, en mayúsculas y gris.
+        */
         .project-metrics .metric .label {
             font-size: 0.6rem;
             color: #94a3b8;
@@ -414,24 +576,40 @@
             letter-spacing: 0.04em;
         }
 
-        /* Valores de metricas en modo oscuro */
+        /* 
+            Valores de métricas en modo oscuro.
+            Texto blanco para mejor contraste.
+        */
         html.dark .project-metrics .metric .value {
             color: #f1f5f9;
         }
 
         /* ============================================================
-           ESTILOS PARA MODALES
-           ============================================================ */
+        ESTILOS PARA MODALES
+        ============================================================ */
+        /* 
+            Overlay del modal: Fondo oscuro semitransparente con desenfoque.
+            Cubre toda la pantalla y centra el contenido.
+        */
         .modal-overlay {
             background: rgba(15, 20, 24, 0.6);
             backdrop-filter: blur(12px);
         }
 
+        /* 
+            Overlay en modo claro: Fondo más claro.
+        */
         html:not(.dark) .modal-overlay {
             background: rgba(241, 245, 249, 0.7);
         }
 
-        /* Inputs dentro de modales */
+        /* 
+            Inputs dentro de modales.
+            border-radius: 12px: Bordes redondeados.
+            padding: 0.75rem 1rem: Espaciado interno.
+            background: Variable para soportar temas claro/oscuro.
+            transition: Transiciones suaves para focus.
+        */
         .modal-input {
             width: 100%;
             border-radius: 12px;
@@ -445,22 +623,30 @@
             font-family: 'Geist', sans-serif;
         }
 
+        /* Placeholder de los inputs del modal */
         .modal-input::placeholder {
             color: var(--modal-placeholder, rgba(100, 116, 139, 0.5));
         }
 
+        /* Focus de los inputs: Borde azul y sombra sutil */
         .modal-input:focus {
             border-color: #38bdf8;
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
         }
 
+        /* Inputs de modal en modo oscuro */
         html.dark .modal-input {
             background: #1b2024;
             border-color: rgba(62, 72, 79, 0.8);
             color: #dee3e8;
         }
 
-        /* Zona de upload (drag & drop) */
+        /* 
+            Zona de upload (drag & drop).
+            border: 2px dashed: Borde punteado.
+            text-align: center: Contenido centrado.
+            cursor: pointer: Indica que es clickeable.
+        */
         #upload-zone {
             border: 2px dashed rgba(148, 163, 184, 0.4);
             background: rgba(248, 250, 252, 0.5);
@@ -471,11 +657,18 @@
             transition: all 0.2s;
         }
 
+        /* 
+            Hover de la zona de upload.
+            Cambia el color del borde a azul y añade fondo sutil.
+        */
         #upload-zone:hover {
             border-color: #38bdf8;
             background: rgba(56, 189, 248, 0.05);
         }
 
+        /* 
+            Zona de upload en modo oscuro.
+        */
         html.dark #upload-zone {
             border-color: rgba(62, 72, 79, 0.8);
             background: rgba(27, 32, 36, 0.5);
@@ -486,7 +679,10 @@
             background: rgba(56, 189, 248, 0.08);
         }
 
-        /* Inputs de modal con estilo consistente */
+        /* 
+            Inputs de modal con estilo consistente.
+            Reutiliza las mismas variables CSS para mantener consistencia.
+        */
         .modal-input {
             width: 100%;
             border-radius: 0.75rem;
@@ -500,20 +696,18 @@
             font-family: 'Geist', sans-serif;
         }
 
-        .modal-input::placeholder {
-            color: var(--modal-placeholder, rgba(100, 116, 139, 0.5));
-        }
-
-        .modal-input:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-        }
-
+        /* 
+            Inputs de solo lectura.
+            Opacidad reducida y cursor default.
+        */
         .modal-input[readonly] {
             opacity: 0.65;
             cursor: default;
         }
 
+        /* 
+            Inputs en modo oscuro.
+        */
         html.dark .modal-input {
             background: #1b2024;
             border-color: rgba(62, 72, 79, 0.8);
@@ -529,7 +723,12 @@
             box-shadow: 0 0 0 3px rgba(142, 213, 255, 0.18);
         }
 
-        /* Barra de progreso personalizada */
+        /* 
+            Barra de progreso personalizada.
+            background: Fondo gris claro.
+            border-radius: 9999px: Forma de píldora.
+            overflow: hidden: Oculta el contenido que sobresale.
+        */
         .progress-track {
             background: rgba(148, 163, 184, 0.2);
             border-radius: 9999px;
@@ -537,6 +736,11 @@
             overflow: hidden;
         }
 
+        /* 
+            Relleno de la barra de progreso.
+            Gradiente de azul a violeta.
+            transition: width 0.6s ease: Animación suave al cambiar el ancho.
+        */
         .progress-fill {
             height: 100%;
             border-radius: 9999px;
@@ -547,76 +751,135 @@
 </head>
 
 <!-- ============================================================
-     CUERPO PRINCIPAL DE LA PAGINA
-     ============================================================ -->
+CUERPO PRINCIPAL DE LA PÁGINA
+============================================================ -->
+<!-- 
+    font-body-md: Clase de Tailwind que aplica la fuente Geist.
+    selection:bg-primary/20 selection:text-on-surface: Estilos para texto seleccionado.
+-->
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">
     
-    <!-- Canvas para particulas de fondo (efecto visual dinamico) -->
+    <!-- 
+        Canvas para partículas de fondo (efecto visual dinámico).
+        Se renderiza detrás de todo el contenido con JavaScript.
+    -->
     <canvas id="particle-canvas"></canvas>
     
-    <!-- Contenedor principal con layout flex de pantalla completa -->
+    <!-- 
+        Contenedor principal con layout flex de pantalla completa.
+        min-h-screen: Altura mínima de toda la pantalla.
+        relative z-10: Posiciona el contenido por encima del canvas.
+    -->
     <div class="flex min-h-screen w-full relative z-10">
         
         <!-- ============================================================
-             SIDEBAR (MENU LATERAL)
-             ============================================================ -->
+        SIDEBAR (MENÚ LATERAL)
+        ============================================================ -->
+        <!-- 
+            Sidebar sticky en la parte superior con efecto glass.
+            h-screen: Altura completa de la pantalla.
+            sticky top-0: Se mantiene fijo al hacer scroll.
+            border-r: Borde derecho sutil.
+        -->
         <aside class="h-screen sticky top-0 flex flex-col items-center py-6 glass border-r border-outline-variant/20 stagger-in" style="animation-delay: 0.1s;">
             
-            <!-- Logo de la aplicacion - icono de terminal en circulo con efecto glow -->
+            <!-- 
+                Logo de la aplicación - icono de terminal en círculo con efecto glow.
+                w-12 h-12: Tamaño cuadrado.
+                rounded-xl: Bordes redondeados.
+                bg-primary/15: Fondo azul transparente.
+                border-primary/40: Borde azul sutil.
+                shadow-[0_0_20px_rgba(56,189,248,0.15)]: Sombra con resplandor azul.
+                hover:scale-110: Efecto de zoom al pasar el mouse.
+            -->
             <div class="mb-8 flex-shrink-0">
                 <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:scale-110 transition-transform cursor-pointer">
                     <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
                 </div>
             </div>
 
-            <!-- Navegacion principal del sidebar -->
+            <!-- 
+                Navegación principal del sidebar.
+                flex-1: Ocupa el espacio disponible.
+                overflow-y-auto: Scroll vertical si es necesario.
+            -->
             <nav class="flex-1 w-full overflow-y-auto">
                 <div class="sidebar-nav">
-                    <!-- Enlace al dashboard (activo por defecto) -->
+                    <!-- 
+                        Enlace al dashboard (activo por defecto).
+                        active: Resalta la página actual.
+                    -->
                     <a href="/dashboard" class="sidebar-nav-item active">
                         <span class="material-symbols-outlined">dashboard</span>
                         <span class="nav-label">Dashboard</span>
                     </a>
-                    <!-- Enlace a la lista de proyectos con badge contador -->
+                    
+                    <!-- 
+                        Enlace a la lista de proyectos con badge contador.
+                        nav-badge: Muestra el número de proyectos.
+                    -->
                     <a href="/projects" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">folder_open</span>
                         <span class="nav-label">Proyectos</span>
                         <span class="nav-badge" id="sidebar-project-count">0</span>
                     </a>
-                    <!-- Enlace a analisis de proyectos -->
+                    
+                    <!-- Enlace a análisis de proyectos -->
                     <a href="/analytics" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">analytics</span>
-                        <span class="nav-label">Analisis</span>
+                        <span class="nav-label">Análisis</span>
                     </a>
-                    <!-- Enlace a analisis de base de datos -->
+                    
+                    <!-- Enlace a análisis de base de datos -->
                     <a href="/database-analysis" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">storage</span>
-                        <span class="nav-label">Analisis BD</span>
+                        <span class="nav-label">Análisis BD</span>
                     </a>
+                    
                     <!-- Enlace a predicciones de machine learning -->
                     <a href="/ml-predictions" class="sidebar-nav-item">
                         <span class="material-symbols-outlined">scatter_plot</span>
                         <span class="nav-label">Predicciones ML</span>
                     </a>
-                    <!-- Boton para abrir el modal de configuracion -->
+                    
+                    <!-- 
+                        Botón para abrir el modal de configuración.
+                        onclick: Llama a la función openConfigModal().
+                        style="cursor:pointer;": Indica que es clickeable.
+                    -->
                     <a onclick="openConfigModal()" class="sidebar-nav-item" style="cursor:pointer;">
                         <span class="material-symbols-outlined">settings</span>
-                        <span class="nav-label">Configuracion</span>
+                        <span class="nav-label">Configuración</span>
                     </a>
-                    <!-- Boton de cerrar sesion -->
+                    
+                    <!-- 
+                        Botón de cerrar sesión.
+                        onclick: Llama a la función logout().
+                        margin-top y border-top: Separador visual.
+                    -->
                     <a href="/" onclick="logout()" class="sidebar-nav-item" style="margin-top:8px;border-top:1px solid rgba(148,163,184,0.1);padding-top:12px;">
                         <span class="material-symbols-outlined">logout</span>
-                        <span class="nav-label">Cerrar sesion</span>
+                        <span class="nav-label">Cerrar sesión</span>
                     </a>
                 </div>
             </nav>
 
-            <!-- Perfil de usuario en la parte inferior del sidebar -->
+            <!-- 
+                Perfil de usuario en la parte inferior del sidebar.
+                mt-auto: Empuja a la parte inferior.
+                border-t: Separador superior.
+            -->
             <div class="mt-auto flex-shrink-0 pt-4 border-t border-outline-variant/20 w-full px-3">
                 <a href="/perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors">
-                    <!-- Avatar del usuario con inicial -->
+                    <!-- 
+                        Avatar del usuario con inicial.
+                        bg-gradient-to-br from-primary to-secondary: Gradiente de azul a violeta.
+                    -->
                     <div id="user-avatar-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm flex-shrink-0">U</div>
-                    <!-- Informacion del usuario (nombre y plan) -->
+                    <!-- 
+                        Información del usuario (nombre y plan).
+                        sidebar-user-info: Oculto en sidebar colapsado.
+                    -->
                     <div class="sidebar-user-info min-w-0">
                         <div class="text-sm font-semibold text-on-surface truncate" id="sidebar-user-name">Usuario</div>
                         <div class="text-xs text-primary" id="sidebar-user-plan">Plan Gratuito</div>
@@ -626,32 +889,62 @@
         </aside>
 
         <!-- ============================================================
-             CONTENIDO PRINCIPAL (MAIN CONTENT)
-             ============================================================ -->
+        CONTENIDO PRINCIPAL (MAIN CONTENT)
+        ============================================================ -->
+        <!-- 
+            Contenido principal: Ocupa el espacio restante con padding y gap.
+            flex-1: Ocupa todo el espacio disponible.
+            overflow-y-auto: Scroll vertical si es necesario.
+            gap-8: Espacio entre elementos hijos.
+        -->
         <main class="flex-1 flex flex-col p-6 lg:p-10 gap-8 overflow-y-auto overflow-x-hidden">
             
             <!-- HEADER DEL DASHBOARD -->
             <header class="flex flex-wrap items-center justify-between gap-4 stagger-in" style="animation-delay: 0.15s;">
-                <!-- Titulo y saludo -->
+                <!-- 
+                    Título y saludo.
+                    text-3xl lg:text-4xl: Tamaño responsive.
+                    font-bold: Negrita.
+                -->
                 <div>
                     <h1 class="text-3xl lg:text-4xl font-bold text-on-surface">
                         Dashboard <span class="text-primary">AutoDocs</span>
                     </h1>
                     <p class="text-on-surface-variant/60 font-mono text-xs mt-1 uppercase tracking-[0.2em]" id="greeting">Bienvenido de vuelta</p>
                 </div>
-                <!-- Acciones rapidas -->
+                
+                <!-- 
+                    Acciones rápidas.
+                    flex items-center gap-3: Alineación horizontal con espacio.
+                -->
                 <div class="flex items-center gap-3">
-                    <!-- Badge del plan actual con contador de proyectos -->
+                    <!-- 
+                        Badge del plan actual con contador de proyectos.
+                        glass: Efecto de vidrio.
+                        px-4 py-2: Padding horizontal y vertical.
+                        rounded-xl: Bordes redondeados.
+                    -->
                     <div class="glass px-4 py-2 rounded-xl flex items-center gap-3 border border-outline-variant/20">
                         <span class="material-symbols-outlined text-primary text-sm">workspace_premium</span>
                         <span class="text-sm font-semibold text-on-surface" id="plan-name">Free</span>
                         <span class="text-xs text-on-surface-variant/60" id="project-count" style="color: #BFBDBD;">0/3</span>
                     </div>
-                    <!-- Boton para cambiar entre tema claro/oscuro -->
+                    
+                    <!-- 
+                        Botón para cambiar entre tema claro/oscuro.
+                        glass: Efecto de vidrio.
+                        glass-hover: Efecto hover.
+                        p-2.5: Padding uniforme.
+                        rounded-xl: Bordes redondeados.
+                    -->
                     <button id="themeButton" class="p-2.5 glass glass-hover rounded-xl border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
                         <span id="themeIcon" class="material-symbols-outlined text-xl">light_mode</span>
                     </button>
-                    <!-- Boton para crear nuevo proyecto -->
+                    
+                    <!-- 
+                        Botón para crear nuevo proyecto.
+                        Abre el modal de subida de proyecto.
+                    -->
                     <button onclick="openUploadModal()" class="px-5 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-primary/30 text-primary transition-all hover:bg-primary/5">
                         <span class="material-symbols-outlined text-lg">add</span>
                         Nuevo
@@ -660,8 +953,13 @@
             </header>
 
             <!-- ============================================================
-                 TARJETAS DE ESTADISTICAS (STATS CARDS)
-                 ============================================================ -->
+            TARJETAS DE ESTADÍSTICAS (STATS CARDS)
+            ============================================================ -->
+            <!-- 
+                Grid de 4 tarjetas de estadísticas.
+                grid-cols-2 md:grid-cols-4: 2 columnas en móvil, 4 en escritorio.
+                gap-4: Espacio entre tarjetas.
+            -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-in" style="animation-delay: 0.2s;">
                 <!-- Tarjeta: Total de proyectos -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
@@ -671,6 +969,7 @@
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-projects">0</div>
                 </div>
+                
                 <!-- Tarjeta: Proyectos completados -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
@@ -679,6 +978,7 @@
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-completed">0</div>
                 </div>
+                
                 <!-- Tarjeta: Total de funciones -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
@@ -687,6 +987,7 @@
                     </div>
                     <div class="text-3xl font-bold text-on-surface" id="stat-functions">0</div>
                 </div>
+                
                 <!-- Tarjeta: Total de endpoints -->
                 <div class="glass p-5 rounded-2xl border border-outline-variant/10">
                     <div class="flex items-center justify-between mb-2">
@@ -698,22 +999,46 @@
             </div>
 
             <!-- ============================================================
-                 TARJETA DE PROGRESO (ANILLO CIRCULAR)
-                 ============================================================ -->
+            TARJETA DE PROGRESO (ANILLO CIRCULAR)
+            ============================================================ -->
+            <!-- 
+                Tarjeta de progreso con anillo SVG.
+                glass: Efecto de vidrio.
+                p-6: Padding.
+                rounded-2xl: Bordes redondeados.
+            -->
             <div class="glass p-6 rounded-2xl border border-outline-variant/10 stagger-in" style="animation-delay: 0.25s;">
                 <div class="flex items-center gap-6">
-                    <!-- Anillo de progreso SVG -->
+                    <!-- 
+                        Anillo de progreso SVG.
+                        w-20 h-20: Tamaño fijo.
+                        flex-shrink-0: Evita que se encoja.
+                    -->
                     <div class="relative w-20 h-20 flex-shrink-0">
                         <svg class="progress-ring w-20 h-20">
-                            <!-- Circulo de fondo (track) -->
+                            <!-- 
+                                Círculo de fondo (track).
+                                stroke-current: Usa el color del texto actual.
+                                stroke-width="6": Grosor de la línea.
+                            -->
                             <circle class="text-surface-variant/30 stroke-current" cx="40" cy="40" fill="transparent" r="34" stroke-width="6"></circle>
-                            <!-- Circulo de progreso (relleno dinamico) -->
+                            <!-- 
+                                Círculo de progreso (relleno dinámico).
+                                stroke-dasharray="213.6": Perímetro del círculo (2*pi*34).
+                                stroke-dashoffset="213.6": Desplazamiento para ocultar el progreso.
+                                stroke-linecap="round": Extremos redondeados.
+                            -->
                             <circle id="progress-circle" class="text-primary stroke-current" cx="40" cy="40" fill="transparent" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" stroke-width="6"></circle>
                         </svg>
-                        <!-- Porcentaje en el centro del anillo -->
+                        <!-- 
+                            Porcentaje en el centro del anillo.
+                            absolute inset-0: Cubre todo el SVG.
+                            flex items-center justify-center: Centra el texto.
+                        -->
                         <div class="absolute inset-0 flex items-center justify-center font-bold text-lg text-on-surface" id="progress-percent">0%</div>
                     </div>
-                    <!-- Informacion de progreso -->
+                    
+                    <!-- Información de progreso -->
                     <div>
                         <div class="text-sm font-semibold text-on-surface" id="progress-label">Sin proyectos</div>
                         <div class="text-xs text-on-surface-variant/50" style="color: #BFBDBD;">Proyectos finalizados sobre el total</div>
@@ -726,30 +1051,57 @@
             </div>
 
             <!-- ============================================================
-                 SECCION DE PROYECTOS RECIENTES
-                 ============================================================ -->
+            SECCIÓN DE PROYECTOS RECIENTES
+            ============================================================ -->
             <section class="stagger-in" style="animation-delay: 0.3s;">
-                <!-- Encabezado de la seccion con enlace "Ver todos" -->
+                <!-- 
+                    Encabezado de la sección con enlace "Ver todos".
+                    flex items-center justify-between: Alineación horizontal con espacio.
+                    mb-4: Margen inferior.
+                -->
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-on-surface">Proyectos Recientes</h2>
                     <a href="/projects" class="text-xs text-primary hover:underline font-semibold uppercase tracking-wider">Ver todos</a>
                 </div>
-                <!-- Grid de tarjetas de proyectos (se renderiza dinamicamente) -->
+                
+                <!-- 
+                    Grid de tarjetas de proyectos (se renderiza dinámicamente con JavaScript).
+                    grid-cols-1 md:grid-cols-2 xl:grid-cols-3: Columnas responsive.
+                    gap-5: Espacio entre tarjetas.
+                -->
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" id="projects-grid"></div>
             </section>
         </main>
     </div>
 
     <!-- ============================================================
-         MODALES
-         ============================================================ -->
+    MODALES
+    ============================================================ -->
 
     <!-- ============================================================
-         MODAL DE SUBIDA DE PROYECTO (UPLOAD MODAL)
-         ============================================================ -->
+    MODAL DE SUBIDA DE PROYECTO (UPLOAD MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal para crear un nuevo proyecto subiendo un archivo o clonando desde GitHub.
+        modal-overlay: Fondo semitransparente con desenfoque.
+        fixed inset-0: Cubre toda la pantalla.
+        z-50: Por encima del contenido principal.
+        hidden: Oculto por defecto.
+        items-center justify-center: Centra el contenido.
+        onclick: Cierra el modal al hacer clic en el overlay.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="uploadModal" onclick="if(event.target===this)closeUploadModal()">
+        <!-- 
+            Contenedor del modal con efecto glass.
+            w-full max-w-md: Ancho máximo de 448px.
+            modal-anim: Animación de entrada.
+        -->
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
-            <!-- Boton para cerrar el modal -->
+            <!-- 
+                Botón para cerrar el modal.
+                absolute top-4 right-4: Posición fija en la esquina superior derecha.
+                hover:text-primary: Cambia a azul al pasar el mouse.
+            -->
             <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             
             <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo Proyecto</h3>
@@ -761,27 +1113,36 @@
                 <input type="text" id="proj-name" class="modal-input" placeholder="Mi Proyecto" />
             </div>
 
-            <!-- Campo: Descripcion (opcional) -->
+            <!-- Campo: Descripción (opcional) -->
             <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripcion <span class="opacity-50">(opcional)</span></label>
-                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripcion" />
+                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-50">(opcional)</span></label>
+                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripción" />
             </div>
 
-            <!-- Zona de drag & drop para subir archivos -->
+            <!-- 
+                Zona de drag & drop para subir archivos.
+                onclick: Abre el selector de archivos.
+                ondragover, ondragleave, ondrop: Maneja el drag & drop.
+            -->
             <div id="upload-zone" onclick="document.getElementById('file-input').click()"
                 ondragover="event.preventDefault();this.style.borderColor='#38bdf8'"
                 ondragleave="event.preventDefault();this.style.borderColor=''"
                 ondrop="event.preventDefault();onFileSelect({target:{files:event.dataTransfer.files}})">
-                <!-- Input oculto para seleccionar archivos -->
+                <!-- 
+                    Input oculto para seleccionar archivos.
+                    accept: Tipos de archivo permitidos.
+                    onchange: Llama a onFileSelect cuando se selecciona un archivo.
+                -->
                 <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
                 <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
                 <p class="text-sm text-on-surface-variant/60">
                     <strong class="text-primary" style="color: #BFBDBD;">Haz clic</strong> o arrastra tu archivo
                 </p>
                 <p class="text-xs mt-1 text-on-surface-variant/40" style="color: #BFBDBD;">
-                    ZIP, TAR.GZ, .py, .js — max. 50 MB
+                    ZIP, TAR.GZ, .py, .js — máx. 50 MB
                 </p>
             </div>
+            
             <!-- Mostrar nombre del archivo seleccionado -->
             <div id="file-name" class="hidden mt-3 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
 
@@ -801,7 +1162,11 @@
                 <input type="url" id="proj-github" class="modal-input" placeholder="https://github.com/usuario/repositorio" />
             </div>
 
-            <!-- Boton para crear el proyecto -->
+            <!-- 
+                Botón para crear el proyecto.
+                bg-gradient-to-r from-primary to-secondary: Gradiente de azul a violeta.
+                shadow-lg shadow-primary/25: Sombra con resplandor.
+            -->
             <button onclick="createProject()" id="modal-submit-btn"
                 class="w-full py-3 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-lg shadow-primary/25">
                 Crear y analizar
@@ -811,12 +1176,16 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE CARGA (LOADING MODAL)
-         ============================================================ -->
+    MODAL DE CARGA (LOADING MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal que se muestra mientras se analiza un proyecto.
+        Muestra un spinner de carga y un mensaje de espera.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="loadingModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <h3 class="text-2xl font-bold text-on-surface mb-1">Analizando proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6">Procesando codigo y generando documentacion</p>
+            <p class="text-on-surface-variant/60 text-sm mb-6">Procesando código y generando documentación</p>
             <div class="flex flex-col items-center gap-4 py-8">
                 <!-- Spinner de carga animado -->
                 <div class="w-16 h-16 border-4 border-surface-variant/40 border-t-primary rounded-full animate-spin"></div>
@@ -826,20 +1195,25 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE LIMITE ALCANZADO (LIMIT MODAL)
-         ============================================================ -->
+    MODAL DE LÍMITE ALCANZADO (LIMIT MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal que se muestra cuando el usuario alcanza el límite de proyectos.
+        Sugiere actualizar al plan Pro.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="limitModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeLimitModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
-            <h3 class="text-2xl font-bold text-on-surface mb-1">Limite alcanzado</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Has alcanzado el limite de proyectos para tu plan actual.</p>
+            <h3 class="text-2xl font-bold text-on-surface mb-1">Límite alcanzado</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Has alcanzado el límite de proyectos para tu plan actual.</p>
             <div class="flex flex-col items-center gap-4 py-8">
                 <!-- Icono de bloqueo -->
                 <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center">
                     <span class="material-symbols-outlined text-error text-3xl">block</span>
                 </div>
-                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Has alcanzado tu limite de 3 proyectos en el plan Gratuito. Te recomendamos actualizar al plan Pro para crear hasta 20 proyectos y acceder a mas funciones.</p>
+                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Has alcanzado tu límite de 3 proyectos en el plan Gratuito. Te recomendamos actualizar al plan Pro para crear hasta 20 proyectos y acceder a más funciones.</p>
             </div>
+            <!-- Botón para ver planes -->
             <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
                 Ver planes
             </button>
@@ -847,8 +1221,12 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE NOMBRE DUPLICADO (DUPLICATE MODAL)
-         ============================================================ -->
+    MODAL DE NOMBRE DUPLICADO (DUPLICATE MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal que se muestra cuando el usuario intenta crear un proyecto 
+        con un nombre que ya existe.
+    -->
     <div class="modal-overlay fixed inset-0 z-[60] hidden items-center justify-center" id="duplicateModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeDuplicateModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -867,18 +1245,22 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE CONFIRMACION DE SINCRONIZACION (SYNC CONFIRM MODAL)
-         ============================================================ -->
+    MODAL DE CONFIRMACIÓN DE SINCRONIZACIÓN (SYNC CONFIRM MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal de confirmación para sincronizar un proyecto con GitHub.
+        Solo disponible para planes Pro y Enterprise.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="syncConfirmModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeSyncConfirmModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Actualizar proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Deseas sincronizar este proyecto con GitHub?</p>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">¿Deseas sincronizar este proyecto con GitHub?</p>
             <div class="flex flex-col items-center gap-4 py-8">
                 <div class="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
                     <span class="material-symbols-outlined text-primary text-3xl">sync</span>
                 </div>
-                <p id="syncConfirmMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Esto reemplazara los datos actuales con los del repositorio.</p>
+                <p id="syncConfirmMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Esto reemplazará los datos actuales con los del repositorio.</p>
             </div>
             <div class="flex gap-3">
                 <button onclick="closeSyncConfirmModal()" class="flex-1 py-3 border border-outline-variant/20 text-on-surface-variant rounded-xl font-semibold hover:border-primary hover:text-primary transition-all">
@@ -892,8 +1274,11 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE EXITO DE SINCRONIZACION (SYNC SUCCESS MODAL)
-         ============================================================ -->
+    MODAL DE ÉXITO DE SINCRONIZACIÓN (SYNC SUCCESS MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal que confirma que la sincronización se completó exitosamente.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="syncSuccessModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeSyncSuccessModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
@@ -903,7 +1288,7 @@
                 <div class="w-16 h-16 rounded-full bg-green-accent/10 border border-green-accent/30 flex items-center justify-center">
                     <span class="material-symbols-outlined text-green-accent text-3xl">check_circle</span>
                 </div>
-                <p id="syncSuccessMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">El analisis comenzara pronto.</p>
+                <p id="syncSuccessMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">El análisis comenzará pronto.</p>
             </div>
             <button onclick="closeSyncSuccessModal()" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
                 Aceptar
@@ -912,21 +1297,24 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE EDICION DE PROYECTO (EDIT PROJECT MODAL)
-         ============================================================ -->
+    MODAL DE EDICIÓN DE PROYECTO (EDIT PROJECT MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal para editar el nombre y descripción de un proyecto existente.
+    -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="editModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Editar proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Actualiza el nombre y descripcion del proyecto</p>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Actualiza el nombre y descripción del proyecto</p>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-on-surface mb-2">Nombre del proyecto</label>
                     <input type="text" id="editProjectName" class="w-full px-4 py-3 rounded-xl bg-surface-variant/10 border border-outline-variant/20 text-on-surface focus:outline-none focus:border-primary transition-all" placeholder="Nombre del proyecto">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-on-surface mb-2">Descripcion (opcional)</label>
-                    <textarea id="editProjectDescription" rows="3" class="w-full px-4 py-3 rounded-xl bg-surface-variant/10 border border-outline-variant/20 text-on-surface focus:outline-none focus:border-primary transition-all resize-none" placeholder="Descripcion del proyecto"></textarea>
+                    <label class="block text-sm font-medium text-on-surface mb-2">Descripción (opcional)</label>
+                    <textarea id="editProjectDescription" rows="3" class="w-full px-4 py-3 rounded-xl bg-surface-variant/10 border border-outline-variant/20 text-on-surface focus:outline-none focus:border-primary transition-all resize-none" placeholder="Descripción del proyecto"></textarea>
                 </div>
             </div>
             <div class="flex gap-3 mt-6">
@@ -941,29 +1329,46 @@
     </div>
 
     <!-- ============================================================
-         MODAL DE CONFIGURACION (CONFIGURATION MODAL)
-         ============================================================ -->
+    MODAL DE CONFIGURACIÓN (CONFIGURATION MODAL)
+    ============================================================ -->
+    <!-- 
+        Modal de configuración completo con múltiples secciones:
+        - Perfil (nombre, email, bio)
+        - Apariencia (tema claro/oscuro/sistema)
+        - Notificaciones
+        - Plan y facturación
+        - Integraciones
+        - Seguridad (cambio de contraseña, 2FA)
+        - Datos (exportar/eliminar)
+    -->
     <div id="configModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" onclick="if(event.target===this)closeConfigModal()">
+        <!-- 
+            Contenedor del modal con scroll interno.
+            max-h-[90vh]: Altura máxima del 90% de la ventana.
+            overflow-hidden: Oculta el desbordamiento.
+            flex flex-col: Layout vertical para header, contenido y footer.
+        -->
         <div class="glass p-0 rounded-3xl w-full max-w-3xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-hidden flex flex-col">
             
-            <!-- HEADER del modal de configuracion -->
+            <!-- HEADER del modal de configuración -->
             <div class="flex items-center justify-between p-6 border-b border-outline-variant/10 flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
                         <span class="material-symbols-outlined text-primary text-2xl">settings</span>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-on-surface">Configuracion</h3>
+                        <h3 class="text-xl font-bold text-on-surface">Configuración</h3>
                         <p class="text-sm text-on-surface-variant/60">Personaliza tu experiencia en AutoDocs AI</p>
                     </div>
                 </div>
+                <!-- Botón para cerrar el modal -->
                 <button onclick="closeConfigModal()" class="w-8 h-8 rounded-lg border-none bg-black/5 hover:bg-red-50 hover:text-red-500 text-on-surface-variant cursor-pointer flex items-center justify-center text-xl transition-all">✕</button>
             </div>
 
             <!-- CONTENIDO CON SCROLL -->
             <div class="flex-1 overflow-y-auto p-6 space-y-8">
                 
-                <!-- 1. SECCION PERFIL -->
+                <!-- 1. SECCIÓN PERFIL -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">person</span>
@@ -983,19 +1388,19 @@
                         <!-- Campo: Bio -->
                         <div class="md:col-span-2">
                             <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Bio</label>
-                            <textarea id="config-bio" class="modal-input" rows="2" placeholder="Breve descripcion sobre ti..."></textarea>
+                            <textarea id="config-bio" class="modal-input" rows="2" placeholder="Breve descripción sobre ti..."></textarea>
                         </div>
                     </div>
                 </section>
 
-                <!-- 2. SECCION APARIENCIA (TEMA) -->
+                <!-- 2. SECCIÓN APARIENCIA (TEMA) -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">palette</span>
                         Apariencia
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Opcion: Tema Claro -->
+                        <!-- Opción: Tema Claro -->
                         <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('light')">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
@@ -1003,12 +1408,13 @@
                                 </div>
                                 <div>
                                     <div class="text-sm font-semibold text-on-surface">Claro</div>
-                                    <div class="text-xs text-on-surface-variant/50">Modo dia</div>
+                                    <div class="text-xs text-on-surface-variant/50">Modo día</div>
                                 </div>
                             </div>
+                            <!-- Indicador de selección -->
                             <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-light-indicator"></div>
                         </div>
-                        <!-- Opcion: Tema Oscuro -->
+                        <!-- Opción: Tema Oscuro -->
                         <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('dark')">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-outline-variant/30 flex items-center justify-center shadow-sm">
@@ -1021,7 +1427,7 @@
                             </div>
                             <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-dark-indicator"></div>
                         </div>
-                        <!-- Opcion: Tema Automatico (Sistema) -->
+                        <!-- Opción: Tema Automático (Sistema) -->
                         <div class="glass p-4 rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/30 transition-all" onclick="setTheme('system')">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-surface-container to-surface-container-high border-2 border-outline-variant/30 flex items-center justify-center shadow-sm">
@@ -1029,7 +1435,7 @@
                                 </div>
                                 <div>
                                     <div class="text-sm font-semibold text-on-surface">Sistema</div>
-                                    <div class="text-xs text-on-surface-variant/50">Automatico</div>
+                                    <div class="text-xs text-on-surface-variant/50">Automático</div>
                                 </div>
                             </div>
                             <div class="mt-2 h-1 rounded-full bg-primary/20" id="theme-system-indicator"></div>
@@ -1037,25 +1443,25 @@
                     </div>
                 </section>
 
-                <!-- 3. SECCION NOTIFICACIONES -->
+                <!-- 3. SECCIÓN NOTIFICACIONES -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">notifications</span>
                         Notificaciones
                     </h4>
                     <div class="space-y-3">
-                        <!-- Notificacion: Analisis completado -->
+                        <!-- Notificación: Análisis completado -->
                         <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-green-500">check_circle</span>
                                 <div>
-                                    <div class="text-sm font-medium text-on-surface">Analisis completado</div>
+                                    <div class="text-sm font-medium text-on-surface">Análisis completado</div>
                                     <div class="text-xs text-on-surface-variant/50">Cuando un proyecto termine de analizarse</div>
                                 </div>
                             </div>
                             <input type="checkbox" id="notif-completed" checked class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
                         </label>
-                        <!-- Notificacion: Recordatorios -->
+                        <!-- Notificación: Recordatorios -->
                         <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-primary">upcoming</span>
@@ -1066,7 +1472,7 @@
                             </div>
                             <input type="checkbox" id="notif-reminders" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
                         </label>
-                        <!-- Notificacion: Actualizaciones -->
+                        <!-- Notificación: Actualizaciones -->
                         <label class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 cursor-pointer hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-secondary">updates</span>
@@ -1080,11 +1486,11 @@
                     </div>
                 </section>
 
-                <!-- 4. SECCION PLAN Y FACTURACION -->
+                <!-- 4. SECCIÓN PLAN Y FACTURACIÓN -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">credit_card</span>
-                        Plan y Facturacion
+                        Plan y Facturación
                     </h4>
                     <div class="glass p-5 rounded-xl border border-outline-variant/10">
                         <div class="flex items-center justify-between flex-wrap gap-4">
@@ -1093,12 +1499,12 @@
                                     <span class="text-lg font-bold text-on-surface" id="config-plan-name">Plan Free</span>
                                     <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200" id="config-plan-status">Activo</span>
                                 </div>
-                                <p class="text-sm text-on-surface-variant/60 mt-1" id="config-plan-details">3 proyectos · Analisis basico · Documentacion automatica</p>
+                                <p class="text-sm text-on-surface-variant/60 mt-1" id="config-plan-details">3 proyectos · Análisis básico · Documentación automática</p>
                             </div>
                             <div class="flex gap-2">
                                 <button onclick="window.location.href='/plan-recommendation'" class="px-5 py-2 bg-secondary text-white rounded-lg font-semibold text-sm hover:bg-secondary/80 transition-all flex items-center gap-2">
                                     <span class="material-symbols-outlined text-sm">auto_awesome</span>
-                                    Ver recomendacion
+                                    Ver recomendación
                                 </button>
                                 <button onclick="window.location.href='/pricing'" class="px-5 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar</button>
                                 <button class="px-5 py-2 border border-outline-variant/30 rounded-lg font-semibold text-sm text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all">Gestionar</button>
@@ -1108,7 +1514,7 @@
                         <div class="mt-4 pt-4 border-t border-outline-variant/10">
                             <div class="flex items-center gap-6 text-sm flex-wrap">
                                 <span class="text-on-surface-variant/60">Proyectos usados: <strong class="text-on-surface" id="config-projects-used">0</strong> / <strong class="text-on-surface" id="config-projects-limit">3</strong></span>
-                                <span class="text-on-surface-variant/60">Proximo cobro: <strong class="text-on-surface" id="config-next-billing">—</strong></span>
+                                <span class="text-on-surface-variant/60">Próximo cobro: <strong class="text-on-surface" id="config-next-billing">—</strong></span>
                             </div>
                             <div class="mt-3 progress-track">
                                 <div id="config-progress-bar" class="progress-fill" style="width:0%"></div>
@@ -1117,14 +1523,14 @@
                     </div>
                 </section>
 
-                <!-- 5. SECCION INTEGRACIONES -->
+                <!-- 5. SECCIÓN INTEGRACIONES -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">integration_instructions</span>
                         Integraciones
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Integracion GitHub -->
+                        <!-- Integración GitHub -->
                         <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">🐙</span>
@@ -1135,7 +1541,7 @@
                             </div>
                             <span class="text-xs text-green-600 font-semibold">✓ Activo</span>
                         </div>
-                        <!-- Integracion Slack -->
+                        <!-- Integración Slack -->
                         <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">⬛</span>
@@ -1146,7 +1552,7 @@
                             </div>
                             <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
                         </div>
-                        <!-- Integracion Notion -->
+                        <!-- Integración Notion -->
                         <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">📘</span>
@@ -1157,7 +1563,7 @@
                             </div>
                             <button class="text-xs text-primary font-semibold hover:underline">Conectar</button>
                         </div>
-                        <!-- Integracion Google Docs -->
+                        <!-- Integración Google Docs -->
                         <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">📄</span>
@@ -1171,35 +1577,41 @@
                     </div>
                 </section>
 
-                <!-- 6. SECCION SEGURIDAD -->
+                <!-- 6. SECCIÓN SEGURIDAD -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">security</span>
                         Seguridad
                     </h4>
                     <div class="space-y-3">
-                        <!-- Cambiar contrasena (expansible) -->
+                        <!-- 
+                            Cambiar contraseña (expansible).
+                            onclick: Toggle de la sección de cambio de contraseña.
+                        -->
                         <button class="w-full text-left p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all flex items-center justify-between" onclick="document.getElementById('config-password-section').classList.toggle('hidden')">
-                            <span class="text-sm text-on-surface">Cambiar contrasena</span>
+                            <span class="text-sm text-on-surface">Cambiar contraseña</span>
                             <span class="material-symbols-outlined text-on-surface-variant/40">chevron_right</span>
                         </button>
-                        <!-- Seccion de cambio de contrasena (inicialmente oculta) -->
+                        
+                        <!-- Sección de cambio de contraseña (inicialmente oculta) -->
                         <div id="config-password-section" class="hidden p-4 glass rounded-xl border border-primary/20 space-y-3">
                             <div>
-                                <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nueva contrasena</label>
+                                <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Nueva contraseña</label>
                                 <input type="password" id="config-new-password" class="modal-input" placeholder="••••••••" />
                             </div>
                             <div>
-                                <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Confirmar contrasena</label>
+                                <label class="block text-xs uppercase tracking-wider font-semibold text-on-surface-variant/60 mb-1">Confirmar contraseña</label>
                                 <input type="password" id="config-confirm-password" class="modal-input" placeholder="••••••••" />
                             </div>
-                            <button onclick="updatePassword()" class="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar contrasena</button>
+                            <button onclick="updatePassword()" class="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/80 transition-all">Actualizar contraseña</button>
                         </div>
+                        
                         <!-- 2FA -->
                         <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
-                            <span class="text-sm text-on-surface">Autenticacion de dos factores</span>
+                            <span class="text-sm text-on-surface">Autenticación de dos factores</span>
                             <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant/20">Desactivado</span>
                         </div>
+                        
                         <!-- Sesiones activas -->
                         <div class="flex items-center justify-between p-3 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all">
                             <span class="text-sm text-on-surface">Sesiones activas</span>
@@ -1208,7 +1620,7 @@
                     </div>
                 </section>
 
-                <!-- 7. SECCION EXPORTAR DATOS -->
+                <!-- 7. SECCIÓN EXPORTAR DATOS -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">download</span>
@@ -1221,7 +1633,7 @@
                         </button>
                         <button class="px-4 py-2 glass rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all text-sm text-on-surface flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm">download</span>
-                            Exportar documentacion (PDF)
+                            Exportar documentación (PDF)
                         </button>
                         <button class="px-4 py-2 glass rounded-xl border border-red-200 hover:border-red-400 transition-all text-sm text-red-600 flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm">delete</span>
@@ -1231,7 +1643,7 @@
                 </section>
             </div>
 
-            <!-- FOOTER del modal con botones de accion -->
+            <!-- FOOTER del modal con botones de acción -->
             <div class="flex items-center justify-between p-6 border-t border-outline-variant/10 flex-shrink-0 bg-surface-container/30">
                 <button onclick="closeConfigModal()" class="px-6 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:border-primary/30 hover:text-primary transition-all font-medium text-sm">
                     Cancelar
@@ -1245,21 +1657,25 @@
     </div>
 
     <!-- ============================================================
-         JAVASCRIPT - LOGICA PRINCIPAL DEL DASHBOARD
-         ============================================================ -->
+    JAVASCRIPT - LÓGICA PRINCIPAL DEL DASHBOARD
+    ============================================================ -->
     <script>
         // ============================================================
-        // INICIALIZACION Y AUTENTICACION
+        // INICIALIZACIÓN Y AUTENTICACIÓN
         // ============================================================
         
-        // Obtener token de autenticacion del localStorage
+        /** 
+         * Obtener token de autenticación del localStorage.
+         * Si no hay token, redirigir a la página de login.
+         */
         const token = localStorage.getItem('token');
-        // Si no hay token, redirigir al login
         if (!token) window.location.href = '/';
 
-        // Obtener datos del usuario del localStorage
+        /**
+         * Obtener datos del usuario del localStorage.
+         * Actualizar los elementos de la UI con la información del usuario.
+         */
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        // Actualizar elementos de la UI con la informacion del usuario
         if (user.name) {
             document.getElementById('sidebar-user-name').textContent = user.name;
             document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
@@ -1267,34 +1683,48 @@
             document.getElementById('greeting').textContent = 'Bienvenido, ' + user.name;
         }
 
-        // Actualizar el nombre del plan en el header
+        /**
+         * Actualizar el nombre del plan en el header.
+         * Mapeo de nombres de planes para mostrar en la UI.
+         */
         const planName = document.getElementById('plan-name');
         if (planName && user.plan) {
-            const planDisplay = user.plan === 'free' ? 'Free' : user.plan === 'pro' ? 'Pro' : user.plan === 'enterprise' ? 'Enterprise' : 'Free';
+            const planDisplay = user.plan === 'free' ? 'Free' : 
+                               user.plan === 'pro' ? 'Pro' : 
+                               user.plan === 'enterprise' ? 'Enterprise' : 'Free';
             planName.textContent = planDisplay;
         }
 
         // ============================================================
-        // FUNCIONES DE AUTENTICACION
+        // FUNCIONES DE AUTENTICACIÓN
         // ============================================================
         
         /**
-         * Devuelve los headers necesarios para peticiones autenticadas
-         * @returns {Object} Headers con token JWT
+         * Devuelve los headers necesarios para peticiones autenticadas.
+         * Incluye el token JWT en el header Authorization.
+         * @returns {Object} Headers con token JWT y Content-Type JSON.
          */
         function authHeaders() {
-            return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+            return { 
+                'Authorization': 'Bearer ' + token, 
+                'Content-Type': 'application/json' 
+            };
         }
 
         // ============================================================
-        // GESTION DE PROYECTOS
+        // GESTIÓN DE PROYECTOS
         // ============================================================
         
-        let allProjects = []; // Almacena todos los proyectos del usuario
+        /** 
+         * Almacena todos los proyectos del usuario.
+         * Se actualiza con cada carga de proyectos.
+         */
+        let allProjects = [];
 
         /**
-         * Carga los proyectos desde el backend y actualiza la UI
-         * Funcion asincrona que maneja la carga inicial y refrescos periodicos
+         * Carga los proyectos desde el backend y actualiza la UI.
+         * Función asíncrona que maneja la carga inicial y refrescos periódicos.
+         * Se ejecuta al cargar la página y cada 10 segundos.
          */
         async function loadProjects() {
             try {
@@ -1307,7 +1737,7 @@
                 const projects = await res.json();
                 allProjects = projects;
                 
-                // Renderizar estadisticas y tarjetas de proyectos
+                // Renderizar estadísticas y tarjetas de proyectos
                 renderStats(projects);
                 renderProjects(projects);
                 
@@ -1317,18 +1747,19 @@
                 // Cargar plan del usuario y actualizar contador de proyectos
                 const planData = await loadUserPlan();
                 
-                // Actualizar el contador de proyectos con el limite del plan
+                // Actualizar el contador de proyectos con el límite del plan
                 const projectCountEl = document.getElementById('project-count');
                 if (projectCountEl) {
                     const limits = { 'free': 3, 'pro': 20, 'enterprise': -1 };
                     const limit = limits[planData?.plan || 'free'] || 3;
                     const count = projects.length;
                     
+                    // Mostrar el contador con formato según el plan
                     if (limit === -1) {
                         projectCountEl.textContent = count + '/∞';
                     } else {
                         projectCountEl.textContent = count + '/' + limit;
-                        // Cambiar color si esta cerca del limite
+                        // Cambiar color si está cerca del límite
                         if (count >= limit) {
                             projectCountEl.classList.add('text-error');
                         } else if (count >= limit * 0.8) {
@@ -1344,14 +1775,15 @@
         }
 
         // ============================================================
-        // CONFIGURACION DE USUARIO
+        // CONFIGURACIÓN DE USUARIO
         // ============================================================
         
-        let configUserData = {};   // Datos del usuario para configuracion
+        let configUserData = {};   // Datos del usuario para configuración
         let configPlanData = {};   // Datos del plan del usuario
 
         /**
-         * Abre el modal de configuracion y carga los datos
+         * Abre el modal de configuración y carga los datos.
+         * Muestra el modal y llama a loadConfigData para cargar la información.
          */
         function openConfigModal() {
             document.getElementById('configModal').classList.remove('hidden');
@@ -1360,7 +1792,7 @@
         }
 
         /**
-         * Cierra el modal de configuracion
+         * Cierra el modal de configuración.
          */
         function closeConfigModal() {
             document.getElementById('configModal').classList.add('hidden');
@@ -1368,7 +1800,8 @@
         }
 
         /**
-         * Carga los datos de configuracion desde el backend
+         * Carga los datos de configuración desde el backend.
+         * Obtiene información del usuario, plan, proyectos y configuración guardada.
          */
         async function loadConfigData() {
             try {
@@ -1389,7 +1822,7 @@
                     
                     const projectLimits = { free: 3, pro: 20, enterprise: -1 };
 
-                    // Cargar proyectos para contar
+                    // Cargar proyectos para contar los usados
                     const projectsRes = await fetch('/api/projects/', { headers: authHeaders() });
                     if (projectsRes.ok) {
                         const projects = await projectsRes.json();
@@ -1399,6 +1832,7 @@
                         document.getElementById('config-projects-used').textContent = used;
                         document.getElementById('config-projects-limit').textContent = limit === -1 ? '∞' : limit;
 
+                        // Calcular porcentaje de uso del plan
                         const progress = limit === -1 ? 0 : Math.min((used / limit) * 100, 100);
                         document.getElementById('config-progress-bar').style.width = progress + '%';
                     }
@@ -1408,7 +1842,7 @@
                 const savedTheme = localStorage.getItem('theme') || 'light';
                 setThemeIndicator(savedTheme);
 
-                // Cargar configuracion de notificaciones
+                // Cargar configuración de notificaciones desde localStorage
                 const notifSettings = JSON.parse(localStorage.getItem('notifications') || '{}');
                 document.getElementById('notif-completed').checked = notifSettings.completed !== false;
                 document.getElementById('notif-reminders').checked = notifSettings.reminders || false;
@@ -1420,14 +1854,15 @@
         }
 
         /**
-         * Guarda la configuracion del usuario en el backend
+         * Guarda la configuración del usuario en el backend.
+         * Actualiza nombre, bio y configuración de notificaciones.
          */
         function saveConfig() {
             const username = document.getElementById('config-username').value.trim();
             const bio = document.getElementById('config-bio').value.trim();
 
             if (!username) {
-                alert('El nombre de usuario no puede estar vacio');
+                alert('El nombre de usuario no puede estar vacío');
                 return;
             }
 
@@ -1444,7 +1879,7 @@
                     return;
                 }
 
-                // Guardar configuracion de notificaciones en localStorage
+                // Guardar configuración de notificaciones en localStorage
                 const notifications = {
                     completed: document.getElementById('notif-completed').checked,
                     reminders: document.getElementById('notif-reminders').checked,
@@ -1469,18 +1904,19 @@
         }
 
         /**
-         * Actualiza la contrasena del usuario
+         * Actualiza la contraseña del usuario.
+         * Valida que la nueva contraseña cumpla con los requisitos.
          */
         async function updatePassword() {
             const newPass = document.getElementById('config-new-password').value;
             const confirmPass = document.getElementById('config-confirm-password').value;
 
             if (!newPass || newPass.length < 6) {
-                alert('La contrasena debe tener al menos 6 caracteres');
+                alert('La contraseña debe tener al menos 6 caracteres');
                 return;
             }
             if (newPass !== confirmPass) {
-                alert('Las contrasenas no coinciden');
+                alert('Las contraseñas no coinciden');
                 return;
             }
 
@@ -1492,12 +1928,13 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    alert('Contrasena actualizada correctamente');
+                    alert('Contraseña actualizada correctamente');
+                    // Limpiar campos y ocultar sección
                     document.getElementById('config-new-password').value = '';
                     document.getElementById('config-confirm-password').value = '';
                     document.getElementById('config-password-section').classList.add('hidden');
                 } else {
-                    alert(data.error || 'Error al actualizar contrasena');
+                    alert(data.error || 'Error al actualizar contraseña');
                 }
             } catch (err) {
                 alert('Error: ' + err.message);
@@ -1505,12 +1942,13 @@
         }
 
         // ============================================================
-        // GESTION DE TEMAS (CLARO/OSCURO)
+        // GESTIÓN DE TEMAS (CLARO/OSCURO)
         // ============================================================
         
         /**
-         * Cambia el tema de la aplicacion
-         * @param {string} theme - 'light', 'dark', o 'system'
+         * Cambia el tema de la aplicación.
+         * @param {string} theme - 'light', 'dark', o 'system'.
+         * 'system': Usa la preferencia del sistema operativo.
          */
         function setTheme(theme) {
             const html = document.documentElement;
@@ -1532,7 +1970,7 @@
             setThemeIndicator(theme);
             localStorage.setItem('theme', theme);
 
-            // Actualizar icono del boton de tema
+            // Actualizar icono del botón de tema
             const themeIcon = document.getElementById('themeIcon');
             if (themeIcon) {
                 const isDark = document.documentElement.classList.contains('dark');
@@ -1541,13 +1979,15 @@
         }
 
         /**
-         * Actualiza el indicador visual del tema seleccionado
-         * @param {string} theme - 'light', 'dark', o 'system'
+         * Actualiza el indicador visual del tema seleccionado.
+         * @param {string} theme - 'light', 'dark', o 'system'.
          */
         function setThemeIndicator(theme) {
+            // Resetear todos los indicadores
             document.querySelectorAll('[id^="theme-"]').forEach(el => {
                 el.style.background = 'rgba(56, 189, 248, 0.1)';
             });
+            // Resaltar el tema seleccionado
             const indicator = document.getElementById('theme-' + theme + '-indicator');
             if (indicator) {
                 indicator.style.background = 'linear-gradient(90deg, #38bdf8, #818cf8)';
@@ -1565,7 +2005,7 @@
             }
         });
 
-        // Cerrar modal de configuracion al hacer clic fuera
+        // Cerrar modal de configuración al hacer clic fuera
         document.getElementById('configModal').addEventListener('click', function(e) {
             if (e.target === this) closeConfigModal();
         });
@@ -1575,8 +2015,9 @@
         // ============================================================
         
         /**
-         * Renderiza las estadisticas del dashboard
-         * @param {Array} projects - Lista de proyectos del usuario
+         * Renderiza las estadísticas del dashboard.
+         * Actualiza los contadores de proyectos, funciones y endpoints.
+         * @param {Array} projects - Lista de proyectos del usuario.
          */
         function renderStats(projects) {
             // Total de proyectos
@@ -1587,11 +2028,11 @@
             document.getElementById('stat-completed').textContent = completed;
             document.getElementById('stat-completed-small').textContent = completed;
             
-            // Total de funciones
+            // Total de funciones (suma de todas las funciones en todos los proyectos)
             const totalFuncs = projects.reduce((s, p) => s + (p.stats?.functions || 0), 0);
             document.getElementById('stat-functions').textContent = totalFuncs;
             
-            // Total de endpoints
+            // Total de endpoints (suma de todos los endpoints en todos los proyectos)
             const totalEp = projects.reduce((s, p) => s + (p.stats?.endpoints || 0), 0);
             document.getElementById('stat-endpoints').textContent = totalEp;
             
@@ -1606,7 +2047,7 @@
             // Actualizar anillo de progreso SVG
             const circle = document.getElementById('progress-circle');
             if (circle) {
-                const circumference = 213.6;
+                const circumference = 213.6; // 2 * PI * radio (34)
                 const offset = circumference - (percent / 100) * circumference;
                 circle.setAttribute('stroke-dashoffset', offset);
             }
@@ -1619,18 +2060,19 @@
         }
 
         /**
-         * Renderiza las tarjetas de proyectos en el grid
-         * @param {Array} projects - Lista de proyectos
+         * Renderiza las tarjetas de proyectos en el grid.
+         * Genera HTML para cada proyecto con sus métricas y estado.
+         * @param {Array} projects - Lista de proyectos.
          */
         function renderProjects(projects) {
             const grid = document.getElementById('projects-grid');
             
-            // Si no hay proyectos, mostrar mensaje de vacio
+            // Si no hay proyectos, mostrar mensaje de vacío
             if (!projects.length) {
                 grid.innerHTML = `
                     <div class="col-span-full glass p-12 rounded-2xl text-center text-on-surface-variant/50">
                         <span class="material-symbols-outlined text-5xl mb-4 block text-primary/40">folder_open</span>
-                        <p class="text-lg font-semibold text-on-surface">Sin proyectos aun</p>
+                        <p class="text-lg font-semibold text-on-surface">Sin proyectos aún</p>
                         <p class="text-sm">Sube tu primer proyecto para comenzar</p>
                         <button onclick="openUploadModal()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary/80 transition-all">
                             Crear proyecto
@@ -1640,7 +2082,7 @@
                 return;
             }
 
-            // Ordenar proyectos por fecha de creacion (mas recientes primero)
+            // Ordenar proyectos por fecha de creación (más recientes primero)
             const sorted = [...projects].sort((a, b) => {
                 const da = a.created_at ? new Date(a.created_at) : new Date(0);
                 const db = b.created_at ? new Date(b.created_at) : new Date(0);
@@ -1680,13 +2122,14 @@
                 return `
                     <div class="project-card glass rounded-2xl p-5 glass-hover border border-outline-variant/10 ${p.status === 'error' ? 'border-red-300/40' : ''}">
                         <div class="flex items-start justify-between mb-3">
+                            <!-- Badge de estado -->
                             <span class="status-badge ${st.class}" ${errorMsg ? `title="${errorMsg}"` : ''}>${st.label}</span>
                             <div class="flex gap-2">
-                                <!-- Boton Editar proyecto -->
+                                <!-- Botón Editar proyecto -->
                                 <button onclick="event.stopPropagation(); openEditModal('${p._id}', '${p.name}', '${p.description || ''}')" class="action-icon" title="Editar proyecto">
                                     <span class="material-symbols-outlined">edit</span>
                                 </button>
-                                <!-- Boton Sincronizar (solo para planes Pro/Enterprise) -->
+                                <!-- Botón Sincronizar (solo para planes Pro/Enterprise) -->
                                 ${canSync ? `
                                 <button onclick="event.stopPropagation(); syncProject('${p._id}', '${p.name}')" class="action-icon" title="Actualizar desde GitHub">
                                     <span class="material-symbols-outlined">sync</span>
@@ -1694,7 +2137,7 @@
                                 ` : ''}
                             </div>
                         </div>
-                        <!-- Click en la tarjeta redirige al analisis del proyecto -->
+                        <!-- Click en la tarjeta redirige al análisis del proyecto -->
                         <div class="flex items-start gap-3 mb-3 cursor-pointer" onclick="window.location.href='/analysis/${p._id}'">
                             <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 flex-shrink-0">
                                 <span class="material-symbols-outlined text-xl">${icon}</span>
@@ -1724,7 +2167,7 @@
                             <span class="text-xs font-bold" style="color:${q >= 70 ? '#10b981' : q >= 40 ? '#f59e0b' : '#ef4444'}">${q}%</span>
                         </div>
                         ` : ''}
-                        <!-- Metricas del proyecto -->
+                        <!-- Métricas del proyecto -->
                         <div class="project-metrics">
                             <div class="metric">
                                 <div class="value">${p.stats?.files || 0}</div>
@@ -1748,11 +2191,12 @@
         }
 
         // ============================================================
-        // GESTION DE MODALES
+        // GESTIÓN DE MODALES
         // ============================================================
         
         /**
-         * Abre el modal de subida de proyecto
+         * Abre el modal de subida de proyecto.
+         * Muestra el modal para crear un nuevo proyecto.
          */
         function openUploadModal() {
             document.getElementById('uploadModal').classList.add('flex');
@@ -1760,7 +2204,8 @@
         }
 
         /**
-         * Cierra el modal de subida y limpia el formulario
+         * Cierra el modal de subida y limpia el formulario.
+         * Limpia los campos y resetea el archivo seleccionado.
          */
         function closeUploadModal() {
             document.getElementById('uploadModal').classList.add('hidden');
@@ -1773,8 +2218,8 @@
         let selectedFile = null; // Archivo seleccionado para subir
 
         /**
-         * Maneja la seleccion de archivo (click o drag & drop)
-         * @param {Event} e - Evento de seleccion de archivo
+         * Maneja la selección de archivo (click o drag & drop).
+         * @param {Event} e - Evento de selección de archivo.
          */
         function onFileSelect(e) {
             selectedFile = e.target.files[0];
@@ -1788,11 +2233,12 @@
         }
 
         // ============================================================
-        // CREACION DE PROYECTOS
+        // CREACIÓN DE PROYECTOS
         // ============================================================
         
         /**
-         * Crea un nuevo proyecto (subida de archivo o clonacion desde GitHub)
+         * Crea un nuevo proyecto (subida de archivo o clonación desde GitHub).
+         * Valida los campos, envía la petición al backend y maneja la respuesta.
          */
         async function createProject() {
             const name = document.getElementById('proj-name').value.trim() || 'Nuevo Proyecto';
@@ -1816,7 +2262,7 @@
             btn.textContent = 'Creando...';
 
             try {
-                // Enviar peticion al backend
+                // Enviar petición al backend
                 const res = await fetch('/api/projects/', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
@@ -1831,7 +2277,7 @@
                     modal.classList.add('flex');
                     modal.classList.remove('hidden');
                     
-                    // Iniciar analisis del proyecto
+                    // Iniciar análisis del proyecto
                     await fetch('/api/analysis/' + data.id + '/start', { 
                         method: 'POST', 
                         headers: authHeaders() 
@@ -1841,7 +2287,7 @@
                     modal.classList.remove('flex');
                     await loadProjects(); // Recargar proyectos
                 } else {
-                    // Manejar errores especificos
+                    // Manejar errores específicos
                     if (data.error && data.error.includes('limite')) {
                         showLimitModal(data.error);
                     } else if (data.error && data.error.includes('Ya existe un proyecto con el nombre')) {
@@ -1859,11 +2305,12 @@
         }
 
         // ============================================================
-        // MODALES DE ERROR Y VALIDACION
+        // MODALES DE ERROR Y VALIDACIÓN
         // ============================================================
         
         /**
-         * Muestra el modal de limite de proyectos alcanzado
+         * Muestra el modal de límite de proyectos alcanzado.
+         * @param {string} message - Mensaje de error.
          */
         function showLimitModal(message) {
             document.getElementById('limitModal').classList.remove('hidden');
@@ -1871,7 +2318,7 @@
         }
 
         /**
-         * Cierra el modal de limite alcanzado
+         * Cierra el modal de límite alcanzado.
          */
         function closeLimitModal() {
             document.getElementById('limitModal').classList.add('hidden');
@@ -1879,8 +2326,8 @@
         }
 
         /**
-         * Muestra el modal de nombre duplicado
-         * @param {string} message - Mensaje de error
+         * Muestra el modal de nombre duplicado.
+         * @param {string} message - Mensaje de error.
          */
         function showDuplicateModal(message) {
             const modal = document.getElementById('duplicateModal');
@@ -1893,23 +2340,23 @@
         }
 
         /**
-         * Cierra el modal de nombre duplicado
+         * Cierra el modal de nombre duplicado.
          */
         function closeDuplicateModal() {
             document.getElementById('duplicateModal').classList.add('hidden');
             document.getElementById('duplicateModal').classList.remove('flex');
         }
 
-        let syncButtonElement = null; // Referencia al boton de sincronizacion
+        let syncButtonElement = null; // Referencia al botón de sincronización
 
         /**
-         * Abre el modal de confirmacion para sincronizar proyecto
-         * @param {string} projectId - ID del proyecto
-         * @param {string} projectName - Nombre del proyecto
+         * Abre el modal de confirmación para sincronizar proyecto.
+         * @param {string} projectId - ID del proyecto.
+         * @param {string} projectName - Nombre del proyecto.
          */
         async function syncProject(projectId, projectName) {
             syncButtonElement = event.target.closest('button');
-            document.getElementById('syncConfirmMessage').textContent = 'Actualizar "' + projectName + '" desde GitHub? Esto reemplazara los datos actuales con los del repositorio.';
+            document.getElementById('syncConfirmMessage').textContent = 'Actualizar "' + projectName + '" desde GitHub? Esto reemplazará los datos actuales con los del repositorio.';
             
             const confirmBtn = document.getElementById('confirmSyncBtn');
             confirmBtn.dataset.projectId = projectId;
@@ -1920,7 +2367,7 @@
         }
 
         /**
-         * Cierra el modal de confirmacion de sincronizacion
+         * Cierra el modal de confirmación de sincronización.
          */
         function closeSyncConfirmModal() {
             document.getElementById('syncConfirmModal').classList.add('hidden');
@@ -1929,7 +2376,8 @@
         }
 
         /**
-         * Confirma y ejecuta la sincronizacion del proyecto
+         * Confirma y ejecuta la sincronización del proyecto.
+         * Llama al endpoint de sync y maneja la respuesta.
          */
         async function confirmSync() {
             const confirmBtn = document.getElementById('confirmSyncBtn');
@@ -1954,7 +2402,7 @@
 
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('syncSuccessMessage').textContent = data.message || 'Proyecto sincronizado correctamente. El analisis comenzara pronto.';
+                    document.getElementById('syncSuccessMessage').textContent = data.message || 'Proyecto sincronizado correctamente. El análisis comenzará pronto.';
                     document.getElementById('syncSuccessModal').classList.remove('hidden');
                     document.getElementById('syncSuccessModal').classList.add('flex');
                     await loadProjects(); // Recargar proyectos
@@ -1973,20 +2421,20 @@
         }
 
         /**
-         * Cierra el modal de exito de sincronizacion
+         * Cierra el modal de éxito de sincronización.
          */
         function closeSyncSuccessModal() {
             document.getElementById('syncSuccessModal').classList.add('hidden');
             document.getElementById('syncSuccessModal').classList.remove('flex');
         }
 
-        let currentEditProjectId = null; // ID del proyecto que se esta editando
+        let currentEditProjectId = null; // ID del proyecto que se está editando
 
         /**
-         * Abre el modal de edicion de proyecto
-         * @param {string} projectId - ID del proyecto
-         * @param {string} name - Nombre actual
-         * @param {string} description - Descripcion actual
+         * Abre el modal de edición de proyecto.
+         * @param {string} projectId - ID del proyecto.
+         * @param {string} name - Nombre actual.
+         * @param {string} description - Descripción actual.
          */
         function openEditModal(projectId, name, description) {
             currentEditProjectId = projectId;
@@ -1997,7 +2445,7 @@
         }
 
         /**
-         * Cierra el modal de edicion
+         * Cierra el modal de edición.
          */
         function closeEditModal() {
             const editModal = document.getElementById('editModal');
@@ -2009,7 +2457,8 @@
         }
 
         /**
-         * Guarda los cambios del proyecto editado
+         * Guarda los cambios del proyecto editado.
+         * Valida el nombre y envía la actualización al backend.
          */
         async function saveProjectEdit() {
             if (!currentEditProjectId) return;
@@ -2062,7 +2511,8 @@
         }
 
         /**
-         * Cierra sesion del usuario
+         * Cierra sesión del usuario.
+         * Limpia localStorage y redirige a la página de login.
          */
         function logout() {
             localStorage.clear();
@@ -2070,17 +2520,17 @@
         }
 
         // ============================================================
-        // SISTEMA DE PARTICULAS (FONDO ANIMADO)
+        // SISTEMA DE PARTÍCULAS (FONDO ANIMADO)
         // ============================================================
         
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
         let mouse = { x: null, y: null };
-        const particleCount = 60;
+        const particleCount = 60; // Número de partículas
 
         /**
-         * Inicializa el canvas con el tamano de la ventana
+         * Inicializa el canvas con el tamaño de la ventana.
          */
         function initCanvas() {
             canvas.width = window.innerWidth;
@@ -2089,13 +2539,14 @@
         }
 
         /**
-         * Clase que representa una particula individual
+         * Clase que representa una partícula individual.
+         * Cada partícula tiene posición, velocidad, tamaño y color.
          */
         class Particle {
             constructor() { this.reset(); }
             
             /**
-             * Reinicia la particula en una posicion aleatoria
+             * Reinicia la partícula en una posición aleatoria.
              */
             reset() {
                 this.x = Math.random() * canvas.width;
@@ -2107,13 +2558,14 @@
             }
             
             /**
-             * Actualiza la posicion de la particula
+             * Actualiza la posición de la partícula.
+             * Aplica efecto de repulsión del mouse.
              */
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
                 
-                // Efecto de repulsion del mouse
+                // Efecto de repulsión del mouse
                 if (mouse.x !== null) {
                     const dx = mouse.x - this.x;
                     const dy = mouse.y - this.y;
@@ -2126,7 +2578,7 @@
                     }
                 }
                 
-                // Rebote en los bordes
+                // Rebote en los bordes (efecto de borde infinito)
                 if (this.x < 0) this.x = canvas.width;
                 if (this.x > canvas.width) this.x = 0;
                 if (this.y < 0) this.y = canvas.height;
@@ -2134,7 +2586,8 @@
             }
             
             /**
-             * Dibuja la particula y las conexiones con otras cercanas
+             * Dibuja la partícula y las conexiones con otras cercanas.
+             * Dibuja líneas entre partículas con distancia < 100px.
              */
             draw() {
                 ctx.fillStyle = this.color;
@@ -2142,7 +2595,7 @@
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Dibujar lineas de conexion
+                // Dibujar líneas de conexión
                 particles.forEach(p => {
                     const d = Math.hypot(this.x - p.x, this.y - p.y);
                     if (d < 100) {
@@ -2158,7 +2611,7 @@
         }
 
         /**
-         * Configura las particulas iniciales
+         * Configura las partículas iniciales.
          */
         function setupParticles() {
             particles = [];
@@ -2166,7 +2619,8 @@
         }
 
         /**
-         * Bucle de animacion de las particulas
+         * Bucle de animación de las partículas.
+         * Usa requestAnimationFrame para animación fluida.
          */
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2179,8 +2633,9 @@
         // ============================================================
         
         /**
-         * Carga el plan del usuario desde el backend
-         * @returns {Object|null} Datos del plan o null en caso de error
+         * Carga el plan del usuario desde el backend.
+         * Actualiza la UI con el nombre del plan y sus características.
+         * @returns {Object|null} Datos del plan o null en caso de error.
          */
         async function loadUserPlan() {
             try {
@@ -2206,9 +2661,9 @@
                     };
 
                     const planDetails = {
-                        free: '3 proyectos · Analisis basico · Documentacion automatica',
-                        pro: '20 proyectos · Analisis avanzado · PDF + IA',
-                        enterprise: 'Proyectos ilimitados · Analisis ilimitados · Soporte prioritario'
+                        free: '3 proyectos · Análisis básico · Documentación automática',
+                        pro: '20 proyectos · Análisis avanzado · PDF + IA',
+                        enterprise: 'Proyectos ilimitados · Análisis ilimitados · Soporte prioritario'
                     };
                     
                     // Actualizar nombre del plan en header
@@ -2218,7 +2673,7 @@
                         planNameEl.className = 'text-sm font-semibold ' + (planColors[plan] || 'text-gray-500');
                     }
                     
-                    // Actualizar seccion de Plan en configuracion
+                    // Actualizar sección de Plan en configuración
                     const configPlanName = document.getElementById('config-plan-name');
                     const configPlanDetails = document.getElementById('config-plan-details');
                     if (configPlanName) {
@@ -2228,7 +2683,7 @@
                         configPlanDetails.textContent = planDetails[plan] || '';
                     }
                     
-                    // Guardar en localStorage para acceso rapido
+                    // Guardar en localStorage para acceso rápido
                     localStorage.setItem('userPlan', plan);
                     
                     // Actualizar sidebar
@@ -2250,12 +2705,13 @@
         // ============================================================
         
         /**
-         * Inicializa el efecto de inclinacion 3D en las tarjetas
+         * Inicializa el efecto de inclinación 3D en las tarjetas.
+         * Rota las tarjetas según la posición del mouse.
          */
         function initTilt() {
             const cards = document.querySelectorAll('.tilt-card, .project-card');
             cards.forEach(card => {
-                if (card.hasTilt) return;
+                if (card.hasTilt) return; // Evita duplicar event listeners
                 card.hasTilt = true;
                 const interaction = card.querySelector('.card-interaction') || card;
                 
@@ -2264,26 +2720,28 @@
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
+                    // Calcular rotación basada en la posición del mouse
                     const rotateX = (y - rect.height/2) / 50;
                     const rotateY = (rect.width/2 - x) / 50;
                     interaction.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(1.01, 1.01, 1.01)';
                 });
                 
                 card.addEventListener('mouseleave', () => {
+                    // Restaurar posición al salir
                     interaction.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                 });
             });
         }
 
         // ============================================================
-        // INICIALIZACION DE LA PAGINA
+        // INICIALIZACIÓN DE LA PÁGINA
         // ============================================================
         
         // Event listeners para redimensionar y movimiento del mouse
         window.addEventListener('resize', initCanvas);
         window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
 
-        // Inicializacion al cargar el DOM
+        // Inicialización al cargar el DOM
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             animate();

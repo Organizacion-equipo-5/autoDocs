@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>debride — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+  }
+  body { background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; font-size: 12pt; line-height: 1.6; text-align: justify; }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+  .doc-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .doc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .doc-header .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat .val { font-size: 1.8rem; font-weight: 800; color: var(--white); }
+  .stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .quality-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #10b981; margin-top: 1rem; }
+  h1, h2, h3, h4 { font-family: Arial, Helvetica, sans-serif; text-align: left; }
+  h1 { font-size: 20pt; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  h2 { font-size: 16pt; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }
+  h3 { font-size: 13pt; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 12pt; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  p, li { margin: 0.75rem 0; font-size: 12pt; text-align: justify; }
+  code { background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.3); padding: 0.2rem 0.55rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: #7dd3fc; }
+  pre { background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; border: none; padding: 0; color: #bae6fd; font-size: 0.95rem; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .report-table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }
+  .report-table thead tr { background: rgba(56,189,248,0.08); }
+  .report-table th, .report-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); }
+  .report-table th { color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .report-table td { color: var(--text); }
+  th { background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  blockquote { border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem; background: rgba(52,211,153,0.1); border-radius: 0 8px 8px 0; margin: 1rem 0; color: #6ee7b7; font-size: 1.05rem; font-weight: 600; font-style: italic; }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc-list { list-style: none; padding-left: 0; }
+  .toc-list li { margin: 0.35rem 0; }
+  .toc-list a { color: var(--accent); text-decoration: none; }
+  .toc-list a:hover { text-decoration: underline; }
+  .toc-list .toc-h1 { font-weight: 700; font-size: 1rem; margin-top: 0.9rem; }
+  .toc-list .toc-h1 a { color: var(--white); }
+  .toc-list .toc-h2 { padding-left: 1.25rem; font-size: 0.92rem; }
+  .toc-list .toc-h3 { padding-left: 2.5rem; font-size: 0.85rem; }
+  .toc-list .toc-h3 a { color: var(--accent2); }
+  .doc-footer { margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; }
+  @media print {
+    @page { margin: 2cm; @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; } }
+    .doc-header { page-break-after: always; min-height: 85vh; }
+    .toc { page-break-after: always; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .diagram-section { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <h1><span class="material-icons">description</span> debride</h1>
+    <div class="subtitle">Documentación Técnica Profesional · Generado 10/08/2026 03:09 UTC</div>
+    <div class="quality-badge">Score de Calidad: 72/100</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">5</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">100</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">27</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">0</div><div class="lbl">Endpoints</div></div>
+    </div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ul class="toc-list"><li class="toc-h1"><a href="#sec1">1. Documentación del Proyecto</a></li><li class="toc-h2"><a href="#sec2">Resumen Ejecutivo</a></li><li class="toc-h2"><a href="#sec3">Stack Tecnológico</a></li><li class="toc-h2"><a href="#sec4">Estadísticas del Proyecto</a></li><li class="toc-h2"><a href="#sec5">2. Documentación de Arquitectura y Diseño</a></li><li class="toc-h3"><a href="#sec6">2.1 Estructura de Directorios</a></li><li class="toc-h3"><a href="#sec7">2.2 Distribución por Capas</a></li><li class="toc-h3"><a href="#sec8">2.3 Distribución de Lenguajes</a></li><li class="toc-h3"><a href="#sec9">2.4 Diagrama de Infraestructura</a></li><li class="toc-h3"><a href="#sec10">2.5 Diagrama de Casos de Uso</a></li><li class="toc-h3"><a href="#sec11">2.6 Diagrama de Clases</a></li><li class="toc-h3"><a href="#sec12">2.7 Patrones Detectados</a></li><li class="toc-h3"><a href="#sec13">2.8 Insights de Arquitectura (IA)</a></li><li class="toc-h2"><a href="#sec14">3. Documentación Técnica de Código</a></li><li class="toc-h2"><a href="#sec15">4. Documentación de Clases</a></li><li class="toc-h3"><a href="#sec16">Debride</a></li><li class="toc-h3"><a href="#sec17">then</a></li><li class="toc-h3"><a href="#sec18">SafeDebride</a></li><li class="toc-h3"><a href="#sec19">TestDebride</a></li><li class="toc-h3"><a href="#sec20">Seattle</a></li><li class="toc-h3"><a href="#sec21">Seattle</a></li><li class="toc-h3"><a href="#sec22">Seattle</a></li><li class="toc-h3"><a href="#sec23">Seattle</a></li><li class="toc-h3"><a href="#sec24">QuarterPounder</a></li><li class="toc-h3"><a href="#sec25">QuarterPounder</a></li><li class="toc-h3"><a href="#sec26">QuarterPounder</a></li><li class="toc-h3"><a href="#sec27">QuarterPounder</a></li><li class="toc-h3"><a href="#sec28">Z</a></li><li class="toc-h3"><a href="#sec29">Z</a></li><li class="toc-h3"><a href="#sec30">Seattle</a></li><li class="toc-h3"><a href="#sec31">Seattle</a></li><li class="toc-h3"><a href="#sec32">Seattle</a></li><li class="toc-h3"><a href="#sec33">Seattle</a></li><li class="toc-h3"><a href="#sec34">Seattle</a></li><li class="toc-h3"><a href="#sec35">Seattle</a></li><li class="toc-h3"><a href="#sec36">Seattle</a></li><li class="toc-h3"><a href="#sec37">Seattle</a></li><li class="toc-h3"><a href="#sec38">RailsThing</a></li><li class="toc-h3"><a href="#sec39">RailsModel</a></li><li class="toc-h3"><a href="#sec40">Constants</a></li><li class="toc-h3"><a href="#sec41">AttributeAccessor</a></li><li class="toc-h3"><a href="#sec42">AttributeAccessor</a></li><li class="toc-h2"><a href="#sec43">5. Documentación de Funciones</a></li><li class="toc-h3"><a href="#sec44">Módulo: bin\debride_rm</a></li><li class="toc-h3"><a href="#sec45">Módulo: lib\debride.rb</a></li><li class="toc-h3"><a href="#sec46">Módulo: test\test_debride.rb</a></li><li class="toc-h2"><a href="#sec47">6. Modelos de Datos</a></li><li class="toc-h3"><a href="#sec48">RailsModel</a></li><li class="toc-h2"><a href="#sec49">7. Guía de Despliegue y Mantenimiento</a></li><li class="toc-h3"><a href="#sec50">7.1 Requisitos del Sistema</a></li><li class="toc-h3"><a href="#sec51">7.2 Instalación Local</a></li><li class="toc-h3"><a href="#sec52">7.3 Despliegue con Docker</a></li><li class="toc-h3"><a href="#sec53">7.4 Variables de Entorno Recomendadas</a></li><li class="toc-h3"><a href="#sec54">7.5 Checklist de Despliegue</a></li><li class="toc-h3"><a href="#sec55">7.6 Registro de Cambios (Changelog)</a></li><li class="toc-h2"><a href="#sec56">8. Reporte de Calidad del Código</a></li><li class="toc-h3"><a href="#sec57">8.1 Análisis de Métricas</a></li><li class="toc-h3"><a href="#sec58">8.2 Funciones con Alta Complejidad Ciclomática</a></li><li class="toc-h3"><a href="#sec59">8.3 Recomendaciones</a></li><li class="toc-h3"><a href="#sec60">8.4 Errores de Análisis</a></li><li class="toc-h2"><a href="#sec61">9. Análisis de Datos del Proyecto</a></li><li class="toc-h3"><a href="#sec62">9.1 Tipos y Fuentes de Datos Detectados</a></li><li class="toc-h3"><a href="#sec63">9.2 Esquema de Data Warehouse Inferido</a></li><li class="toc-h3"><a href="#sec64">9.3 Reporte de Calidad de Datos</a></li><li class="toc-h3"><a href="#sec65">9.4 Minería de Datos Aplicada al Código</a></li><li class="toc-h3"><a href="#sec66">9.5 Pipeline ETL Utilizado</a></li></ul>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-08-10 03:08 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>Ruby</strong> y cuenta con
+5 archivos fuente, 100 funciones, 27 clases y
+0 endpoints de API documentados. El score de calidad del código es
+<strong>72/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td>5 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>27</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>72/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>0 / 100</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 27</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3 id="sec6">2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── (raíz)/
+├── bin/
+├── lib/
+├── test/
+</code></pre>
+<h3 id="sec7">2.2 Distribución por Capas</h3>
+<ul>
+<li><strong><code>(raíz)/</code></strong> — 5 archivos [.autotest(1), .rdoc(2), .txt(1), .sin ext(1)]</li>
+<li><strong><code>bin/</code></strong> — 3 archivos [.sin ext(3)]</li>
+<li><strong><code>lib/</code></strong> — 1 archivos [.rb(1)]</li>
+<li><strong><code>test/</code></strong> — 1 archivos [.rb(1)]</li>
+</ul>
+<h3 id="sec8">2.3 Distribución de Lenguajes</h3>
+<ul>
+<li>Ruby: 5 archivos (100%)</li>
+</ul>
+<h3 id="sec9">2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3 id="sec10">2.5 Diagrama de Casos de Uso</h3>
+<h3 id="sec11">2.6 Diagrama de Clases</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<blockquote>
+<p>⚠️ <strong>Clases con información incompleta:</strong> Las siguientes clases aparecen sin métodos ni atributos documentados: <code>Debride</code>, <code>then</code>, <code>SafeDebride</code>, <code>TestDebride</code>, <code>Seattle</code>, <code>Seattle</code>, <code>Seattle</code>, <code>Seattle</code>, <code>QuarterPounder</code>, <code>QuarterPounder</code> y 17 más. Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.</p>
+</blockquote>
+<h3 id="sec12">2.7 Patrones Detectados</h3>
+<ul>
+<li><strong>Patrón MVC</strong>: clases Model detectadas</li>
+<li><strong>Testing</strong>: 35 funciones de prueba detectadas</li>
+</ul>
+<h3 id="sec13">2.8 Insights de Arquitectura (IA)</h3>
+<p><strong>Insights Arquitectónicos</strong></p>
+<ol>
+<li><strong>Patrones arquitectónicos probables</strong>: Debido a la ausencia de endpoints, es probable que el proyecto siga un patrón de arquitectura Monolito o de aplicación de consola.</li>
+<li><strong>Buenas prácticas detectadas</strong>: La presencia de clases (27) sugiere un enfoque orientado a objetos, lo que es una buena práctica en Ruby.</li>
+<li><strong>Áreas de mejora sugeridas</strong>: La falta de endpoints indica que el proyecto podría beneficiarse de la implementación de una API para mejorar su interoperabilidad y escalabilidad.</li>
+<li><strong>Complejidad del proyecto</strong>: La cantidad de funciones (100) y clases (27) sugiere un proyecto de complejidad moderada.</li>
+<li><strong>Recomendaciones de escalabilidad</strong>: Considerar la implementación de una arquitectura de microservicios y utilizar frameworks como Ruby on Rails para mejorar la escalabilidad y el manejo de endpoints.</li>
+</ol>
+<hr />
+<h2 id="sec14">3. Documentación Técnica de Código</h2>
+<p>No se detectaron endpoints en este proyecto.</p>
+<hr />
+<h2 id="sec15">4. Documentación de Clases</h2>
+<p>Total: <strong>27 clases</strong></p>
+<h3 id="sec16"><code>Debride</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>lib\debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> MethodBasedSexpProcessor</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Clase Debride: Una herramienta para procesar información</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong>
+La clase Debride es como un ayudante que se encarga de procesar y limpiar información para que sea más fácil de entender y utilizar. Piensa en ella como una especie de "organizador" que toma datos complejos y los convierte en algo más simple y útil.</p>
+<p><strong>2. Representación en el sistema:</strong>
+Imagina un sistema como una gran oficina donde diferentes departamentos trabajan juntos para lograr un objetivo común. La clase Debride sería como el departamento de "Procesamiento de Datos", donde se reciben y se organizan los datos para que otros departamentos puedan utilizarlos de manera efectiva.</p>
+<p><strong>3. Funcionalidades principales:</strong>
+La clase Debride puede hacer varias cosas, como:
+* Tomar información compleja y descomponerla en partes más pequeñas y manejables.
+* Eliminar información innecesaria o redundancy para que los datos sean más claros y concisos.
+* Reorganizar la información de manera que sea más fácil de entender y utilizar.</p>
+<p><strong>4. Uso en la vida real:</strong>
+En la vida real, una clase como Debride podría ser utilizada en situaciones como:
+* Un sitio web que necesita procesar grandes cantidades de datos para mostrar información relevante a los usuarios.
+*</p>
+<hr />
+<h3 id="sec17"><code>then</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>lib\debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Descripción de la clase "then"</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong>
+La clase "then" es como un pequeño ayudante que se encarga de hacer algo después de que otra cosa haya sucedido. En otras palabras, es una forma de decir "cuando esto suceda, haz eso".</p>
+<p><strong>2. Representación en el sistema:</strong>
+Imagina un sistema de producción en una fábrica. La clase "then" es como un trabajador que se encarga de realizar una tarea específica después de que se haya completado otra tarea. Por ejemplo, cuando se termina de ensamblar un producto, el trabajador "then" se encarga de empaquetarlo y prepararlo para ser enviado.</p>
+<p><strong>3. Funcionalidades principales:</strong>
+La clase "then" puede hacer lo siguiente:
+* Esperar a que algo suceda antes de realizar una acción.
+* Realizar una acción específica después de que algo haya sucedido.
+* Ayudar a organizar el flujo de trabajo en un sistema.</p>
+<p><strong>4. Uso en la vida real:</strong>
+Un ejemplo práctico sería en un sistema de pago en línea. Cuando un cliente completa su compra, la clase "then" se encarga de enviar un correo electrónico de confirmación y actualizar el estado del pedido. Otro ejemplo sería en un sistema de automatización de tareas, donde la clase "then</p>
+<hr />
+<h3 id="sec18"><code>SafeDebride</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> Debride</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p><strong>Descripción de la Clase SafeDebride</strong></p>
+</blockquote>
+<p><strong>1. Propósito de la clase:</strong>
+La clase SafeDebride está diseñada para proteger y limpiar archivos de manera segura. Piensa en ella como un "limpiador de archivos" que se asegura de que los archivos estén libres de problemas y sean seguros para usar.</p>
+<p><strong>2. Representación en el sistema:</strong>
+Imagina que la clase SafeDebride es como un filtro de agua en un sistema de suministro de agua. Al igual que el filtro de agua elimina los contaminantes y asegura que el agua sea segura para beber, la clase SafeDebride elimina los problemas en los archivos y asegura que sean seguros para usar en el sistema.</p>
+<p><strong>3. Funcionalidades principales:</strong>
+La clase SafeDebride puede hacer lo siguiente:
+* Identificar y eliminar problemas en los archivos
+* Asegurarse de que los archivos estén completos y no dañados
+* Proteger los archivos contra accesos no autorizados
+* Limpiar los archivos de manera segura para que sean fáciles de usar</p>
+<p><strong>4. Uso en la vida real:</strong>
+La clase SafeDebride se puede usar en situaciones como:
+* Cuando se descargan archivos de Internet y se quiere asegurar que estén libres de virus o malware
+* Cuando se trabaja con archivos sensibles</p>
+<hr />
+<h3 id="sec19"><code>TestDebride</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> Minitest</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec20"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec21"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec22"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec23"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec24"><code>QuarterPounder</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec25"><code>QuarterPounder</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec26"><code>QuarterPounder</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec27"><code>QuarterPounder</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec28"><code>Z</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec29"><code>Z</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec30"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec31"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec32"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec33"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec34"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec35"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec36"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec37"><code>Seattle</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec38"><code>RailsThing</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec39"><code>RailsModel</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec40"><code>Constants</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec41"><code>AttributeAccessor</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec42"><code>AttributeAccessor</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>test\test_debride.rb</code></li>
+<li><strong>Línea:</strong> 0</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec43">5. Documentación de Funciones</h2>
+<p>Total: <strong>100 funciones</strong></p>
+<h3 id="sec44">Módulo: <code>bin\debride_rm</code></h3>
+<p><strong><code>autoclave</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "autoclave" sirve para procesar un archivo específico. Necesita saber qué archivo debe procesar, que en este caso se encuentra en "bin\debride_rm". Una vez que recibe esta información, la función realiza las operaciones necesarias y produce un resultado procesado. En la vida real, se puede usar para limpiar o preparar archivos para su uso en otros programas. En el sistema, es importante porque ayuda a mantener los archivos en orden y listos para su uso, asegurando que el programa funcione correctamente.</p>
+</blockquote>
+<hr />
+<h3 id="sec45">Módulo: <code>lib\debride.rb</code></h3>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "self" se utiliza para identificar y retornar el objeto actual en el que se está ejecutando. </p>
+</blockquote>
+<p>Necesita saber qué objeto es el que se está utilizando. </p>
+<p>Retorna el objeto mismo. </p>
+<p>Se utiliza en situaciones donde es necesario referirse al objeto actual, como en la creación de instancias o en la resolución de conflictos de nombres. </p>
+<p>Es importante porque permite a los programadores acceder y manipular el objeto actual de forma efectiva.</p>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "self" se utiliza para referirse a la propia instancia de una clase. </p>
+</blockquote>
+<p><strong>Propósito:</strong> Ayuda a una parte del programa a saber quién es y qué puede hacer.
+<strong>Datos necesarios:</strong> La propia instancia.
+<strong>Resultado:</strong> La instancia actual.
+<strong>Uso en la vida real:</strong> Es como un espejo que muestra quién eres en un momento dado.
+<strong>Importancia:</strong> Esencial para que el programa sepa qué hacer consigo mismo.</p>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Esta función se llama "self" y sirve para identificar y proporcionar información sobre el objeto que la está utilizando. </p>
+</blockquote>
+<p>Necesita saber quién la está llamando para funcionar. </p>
+<p>Su resultado es la identificación del objeto que la invocó. </p>
+<p>En la vida real, se usa como una especie de espejo que refleja quién está pidiendo una acción. </p>
+<p>Es importante porque ayuda al sistema a saber quién está haciendo qué, manteniendo todo organizado.</p>
+<p><strong><code>run</code></strong></p>
+<ul>
+<li>Parámetros: <code>*files</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>La función "run" ayuda a procesar archivos de manera eficiente. Para funcionar, necesita recibir uno o más archivos como entrada. Una vez que recibe estos archivos, los procesa y produce un resultado que puede ser utilizado para tomar decisiones o realizar acciones siguientes. En la vida real, esta función se puede utilizar para automatizar tareas repetitivas, como procesar grandes cantidades de datos o archivos. Es importante en el sistema porque permite ejecutar múltiples archivos de manera simultánea, ahorrando tiempo y esfuerzo. En resumen, "run" es como una herramienta que ayuda a hacer el trabajo más rápido y fácil.</p>
+</blockquote>
+<p><strong><code>process</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_rb</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>initialize</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>klass_name</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>plain_method_name</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_attrasgn</code></strong></p>
+<ul>
+<li>Parámetros: <code>sexp</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_op_asgn2</code></strong></p>
+<ul>
+<li>Parámetros: <code>sexp</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>record_method</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_call</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>string_like</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_alias</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_block_pass</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_cdecl</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>name_to_string</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_colon2</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_colon3</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_const</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_defn</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_defs</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>process_hash</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>missing</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>missing_locations</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>report</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>report_text</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>report_json</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>report_yaml</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>inspect</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3 id="sec46">Módulo: <code>test\test_debride.rb</code></h3>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>assert_option</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>assert_process</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_sanity</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_parse_options</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_parse_options_empty</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_parse_options_exclude</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_parse_options_focus</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_parse_options_whitelist</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_exclude_files</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_exclude_files__multiple</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_exclude_files__dir_without_slash</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_focus</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_format__plain</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_format__json</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_format__yaml</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_whitelist</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_whitelist_regexp</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_process_rb_path</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_process_rb_io</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_call__alias_method__symbol</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_call__alias_method__string</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_call__alias_method__interpolated</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_alias_method_chain</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>royale_with_cheese</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_cdecl_const2</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_cdecl_const3</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_method_send</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_method_try</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_block_pass</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_block_pass_other</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_block_pass_empty</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>g</code></strong></p>
+<ul>
+<li>Parámetros: <code>&amp;</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_hash__shorthand</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_hash__not_shorthand</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_hash__kwsplat_bug</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_safe_navigation_operator</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_call_method</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_rails_dsl_methods</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>save_callback</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>action_filter</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>callback_condition</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>action_condition</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>string_condition</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>validation_condition</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>some_validation_method</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>test_rails_dsl_macro_definitions</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>instance_method_caller</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>self</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec47">6. Modelos de Datos</h2>
+<p>Se detectaron <strong>1 modelos de datos</strong>:</p>
+<h3 id="sec48"><code>RailsModel</code></h3>
+<ul>
+<li>Archivo: <code>test\test_debride.rb</code></li>
+<li>Hereda de: object</li>
+<li>Métodos: </li>
+</ul>
+<hr />
+<h2 id="sec49">7. Guía de Despliegue y Mantenimiento</h2>
+<h3 id="sec50">7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: Ruby</li>
+<li><strong>Archivos detectados</strong>: 5</li>
+</ul>
+<h3 id="sec51">7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+bundle install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+# ejecutar proyecto
+</code></pre>
+<h3 id="sec52">7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM ubuntu:22.04
+
+WORKDIR /app
+COPY . .
+RUN bundle install
+EXPOSE 8000
+CMD [&quot;start&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3 id="sec53">7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3 id="sec54">7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3 id="sec55">7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-08-10
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec56">8. Reporte de Calidad del Código</h2>
+<h3 id="sec57">8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 72/100 (Bueno [YELLOW])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 0/100 (0%)
+- Clases documentadas: 0/27</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 1.0
+- Complejidad máxima: 1
+- Funciones con alta complejidad (&gt;10): 0</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: ↓ Baja
+</code></pre>
+<h3 id="sec58">8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<p>No hay funciones con complejidad &gt; 10. [OK]</p>
+<h3 id="sec59">8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 100 funciones sin documentar</li>
+</ul>
+<h3 id="sec60">8.4 Errores de Análisis</h3>
+<p>Sin errores detectados. [OK]</p>
+<hr />
+<h2 id="sec61">9. Análisis de Datos del Proyecto</h2>
+<h3 id="sec62">9.1 Tipos y Fuentes de Datos Detectados</h3>
+<p><strong>Datos Estructurados:</strong> 0 archivos</p>
+<p><strong>Datos Semi-estructurados:</strong> 0 archivos</p>
+<p><strong>Datos No Estructurados:</strong> 0 archivos</p>
+<h3 id="sec63">9.2 Esquema de Data Warehouse Inferido</h3>
+<p><strong>Diagrama Estrella (Star Schema):</strong></p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p>El esquema estrella es adecuado para consultas analíticas rápidas, con una tabla de hechos central conectada a tablas de dimensión.</p>
+<h3 id="sec64">9.3 Reporte de Calidad de Datos</h3>
+<p><strong>Problemas Detectados en el Código:</strong></p>
+<ul>
+<li><strong>Funciones sin documentar:</strong> 100</li>
+<li><code>autoclave</code> en <code>bin\debride_rm</code></li>
+<li><code>self</code> en <code>lib\debride.rb</code></li>
+<li><code>self</code> en <code>lib\debride.rb</code></li>
+<li><code>self</code> en <code>lib\debride.rb</code></li>
+<li><code>run</code> en <code>lib\debride.rb</code></li>
+<li>
+<p>... y 95 más</p>
+</li>
+<li>
+<p><strong>Problemas de naming conventions:</strong> 1</p>
+</li>
+<li><code>then</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+</ul>
+<h3 id="sec65">9.4 Minería de Datos Aplicada al Código</h3>
+<p><em>Análisis automático realizado sobre las funciones y clases extraídas del proyecto.</em></p>
+<h4>A) Funciones de Alta Complejidad Ciclomática</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Umbral</th>
+<th>Cantidad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Alta</td>
+<td>&gt; 5</td>
+<td>0</td>
+<td>Requieren refactorización urgente</td>
+</tr>
+<tr>
+<td>🟡 Media</td>
+<td>4–5</td>
+<td>0</td>
+<td>Candidatas a simplificación</td>
+</tr>
+<tr>
+<td>🟢 Baja</td>
+<td>≤ 3</td>
+<td>100</td>
+<td>Complejidad aceptable</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.</p>
+</blockquote>
+<h4>B) Funciones Sin Documentación</h4>
+<p><strong>100 de 100 funciones</strong> carecen de docstring (100%).</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>autoclave</code></td>
+<td><code>bin\debride_rm</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>run</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_rb</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>initialize</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>klass_name</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>plain_method_name</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_attrasgn</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_op_asgn2</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>record_method</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_call</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>string_like</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_alias</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_block_pass</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>process_cdecl</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>name_to_string</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><em>... y 80 funciones más sin documentar.</em></p>
+<p>💡 <strong>Sugerencia:</strong> Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.</p>
+<h4>C) Detección de Funciones con Nombres Similares (Posibles Duplicados)</h4>
+<p><em>Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse.</em></p>
+<p>Se detectaron <strong>2 grupos de funciones con nombres similares</strong> repartidas en distintos archivos:</p>
+<p><strong>Patrón: <code>*_self</code> / <code>self_*</code></strong> — aparece en 2 archivos distintos</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong>Sugerencia:</strong> Las 24 funciones <code>self</code>, <code>self</code>, <code>self</code>, <code>self</code>... comparten el patrón <code>self</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_block_pass</code> / <code>block_pass_*</code></strong> — aparece en 2 archivos distintos</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>process_block_pass</code></td>
+<td><code>lib\debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>test_block_pass</code></td>
+<td><code>test\test_debride.rb</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>process_block_pass</code> y <code>test_block_pass</code> realizan operaciones similares (<code>block_pass</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/block_pass.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>lib\debride.rb</code>, <code>test\test_debride.rb</code>).</p>
+<hr />
+<h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Funciones</th>
+<th>Complejidad Promedio</th>
+<th>Documentadas</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test\test_debride.rb</code></td>
+<td>67</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🔴 Sobrecargado</td>
+</tr>
+<tr>
+<td><code>lib\debride.rb</code></td>
+<td>32</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🔴 Sobrecargado</td>
+</tr>
+<tr>
+<td><code>bin\debride_rm</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong><code>test\test_debride.rb</code></strong> tiene 67 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).
+💡 <strong><code>lib\debride.rb</code></strong> tiene 32 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).</p>
+<h4>E) Patrones Frecuentes Adicionales (Análisis IA)</h4>
+<ul>
+<li><strong>self</strong>: 4 ocurrencias</li>
+<li>Ejemplos: ['self', 'self', 'self', 'self']</li>
+<li><strong>process</strong>: 3 ocurrencias</li>
+<li>Ejemplos: ['process', 'process_rb', 'process_attrasgn']</li>
+<li><strong>Seattle</strong>: 4 ocurrencias</li>
+<li>Ejemplos: ['Seattle', 'Seattle', 'Seattle', 'Seattle']</li>
+</ul>
+<h3 id="sec66">9.5 Pipeline ETL Utilizado</h3>
+<p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Fases del Pipeline:</strong></p>
+<ul>
+<li><strong>Extract:</strong> Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales</li>
+<li><strong>Transform:</strong> Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones</li>
+<li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
+</ul>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-08-10 03:08 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">debride</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">5</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">27</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">0</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#10b981">72/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">10/08/2026 03:09 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,74 +1,157 @@
 <!DOCTYPE html>
 <html class="light" lang="es">
 <head>
+    <!-- ============================================================
+    METADATOS Y CONFIGURACIÓN DEL DOCUMENTO
+    ============================================================ -->
+    <!-- 
+        charset="UTF-8": Define la codificación de caracteres UTF-8 que soporta 
+        todos los caracteres Unicode incluyendo letras con acentos, ñ y símbolos especiales.
+    -->
     <meta charset="UTF-8" />
+    
+    <!-- 
+        viewport: Controla cómo se muestra la página en dispositivos móviles.
+        width=device-width: Ajusta el ancho al tamaño de la pantalla.
+        initial-scale=1.0: Establece el nivel de zoom inicial al 100%.
+    -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>Analytics — AutoDocs AI</title>
-    <!-- Tailwind CSS para estilos utilitarios -->
+    
+    <!-- ============================================================
+    LIBRERÍAS Y RECURSOS EXTERNOS
+    ============================================================ -->
+    <!-- 
+        Tailwind CSS: Framework utilitario para estilos rápidos y responsive.
+        plugins=forms,container-queries: Habilita estilos predefinidos para 
+        formularios y soporte para container queries.
+    -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- zoom para gráficos -->
-         <!-- Chart.js para gráficos -->
+    
+    <!-- 
+        Chart.js: Biblioteca para crear gráficos interactivos.
+        v4.4.1: Versión utilizada para la visualización de datos.
+        chartjs-plugin-zoom: Plugin que permite zoom y pan en los gráficos.
+    -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
-    <!-- Fuentes personalizadas: Geist para textos, JetBrains Mono para código -->
+    
+    <!-- 
+        Fuentes de Google: JetBrains Mono para código, Geist para UI.
+        JetBrains Mono: Fuente monoespaciada diseñada para código con buena legibilidad.
+        Geist: Fuente sans-serif moderna y limpia para textos generales.
+    -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Iconos de Material Symbols -->
+    
+    <!-- 
+        Iconos Material Symbols: Sistema de iconos de Google Material Design.
+        wght: Rango de peso de la fuente (100-700).
+        FILL: Nivel de relleno del icono (0=outline, 1=filled).
+    -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-
-    
-    <!-- Configuración de Tailwind: colores y tipografía personalizada -->
+    <!-- ============================================================
+    CONFIGURACIÓN DE TAILWIND
+    ============================================================ -->
     <script id="tailwind-config">
+        /*
+            Extiende la configuración de Tailwind con colores personalizados 
+            siguiendo el sistema de diseño Material Design.
+            Estos colores se usan en toda la página para mantener consistencia.
+        */
         tailwind.config = {
+            // darkMode: "class": Habilita el modo oscuro basado en clases CSS
+            // Se activa añadiendo la clase "dark" al elemento html
             darkMode: "class",
             theme: {
                 extend: {
+                    // Paleta de colores semántica para el sistema de diseño
                     colors: {
-                        "secondary": "#818cf8",
-                        "primary": "#38bdf8",
+                        "secondary": "#818cf8",           // Color secundario (violeta)
+                        "primary": "#38bdf8",             // Color principal (azul)
                         "surface-container-high": "#e2e8f0",
                         "surface-variant": "#cbd5e1",
-                        "on-surface-variant": "#334155",
+                        "on-surface-variant": "#334155",   // Texto secundario
                         "outline-variant": "#94a3b8",
-                        "on-surface": "#0f172a",
+                        "on-surface": "#0f172a",           // Texto principal
                         "tertiary": "#7c5800",
-                        "background": "#f1f5f9",
-                        "error": "#ba1a1a",
+                        "background": "#f1f5f9",           // Fondo principal
+                        "error": "#ba1a1a",                // Color de error
                         "surface-container": "#ffffff",
                         "outline": "#64748b",
                         "surface": "#f1f5f9",
                     },
+                    // Fuentes personalizadas para diferentes contextos
                     fontFamily: {
-                        "body-md": ["Geist"],
-                        "headline-lg": ["Geist"],
-                        "display-lg": ["Geist"],
-                        "code-md": ["JetBrains Mono"],
+                        "body-md": ["Geist"],        // Texto general del cuerpo
+                        "headline-lg": ["Geist"],    // Títulos grandes
+                        "display-lg": ["Geist"],     // Textos de display/presentación
+                        "code-md": ["JetBrains Mono"], // Código y texto monoespaciado
                     }
                 },
             },
         }
     </script>
     
+    <!-- ============================================================
+    ESTILOS PERSONALIZADOS
+    ============================================================ -->
     <style>
-        /* Estilos globales */
+        /* ============================================================
+        ESTILOS GLOBALES Y VARIABLES CSS
+        ============================================================ */
+        
+        /* 
+            Estilos base para el body en modo claro.
+            body: Fondo gris claro y texto oscuro por defecto.
+            overflow-x: hidden: Evita scroll horizontal.
+            min-height: 100vh: Ocupa al menos toda la altura de la pantalla.
+        */
         body {
             background: #f1f5f9;
             overflow-x: hidden;
             min-height: 100vh;
             color: #0f172a;
         }
-        html.dark body { background: #0f1418; color: #e2e8f0; }
+        
+        /* 
+            Estilos para el modo oscuro (se activa con la clase .dark en html).
+            Reemplaza los colores de fondo y texto para el tema oscuro.
+        */
+        html.dark body { 
+            background: #0f1418; 
+            color: #e2e8f0; 
+        }
 
-        /* Estilos para modo oscuro */
+        /* ============================================================
+        EFECTO GLASS (VIDRIO ESMERILADO)
+        ============================================================ */
+        /* 
+            Efecto de vidrio esmerilado con desenfoque, transparencia 
+            y bordes sutiles.
+            backdrop-filter: blur(16px): Desenfoca el fondo subyacente.
+        */
         html.dark .glass {
             background: rgba(15, 20, 24, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
+        
+        /* 
+            Efecto hover para elementos glass en modo oscuro.
+            Intensifica el borde y la sombra al pasar el mouse.
+        */
         html.dark .glass-hover:hover {
             border-color: rgba(56, 189, 248, 0.4);
             box-shadow: 0 12px 30px rgba(56, 189, 248, 0.2);
         }
+        
+        /* 
+            Colores de texto en modo oscuro.
+            Usan !important para sobrescribir estilos de Tailwind.
+        */
         html.dark .text-on-surface        { color: #f1f5f9 !important; }
         html.dark .text-on-surface-variant { color: #94a3b8 !important; }
         html.dark .text-primary            { color: #38bdf8 !important; }
@@ -77,20 +160,67 @@
         html.dark .border-primary\/30      { border-color: rgba(56,189,248,0.3) !important; }
         html.dark .bg-primary\/15          { background: rgba(56,189,248,0.15) !important; }
 
-        /* Lienzo de partículas de fondo */
+        /* ============================================================
+        CANVAS DE PARTÍCULAS (FONDO ANIMADO)
+        ============================================================ */
+        /* 
+            Contenedor fijo para el fondo animado de partículas.
+            position: fixed: Se mantiene fijo en la ventana.
+            z-index: 0: Detrás de todo el contenido.
+            pointer-events: none: Permite hacer clic a través del canvas.
+        */
         #particle-canvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 0; pointer-events: none;
         }
+        
+        /* ============================================================
+        PUNTOS DE COLOR PARA INDICADORES
+        ============================================================ */
+        /* 
+            Punto de color para indicar el estado de calidad.
+            display: inline-block: Se comporta como texto en línea.
+            width: 9px; height: 9px: Tamaño fijo.
+            border-radius: 50%: Forma circular.
+            margin-right: 4px: Espacio a la derecha.
+        */
         .color-dot {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    margin-right: 4px;
-}
-/* Controles de zoom tipo lupa para el grafico de calidad */
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        
+        /* 
+            Colores específicos para cada estado de calidad.
+            green: ≥ 70 (Bueno)
+            yellow: ≥ 40 (Regular)
+            red: < 40 (Malo)
+        */
+        .color-dot.green {
+            background-color: #10b981;
+        }
+        .color-dot.yellow {
+            background-color: #d0c114;
+        }
+        .color-dot.red {
+            background-color: #d43737;
+        }
+        
+        /* ============================================================
+        CONTROLES DE ZOOM PARA EL GRÁFICO DE CALIDAD
+        ============================================================ */
+        /* 
+            Contenedor de los botones de zoom.
+            display: flex; align-items: center: Alineación horizontal centrada.
+            gap: 4px: Espacio entre botones.
+            background: rgba(148,163,184,0.08): Fondo gris sutil.
+            border: 1px solid rgba(148,163,184,0.15): Borde sutil.
+            border-radius: 10px: Bordes redondeados.
+            padding: 3px: Espaciado interno.
+        */
         .zoom-controls {
             display: flex;
             align-items: center;
@@ -100,6 +230,18 @@
             border-radius: 10px;
             padding: 3px;
         }
+        
+        /* 
+            Botón de zoom individual.
+            display: flex; align-items: center; justify-content: center: Centra el icono.
+            width: 28px; height: 28px: Tamaño fijo.
+            border-radius: 7px: Bordes redondeados.
+            border: none: Sin borde.
+            background: transparent: Fondo transparente.
+            color: #64748b: Color gris.
+            cursor: pointer: Indica que es clickeable.
+            transition: all 0.15s: Transición suave.
+        */
         .zoom-btn {
             display: flex;
             align-items: center;
@@ -113,33 +255,52 @@
             cursor: pointer;
             transition: all 0.15s;
         }
+        
+        /* 
+            Hover del botón de zoom (cuando está habilitado).
+            Fondo azul sutil y texto azul.
+        */
         .zoom-btn:hover:not(:disabled) {
             background: rgba(56, 189, 248, 0.15);
             color: #38bdf8;
         }
+        
+        /* 
+            Botón de zoom deshabilitado.
+            Opacidad reducida y cursor no permitido.
+        */
         .zoom-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
+        
+        /* 
+            Icono dentro del botón de zoom.
+            font-size: 1.1rem: Tamaño del icono.
+        */
         .zoom-btn .material-symbols-outlined {
             font-size: 1.1rem;
         }
+        
+        /* 
+            Botones de zoom en modo oscuro.
+            Color gris más claro.
+        */
         html.dark .zoom-btn {
             color: #94a3b8;
         }
-        
-.color-dot.green {
-    background-color: #10b981;
-}
 
-.color-dot.yellow {
-    background-color: #d0c114;
-}
-
-.color-dot.red {
-    background-color: #d43737;
-}
-        /* Efecto glassmorphism */
+        /* ============================================================
+        EFECTO GLASSMORPHISM
+        ============================================================ */
+        /* 
+            Efecto de vidrio esmerilado.
+            background: rgba(255,255,255,0.7): Fondo blanco semitransparente.
+            backdrop-filter: blur(16px): Desenfoque del fondo.
+            border: 1px solid rgba(0,0,0,0.04): Borde sutil.
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02): Sombra ligera.
+            transition: border-color 0.4s ease, box-shadow 0.4s ease: Transiciones suaves.
+        */
         .glass {
             background: rgba(255,255,255,0.7);
             backdrop-filter: blur(16px);
@@ -147,49 +308,126 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
+        
+        /* 
+            Efecto hover para elementos glass.
+            Intensifica borde y sombra al pasar el mouse.
+        */
         .glass-hover:hover {
-            border-color: rgba(56,189,248,0.3);
-            box-shadow: 0 12px 30px rgba(56,189,248,0.12);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.12);
         }
         
-        /* Efecto de resplandor cian */
+        /* ============================================================
+        EFECTO DE RESPLANDOR (GLOW)
+        ============================================================ */
+        /* 
+            Sombra de texto con color primario para dar efecto de "resplandor".
+        */
         .glow-cyan  { text-shadow: 0 0 12px rgba(56,189,248,0.4); }
         
-        /* Animación de entrada escalonada */
+        /* ============================================================
+        ANIMACIÓN DE ENTRADA (STAGGER)
+        ============================================================ */
+        /* 
+            Los elementos con esta clase aparecen gradualmente con un 
+            desplazamiento vertical y desvanecimiento.
+        */
         .stagger-in {
             opacity: 0; transform: translateY(20px);
             animation: fadeInUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
         }
-        @keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
         
-        /* Scrollbar personalizada */
+        /* Keyframes de la animación */
+        @keyframes fadeInUp { 
+            to { opacity:1; transform:translateY(0); } 
+        }
+        
+        /* ============================================================
+        SCROLLBAR PERSONALIZADA
+        ============================================================ */
+        /* 
+            Scrollbar más delgada y con color primario.
+        */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
 
-        /* Tarjetas de KPI (indicadores clave) */
+        /* ============================================================
+        TARJETAS DE KPI (INDICADORES CLAVE)
+        ============================================================ */
+        /* 
+            Tarjeta de indicador clave de rendimiento.
+            display: flex; flex-direction: column: Layout vertical.
+            gap: 4px: Espacio entre elementos.
+        */
         .kpi-card {
             display: flex; flex-direction: column; gap: 4px;
         }
+        
+        /* 
+            Valor del KPI.
+            font-size: 2.5rem; font-weight: 800: Grande y negrita.
+            line-height: 1: Sin espacio extra.
+            text-shadow: 0 0 12px rgba(56,189,248,0.3): Resplandor sutil.
+        */
         .kpi-value {
             font-size: 2.5rem; font-weight: 800; line-height: 1;
             text-shadow: 0 0 12px rgba(56,189,248,0.3);
         }
+        
+        /* 
+            Etiqueta del KPI.
+            font-size: 0.65rem; font-weight: 700: Pequeño y negrita.
+            letter-spacing: 0.15em: Espaciado entre letras.
+            text-transform: uppercase: Texto en mayúsculas.
+        */
         .kpi-label {
             font-size: 0.65rem; font-weight: 700;
             letter-spacing: 0.15em; text-transform: uppercase;
         }
 
-        /* Píldoras de insight */
+        /* ============================================================
+        PÍLDORAS DE INSIGHT
+        ============================================================ */
+        /* 
+            Insignia para mostrar información de tendencias.
+            display: inline-flex; align-items: center; gap: 6px: Alineación flexible.
+            padding: 4px 10px: Espaciado.
+            border-radius: 999px: Forma de píldora.
+            font-size: 0.7rem; font-weight: 600: Pequeño y semi-negrita.
+        */
         .insight {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 4px 10px; border-radius: 999px;
             font-size: 0.7rem; font-weight: 600;
         }
+        
+        /* 
+            Insight positivo (verde).
+        */
         .insight-good  { background: rgba(16,185,129,0.12); color: #10b981; }
+        
+        /* 
+            Insight de advertencia (amarillo).
+        */
         .insight-warn  { background: rgba(251,191,36,0.12);  color: #f59e0b; }
+        
+        /* 
+            Insight informativo (azul).
+        */
         .insight-info  { background: rgba(56,189,248,0.12);  color: #38bdf8; }
 
-        /* Estilos para las barras de lenguajes */
+        /* ============================================================
+        ESTILOS PARA LAS BARRAS DE LENGUAJES
+        ============================================================ */
+        /* 
+            Contenedor de cada barra de lenguaje.
+            display: flex; align-items: center: Alineación horizontal centrada.
+            gap: 10px: Espacio entre elementos.
+            padding: 4px 0: Espaciado vertical.
+            border-radius: 6px: Bordes redondeados.
+            transition: background 0.2s: Transición suave.
+        */
         .lang-bar-container {
             display: flex;
             align-items: center;
@@ -198,9 +436,23 @@
             border-radius: 6px;
             transition: background 0.2s;
         }
+        
+        /* 
+            Hover del contenedor de barra: Fondo azul sutil.
+        */
         .lang-bar-container:hover {
             background: rgba(56, 189, 248, 0.06);
         }
+        
+        /* 
+            Nombre del lenguaje.
+            min-width: 85px; max-width: 85px: Ancho fijo.
+            font-size: 0.75rem; font-weight: 600: Pequeño y semi-negrita.
+            color: #0f172a: Color oscuro en modo claro.
+            display: flex; align-items: center; gap: 6px: Alineación con punto de color.
+            white-space: nowrap: Evita saltos de línea.
+            overflow: hidden; text-overflow: ellipsis: Trunca texto largo.
+        */
         .lang-name {
             min-width: 85px;
             max-width: 85px;
@@ -214,9 +466,21 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        
+        /* 
+            Nombre del lenguaje en modo oscuro.
+        */
         html.dark .lang-name {
             color: #f1f5f9;
         }
+        
+        /* 
+            Punto de color del lenguaje.
+            display: inline-block: Se comporta como texto en línea.
+            width: 10px; height: 10px: Tamaño fijo.
+            border-radius: 3px: Bordes ligeramente redondeados.
+            flex-shrink: 0: No se encoje.
+        */
         .lang-color-dot {
             display: inline-block;
             width: 10px;
@@ -224,6 +488,16 @@
             border-radius: 3px;
             flex-shrink: 0;
         }
+        
+        /* 
+            Pista de la barra de lenguaje.
+            flex: 1: Ocupa el espacio disponible.
+            height: 8px: Altura fija.
+            background: rgba(148,163,184,0.12): Fondo gris sutil.
+            border-radius: 4px: Bordes redondeados.
+            overflow: hidden: Oculta el relleno que sobresale.
+            min-width: 40px: Ancho mínimo.
+        */
         .lang-bar-track {
             flex: 1;
             height: 8px;
@@ -232,11 +506,27 @@
             overflow: hidden;
             min-width: 40px;
         }
+        
+        /* 
+            Relleno de la barra de lenguaje.
+            height: 100%: Ocupa toda la altura.
+            border-radius: 4px: Bordes redondeados.
+            transition: width 1.2s cubic-bezier(0.22,1,0.36,1): Animación suave al cargar.
+        */
         .lang-bar-fill {
             height: 100%;
             border-radius: 4px;
             transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
         }
+        
+        /* 
+            Texto de estadísticas del lenguaje.
+            min-width: 105px: Ancho fijo.
+            font-size: 0.7rem; font-family: 'JetBrains Mono', monospace: Pequeño y monoespaciado.
+            color: #475569: Gris oscuro.
+            text-align: right: Alineado a la derecha.
+            white-space: nowrap: Evita saltos de línea.
+        */
         .lang-stats-text {
             min-width: 105px;
             font-size: 0.7rem;
@@ -245,24 +535,50 @@
             text-align: right;
             white-space: nowrap;
         }
+        
+        /* 
+            Texto de estadísticas en modo oscuro.
+        */
         html.dark .lang-stats-text {
             color: #94a3b8;
         }
+        
+        /* 
+            Contador de proyectos del lenguaje (destacado).
+            font-weight: 700: Negrita.
+            color: #38bdf8: Azul primario.
+        */
         .lang-count {
             font-weight: 700;
             color: #38bdf8;
         }
+        
+        /* 
+            Contador en modo oscuro.
+        */
         html.dark .lang-count {
             color: #38bdf8;
         }
+        
+        /* 
+            Porcentaje del lenguaje.
+            color: #94a3b8: Gris.
+        */
         .lang-percent {
             color: #94a3b8;
         }
+        
+        /* 
+            Porcentaje en modo oscuro.
+        */
         html.dark .lang-percent {
             color: #64748b;
         }
 
-        /* Scroll personalizado para la lista de lenguajes */
+        /* 
+            Scroll personalizado para la lista de lenguajes.
+            width: 3px: Barra más delgada.
+        */
         #lang-bars-container::-webkit-scrollbar {
             width: 3px;
         }
@@ -276,14 +592,33 @@
     </style>
 </head>
 <body class="font-body-md">
-    <!-- Lienzo para el fondo de partículas interactivas -->
+    <!-- 
+        Lienzo para el fondo de partículas interactivas.
+        Se renderiza detrás de todo el contenido con animación JavaScript.
+    -->
     <canvas id="particle-canvas"></canvas>
     
     <div class="flex min-h-screen w-full relative z-10">
 
-        <!-- Barra lateral de navegación -->
+        <!-- ============================================================
+        BARRA LATERAL DE NAVEGACIÓN (SIDEBAR)
+        ============================================================ -->
+        <!-- 
+            Sidebar con navegación lateral.
+            w-20 lg:w-24: Ancho reducido en móvil, un poco más en escritorio.
+            h-screen sticky top-0: Altura completa y fijo.
+            glass: Efecto de vidrio.
+            border-r: Borde derecho sutil.
+        -->
         <aside class="w-20 lg:w-24 h-screen sticky top-0 flex flex-col items-center py-10 glass border-r border-outline-variant/20 stagger-in" style="animation-delay:0.1s;">
-            <!-- Logo/icono de la aplicación -->
+            <!-- 
+                Logo/icono de la aplicación.
+                w-12 h-12: Tamaño cuadrado.
+                rounded-xl: Bordes redondeados.
+                bg-primary/15: Fondo azul transparente.
+                border-primary/30: Borde azul sutil.
+                hover:scale-110: Efecto de zoom al pasar el mouse.
+            -->
             <div class="mb-12">
                 <div class="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
                     <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
@@ -292,29 +627,46 @@
             
             <!-- Navegación principal -->
             <nav class="flex-1 flex flex-col gap-8">
+                <!-- Enlace al Dashboard -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/dashboard">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">dashboard</span>
+                    <!-- Tooltip que aparece al hacer hover -->
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Dashboard</span>
                 </a>
+                
+                <!-- Enlace a Proyectos -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/projects">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">folder_open</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Proyectos</span>
                 </a>
+                
+                <!-- Enlace a Analytics (página actual, activo) -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/analytics">
                     <span class="material-symbols-outlined text-primary text-2xl">analytics</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Analisis</span>
                 </a>
+                
+                <!-- Enlace a Análisis de Base de Datos -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/database-analysis">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">storage</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Analisis BD</span>
                 </a>
+                
+                <!-- Botón de cerrar sesión -->
                 <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="logout()">
                     <span class="material-symbols-outlined text-on-surface-variant/50 text-2xl group-hover:text-primary transition-colors">logout</span>
                     <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-primary pointer-events-none">Salir</span>
                 </a>
             </nav>
             
-            <!-- Avatar del usuario -->
+            <!-- 
+                Avatar del usuario en la parte inferior del sidebar.
+                w-10 h-10: Tamaño cuadrado.
+                rounded-full: Forma circular.
+                border: Borde sutil.
+                hover:border-primary: Borde azul al pasar el mouse.
+                hover:scale-110: Zoom al pasar el mouse.
+            -->
             <div class="mt-auto">
                 <a href="/perfil" class="w-10 h-10 rounded-full border border-outline-variant/30 overflow-hidden hover:border-primary transition-all hover:scale-110 cursor-pointer inline-flex">
                     <div id="user-avatar-sidebar" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-white font-bold text-sm">U</div>
@@ -322,37 +674,56 @@
             </div>
         </aside>
 
-        <!-- Contenido principal -->
+        <!-- ============================================================
+        CONTENIDO PRINCIPAL
+        ============================================================ -->
         <main class="flex-1 flex flex-col p-8 lg:p-12 gap-10 overflow-y-auto overflow-x-hidden">
 
-            <!-- Encabezado con título y botón de tema -->
+            <!-- ============================================================
+            ENCABEZADO CON TÍTULO Y BOTÓN DE TEMA
+            ============================================================ -->
             <header class="flex justify-between items-center stagger-in" style="animation-delay:0.15s;">
                 <div>
                     <h1 class="font-display-lg text-4xl lg:text-5xl glow-cyan tracking-tight text-on-surface">Análisis</h1>
                     <p class="text-on-surface-variant/60 font-mono text-xs mt-2 uppercase tracking-[0.3em]" id="greeting">Resumen de tus proyectos</p>
                 </div>
+                <!-- Botón para cambiar tema claro/oscuro -->
                 <button id="themeButton" class="px-4 py-2.5 glass glass-hover rounded-xl text-sm font-semibold flex items-center gap-2 border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
                     <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
                 </button>
             </header>
 
-            <!-- Fila de indicadores KPI -->
+            <!-- ============================================================
+            FILA DE INDICADORES KPI
+            ============================================================ -->
+            <!-- 
+                Grid de 4 tarjetas de KPI.
+                grid-cols-2 md:grid-cols-4: 2 columnas en móvil, 4 en escritorio.
+                gap-5: Espacio entre tarjetas.
+            -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-5 stagger-in" style="animation-delay:0.2s;" id="kpi-row">
+                <!-- KPI: Proyectos totales -->
                 <div class="glass rounded-3xl p-6 glass-hover kpi-card">
                     <span class="material-symbols-outlined text-primary/60 mb-1">folder</span>
                     <div class="kpi-value text-on-surface" id="kpi-total">—</div>
                     <div class="kpi-label text-on-surface-variant">Proyectos totales</div>
                 </div>
+                
+                <!-- KPI: Proyectos completados -->
                 <div class="glass rounded-3xl p-6 glass-hover kpi-card">
                     <span class="material-symbols-outlined text-green-500/70 mb-1">check_circle</span>
                     <div class="kpi-value text-on-surface" id="kpi-completed">—</div>
                     <div class="kpi-label text-on-surface-variant">Completados</div>
                 </div>
+                
+                <!-- KPI: Calidad promedio -->
                 <div class="glass rounded-3xl p-6 glass-hover kpi-card">
                     <span class="material-symbols-outlined text-secondary/70 mb-1">star</span>
                     <div class="kpi-value text-on-surface" id="kpi-quality">—</div>
                     <div class="kpi-label text-on-surface-variant">Calidad promedio</div>
                 </div>
+                
+                <!-- KPI: Funciones totales -->
                 <div class="glass rounded-3xl p-6 glass-hover kpi-card">
                     <span class="material-symbols-outlined text-primary/60 mb-1">functions</span>
                     <div class="kpi-value text-on-surface" id="kpi-functions">—</div>
@@ -360,10 +731,14 @@
                 </div>
             </div>
 
-            <!-- Primera fila de gráficos: progreso de calidad + estado -->
+            <!-- ============================================================
+            PRIMERA FILA DE GRÁFICOS: Progreso de calidad + Estado
+            ============================================================ -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:0.3s;">
 
-                <!-- Gráfico de progreso de calidad a lo largo del tiempo -->
+                <!-- ============================================================
+                GRÁFICO DE PROGRESO DE CALIDAD (Línea)
+                ============================================================ -->
                 <div class="lg:col-span-2 glass rounded-3xl p-7 glass-hover">
                     <div class="flex items-start justify-between mb-1">
                         <div>
@@ -374,6 +749,7 @@
                             <p class="text-on-surface-variant/50 text-xs" style="color: #BFBDBD;">Puntos de Calidad de cada proyecto completado en orden cronológico</p>
                         </div>
                         <div class="flex items-center gap-2 flex-shrink-0">
+                            <!-- Badge de tendencia (se muestra dinámicamente) -->
                             <div id="quality-trend-badge" class="insight insight-info hidden">
                                 <span class="material-symbols-outlined text-xs">arrow_upward</span>
                                 <span id="quality-trend-text"></span>
@@ -392,12 +768,16 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Contenedor del gráfico -->
                     <div style="position:relative;height:380px;margin-top:16px;">
                         <canvas id="chart-quality-trend"></canvas>
                     </div>
                     <p id="quality-insight" class="text-xs text-on-surface-variant/50 mt-3 text-center"></p>
                 </div>
-                <!-- Gráfico de estado de proyectos (donut/pie) -->
+
+                <!-- ============================================================
+                GRÁFICO DE ESTADO DE PROYECTOS (Dona)
+                ============================================================ -->
                 <div class="glass rounded-3xl p-7 glass-hover">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-secondary/70 text-lg">donut_small</span>
@@ -410,28 +790,36 @@
                 </div>
             </div>
 
-            <!-- Segunda fila de gráficos: calidad por proyecto + lenguajes -->
+            <!-- ============================================================
+            SEGUNDA FILA DE GRÁFICOS: Calidad por proyecto + Lenguajes
+            ============================================================ -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:0.4s;">
 
-                <!-- Gráfico de barras horizontales: calidad por proyecto -->
+                <!-- ============================================================
+                GRÁFICO DE BARRAS HORIZONTALES: Calidad por proyecto
+                ============================================================ -->
                 <div class="lg:col-span-2 glass rounded-3xl p-7 glass-hover">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-green-500/70 text-lg">bar_chart</span>
                         <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Calidad por proyecto</span>
                     </div>
-                   <p class="text-on-surface-variant/50 text-xs mb-4" style="color: #BFBDBD;">
-    <span class="color-dot green"></span> >= 70 ·
-    <span class="color-dot yellow"></span> >= 40 ·
-    <span class="color-dot red"></span> < 40
-    (Puntos de calidad)
-</p>
+                    <!-- Leyenda de colores para los puntos de calidad -->
+                    <p class="text-on-surface-variant/50 text-xs mb-4" style="color: #BFBDBD;">
+                        <span class="color-dot green"></span> >= 70 ·
+                        <span class="color-dot yellow"></span> >= 40 ·
+                        <span class="color-dot red"></span> < 40
+                        (Puntos de calidad)
+                    </p>
                     <div id="quality-chart-wrap" style="position:relative;height:200px;overflow:hidden;">
                         <canvas id="chart-quality-per-project"></canvas>
                     </div>
+                    <!-- Mensaje cuando no hay proyectos completados -->
                     <p id="no-completed" class="text-center text-on-surface-variant/40 text-sm mt-4 hidden">Aun no tienes proyectos completados</p>
                 </div>
 
-                <!-- Panel de lenguajes con barras horizontales -->
+                <!-- ============================================================
+                PANEL DE LENGUAJES CON BARRAS HORIZONTALES
+                ============================================================ -->
                 <div class="glass rounded-3xl p-7 glass-hover">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-primary/70 text-lg">code</span>
@@ -439,9 +827,14 @@
                     </div>
                     <p class="text-on-surface-variant/50 text-xs mb-3"style="color: #BFBDBD;">Cantidad de proyectos por lenguaje</p>
                     
-                    <!-- Contenedor con scroll para la lista de lenguajes -->
+                    <!-- 
+                        Contenedor con scroll para la lista de lenguajes.
+                        max-height: 240px: Altura máxima con scroll.
+                        overflow-y: auto: Scroll vertical si es necesario.
+                        padding-right: 4px: Espacio para la scrollbar.
+                    -->
                     <div id="lang-bars-container" style="max-height: 240px; overflow-y: auto; padding-right: 4px;">
-                        <!-- Las barras se generan dinamicamente con JavaScript -->
+                        <!-- Las barras se generan dinámicamente con JavaScript -->
                     </div>
                     
                     <!-- Estadísticas de lenguajes -->
@@ -455,30 +848,78 @@
         </main>
     </div>
 
+    <!-- ============================================================
+    JAVASCRIPT — LÓGICA DE LA APLICACIÓN
+    ============================================================ -->
     <script>
+        // ============================================================
+        // REGISTRO DEL PLUGIN DE ZOOM
+        // ============================================================
         // Registrar el plugin de zoom en Chart.js (obligatorio en Chart.js v4)
         if (window.Chart && window.ChartZoom) {
             Chart.register(window.ChartZoom);
         }
-        // Autenticacion: verificar token y obtener datos del usuario
+        
+        // ============================================================
+        // AUTENTICACIÓN Y DATOS DEL USUARIO
+        // ============================================================
+        
+        /** 
+         * Obtener token de autenticación del localStorage.
+         * Si no hay token, redirigir a la página de login.
+         */
         const token = localStorage.getItem('token');
         if (!token) window.location.href = '/';
+        
+        /**
+         * Obtener datos del usuario del localStorage.
+         * Actualizar los elementos de la UI con la información del usuario.
+         */
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (user.name) {
             document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
             document.getElementById('greeting').textContent = 'Hola, ' + user.name;
         }
         
-        // Funciones de autenticacion para peticiones fetch
-        function authHeaders() { return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }; }
-        function logout() { localStorage.clear(); }
+        // ============================================================
+        // FUNCIONES DE AUTENTICACIÓN
+        // ============================================================
+        
+        /**
+         * Devuelve los headers necesarios para peticiones autenticadas.
+         * @returns {Object} Headers con token JWT y Content-Type JSON.
+         */
+        function authHeaders() { 
+            return { 
+                'Authorization': 'Bearer ' + token, 
+                'Content-Type': 'application/json' 
+            }; 
+        }
+        
+        /**
+         * Cierra sesión del usuario.
+         * Limpia localStorage y redirige a la página de login.
+         */
+        function logout() { 
+            localStorage.clear(); 
+        }
 
-        // Funciones auxiliares para el tema oscuro/claro
+        // ============================================================
+        // FUNCIONES AUXILIARES PARA EL TEMA OSCURO/CLARO
+        // ============================================================
+        
+        /**
+         * Detecta si el modo oscuro está activo.
+         * @returns {boolean} - true si está en modo oscuro.
+         */
         function isDark() {
             return document.documentElement.classList.contains('dark');
         }
         
-        // Configuracion de colores para los graficos segun el tema
+        /**
+         * Configuración de colores para los gráficos según el tema.
+         * @returns {Object} - Colores para texto, grid y paleta.
+         */
         function chartColors() {
             const dark = isDark();
             return {
@@ -488,7 +929,14 @@
             };
         }
 
-        // Mapa de colores por lenguaje de programacion
+        // ============================================================
+        // MAPA DE COLORES POR LENGUAJE DE PROGRAMACIÓN
+        // ============================================================
+        
+        /**
+         * Mapa de colores asociados a lenguajes de programación.
+         * Se usa para colorear las barras en la sección de lenguajes.
+         */
         const languageColors = {
             'Python': '#38bdf8',
             'JavaScript': '#f7df1e',
@@ -519,12 +967,23 @@
             'Otro': '#94a3b8'
         };
 
-        // Obtener color asociado a un lenguaje
+        /**
+         * Obtiene el color asociado a un lenguaje de programación.
+         * @param {string} lang - Nombre del lenguaje.
+         * @returns {string} - Color en formato hexadecimal.
+         */
         function getLanguageColor(lang) {
             return languageColors[lang] || '#94a3b8';
         }
 
-        // Renderizar las barras de lenguajes
+        // ============================================================
+        // RENDERIZADO DE BARRAS DE LENGUAJES
+        // ============================================================
+        
+        /**
+         * Renderiza las barras de lenguajes en el panel lateral.
+         * @param {Object} langMap - Mapa de lenguaje -> cantidad de proyectos.
+         */
         function renderLanguageBars(langMap) {
             const container = document.getElementById('lang-bars-container');
             const totalSpan = document.getElementById('lang-total');
@@ -575,17 +1034,24 @@
 
             container.innerHTML = html;
             
-            // Actualizar estadisticas de lenguajes
+            // Actualizar estadísticas de lenguajes
             const langText = sorted.length === 1 ? 'lenguaje' : 'lenguajes';
             totalSpan.textContent = 'Total: ' + sorted.length + ' ' + langText + ' · ' + total + ' proyectos';
             mostUsedSpan.textContent = 'Más usado: ' + sorted[0][0] + ' (' + sorted[0][1] + ' proyecto' + (sorted[0][1] !== 1 ? 's' : '') + ')';
         }
-// Nivel de zoom actual del grafico de calidad (1 = sin zoom)
-        let qualityZoomLevel = 1;
-        const QUALITY_ZOOM_STEP = 1.4;   // cuanto acerca/aleja cada click de lupa
-        const QUALITY_ZOOM_MAX  = 8;     // limite maximo de acercamiento
 
-        // Habilita/deshabilita los botones de lupa segun el nivel de zoom actual
+        // ============================================================
+        // CONTROLES DE ZOOM PARA EL GRÁFICO DE CALIDAD
+        // ============================================================
+        
+        // Nivel de zoom actual del gráfico de calidad (1 = sin zoom)
+        let qualityZoomLevel = 1;
+        const QUALITY_ZOOM_STEP = 1.4;   // Cuánto acerca/aleja cada click de lupa
+        const QUALITY_ZOOM_MAX  = 8;     // Límite máximo de acercamiento
+
+        /**
+         * Habilita/deshabilita los botones de lupa según el nivel de zoom actual.
+         */
         function updateZoomButtonsState() {
             const outBtn   = document.getElementById('zoom-out-btn');
             const inBtn    = document.getElementById('zoom-in-btn');
@@ -598,7 +1064,9 @@
             inBtn.disabled    = qualityZoomLevel >= QUALITY_ZOOM_MAX;
         }
 
-       // Acerca el grafico de calidad (lupa +)
+        /**
+         * Acerca el gráfico de calidad (lupa +).
+         */
         function zoomInQuality() {
             if (!window._c_trend || typeof window._c_trend.zoom !== 'function') return;
             qualityZoomLevel = Math.min(qualityZoomLevel * QUALITY_ZOOM_STEP, QUALITY_ZOOM_MAX);
@@ -606,7 +1074,9 @@
             updateZoomButtonsState();
         }
 
-        // Aleja el grafico de calidad (lupa -)
+        /**
+         * Aleja el gráfico de calidad (lupa -).
+         */
         function zoomOutQuality() {
             if (!window._c_trend || typeof window._c_trend.zoom !== 'function') return;
             qualityZoomLevel = Math.max(qualityZoomLevel / QUALITY_ZOOM_STEP, 1);
@@ -614,7 +1084,9 @@
             updateZoomButtonsState();
         }
 
-        // Restaura el grafico de calidad a su zoom original
+        /**
+         * Restaura el gráfico de calidad a su zoom original.
+         */
         function resetQualityZoom() {
             if (window._c_trend && typeof window._c_trend.resetZoom === 'function') {
                 window._c_trend.resetZoom();
@@ -623,7 +1095,13 @@
             updateZoomButtonsState();
         }
 
-        // Cargar datos y renderizar todo
+        // ============================================================
+        // CARGA DE DATOS Y RENDERIZADO
+        // ============================================================
+        
+        /**
+         * Carga los proyectos desde el backend y renderiza todos los gráficos.
+         */
         async function load() {
             const res = await fetch('/api/projects/', { headers: authHeaders() });
             if (!res.ok) return;
@@ -633,11 +1111,21 @@
             renderLanguageData(projects);
         }
 
-        // Renderizar indicadores KPI
+        // ============================================================
+        // RENDERIZADO DE INDICADORES KPI
+        // ============================================================
+        
+        /**
+         * Renderiza los indicadores KPI en la parte superior.
+         * @param {Array} projects - Lista de proyectos del usuario.
+         */
         function renderKPIs(projects) {
+            // Proyectos completados
             const completed = projects.filter(p => p.status === 'completed');
+            // Scores de calidad de proyectos completados
             const scores = completed.map(p => p.stats?.quality_score || 0).filter(s => s > 0);
             const avgQ = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0) / scores.length) : 0;
+            // Total de funciones en todos los proyectos
             const totalFuncs = projects.reduce((s,p) => s + (p.stats?.functions || 0), 0);
 
             document.getElementById('kpi-total').textContent     = projects.length;
@@ -646,7 +1134,14 @@
             document.getElementById('kpi-functions').textContent = totalFuncs || '—';
         }
 
-        // Procesar datos de lenguajes y llamar al renderizador
+        // ============================================================
+        // PROCESAMIENTO DE DATOS DE LENGUAJES
+        // ============================================================
+        
+        /**
+         * Procesa los datos de lenguajes y llama al renderizador.
+         * @param {Array} projects - Lista de proyectos.
+         */
         function renderLanguageData(projects) {
             const langMap = {};
             projects.forEach(p => {
@@ -656,22 +1151,34 @@
             renderLanguageBars(langMap);
         }
 
-        // Renderizar todos los graficos
+        // ============================================================
+        // RENDERIZADO DE TODOS LOS GRÁFICOS
+        // ============================================================
+        
+        /**
+         * Renderiza todos los gráficos de la página.
+         * @param {Array} projects - Lista de proyectos.
+         */
         function renderCharts(projects) {
+            // Configuración global de Chart.js
             Chart.defaults.font.family = "'Geist', sans-serif";
             const { text, grid, palette } = chartColors();
             Chart.defaults.color       = text;
             Chart.defaults.borderColor = grid;
 
-            // Filtrar proyectos completados y ordenarlos cronologicamente
+            // ============================================================
+            // GRÁFICO 1: Progreso de calidad (línea)
+            // ============================================================
+            // Filtrar proyectos completados y ordenarlos cronológicamente
             const completed = projects
                 .filter(p => p.status === 'completed')
                 .sort((a,b) => (a.created_at||'').localeCompare(b.created_at||''));
 
-            // Grafico 1: Progreso de calidad (linea)
+            // Etiquetas (nombres de proyectos) y valores (scores de calidad)
             const trendLabels = completed.map(p => p.name.length > 14 ? p.name.slice(0,12)+'…' : p.name);
             const trendValues = completed.map(p => p.stats?.quality_score || 0);
 
+            // Badge de tendencia (muestra si la calidad sube, baja o se mantiene)
             if (trendValues.length >= 2) {
                 const diff = trendValues[trendValues.length-1] - trendValues[0];
                 const badge = document.getElementById('quality-trend-badge');
@@ -690,6 +1197,7 @@
                     badge.querySelector('.material-symbols-outlined').textContent = 'remove';
                     badgeText.textContent = 'Sin cambio';
                 }
+                
                 // Insight del mejor proyecto
                 const best = Math.max(...trendValues);
                 const bestName = completed[trendValues.indexOf(best)]?.name || '';
@@ -698,8 +1206,7 @@
                 insight.style.color = "#B3B3B3"; 
             }
 
-            // Inicializar grafico de tendencia de calidad
-            // Inicializar grafico de tendencia de calidad
+            // Inicializar gráfico de tendencia de calidad
             const ctxT = document.getElementById('chart-quality-trend').getContext('2d');
             if (window._c_trend) window._c_trend.destroy();
             qualityZoomLevel = 1;
@@ -711,6 +1218,7 @@
                         label: 'Calidad',
                         data: trendValues.length ? trendValues : [0],
                         borderColor: '#8ed5ff',
+                        // Degradado de fondo (área bajo la línea)
                         backgroundColor: ctx => {
                             const g = ctx.chart.ctx.createLinearGradient(0,0,0,380);
                             g.addColorStop(0,'rgba(142,213,255,0.25)');
@@ -720,30 +1228,35 @@
                         borderWidth: 1.5,
                         pointRadius: 5,
                         pointHoverRadius: 7,
+                        // Color de los puntos según el valor: verde (≥70), amarillo (≥40), rojo (<40)
                         pointBackgroundColor: trendValues.map(v => v>=70?'#10b981':v>=40?'#ffc176':'#ff8fab'),
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4  // Suavizado de la línea
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     // Espacio extra arriba y a la derecha para que el punto en 100
-                    // y el ultimo nombre de proyecto no queden pegados al borde
+                    // y el último nombre de proyecto no queden pegados al borde
                     layout: {
                         padding: { top: 44, right: 28, left: 4, bottom: 4 }
                     },
                     plugins: {
                         legend: { display: false },
-                        tooltip: { callbacks: { label: ctx => ' Calidad: ' + ctx.parsed.y + '/100' } },
+                        tooltip: { 
+                            callbacks: { 
+                                label: ctx => ' Calidad: ' + ctx.parsed.y + '/100' 
+                            } 
+                        },
+                        // Configuración del zoom (controlado solo por botones)
                         zoom: {
                             limits: {
                                 x: { min: 'original', max: 'original', minRange: 3 }
                             },
-                            // El zoom con rueda/pellizco/arrastre queda desactivado:
-                            // el zoom se controla solo con los botones de lupa
+                            // El zoom con rueda/pellizco/arrastre queda desactivado
                             pan: {
                                 enabled: true,
                                 mode: 'x',
@@ -762,20 +1275,33 @@
                             offset: true,
                             grid: { color: grid },
                             ticks: { color: text, autoSkipPadding: 12 },
-                            title: { display: true, text: 'Nombres de Proyectos', color: text, font: { size: 11 } }
+                            title: { 
+                                display: true, 
+                                text: 'Nombres de Proyectos', 
+                                color: text, 
+                                font: { size: 11 } 
+                            }
                         },
                         y: {
                             grid: { color: grid },
                             ticks: { color: text },
                             min: 0,
                             max: 100,
-                            title: { display: true, text: 'Puntos de Calidad', color: text, font: { size: 11 } }
+                            title: { 
+                                display: true, 
+                                text: 'Puntos de Calidad', 
+                                color: text, 
+                                font: { size: 11 } 
+                            }
                         },
                     }
                 }
             });
             updateZoomButtonsState();
-            // Grafico 2: Estado de proyectos (pastel)
+
+            // ============================================================
+            // GRÁFICO 2: Estado de proyectos (dona/pastel)
+            // ============================================================
             const statusMap = { Completado:0, Pendiente:0, Analizando:0, Error:0 };
             projects.forEach(p => {
                 if      (p.status==='completed')  statusMap['Completado']++;
@@ -785,7 +1311,12 @@
             });
             const stLabels = Object.keys(statusMap).filter(k=>statusMap[k]>0);
             const stValues = stLabels.map(k=>statusMap[k]);
-            const stColors = { Completado:'#10b981', Pendiente:'#8A979E', Analizando:'#ffc176', Error:'#ff8fab' };
+            const stColors = { 
+                Completado:'#10b981', 
+                Pendiente:'#8A979E', 
+                Analizando:'#ffc176', 
+                Error:'#ff8fab' 
+            };
 
             const ctxS = document.getElementById('chart-status').getContext('2d');
             if (window._c_status) window._c_status.destroy();
@@ -793,33 +1324,46 @@
                 type: 'doughnut',
                 data: {
                     labels: stLabels.length ? stLabels : ['Sin datos'],
-                    datasets: [{ data: stValues.length ? stValues : [1],
+                    datasets: [{ 
+                        data: stValues.length ? stValues : [1],
                         backgroundColor: stLabels.map(k=>stColors[k]||'#8ed5ff'),
                         borderWidth: 2,
                         borderColor: isDark() ? '#1b2024' : '#ffffff'
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: text, padding: 8, font: { size: 11 } } } }
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { color: text, padding: 8, font: { size: 11 } } 
+                        } 
+                    }
                 }
             });
 
-            // Grafico 3: Calidad por proyecto (barras horizontales)
+            // ============================================================
+            // GRÁFICO 3: Calidad por proyecto (barras horizontales)
+            // ============================================================
             const qLabels = completed.map(p => p.name.length>18 ? p.name.slice(0,16)+'…' : p.name);
             const qValues = completed.map(p => p.stats?.quality_score || 0);
             const qColors = qValues.map(v => v>=70?'rgba(16,185,129,0.75)':v>=40?'rgba(255,193,118,0.75)':'rgba(255,143,171,0.75)');
 
             const wrap = document.getElementById('quality-chart-wrap');
             const noCmp = document.getElementById('no-completed');
+            
+            // Si no hay proyectos completados, mostrar mensaje
             if (!completed.length) {
                 wrap.style.display = 'none';
                 noCmp.classList.remove('hidden');
             } else {
                 wrap.style.display = 'block';
                 noCmp.classList.add('hidden');
+                // Ajustar altura dinámica según cantidad de proyectos
                 const dynH = Math.max(200, qLabels.length * 38);
                 wrap.style.height = dynH + 'px';
+                
                 const ctxQ = document.getElementById('chart-quality-per-project').getContext('2d');
                 if (window._c_quality) window._c_quality.destroy();
                 window._c_quality = new Chart(ctxQ, {
@@ -835,7 +1379,7 @@
                         }]
                     },
                     options: {
-                        indexAxis: 'y',
+                        indexAxis: 'y',  // Barras horizontales
                         responsive: true, 
                         maintainAspectRatio: false,
                         plugins: { 
@@ -848,76 +1392,96 @@
                         },
                         scales: {
                             x: { 
-    grid: { color: grid }, 
-    ticks: { color: text }, 
-    min: 0, 
-    max: 100,
-    title: {
-        display: true,
-        text: 'Puntos de Calidad por proyecto',
-        color: text,
-        font: {
-            size: 11
-        }
-    }
-},
-
-y: { 
-    grid: { color: grid }, 
-    ticks: { color: text },
-    title: {
-        display: true,
-        text: 'Nombres de Proyectos',
-        color: text,
-        font: {
-            size: 11
-        }
-    }
-}
+                                grid: { color: grid }, 
+                                ticks: { color: text }, 
+                                min: 0, 
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Puntos de Calidad por proyecto',
+                                    color: text,
+                                    font: { size: 11 }
+                                }
+                            },
+                            y: { 
+                                grid: { color: grid }, 
+                                ticks: { color: text },
+                                title: {
+                                    display: true,
+                                    text: 'Nombres de Proyectos',
+                                    color: text,
+                                    font: { size: 11 }
+                                }
+                            }
                         }
                     }
                 });
             }
         }
 
-        // Sistema de particulas de fondo interactivas
+        // ============================================================
+        // SISTEMA DE PARTÍCULAS DE FONDO INTERACTIVAS
+        // ============================================================
+        
         const canvas = document.getElementById('particle-canvas');
         let ctx2 = canvas.getContext('2d');
         let particles = [];
         let mouse = {};
         
-        // Inicializar el canvas y las particulas
+        /**
+         * Inicializa el canvas y las partículas.
+         */
         function initCanvas() {
             canvas.width  = window.innerWidth;
             canvas.height = window.innerHeight;
             particles = Array.from({length:60}, () => ({
-                x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+                x: Math.random()*canvas.width, 
+                y: Math.random()*canvas.height,
                 size: Math.random()*2+0.5,
-                vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3
+                vx: (Math.random()-0.5)*0.3, 
+                vy: (Math.random()-0.5)*0.3
             }));
         }
         
-        // Animacion de particulas
+        /**
+         * Animación de partículas.
+         * Actualiza la posición de cada partícula y las dibuja.
+         * Aplica efecto de repulsión al pasar el mouse cerca.
+         */
         function animateParticles() {
             ctx2.clearRect(0,0,canvas.width,canvas.height);
             const dark = isDark();
             particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                // Interaccion con el mouse
+                p.x += p.vx; 
+                p.y += p.vy;
+                // Interacción con el mouse (repulsión)
                 if (mouse.x) {
                     const dx=mouse.x-p.x, dy=mouse.y-p.y, d=Math.hypot(dx,dy);
-                    if(d<150){const a=Math.atan2(dy,dx),f=(150-d)/150;p.x-=Math.cos(a)*f*1.2;p.y-=Math.sin(a)*f*1.2;}
+                    if(d<150){
+                        const a=Math.atan2(dy,dx);
+                        const f=(150-d)/150;
+                        p.x-=Math.cos(a)*f*1.2;
+                        p.y-=Math.sin(a)*f*1.2;
+                    }
                 }
-                // Rebote en los bordes
-                if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
-                if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
-                // Dibujar particula
+                // Rebote en los bordes (efecto de borde infinito)
+                if(p.x<0) p.x=canvas.width; 
+                if(p.x>canvas.width) p.x=0;
+                if(p.y<0) p.y=canvas.height; 
+                if(p.y>canvas.height) p.y=0;
+                
+                // Dibujar partícula
                 ctx2.fillStyle = dark ? 'rgba(142,213,255,0.35)' : 'rgba(56,189,248,0.2)';
-                ctx2.beginPath(); ctx2.arc(p.x,p.y,p.size,0,Math.PI*2); ctx2.fill();
-                // Dibujar conexiones entre particulas cercanas
+                ctx2.beginPath(); 
+                ctx2.arc(p.x,p.y,p.size,0,Math.PI*2); 
+                ctx2.fill();
+                
+                // Dibujar conexiones entre partículas cercanas (distancia < 100px)
                 particles.forEach(q => {
                     if(Math.hypot(p.x-q.x,p.y-q.y)<100){
-                        ctx2.beginPath(); ctx2.moveTo(p.x,p.y); ctx2.lineTo(q.x,q.y);
+                        ctx2.beginPath(); 
+                        ctx2.moveTo(p.x,p.y); 
+                        ctx2.lineTo(q.x,q.y);
                         ctx2.strokeStyle = dark ? 'rgba(142,213,255,0.08)' : 'rgba(56,189,248,0.06)';
                         ctx2.stroke();
                     }
@@ -926,11 +1490,15 @@ y: {
             requestAnimationFrame(animateParticles);
         }
 
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        
         // Event listeners para redimension y movimiento del mouse
         window.addEventListener('resize', initCanvas);
         window.addEventListener('mousemove', e => { mouse.x=e.x; mouse.y=e.y; });
 
-        // Inicializacion al cargar la pagina
+        // Inicialización al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
             animateParticles();
