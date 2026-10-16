@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coahsy — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+  }
+  body { background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; font-size: 12pt; line-height: 1.6; text-align: justify; }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+  .doc-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .doc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .doc-header .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat .val { font-size: 1.8rem; font-weight: 800; color: var(--white); }
+  .stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .quality-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #10b981; margin-top: 1rem; }
+  h1, h2, h3, h4 { font-family: Arial, Helvetica, sans-serif; text-align: left; }
+  h1 { font-size: 20pt; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  h2 { font-size: 16pt; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }
+  h3 { font-size: 13pt; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 12pt; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  p, li { margin: 0.75rem 0; font-size: 12pt; text-align: justify; }
+  code { background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.3); padding: 0.2rem 0.55rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: #7dd3fc; }
+  pre { background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; border: none; padding: 0; color: #bae6fd; font-size: 0.95rem; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .report-table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }
+  .report-table thead tr { background: rgba(56,189,248,0.08); }
+  .report-table th, .report-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); }
+  .report-table th { color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .report-table td { color: var(--text); }
+  th { background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  blockquote { border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem; background: rgba(52,211,153,0.1); border-radius: 0 8px 8px 0; margin: 1rem 0; color: #6ee7b7; font-size: 1.05rem; font-weight: 600; font-style: italic; }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc-list { list-style: none; padding-left: 0; }
+  .toc-list li { margin: 0.35rem 0; }
+  .toc-list a { color: var(--accent); text-decoration: none; }
+  .toc-list a:hover { text-decoration: underline; }
+  .toc-list .toc-h1 { font-weight: 700; font-size: 1rem; margin-top: 0.9rem; }
+  .toc-list .toc-h1 a { color: var(--white); }
+  .toc-list .toc-h2 { padding-left: 1.25rem; font-size: 0.92rem; }
+  .toc-list .toc-h3 { padding-left: 2.5rem; font-size: 0.85rem; }
+  .toc-list .toc-h3 a { color: var(--accent2); }
+  .doc-footer { margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; }
+  @media print {
+    @page { margin: 2cm; @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; } }
+    .doc-header { page-break-after: always; min-height: 85vh; }
+    .toc { page-break-after: always; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .diagram-section { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <h1><span class="material-icons">description</span> Coahsy</h1>
+    <div class="subtitle">Documentación Técnica Profesional · Generado 13/10/2026 05:10 UTC</div>
+    <div class="quality-badge">Score de Calidad: 75/100</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">20</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">63</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">8</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">20</div><div class="lbl">Endpoints</div></div>
+    </div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ul class="toc-list"><li class="toc-h1"><a href="#sec1">1. Documentación del Proyecto</a></li><li class="toc-h2"><a href="#sec2">Resumen Ejecutivo</a></li><li class="toc-h2"><a href="#sec3">Stack Tecnológico</a></li><li class="toc-h2"><a href="#sec4">Estadísticas del Proyecto</a></li><li class="toc-h2"><a href="#sec5">2. Documentación de Arquitectura y Diseño</a></li><li class="toc-h3"><a href="#sec6">2.1 Estructura de Directorios</a></li><li class="toc-h3"><a href="#sec7">2.2 Distribución por Capas</a></li><li class="toc-h3"><a href="#sec8">2.3 Distribución de Lenguajes</a></li><li class="toc-h3"><a href="#sec9">2.4 Diagrama de Infraestructura</a></li><li class="toc-h3"><a href="#sec10">2.5 Diagrama de Casos de Uso</a></li><li class="toc-h3"><a href="#sec11">2.6 Diagrama de Clases</a></li><li class="toc-h3"><a href="#sec12">2.7 Patrones Detectados</a></li><li class="toc-h3"><a href="#sec13">2.8 Insights de Arquitectura (IA)</a></li><li class="toc-h2"><a href="#sec14">3. Documentación Técnica de Código</a></li><li class="toc-h3"><a href="#sec15">3.1 Guía de Configuración del Entorno de Desarrollo</a></li><li class="toc-h3"><a href="#sec16">3.2 Documentación de API</a></li><li class="toc-h3"><a href="#sec17">3.3 Estado de Comentarios y Docstrings</a></li><li class="toc-h3"><a href="#sec18">3.4 Planes de Prueba (Testing)</a></li><li class="toc-h2"><a href="#sec19">4. Documentación de Clases</a></li><li class="toc-h3"><a href="#sec20">Config</a></li><li class="toc-h3"><a href="#sec21">Usuario</a></li><li class="toc-h3"><a href="#sec22">Grupo</a></li><li class="toc-h3"><a href="#sec23">Deportista</a></li><li class="toc-h3"><a href="#sec24">Dispositivo</a></li><li class="toc-h3"><a href="#sec25">RegistroActividad</a></li><li class="toc-h3"><a href="#sec26">MetaRutina</a></li><li class="toc-h3"><a href="#sec27">Notificacion</a></li><li class="toc-h2"><a href="#sec28">5. Documentación de Funciones</a></li><li class="toc-h3"><a href="#sec29">Módulo: app.py</a></li><li class="toc-h3"><a href="#sec30">Módulo: utils.py</a></li><li class="toc-h3"><a href="#sec31">Módulo: auth_utils.py</a></li><li class="toc-h3"><a href="#sec32">Módulo: routes/historial.py</a></li><li class="toc-h3"><a href="#sec33">Módulo: routes/auth.py</a></li><li class="toc-h3"><a href="#sec34">Módulo: routes/actividad.py</a></li><li class="toc-h3"><a href="#sec35">Módulo: routes/notificaciones.py</a></li><li class="toc-h3"><a href="#sec36">Módulo: routes/grupos.py</a></li><li class="toc-h3"><a href="#sec37">Módulo: routes/metas.py</a></li><li class="toc-h3"><a href="#sec38">Módulo: routes/dispositivos.py</a></li><li class="toc-h3"><a href="#sec39">Módulo: routes/deportistas.py</a></li><li class="toc-h3"><a href="#sec40">Módulo: web/js/app.js</a></li><li class="toc-h2"><a href="#sec41">6. Modelos de Datos</a></li><li class="toc-h3"><a href="#sec42">Esquema General Inferido</a></li><li class="toc-h2"><a href="#sec43">7. Guía de Despliegue y Mantenimiento</a></li><li class="toc-h3"><a href="#sec44">7.1 Requisitos del Sistema</a></li><li class="toc-h3"><a href="#sec45">7.2 Instalación Local</a></li><li class="toc-h3"><a href="#sec46">7.3 Despliegue con Docker</a></li><li class="toc-h3"><a href="#sec47">7.4 Variables de Entorno Recomendadas</a></li><li class="toc-h3"><a href="#sec48">7.5 Checklist de Despliegue</a></li><li class="toc-h3"><a href="#sec49">7.6 Registro de Cambios (Changelog)</a></li><li class="toc-h2"><a href="#sec50">8. Reporte de Calidad del Código</a></li><li class="toc-h3"><a href="#sec51">8.1 Análisis de Métricas</a></li><li class="toc-h3"><a href="#sec52">8.2 Funciones con Alta Complejidad Ciclomática</a></li><li class="toc-h3"><a href="#sec53">8.3 Recomendaciones</a></li><li class="toc-h3"><a href="#sec54">8.4 Errores de Análisis</a></li><li class="toc-h2"><a href="#sec55">9. Análisis de Datos del Proyecto</a></li><li class="toc-h3"><a href="#sec56">9.1 Tipos y Fuentes de Datos Detectados</a></li><li class="toc-h3"><a href="#sec57">9.2 Esquema de Data Warehouse Inferido</a></li><li class="toc-h3"><a href="#sec58">9.3 Reporte de Calidad de Datos</a></li><li class="toc-h3"><a href="#sec59">9.4 Minería de Datos Aplicada al Código</a></li><li class="toc-h3"><a href="#sec60">9.5 Pipeline ETL Utilizado</a></li></ul>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-10-13 05:10 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>Python</strong> y cuenta con
+20 archivos fuente, 63 funciones, 8 clases y
+20 endpoints de API documentados. El score de calidad del código es
+<strong>75/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>16 archivos</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>1 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>63</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>75/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>12 / 63</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 8</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3 id="sec6">2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── (raíz)/
+├── .expo/
+├── routes/
+├── web/
+</code></pre>
+<h3 id="sec7">2.2 Distribución por Capas</h3>
+<ul>
+<li><strong><code>(raíz)/</code></strong> — 9 archivos [.md(1), .txt(1), .py(7)]</li>
+<li><strong><code>.expo/</code></strong> — 2 archivos [.json(1), .md(1)]</li>
+<li><strong><code>routes/</code></strong> — 9 archivos [.py(9)]</li>
+<li><strong><code>web/</code></strong> — 5 archivos [.md(1), .svg(1), .html(1), .css(1), .js(1)]</li>
+</ul>
+<h3 id="sec8">2.3 Distribución de Lenguajes</h3>
+<ul>
+<li>Python: 16 archivos (80%)</li>
+<li>JSON: 1 archivos (5%)</li>
+<li>HTML: 1 archivos (5%)</li>
+<li>CSS: 1 archivos (5%)</li>
+<li>JavaScript: 1 archivos (5%)</li>
+</ul>
+<h3 id="sec9">2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3 id="sec10">2.5 Diagrama de Casos de Uso</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3 id="sec11">2.6 Diagrama de Clases</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<blockquote>
+<p>⚠️ <strong>Clases con información incompleta:</strong> Las siguientes clases aparecen sin métodos ni atributos documentados: <code>Config</code>, <code>Usuario</code>, <code>Grupo</code>, <code>Deportista</code>, <code>Dispositivo</code>, <code>RegistroActividad</code>, <code>MetaRutina</code>, <code>Notificacion</code>. Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.</p>
+</blockquote>
+<h3 id="sec12">2.7 Patrones Detectados</h3>
+<ul>
+<li><strong>API REST</strong>: 20 endpoints detectados (Flask/FastAPI)</li>
+<li><strong>Programación Asíncrona</strong>: 10 funciones async/await</li>
+</ul>
+<h3 id="sec13">2.8 Insights de Arquitectura (IA)</h3>
+<p>No se pudieron generar insights de arquitectura</p>
+<hr />
+<h2 id="sec14">3. Documentación Técnica de Código</h2>
+<h3 id="sec15">3.1 Guía de Configuración del Entorno de Desarrollo</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Crear entorno virtual (recomendado para Python)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores locales
+
+# 5. Ejecutar en modo desarrollo
+python app.py  # o npm run dev
+</code></pre>
+<h3 id="sec16">3.2 Documentación de API</h3>
+<p>Total de endpoints detectados: <strong>20</strong></p>
+<h4>Módulo: <code>app.py</code></h4>
+<h5>[GET] <code>/ get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint / get</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/INDEX.HTML get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint /INDEX.HTML get</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/FAVICON.ICO get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<blockquote>
+<p>Endpoint /FAVICON.ICO get</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/API/HEALTH get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>app.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/historial.py</code></h4>
+<h5>[GET] <code>/GRUPO/&lt;INT:GRUPO_ID&gt; get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/historial.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/auth.py</code></h4>
+<h5>[GET] <code>/REGISTRO post</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/auth.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/LOGIN post</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/auth.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/actividad.py</code></h4>
+<h5>[GET] <code>/DEPORTISTA/&lt;INT:DEPORTISTA_ID&gt; get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/actividad.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/GRUPO/&lt;INT:GRUPO_ID&gt; get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/actividad.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/notificaciones.py</code></h4>
+<h5>[GET] <code>/DEPORTISTA/&lt;INT:DEPORTISTA_ID&gt; get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/notificaciones.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/&lt;INT:NOTIF_ID&gt;/LEIDA patch</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/notificaciones.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/grupos.py</code></h4>
+<h5>[GET] <code>/&lt;INT:GRUPO_ID&gt; put</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/grupos.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/&lt;INT:GRUPO_ID&gt; delete</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/grupos.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/metas.py</code></h4>
+<h5>[GET] <code>/DEPORTISTA/&lt;INT:DEPORTISTA_ID&gt; get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/metas.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/&lt;INT:META_ID&gt;/ESTADO patch</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/metas.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/dispositivos.py</code></h4>
+<h5>[GET] <code>/&lt;INT:DISPOSITIVO_ID&gt;/ESTADO patch</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/dispositivos.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/&lt;INT:DISPOSITIVO_ID&gt; delete</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/dispositivos.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h4>Módulo: <code>routes/deportistas.py</code></h4>
+<h5>[GET] <code>/&lt;INT:DEPORTISTA_ID&gt; get</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/deportistas.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/&lt;INT:DEPORTISTA_ID&gt; put</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/deportistas.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h5>[GET] <code>/&lt;INT:DEPORTISTA_ID&gt; delete</code></h5>
+<ul>
+<li><strong>Framework</strong>: Flask/FastAPI</li>
+<li><strong>Archivo</strong>: <code>routes/deportistas.py</code></li>
+</ul>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, requerido): Bearer JWT token</li>
+</ul>
+<p><strong>Códigos de respuesta:</strong></p>
+<ul>
+<li><code>200</code> — Operación exitosa</li>
+<li><code>400</code> — Solicitud incorrecta</li>
+<li><code>401</code> — No autorizado</li>
+<li><code>404</code> — Recurso no encontrado</li>
+<li><code>500</code> — Error interno del servidor</li>
+</ul>
+<hr />
+<h3 id="sec17">3.3 Estado de Comentarios y Docstrings</h3>
+<p><strong>Total de funciones:</strong> 63</p>
+<ul>
+<li><strong>[OK] Documentadas:</strong> 12 (19%)</li>
+<li><strong>[X] Sin documentar:</strong> 51 (81%)</li>
+</ul>
+<p><strong>Visualización de documentación:</strong></p>
+<pre><code class="language-text">[███░░░░░░░░░░░░░░░░]
+19% documentado
+</code></pre>
+<p><strong>Ejemplo de docstrings detectados:</strong></p>
+<pre><code class="language-python">def index():
+    &quot;&quot;&quot;
+    Panel del entrenador (web/index.html).
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<pre><code class="language-python">def serialize(obj):
+    &quot;&quot;&quot;
+    Convierte un modelo SQLAlchemy (o lista de modelos) a dict JSON-safe.
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<pre><code class="language-python">def require_fields(data, fields):
+    &quot;&quot;&quot;
+    Regresa lista de campos faltantes o vacíos.
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<p><strong>Funciones que requieren documentación:</strong></p>
+<ul>
+<li><code>create_app()</code> en <code>app.py</code></li>
+<li><code>favicon()</code> en <code>app.py</code></li>
+<li><code>health()</code> en <code>app.py</code></li>
+<li><code>not_found(e)</code> en <code>app.py</code></li>
+<li><code>method_not_allowed(e)</code> en <code>app.py</code></li>
+<li>... y 46 más</li>
+</ul>
+<h3 id="sec18">3.4 Planes de Prueba (Testing)</h3>
+<p>No se detectaron pruebas automatizadas. Se recomienda implementar:</p>
+<pre><code class="language-python"># Ejemplo de estructura de tests recomendada
+import pytest
+
+class TestEndpoints:
+    def test_get_returns_200(self, client):
+        response = client.get('/api/endpoint')
+        assert response.status_code == 200
+
+    def test_post_creates_resource(self, client):
+        data = {'name': 'test'}
+        response = client.post('/api/endpoint', json=data)
+        assert response.status_code == 201
+
+    def test_unauthorized_returns_401(self, client):
+        response = client.get('/api/protected')
+        assert response.status_code == 401
+</code></pre>
+<p><strong>Escenarios de prueba recomendados:</strong></p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Escenario</th>
+<th>Tipo</th>
+<th>Prioridad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/ get — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/ get — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/INDEX.HTML get — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/INDEX.HTML get — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/FAVICON.ICO get — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/FAVICON.ICO get — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/API/HEALTH get — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/API/HEALTH get — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/GRUPO/<INT:GRUPO_ID> get — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/GRUPO/<INT:GRUPO_ID> get — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/REGISTRO post — respuesta 200</td>
+<td>Integración</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td>/REGISTRO post — sin auth (401)</td>
+<td>Seguridad</td>
+<td>Alta</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec19">4. Documentación de Clases</h2>
+<p>Total: <strong>8 clases</strong></p>
+<h3 id="sec20"><code>Config</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>config.py</code></li>
+<li><strong>Línea:</strong> 3</li>
+<li><strong>Hereda de:</strong> object</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p>Clase Config</p>
+</blockquote>
+<hr />
+<h3 id="sec21"><code>Usuario</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 6</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p>Clase Usuario</p>
+</blockquote>
+<hr />
+<h3 id="sec22"><code>Grupo</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 20</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<blockquote>
+<p>Clase Grupo</p>
+</blockquote>
+<hr />
+<h3 id="sec23"><code>Deportista</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 30</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec24"><code>Dispositivo</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 46</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec25"><code>RegistroActividad</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 58</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec26"><code>MetaRutina</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 71</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<h3 id="sec27"><code>Notificacion</code></h3>
+<ul>
+<li><strong>Archivo:</strong> <code>models.py</code></li>
+<li><strong>Línea:</strong> 84</li>
+<li><strong>Hereda de:</strong> db.Model</li>
+<li><strong>Métodos:</strong> 0</li>
+<li><strong>Documentada:</strong> [X] No</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec28">5. Documentación de Funciones</h2>
+<p>Total: <strong>63 funciones</strong></p>
+<h3 id="sec29">Módulo: <code>app.py</code></h3>
+<p><strong><code>create_app</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función create_app</p>
+</blockquote>
+<p><strong><code>index</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Panel del entrenador (web/index.html).</p>
+</blockquote>
+<p><strong><code>favicon</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función favicon</p>
+</blockquote>
+<p><strong><code>health</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función health</p>
+</blockquote>
+<p><strong><code>not_found</code></strong></p>
+<ul>
+<li>Parámetros: <code>e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<blockquote>
+<p>Función not_found</p>
+</blockquote>
+<p><strong><code>method_not_allowed</code></strong></p>
+<ul>
+<li>Parámetros: <code>e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>server_error</code></strong></p>
+<ul>
+<li>Parámetros: <code>e</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h4><code>index()</code></h4>
+<p><strong>Ubicación:</strong> <code>app.py</code></p>
+<blockquote>
+<p>Panel del entrenador (web/index.html).</p>
+</blockquote>
+<h3 id="sec30">Módulo: <code>utils.py</code></h3>
+<p><strong><code>serialize</code></strong></p>
+<ul>
+<li>Parámetros: <code>obj</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Convierte un modelo SQLAlchemy (o lista de modelos) a dict JSON-safe.</p>
+</blockquote>
+<p><strong><code>require_fields</code></strong></p>
+<ul>
+<li>Parámetros: <code>data, fields</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Regresa lista de campos faltantes o vacíos.</p>
+</blockquote>
+<p><strong><code>now</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h4><code>serialize(obj)</code></h4>
+<p><strong>Ubicación:</strong> <code>utils.py</code></p>
+<blockquote>
+<p>Convierte un modelo SQLAlchemy (o lista de modelos) a dict JSON-safe.</p>
+</blockquote>
+<h4><code>require_fields(data, fields)</code></h4>
+<p><strong>Ubicación:</strong> <code>utils.py</code></p>
+<blockquote>
+<p>Regresa lista de campos faltantes o vacíos.</p>
+</blockquote>
+<h3 id="sec31">Módulo: <code>auth_utils.py</code></h3>
+<p><strong><code>hash_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>plain</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>check_password</code></strong></p>
+<ul>
+<li>Parámetros: <code>plain, hashed</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>generate_token</code></strong></p>
+<ul>
+<li>Parámetros: <code>user_id, rol</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>decode_token</code></strong></p>
+<ul>
+<li>Parámetros: <code>token</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>token_required</code></strong></p>
+<ul>
+<li>Parámetros: <code>f</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Protege un endpoint: requiere header Authorization: Bearer <token>.</p>
+</blockquote>
+<p><strong><code>decorated</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h4><code>token_required(f)</code></h4>
+<p><strong>Ubicación:</strong> <code>auth_utils.py</code></p>
+<blockquote>
+<p>Protege un endpoint: requiere header Authorization: Bearer <token>.</p>
+</blockquote>
+<h3 id="sec32">Módulo: <code>routes/historial.py</code></h3>
+<p><strong><code>historial_grupo</code></strong></p>
+<ul>
+<li>Parámetros: <code>grupo_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Combina registros de actividad, metas asignadas y notificaciones enviadas
+de todos los deportistas de un grupo, ordenados del más reciente al más antiguo.
+Alimenta la pantalla 'Historial de eventos' de la app web.</p>
+</blockquote>
+<hr />
+<h4><code>historial_grupo(grupo_id)</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/historial.py</code></p>
+<blockquote>
+<p>Combina registros de actividad, metas asignadas y notificaciones enviadas
+de todos los deportistas de un grupo, ordenados del más reciente al más antiguo.
+Alimenta la pantalla 'Historial de eventos' de la app web.</p>
+</blockquote>
+<h3 id="sec33">Módulo: <code>routes/auth.py</code></h3>
+<p><strong><code>registro</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>login</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 5</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3 id="sec34">Módulo: <code>routes/actividad.py</code></h3>
+<p><strong><code>registrar_actividad</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 9</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Endpoint que consume la app wearable para enviar cada lectura de sensores.
+No requiere token de entrenador (el propio dispositivo se identifica con su id),
+pero sí valida que el dispositivo y el deportista existan.</p>
+</blockquote>
+<p><strong><code>actividad_por_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>deportista_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Historial + último registro de un deportista (vista individual).</p>
+</blockquote>
+<p><strong><code>actividad_por_grupo</code></strong></p>
+<ul>
+<li>Parámetros: <code>grupo_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Vista grupal: resumen agregado (último registro de cada deportista del grupo).</p>
+</blockquote>
+<hr />
+<h4><code>registrar_actividad()</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/actividad.py</code></p>
+<blockquote>
+<p>Endpoint que consume la app wearable para enviar cada lectura de sensores.
+No requiere token de entrenador (el propio dispositivo se identifica con su id),
+pero sí valida que el dispositivo y el deportista existan.</p>
+</blockquote>
+<h4><code>actividad_por_deportista(deportista_id)</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/actividad.py</code></p>
+<blockquote>
+<p>Historial + último registro de un deportista (vista individual).</p>
+</blockquote>
+<h4><code>actividad_por_grupo(grupo_id)</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/actividad.py</code></p>
+<blockquote>
+<p>Vista grupal: resumen agregado (último registro de cada deportista del grupo).</p>
+</blockquote>
+<h3 id="sec35">Módulo: <code>routes/notificaciones.py</code></h3>
+<p><strong><code>enviar_notificacion</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 9</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Envía una notificación a uno o varios deportistas desde la app web.</p>
+</blockquote>
+<p><strong><code>notificaciones_por_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>deportista_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Consumido por la app wearable para mostrar sus notificaciones.
+No requiere token de entrenador: el propio dispositivo consulta con el id
+del deportista que tiene configurado.</p>
+</blockquote>
+<p><strong><code>marcar_leida</code></strong></p>
+<ul>
+<li>Parámetros: <code>notif_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h4><code>enviar_notificacion()</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/notificaciones.py</code></p>
+<blockquote>
+<p>Envía una notificación a uno o varios deportistas desde la app web.</p>
+</blockquote>
+<h4><code>notificaciones_por_deportista(deportista_id)</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/notificaciones.py</code></p>
+<blockquote>
+<p>Consumido por la app wearable para mostrar sus notificaciones.
+No requiere token de entrenador: el propio dispositivo consulta con el id
+del deportista que tiene configurado.</p>
+</blockquote>
+<h3 id="sec36">Módulo: <code>routes/grupos.py</code></h3>
+<p><strong><code>listar_grupos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>crear_grupo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 3</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>actualizar_grupo</code></strong></p>
+<ul>
+<li>Parámetros: <code>grupo_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>eliminar_grupo</code></strong></p>
+<ul>
+<li>Parámetros: <code>grupo_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3 id="sec37">Módulo: <code>routes/metas.py</code></h3>
+<p><strong><code>crear_meta</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 7</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>metas_por_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>deportista_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>actualizar_estado_meta</code></strong></p>
+<ul>
+<li>Parámetros: <code>meta_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h3 id="sec38">Módulo: <code>routes/dispositivos.py</code></h3>
+<p><strong><code>listar_dispositivos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>registrar_dispositivo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 6</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>actualizar_estado</code></strong></p>
+<ul>
+<li>Parámetros: <code>dispositivo_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Usado por el wearable para marcarse como conectado/desconectado.</p>
+</blockquote>
+<p><strong><code>eliminar_dispositivo</code></strong></p>
+<ul>
+<li>Parámetros: <code>dispositivo_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h4><code>actualizar_estado(dispositivo_id)</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/dispositivos.py</code></p>
+<blockquote>
+<p>Usado por el wearable para marcarse como conectado/desconectado.</p>
+</blockquote>
+<h3 id="sec39">Módulo: <code>routes/deportistas.py</code></h3>
+<p><strong><code>listar_deportistas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 4</li>
+<li>Documentada: [OK]</li>
+</ul>
+<blockquote>
+<p>Lista deportistas; opcionalmente filtra por ?grupo=<id_grupo>.</p>
+</blockquote>
+<p><strong><code>obtener_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>deportista_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>crear_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 8</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>actualizar_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>deportista_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [MED] 9</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>eliminar_deportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>deportista_id</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 2</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<h4><code>listar_deportistas()</code></h4>
+<p><strong>Ubicación:</strong> <code>routes/deportistas.py</code></p>
+<blockquote>
+<p>Lista deportistas; opcionalmente filtra por ?grupo=<id_grupo>.</p>
+</blockquote>
+<h3 id="sec40">Módulo: <code>web/js/app.js</code></h3>
+<p><strong><code>async api</code></strong></p>
+<ul>
+<li>Parámetros: <code>path, { method = "GET", body, auth = true } = {}</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>showToast</code></strong></p>
+<ul>
+<li>Parámetros: <code>message, isError = false</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>fmtFecha</code></strong></p>
+<ul>
+<li>Parámetros: <code>iso</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupLoginListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async enterApp</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupNavigationListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>switchView</code></strong></p>
+<ul>
+<li>Parámetros: <code>name</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarGrupos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>llenarSelectsDeGrupo</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupDashboardListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarDashboard</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>renderListaGrupos</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupDeportistasListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarPantallaDeportistas</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupActividadListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarPantallaActividad</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async onActGrupoChange</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarActividadDeportista</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupNotificacionesListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarPantallaNotificaciones</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>setupHistorialListeners</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong><code>async cargarPantallaHistorial</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<hr />
+<hr />
+<h2 id="sec41">6. Modelos de Datos</h2>
+<p>No se detectaron clases con nombres de modelo explícitos.</p>
+<h3 id="sec42">Esquema General Inferido</h3>
+<p>Basado en el análisis del código, las entidades principales son:</p>
+<ul>
+<li><strong>App</strong></li>
+</ul>
+<hr />
+<h2 id="sec43">7. Guía de Despliegue y Mantenimiento</h2>
+<h3 id="sec44">7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: Python</li>
+<li><strong>Archivos detectados</strong>: 20</li>
+</ul>
+<h3 id="sec45">7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+pip install -r requirements.txt
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+python app.py
+</code></pre>
+<h3 id="sec46">7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM python:3.12-slim
+
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+EXPOSE 8000
+CMD [&quot;python app.py&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3 id="sec47">7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3 id="sec48">7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3 id="sec49">7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-10-13
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec50">8. Reporte de Calidad del Código</h2>
+<h3 id="sec51">8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 75/100 (Bueno [YELLOW])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 12/63 (19%)
+- Clases documentadas: 0/8</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 2.57
+- Complejidad máxima: 9
+- Funciones con alta complejidad (&gt;10): 0</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: → Estable
+</code></pre>
+<h3 id="sec52">8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<p>No hay funciones con complejidad &gt; 10. [OK]</p>
+<h3 id="sec53">8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 51 funciones sin documentar</li>
+</ul>
+<h3 id="sec54">8.4 Errores de Análisis</h3>
+<p>Sin errores detectados. [OK]</p>
+<hr />
+<h2 id="sec55">9. Análisis de Datos del Proyecto</h2>
+<h3 id="sec56">9.1 Tipos y Fuentes de Datos Detectados</h3>
+<p><strong>Datos Estructurados:</strong> 0 archivos</p>
+<p><strong>Datos Semi-estructurados:</strong> 0 archivos</p>
+<p><strong>Datos No Estructurados:</strong> 0 archivos</p>
+<h3 id="sec57">9.2 Esquema de Data Warehouse Inferido</h3>
+<p>No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.</p>
+<h3 id="sec58">9.3 Reporte de Calidad de Datos</h3>
+<p><strong>Problemas Detectados en el Código:</strong></p>
+<ul>
+<li><strong>Funciones sin documentar:</strong> 51</li>
+<li><code>create_app</code> en <code>app.py</code></li>
+<li><code>favicon</code> en <code>app.py</code></li>
+<li><code>health</code> en <code>app.py</code></li>
+<li><code>not_found</code> en <code>app.py</code></li>
+<li><code>method_not_allowed</code> en <code>app.py</code></li>
+<li>... y 46 más</li>
+</ul>
+<h3 id="sec59">9.4 Minería de Datos Aplicada al Código</h3>
+<p><em>Análisis automático realizado sobre las funciones y clases extraídas del proyecto.</em></p>
+<h4>A) Funciones de Alta Complejidad Ciclomática</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Umbral</th>
+<th>Cantidad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Alta</td>
+<td>&gt; 5</td>
+<td>8</td>
+<td>Requieren refactorización urgente</td>
+</tr>
+<tr>
+<td>🟡 Media</td>
+<td>4–5</td>
+<td>10</td>
+<td>Candidatas a simplificación</td>
+</tr>
+<tr>
+<td>🟢 Baja</td>
+<td>≤ 3</td>
+<td>45</td>
+<td>Complejidad aceptable</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Funciones de alta complejidad — detalle y recomendaciones:</strong></p>
+<ul>
+<li><strong><code>registrar_actividad</code></strong></li>
+<li>📁 Archivo: <code>routes/actividad.py</code> — línea 12</li>
+<li>📊 Complejidad ciclomática: <strong>9</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (9). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>enviar_notificacion</code></strong></p>
+</li>
+<li>📁 Archivo: <code>routes/notificaciones.py</code> — línea 13</li>
+<li>📊 Complejidad ciclomática: <strong>9</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (9). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>actualizar_deportista</code></strong> <code>[sin docstring]</code></p>
+</li>
+<li>📁 Archivo: <code>routes/deportistas.py</code> — línea 71</li>
+<li>📊 Complejidad ciclomática: <strong>9</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (9). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>crear_deportista</code></strong> <code>[sin docstring]</code></p>
+</li>
+<li>📁 Archivo: <code>routes/deportistas.py</code> — línea 37</li>
+<li>📊 Complejidad ciclomática: <strong>8</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (8). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>historial_grupo</code></strong></p>
+</li>
+<li>📁 Archivo: <code>routes/historial.py</code> — línea 11</li>
+<li>📊 Complejidad ciclomática: <strong>7</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (7). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>crear_meta</code></strong> <code>[sin docstring]</code></p>
+</li>
+<li>📁 Archivo: <code>routes/metas.py</code> — línea 16</li>
+<li>📊 Complejidad ciclomática: <strong>7</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (7). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>serialize</code></strong></p>
+</li>
+<li>📁 Archivo: <code>utils.py</code> — línea 4</li>
+<li>📊 Complejidad ciclomática: <strong>6</strong></li>
+<li>
+<p>💡 Sugerencia: Complejidad moderada-alta (6). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</p>
+</li>
+<li>
+<p><strong><code>registrar_dispositivo</code></strong> <code>[sin docstring]</code></p>
+</li>
+<li>📁 Archivo: <code>routes/dispositivos.py</code> — línea 27</li>
+<li>📊 Complejidad ciclomática: <strong>6</strong></li>
+<li>💡 Sugerencia: Complejidad moderada-alta (6). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.</li>
+</ul>
+<h4>B) Funciones Sin Documentación</h4>
+<p><strong>51 de 63 funciones</strong> carecen de docstring (81%).</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create_app</code></td>
+<td><code>app.py</code></td>
+<td>10</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>favicon</code></td>
+<td><code>app.py</code></td>
+<td>38</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>health</code></td>
+<td><code>app.py</code></td>
+<td>42</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>not_found</code></td>
+<td><code>app.py</code></td>
+<td>46</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>method_not_allowed</code></td>
+<td><code>app.py</code></td>
+<td>50</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>server_error</code></td>
+<td><code>app.py</code></td>
+<td>54</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>now</code></td>
+<td><code>utils.py</code></td>
+<td>30</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>hash_password</code></td>
+<td><code>auth_utils.py</code></td>
+<td>11</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>check_password</code></td>
+<td><code>auth_utils.py</code></td>
+<td>15</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>generate_token</code></td>
+<td><code>auth_utils.py</code></td>
+<td>22</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>decode_token</code></td>
+<td><code>auth_utils.py</code></td>
+<td>32</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>decorated</code></td>
+<td><code>auth_utils.py</code></td>
+<td>39</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>registro</code></td>
+<td><code>routes/auth.py</code></td>
+<td>12</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>login</code></td>
+<td><code>routes/auth.py</code></td>
+<td>42</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>marcar_leida</code></td>
+<td><code>routes/notificaciones.py</code></td>
+<td>62</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>listar_grupos</code></td>
+<td><code>routes/grupos.py</code></td>
+<td>13</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>crear_grupo</code></td>
+<td><code>routes/grupos.py</code></td>
+<td>20</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>actualizar_grupo</code></td>
+<td><code>routes/grupos.py</code></td>
+<td>34</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>eliminar_grupo</code></td>
+<td><code>routes/grupos.py</code></td>
+<td>51</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>crear_meta</code></td>
+<td><code>routes/metas.py</code></td>
+<td>16</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p><em>... y 31 funciones más sin documentar.</em></p>
+<p>💡 <strong>Sugerencia:</strong> Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.</p>
+<h4>C) Detección de Funciones con Nombres Similares (Posibles Duplicados)</h4>
+<p><em>Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse.</em></p>
+<p>Se detectaron <strong>1 grupos de funciones con nombres similares</strong> repartidas en distintos archivos:</p>
+<p><strong>Patrón: <code>*_por_deportista</code> / <code>por_deportista_*</code></strong> — aparece en 3 archivos distintos</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>actividad_por_deportista</code></td>
+<td><code>routes/actividad.py</code></td>
+<td>58</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>notificaciones_por_deportista</code></td>
+<td><code>routes/notificaciones.py</code></td>
+<td>46</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>metas_por_deportista</code></td>
+<td><code>routes/metas.py</code></td>
+<td>60</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong>Sugerencia:</strong> Las 3 funciones <code>actividad_por_deportista</code>, <code>notificaciones_por_deportista</code>, <code>metas_por_deportista</code> comparten el patrón <code>por_deportista</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Funciones</th>
+<th>Complejidad Promedio</th>
+<th>Documentadas</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>web/js/app.js</code></td>
+<td>22</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🔴 Sobrecargado</td>
+</tr>
+<tr>
+<td><code>app.py</code></td>
+<td>7</td>
+<td>1.1</td>
+<td>14%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>auth_utils.py</code></td>
+<td>6</td>
+<td>2.7</td>
+<td>17%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/deportistas.py</code></td>
+<td>5</td>
+<td>5.0</td>
+<td>20%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/grupos.py</code></td>
+<td>4</td>
+<td>2.5</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/dispositivos.py</code></td>
+<td>4</td>
+<td>4.0</td>
+<td>25%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>utils.py</code></td>
+<td>3</td>
+<td>4.0</td>
+<td>67%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/actividad.py</code></td>
+<td>3</td>
+<td>4.0</td>
+<td>100%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/notificaciones.py</code></td>
+<td>3</td>
+<td>4.0</td>
+<td>67%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/metas.py</code></td>
+<td>3</td>
+<td>4.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/auth.py</code></td>
+<td>2</td>
+<td>5.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>routes/historial.py</code></td>
+<td>1</td>
+<td>7.0</td>
+<td>100%</td>
+<td>🟡 Revisar</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong><code>web/js/app.js</code></strong> tiene 22 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).</p>
+<h4>E) Patrones Frecuentes Adicionales (Análisis IA)</h4>
+<ul>
+<li><strong>create_</strong>: 1 ocurrencias</li>
+<li>Ejemplos: Operaciones create_ repetidas</li>
+<li><strong>check_</strong>: 1 ocurrencias</li>
+<li>Ejemplos: Operaciones check_ repetidas</li>
+</ul>
+<h3 id="sec60">9.5 Pipeline ETL Utilizado</h3>
+<p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Fases del Pipeline:</strong></p>
+<ul>
+<li><strong>Extract:</strong> Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales</li>
+<li><strong>Transform:</strong> Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones</li>
+<li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
+</ul>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-10-13 05:10 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">Coahsy</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">20</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">8</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">63</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">20</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#10b981">75/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">13/10/2026 05:10 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>

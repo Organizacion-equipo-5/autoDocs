@@ -2,8 +2,10 @@ from datetime import datetime
 from services.ai_enhancer import AIEnhancer
 import subprocess
 import os
+import re
 import shutil
 import zlib
+import struct
 import base64
 import mimetypes
 import urllib.request
@@ -29,11 +31,71 @@ class DocGenerator:
         if self.ai_enhancer.is_available():
             self.r = self.ai_enhancer.enhance_documentation(self.r)
 
+    @staticmethod
+    def _sanitize_ai_markdown(text: str) -> str:
+        """Cierra bloques ``` abiertos por respuestas de IA cortadas."""
+        if not text:
+            return text
+        fences = sum(1 for ln in text.splitlines() if ln.strip().startswith('```'))
+        if fences % 2 == 1:
+            text = text.rstrip() + "\n```"
+        return text
+
+    @staticmethod
+    def _color_bar_html(hex_color: str, alt: str = "Nivel de calidad") -> str:
+        """
+        Barra de color como imagen PNG (data URI) generada sin librerías externas.
+        Se usa <img> porque es la única etiqueta HTML que el conversor respeta.
+        """
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        # Imagen ya con forma de barra (600x8): el conversor respeta la proporción
+        # de la imagen e ignora el width/height del style.
+        w, h = 600, 8
+        row = b'\x00' + bytes([r, g, b]) * w
+        raw = row * h
+
+        def chunk(tag: bytes, data: bytes) -> bytes:
+            return (struct.pack('>I', len(data)) + tag + data
+                    + struct.pack('>I', zlib.crc32(tag + data) & 0xffffffff))
+
+        png = (b'\x89PNG\r\n\x1a\n'
+               + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0))
+               + chunk(b'IDAT', zlib.compress(raw))
+               + chunk(b'IEND', b''))
+        uri = 'data:image/png;base64,' + base64.b64encode(png).decode('ascii')
+        return (
+            f"\n<div style=\"margin: 0.4rem 0 0.6rem 0;\">"
+            f"<img src=\"{uri}\" alt=\"{alt}\" "
+            f"style=\"width: 100%; height: 6px; border-radius: 3px; display:block;\">"
+            f"</div>\n"
+        )
+
     def _render_markdown_table(self, headers: list[str], rows: list[list[str]]) -> str:
         header_line = '| ' + ' | '.join(headers) + ' |'
         separator_line = '| ' + ' | '.join('---' for _ in headers) + ' |'
         row_lines = '\n'.join('| ' + ' | '.join(row) + ' |' for row in rows)
         return f"{header_line}\n{separator_line}\n{row_lines}\n"
+
+    @staticmethod
+    def _count_function_loc(fn: dict):
+        """
+        Cuenta las líneas de código de una función a partir de su código fuente.
+
+        - Si existe `code_snippet`, se cuentan sus líneas no vacías.
+        - Si no hay snippet pero el análisis aporta `line` y `end_line`
+          (o `end_lineno`), se usa ese rango.
+        - Si no hay datos suficientes devuelve None (se muestra «—»).
+        """
+        snippet = fn.get('code_snippet') or ''
+        if snippet.strip():
+            return sum(1 for ln in snippet.splitlines() if ln.strip())
+
+        start = fn.get('line')
+        end = fn.get('end_line') or fn.get('end_lineno')
+        if isinstance(start, int) and isinstance(end, int) and end >= start:
+            return end - start + 1
+        return None
 
     def _graphviz_available(self) -> bool:
         return bool(shutil.which('dot'))
@@ -96,6 +158,7 @@ class DocGenerator:
         return res
 
     def _fetch_plantuml_image(self, plantuml_code: str, output_file: Path) -> Path | None:
+        # 1. Intentar primero con plantuml.com oficial (muy rápido y confiable)
         default_servers = [
             'https://www.plantuml.com/plantuml',
         ]
@@ -103,7 +166,7 @@ class DocGenerator:
         servers = [server_url] + default_servers if server_url else default_servers
         encoded = self._plantuml_encode(plantuml_code)
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'image/png,*/*;q=0.8',
         }
         for server in filter(None, servers):
@@ -113,31 +176,47 @@ class DocGenerator:
                 output_path = output_file.with_suffix(f'.{ext}')
                 try:
                     request = urllib.request.Request(target_url, headers=headers)
-                    with urllib.request.urlopen(request, timeout=20) as response:
+                    with urllib.request.urlopen(request, timeout=10) as response:
                         if response.status != 200:
-                            print(f"[PlantUML Error] remote server returned {response.status} for {target_url}")
                             continue
                         content = response.read()
-                        content_type = response.headers.get('Content-Type', '')
                         if ext == 'png':
                             if not content.startswith(b'\x89PNG\r\n\x1a\n'):
-                                print(f"[PlantUML Error] remote server returned invalid PNG for {target_url}")
                                 continue
                         elif ext == 'svg':
                             text = content.decode('utf-8', errors='ignore').strip()
                             if not (text.startswith('<svg') or text.startswith('<?xml')):
-                                print(f"[PlantUML Error] remote server returned invalid SVG for {target_url}")
                                 continue
                         output_path.write_bytes(content)
                         if self._is_valid_image(output_path):
                             return output_path
                         output_path.unlink(missing_ok=True)
-                except urllib.error.HTTPError as e:
-                    print(f"[PlantUML Error] remote fetch failed {e.code} for {target_url}: {e.reason}")
-                except urllib.error.URLError as e:
-                    print(f"[PlantUML Error] remote fetch failed for {target_url}: {e}")
-                except Exception as e:
-                    print(f"[PlantUML Error] remote fetch failed for {target_url}: {e}")
+                except Exception:
+                    pass
+
+        # 2. Fallback a Kroki vía POST
+        try:
+            kroki_req = urllib.request.Request(
+                "https://kroki.io/plantuml/png",
+                data=plantuml_code.encode("utf-8"),
+                headers={
+                    "Content-Type": "text/plain; charset=utf-8",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36",
+                    "Accept": "image/png"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(kroki_req, timeout=8) as resp:
+                if resp.status == 200:
+                    data = resp.read()
+                    if data.startswith(b'\x89PNG\r\n\x1a\n') and len(data) > 200:
+                        png_out = output_file.with_suffix('.png')
+                        png_out.write_bytes(data)
+                        if self._is_valid_image(png_out):
+                            return png_out
+                        png_out.unlink(missing_ok=True)
+        except Exception:
+            pass
         return None
 
     def _image_to_data_uri(self, image_path: Path) -> str:
@@ -258,6 +337,47 @@ class DocGenerator:
         }
 
     # ─── 1. README ────────────────────────────────────────────────────────────
+    def _cover_page(self) -> str:
+        lang  = self.r.get("primary_language", "Desconocido")
+        langs = self.r.get("languages", {})
+        fns   = self.r.get("functions", [])
+        cls   = self.r.get("classes", [])
+        eps   = self.r.get("endpoints", [])
+        files = self.r.get("total_files", 0)
+        score = self.r.get("quality_score", 0)
+        label = "Excelente" if score >= 80 else "Aceptable" if score >= 60 else "Requiere mejoras"
+
+        return f"""
+        <div class="cover">
+          <p class="eyebrow">Auditoría &amp; Especificación Técnica de Software</p>
+          <h1 class="cover-title">{self.r.get('project_name', 'Proyecto')}</h1>
+          <div class="cover-rule"></div>
+          <p class="cover-subtitle">
+            Documento Maestro de Arquitectura, Endpoints, Modelos de Dominio y Métricas de Calidad
+          </p>
+
+          <table class="meta-table">
+            <tr><td>Proyecto:</td><td><strong>{self.r.get('project_name','—')}</strong></td></tr>
+            <tr><td>Lenguaje Dominante:</td><td><strong>{lang}</strong></td></tr>
+            <tr><td>Score de Calidad:</td><td><strong>{score} / 100 ({label})</strong></td></tr>
+            <tr><td>Total Archivos Analizados:</td><td><strong>{files}</strong></td></tr>
+            <tr><td>Fecha de Generación:</td><td><strong>{self.now}</strong></td></tr>
+            <tr><td>Motor de Generación:</td><td><strong>AutoDocs AI Enterprise (Groq IA + PlantUML/Kroki)</strong></td></tr>
+          </table>
+
+          <div class="kpi-row">
+            <div class="kpi"><span class="kpi-num">{files}</span><span class="kpi-lbl">Archivos</span></div>
+            <div class="kpi"><span class="kpi-num">{len(fns)}</span><span class="kpi-lbl">Funciones</span></div>
+            <div class="kpi"><span class="kpi-num">{len(cls)}</span><span class="kpi-lbl">Clases</span></div>
+            <div class="kpi"><span class="kpi-num">{len(eps)}</span><span class="kpi-lbl">Endpoints</span></div>
+          </div>
+
+          <p class="cover-footer">
+            Documento técnico confidencial · Generado automáticamente por AutoDocs AI · Distribución interna
+          </p>
+        </div>
+        <div class="page-break"></div>
+        """
     def _readme(self) -> str:
         lang   = self.r.get("primary_language", "Desconocido")
         langs  = self.r.get("languages", {})
@@ -305,8 +425,8 @@ Este proyecto está desarrollado principalmente en **{lang}** y cuenta con
         eps     = self.r.get("endpoints", [])
         cls     = self.r.get("classes", [])
         
-        # Agregar insights de IA si están disponibles
-        ai_insights = self.r.get("ai_architecture_insights", "")
+        # Agregar insights de IA si están disponibles (cerrando bloques ``` abiertos)
+        ai_insights = self._sanitize_ai_markdown(self.r.get("ai_architecture_insights", ""))
 
         # Agrupar por directorio raíz
         dirs = {}
@@ -331,13 +451,15 @@ Este proyecto está desarrollado principalmente en **{lang}** y cuenta con
 
         # Diagrama de casos de uso en PlantUML
         use_cases_puml = "@startuml\n"
-        use_cases_puml += "actor Usuario as user\n"
-        use_cases_puml += "package \"Sistema\" {\n"
-        for ep in eps[:10]:
+        use_cases_puml += "left to right direction\n"
+        use_cases_puml += "skinparam packageStyle rectangle\n"
+        use_cases_puml += "actor \"Usuario\" as user\n"
+        use_cases_puml += "rectangle \"Sistema\" {\n"
+        for idx, ep in enumerate(eps[:10], start=1):
             method = ep.get("method", "GET")
-            path = ep.get("path", "/").replace("/", "_").replace("{", "").replace("}", "")
-            use_cases_puml += f'  usecase "{method} {ep.get("path", "/")}" as uc_{path}\n'
-            use_cases_puml += f'  user --> uc_{path}\n'
+            path_label = ep.get("path", "/").replace('"', '')
+            use_cases_puml += f'  usecase "{method} {path_label}" as uc_{idx}\n'
+            use_cases_puml += f'  user --> uc_{idx}\n'
         if len(eps) > 10:
             use_cases_puml += '  usecase "Otros endpoints" as uc_other\n'
             use_cases_puml += '  user --> uc_other\n'
@@ -392,14 +514,18 @@ cli --> routes
 
         # Diagrama de clases en PlantUML
         class_puml = "@startuml\n"
-        for c in cls[:15]:
-            class_name = c.get("name", "Unknown")
-            class_puml += f'class "{class_name}" {{\n'
+        class_puml += "skinparam classAttributeIconSize 0\n"
+        for idx, c in enumerate(cls[:15], start=1):
+            class_name = c.get("name", f"Class{idx}")
+            safe_alias = f"cls_{idx}"
+            class_puml += f'class "{class_name}" as {safe_alias} {{\n'
             methods = c.get("methods", [])
             for m in methods[:5]:
-                class_puml += f'  {m}\n'
+                clean_m = re.sub(r'[^a-zA-Z0-9_]', '', str(m))
+                if clean_m:
+                    class_puml += f'  +{clean_m}()\n'
             if len(methods) > 5:
-                class_puml += f'  ... {len(methods) - 5} más\n'
+                class_puml += f'  ... ({len(methods) - 5} más)\n'
             class_puml += '}\n'
         class_puml += "@enduml"
         
@@ -492,7 +618,6 @@ proyecto/
     def _api_docs(self) -> list:
         docs = []
         for ep in self.r.get("endpoints", []):
-            # Usar descripción de IA si está disponible, sino usar descripción genérica
             description = ep.get("ai_description") or f"Endpoint {ep.get('method')} {ep.get('path')}"
             docs.append({
                 "method":      ep.get("method"),
@@ -510,6 +635,55 @@ proyecto/
                 }
             })
         return docs
+
+    def _render_code_fragment(self, name: str, file: str, snippet: str, explanation: str, lang: str = "python") -> str:
+        """Genera un bloque HTML de fragmento de código con explicación."""
+        if not snippet:
+            return ""
+        # Escapar caracteres problemáticos en el snippet para HTML
+        safe_snippet = snippet.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        return f"""
+<div class="code-fragment">
+  <div class="code-fragment-header">
+    <div class="frag-icon">&lt;/&gt;</div>
+    <div>
+      <div class="frag-title">{name}</div>
+      <div class="frag-file">{file}</div>
+    </div>
+  </div>
+  <pre><code>{safe_snippet}</code></pre>
+  <div class="code-explanation">{explanation}</div>
+</div>
+"""
+
+    def _generate_code_explanation(self, fn: dict) -> str:
+        """Genera una explicación automática de un fragmento de código."""
+        name = fn.get('name', '?')
+        params = fn.get('params', [])
+        docstring = fn.get('docstring', '')
+        is_async = fn.get('is_async', False)
+        cx = fn.get('complexity', 1)
+
+        parts = []
+        if docstring:
+            parts.append(f"<strong>Propósito:</strong> {docstring}")
+        else:
+            parts.append(f"<strong>Propósito:</strong> Función <code>{name}</code> detectada en el proyecto.")
+
+        if params:
+            param_list = ', '.join(f'<code>{p}</code>' for p in params if p != 'self')
+            if param_list:
+                parts.append(f"<strong>Parámetros:</strong> Recibe {param_list}.")
+
+        if is_async:
+            parts.append("<strong>Tipo:</strong> Función asíncrona (<code>async/await</code>), diseñada para operaciones no bloqueantes.")
+
+        if cx > 10:
+            parts.append(f"<strong>Complejidad:</strong> Alta ({cx}). Se recomienda refactorizar para mejorar la legibilidad.")
+        elif cx > 5:
+            parts.append(f"<strong>Complejidad:</strong> Moderada ({cx}). Contiene múltiples ramas de decisión.")
+
+        return ' '.join(parts)
 
     def _api_section(self) -> str:
         eps = self.r.get("endpoints", [])
@@ -550,83 +724,171 @@ python app.py  # o npm run dev
 
 """
 
-        # 3.2 Documentación de API
-        out += f"### 3.2 Documentación de API\n\nTotal de endpoints detectados: **{len(eps)}**\n\n"
+        # 3.2 Tabla resumen de endpoints
+        out += f"### 3.2 Catálogo de Endpoints de API\n\n"
+        out += f"El proyecto expone **{len(eps)} endpoints**. A continuación se presenta el catálogo completo organizado por módulo:\n\n"
 
+        # Tabla resumen de todos los endpoints
+        ep_rows = []
+        for ep in eps:
+            method = ep.get('method', 'GET')
+            ep_rows.append([
+                f"**{method}**",
+                f"`{ep.get('path', '/')}`",
+                f"`{ep.get('file', '?')}`",
+                ep.get('framework', '—'),
+            ])
+        out += self._render_markdown_table(
+            ['Método', 'Ruta', 'Archivo', 'Framework'],
+            ep_rows
+        )
+
+        # Detalle por módulo
         by_file = {}
         for ep in eps:
             by_file.setdefault(ep.get("file", "desconocido"), []).append(ep)
 
         for f, endpoints in by_file.items():
-            out += f"#### Módulo: `{f}`\n\n"
+            out += f"\n#### Módulo: `{f}`\n\n"
             for ep in endpoints:
-                method_icons = {"GET": "[GET]", "POST": "[POST]", "PUT": "[PUT]", "DELETE": "[DEL]", "PATCH": "[PATCH]"}
-                icon = method_icons.get(ep.get("method", ""), "[GET]")
-                out += f"##### {icon} `{ep.get('method')} {ep.get('path')}`\n\n"
-                out += f"- **Framework**: {ep.get('framework', 'Desconocido')}\n"
-                out += f"- **Archivo**: `{ep.get('file')}`\n\n"
-                # Mostrar descripción de IA si está disponible
-                ai_desc = ep.get("ai_description")
+                method = ep.get('method', 'GET')
+                out += f"##### `{method} {ep.get('path')}`\n\n"
+                # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
+                ai_desc = self._sanitize_ai_markdown(ep.get("ai_description"))
                 if ai_desc:
                     out += f"> {ai_desc}\n\n"
-                out += "**Parámetros esperados:**\n\n"
-                method = ep.get("method", "GET")
-                if method in ("POST", "PUT", "PATCH"):
-                    out += "- `body` (JSON, requerido): Cuerpo de la solicitud\n"
-                out += "- `Authorization` (Header, requerido): Bearer JWT token\n\n"
-                out += "**Códigos de respuesta:**\n\n"
-                out += "- `200` — Operación exitosa\n"
-                out += "- `400` — Solicitud incorrecta\n"
-                out += "- `401` — No autorizado\n"
-                out += "- `404` — Recurso no encontrado\n"
-                out += "- `500` — Error interno del servidor\n\n"
+
+                # Tabla de detalle del endpoint
+                detail_rows = [
+                    ['Framework', ep.get('framework', 'Desconocido')],
+                    ['Archivo', f"`{ep.get('file')}`"],
+                ]
+                if method in ('POST', 'PUT', 'PATCH'):
+                    detail_rows.append(['Body', 'JSON (requerido)'])
+                detail_rows.append(['Auth', 'Bearer JWT Token'])
+                out += self._render_markdown_table(['Propiedad', 'Valor'], detail_rows)
+
+                # Tabla de códigos de respuesta
+                resp_rows = [
+                    ['`200`', '✅ Operación exitosa'],
+                    ['`400`', '⚠️ Solicitud incorrecta'],
+                    ['`401`', '🔒 No autorizado'],
+                    ['`404`', '❌ Recurso no encontrado'],
+                    ['`500`', '🔥 Error interno del servidor'],
+                ]
+                out += self._render_markdown_table(['Código', 'Descripción'], resp_rows)
                 out += "---\n\n"
 
-        # 3.3 Comentarios y JSDoc / Docstrings
+        # 3.3 Estado de documentación
         fns = self.r.get("functions", [])
         documented = [f for f in fns if f.get("docstring")]
         undocumented = [f for f in fns if not f.get("docstring")]
         doc_pct = round(len(documented) / max(len(fns), 1) * 100)
 
         out += "### 3.3 Estado de Comentarios y Docstrings\n\n"
-        out += f"**Total de funciones:** {len(fns)}\n\n"
-        out += f"- **[OK] Documentadas:** {len(documented)} ({doc_pct}%)\n"
-        out += f"- **[X] Sin documentar:** {len(undocumented)} ({100 - doc_pct}%)\n\n"
-        out += "**Visualización de documentación:**\n\n"
-        out += f"```text\n[{'█' * int(doc_pct/5)}{'░' * int((100-doc_pct)/5)}]\n{doc_pct}% documentado\n```\n\n"
 
+        # Tabla de resumen de documentación
+        doc_summary_rows = [
+            ['Total de funciones', str(len(fns))],
+            ['✅ Documentadas', f"{len(documented)} ({doc_pct}%)"],
+            ['❌ Sin documentar', f"{len(undocumented)} ({100 - doc_pct}%)"],
+        ]
+        out += self._render_markdown_table(['Métrica', 'Valor'], doc_summary_rows)
+
+        out += f"\n```text\n[{'█' * int(doc_pct/5)}{'░' * int((100-doc_pct)/5)}] {doc_pct}% documentado\n```\n\n"
+
+        # Fragmentos de código con docstrings como ejemplos
         if documented:
-            out += "**Ejemplo de docstrings detectados:**\n\n"
-            for fn in documented[:3]:
-                params_str = ", ".join(fn.get("params", []))
-                out += f"```python\ndef {fn['name']}({params_str}):\n    \"\"\"\n    {fn['docstring']}\n    \"\"\"\n    ...\n```\n\n"
+            out += "#### Fragmentos de Código con Documentación\n\n"
+            out += "A continuación se muestran fragmentos reales del proyecto que cuentan con docstrings correctamente implementados:\n\n"
+            for fn in documented[:4]:
+                snippet = fn.get('code_snippet', '')
+                if snippet:
+                    explanation = self._generate_code_explanation(fn)
+                    out += self._render_code_fragment(
+                        fn['name'], fn.get('file', '?'), snippet, explanation,
+                        self.r.get('primary_language', 'python').lower()
+                    )
+                else:
+                    params_str = ", ".join(fn.get("params", []))
+                    out += f"```python\ndef {fn['name']}({params_str}):\n    \"\"\"\n    {fn['docstring']}\n    \"\"\"\n    ...\n```\n\n"
 
         if undocumented:
-            out += "**Funciones que requieren documentación:**\n\n"
-            for fn in undocumented[:5]:
-                params_str = ", ".join(fn.get("params", []))
-                out += f"- `{fn['name']}({params_str})` en `{fn.get('file', '?')}`\n"
-            if len(undocumented) > 5:
-                out += f"- ... y {len(undocumented) - 5} más\n"
+            out += "\n#### Funciones que Requieren Documentación\n\n"
+            undoc_rows = []
+            for fn in undocumented[:10]:
+                params_str = ", ".join(fn.get("params", [])) or "—"
+                undoc_rows.append([f"`{fn['name']}`", f"`{params_str}`", f"`{fn.get('file', '?')}`"])
+            out += self._render_markdown_table(['Función', 'Parámetros', 'Archivo'], undoc_rows)
+            if len(undocumented) > 10:
+                out += f"\n_... y {len(undocumented) - 10} funciones más sin documentar._\n"
             out += "\n"
 
-        # 3.4 Planes de Prueba (Testing)
+        # 3.4 Escenarios de Prueba (Testing) — EN TABLA
         test_fns = [f for f in fns if "test" in f["name"].lower() or f["name"].startswith("test_")]
-        out += "### 3.4 Planes de Prueba (Testing)\n\n"
+        out += "### 3.4 Escenarios de Pruebas\n\n"
         if test_fns:
-            out += f"Se detectaron **{len(test_fns)} funciones de prueba**:\n\n"
-            rows = [[f"`{fn['name']}`", f"`{fn.get('file', '?')}`"] for fn in test_fns[:10]]
-            out += self._render_markdown_table(['Función de Test', 'Archivo'], rows)
+            out += f"Se detectaron **{len(test_fns)} funciones de prueba** en el proyecto:\n\n"
+            test_rows = []
+            for fn in test_fns[:15]:
+                cx = fn.get('complexity', 1)
+                status = '✅ Implementada'
+                test_rows.append([
+                    f"`{fn['name']}`",
+                    f"`{fn.get('file', '?')}`",
+                    f"{cx}",
+                    status
+                ])
+            out += self._render_markdown_table(
+                ['Función de Test', 'Archivo', 'Complejidad', 'Estado'],
+                test_rows
+            )
+
+            # Mostrar fragmentos de código de tests
+            test_with_code = [f for f in test_fns if f.get('code_snippet')][:3]
+            if test_with_code:
+                out += "\n#### Fragmentos de Código de Tests\n\n"
+                out += "Estos son fragmentos reales de las pruebas implementadas en el proyecto:\n\n"
+                for fn in test_with_code:
+                    explanation = self._generate_code_explanation(fn)
+                    out += self._render_code_fragment(
+                        fn['name'], fn.get('file', '?'), fn['code_snippet'], explanation
+                    )
         else:
-            out += "No se detectaron pruebas automatizadas. Se recomienda implementar:\n\n"
-            out += "```python\n# Ejemplo de estructura de tests recomendada\nimport pytest\n\nclass TestEndpoints:\n    def test_get_returns_200(self, client):\n        response = client.get('/api/endpoint')\n        assert response.status_code == 200\n\n    def test_post_creates_resource(self, client):\n        data = {'name': 'test'}\n        response = client.post('/api/endpoint', json=data)\n        assert response.status_code == 201\n\n    def test_unauthorized_returns_401(self, client):\n        response = client.get('/api/protected')\n        assert response.status_code == 401\n```\n\n"
-            out += "**Escenarios de prueba recomendados:**\n\n"
-            rows = []
-            for ep in eps[:6]:
-                rows.append([f"{ep.get('method')} {ep.get('path')} — respuesta 200", "Integración", "Alta"])
-                rows.append([f"{ep.get('method')} {ep.get('path')} — sin auth (401)", "Seguridad", "Alta"])
-            out += self._render_markdown_table(['Escenario', 'Tipo', 'Prioridad'], rows)
-            out += "\n"
+            out += "> ⚠️ No se detectaron pruebas automatizadas en este proyecto.\n\n"
+            out += "Se recomienda implementar los siguientes escenarios de prueba:\n\n"
+
+            # Tabla profesional de escenarios recomendados
+            scenario_rows = []
+            for ep in eps[:8]:
+                method = ep.get('method', 'GET')
+                path = ep.get('path', '/')
+                scenario_rows.append([
+                    f"`{method} {path}`",
+                    f"Respuesta exitosa (200)",
+                    "Integración",
+                    "🔴 Alta"
+                ])
+                scenario_rows.append([
+                    f"`{method} {path}`",
+                    f"Sin autenticación (401)",
+                    "Seguridad",
+                    "🔴 Alta"
+                ])
+                if method in ('POST', 'PUT', 'PATCH'):
+                    scenario_rows.append([
+                        f"`{method} {path}`",
+                        f"Datos inválidos (400)",
+                        "Validación",
+                        "🟡 Media"
+                    ])
+            out += self._render_markdown_table(
+                ['Endpoint', 'Escenario', 'Tipo', 'Prioridad'],
+                scenario_rows
+            )
+
+            out += "\n**Ejemplo de implementación recomendada:**\n\n"
+            out += "```python\nimport pytest\n\nclass TestEndpoints:\n    def test_get_returns_200(self, client):\n        response = client.get('/api/endpoint')\n        assert response.status_code == 200\n\n    def test_post_creates_resource(self, client):\n        data = {'name': 'test'}\n        response = client.post('/api/endpoint', json=data)\n        assert response.status_code == 201\n\n    def test_unauthorized_returns_401(self, client):\n        response = client.get('/api/protected')\n        assert response.status_code == 401\n```\n\n"
 
         return out
 
@@ -652,24 +914,61 @@ python app.py  # o npm run dev
         if not classes:
             return "## 4. Clases\n\nNo se detectaron clases en este proyecto.\n"
 
-        out = f"## 4. Documentación de Clases\n\nTotal: **{len(classes)} clases**\n\n"
+        out = f"## 4. Documentación de Módulos y Clases\n\n"
+        out += f"El proyecto contiene **{len(classes)} clases** distribuidas en los siguientes módulos.\n\n"
+
+        # TABLA RESUMEN de todas las clases/módulos
+        out += "### 4.1 Tabla Resumen de Módulos\n\n"
+        cls_rows = []
         for c in classes:
-            out += f"### `{c['name']}`\n\n"
-            out += f"- **Archivo:** `{c['file']}`\n"
-            out += f"- **Línea:** {c.get('line', '?')}\n"
-            out += f"- **Hereda de:** {', '.join(c.get('bases', [])) or 'object'}\n"
-            out += f"- **Métodos:** {len(c.get('methods', []))}\n"
-            out += f"- **Documentada:** {'[OK] Sí' if c.get('docstring') else '[X] No'}\n\n"
-            # Mostrar descripción de IA o docstring
-            ai_desc = c.get("ai_description") or c.get("docstring")
+            methods_count = len(c.get('methods', []))
+            bases = ', '.join(c.get('bases', [])) or 'object'
+            doc_status = '✅ Sí' if c.get('docstring') else '❌ No'
+            cls_rows.append([
+                f"**`{c['name']}`**",
+                f"`{c['file']}`",
+                str(c.get('line', '—')),
+                bases,
+                str(methods_count),
+                doc_status
+            ])
+        out += self._render_markdown_table(
+            ['Clase', 'Archivo', 'Línea', 'Herencia', 'Métodos', 'Documentada'],
+            cls_rows
+        )
+
+        # Detalle de cada clase con fragmento de código
+        out += "\n### 4.2 Detalle de Clases\n\n"
+        for c in classes:
+            out += f"#### `{c['name']}`\n\n"
+            # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
+            ai_desc = self._sanitize_ai_markdown(c.get("ai_description") or c.get("docstring"))
             if ai_desc:
                 out += f"> {ai_desc}\n\n"
+
             if c.get("methods"):
-                out += "**Métodos:**\n\n"
+                method_rows = []
                 for m in c["methods"][:20]:
-                    out += f"- `{m}()`\n"
-                out += "\n"
-            out += "---\n\n"
+                    method_rows.append([f"`{m}()`"])
+                out += self._render_markdown_table(['Métodos disponibles'], method_rows)
+
+            # Fragmento de código de la clase
+            snippet = c.get('code_snippet', '')
+            if snippet:
+                explanation_parts = []
+                if ai_desc:
+                    explanation_parts.append(f"<strong>Descripción:</strong> {ai_desc}")
+                bases = ', '.join(c.get('bases', []))
+                if bases:
+                    explanation_parts.append(f"<strong>Herencia:</strong> Extiende de <code>{bases}</code>.")
+                methods_count = len(c.get('methods', []))
+                explanation_parts.append(f"<strong>Estructura:</strong> Contiene {methods_count} método(s) detectado(s).")
+                explanation = ' '.join(explanation_parts) if explanation_parts else f"Clase <code>{c['name']}</code> del proyecto."
+                out += self._render_code_fragment(
+                    c['name'], c.get('file', '?'), snippet, explanation,
+                    self.r.get('primary_language', 'python').lower()
+                )
+            out += "\n---\n\n"
         return out
 
     # ─── 5. FUNCIONES ─────────────────────────────────────────────────────────
@@ -678,7 +977,6 @@ python app.py  # o npm run dev
         for fn in self.r.get("functions", []):
             params_doc = [{"name": p, "type": "any", "description": f"Parámetro {p}"}
                           for p in fn.get("params", [])]
-            # Usar descripción de IA si está disponible, sino usar docstring
             description = fn.get("ai_description") or fn.get("docstring") or f"Función {fn['name']}"
             docs.append({
                 "name":        fn["name"],
@@ -688,6 +986,7 @@ python app.py  # o npm run dev
                 "parameters":  params_doc,
                 "is_async":    fn.get("is_async", False),
                 "complexity":  fn.get("complexity", 1),
+                "lines_of_code": self._count_function_loc(fn),
                 "returns":     {"type": "any", "description": "Valor de retorno"},
             })
         return docs
@@ -702,39 +1001,71 @@ python app.py  # o npm run dev
         for fn in fns:
             by_file.setdefault(fn.get("file", "desconocido"), []).append(fn)
 
-        out = f"## 5. Documentación de Funciones\n\nTotal: **{len(fns)} funciones**\n\n"
+        out = f"## 5. Documentación de Funciones\n\nEl proyecto contiene **{len(fns)} funciones** distribuidas en **{len(by_file)} módulos**.\n\n"
 
+        # TABLA RESUMEN por módulo
+        out += "### 5.1 Resumen por Módulo\n\n"
+        module_rows = []
         for fname, funcs in by_file.items():
-            out += f"### Módulo: `{fname}`\n\n"
-            for fn in funcs:
-                params   = ", ".join(fn.get("params", [])) or "—"
-                asyn     = "[ASYNC]" if fn.get("is_async") else "—"
-                cx       = fn.get("complexity", 1)
-                cx_icon  = "[LOW]" if cx <= 5 else "[MED]" if cx <= 10 else "[HIGH]"
-                doc_icon = "[OK]" if fn.get("docstring") else "[X]"
-                name     = ("async " if fn.get("is_async") else "") + fn["name"]
-                out += f"**`{name}`**\n\n"
-                out += f"- Parámetros: `{params}`\n"
-                out += f"- Async: {asyn}\n"
-                out += f"- Complejidad: {cx_icon} {cx}\n"
-                out += f"- Documentada: {doc_icon}\n\n"
-                # Mostrar descripción de IA o docstring
-                ai_desc = fn.get("ai_description") or fn.get("docstring")
-                if ai_desc:
-                    out += f"> {ai_desc}\n\n"
-            out += "---\n\n"
+            avg_cx = round(sum(f.get('complexity', 1) for f in funcs) / max(len(funcs), 1), 1)
+            doc_count = sum(1 for f in funcs if f.get('docstring'))
+            doc_pct = round(doc_count / max(len(funcs), 1) * 100)
+            async_count = sum(1 for f in funcs if f.get('is_async'))
+            module_rows.append([
+                f"`{fname}`",
+                str(len(funcs)),
+                str(avg_cx),
+                f"{doc_pct}%",
+                str(async_count) if async_count else '—',
+            ])
+        out += self._render_markdown_table(
+            ['Módulo', 'Funciones', 'Complejidad Prom.', 'Documentadas', 'Async'],
+            module_rows
+        )
 
-            # Detalle de funciones con docstring o descripción IA
+        # Detalle por módulo con tabla de funciones
+        out += "\n### 5.2 Detalle por Módulo\n\n"
+        for fname, funcs in by_file.items():
+            out += f"#### Módulo: `{fname}`\n\n"
+
+            # Tabla de funciones del módulo (incluye líneas de código de cada función)
+            fn_rows = []
             for fn in funcs:
-                ai_desc = fn.get("ai_description") or fn.get("docstring")
-                if ai_desc and fn.get("docstring"):
-                    params_str = ", ".join(fn.get("params", []))
-                    out += f"#### `{fn['name']}({params_str})`\n\n"
-                    out += f"**Ubicación:** `{fn.get('file', 'desconocido')}`\n\n"
-                    out += f"> {ai_desc}\n\n"
-                    # Agregar ejemplo de código si está disponible
-                    if fn.get("code_snippet"):
-                        out += f"**Ejemplo de código:**\n\n```python\n{fn['code_snippet']}\n```\n\n"
+                cx = fn.get('complexity', 1)
+                cx_badge = '🟢' if cx <= 5 else '🟡' if cx <= 10 else '🔴'
+                params = ', '.join(fn.get('params', [])) or '—'
+                async_tag = '⚡' if fn.get('is_async') else ''
+                doc_tag = '✅' if fn.get('docstring') else '❌'
+                loc = self._count_function_loc(fn)
+                loc_str = str(loc) if loc is not None else '—'
+                fn_rows.append([
+                    f"`{fn['name']}`{async_tag}",
+                    f"`{params}`",
+                    loc_str,
+                    f"{cx_badge} {cx}",
+                    doc_tag
+                ])
+            out += self._render_markdown_table(
+                ['Función', 'Parámetros', 'Líneas de código', 'Complejidad', 'Doc'],
+                fn_rows
+            )
+
+            # Fragmentos de código relevantes (máximo 3 por módulo)
+            important_fns = sorted(funcs, key=lambda f: f.get('complexity', 1), reverse=True)
+            code_shown = 0
+            for fn in important_fns:
+                if code_shown >= 3:
+                    break
+                snippet = fn.get('code_snippet', '')
+                if snippet:
+                    explanation = self._generate_code_explanation(fn)
+                    out += self._render_code_fragment(
+                        fn['name'], fn.get('file', '?'), snippet, explanation,
+                        self.r.get('primary_language', 'python').lower()
+                    )
+                    code_shown += 1
+
+            out += "\n---\n\n"
 
         return out
 
@@ -810,30 +1141,32 @@ python app.py  # o npm run dev
 
         # Generar diagrama PlantUML estrella
         puml = "@startuml\n"
-        puml += "!include <archimate/Archimate>\n"
         puml += "skinparam backgroundColor #FEFEFE\n"
         puml += "title Diagrama Estrella de Data Warehouse\n\n"
 
         # Tabla de hechos
         if fact_table:
-            puml += f"rectangle \"{fact_table['name']}\" as fact <<Fact Table>> {{\n"
-            puml += "  **Fact Table**\n"
+            puml += f"class \"{fact_table['name']}\" as fact <<FactTable>> {{\n"
             for method in fact_table.get("methods", [])[:5]:
-                puml += f"  -- {method}\n"
+                clean_m = re.sub(r'[^a-zA-Z0-9_]', '', str(method))
+                if clean_m:
+                    puml += f"  +{clean_m}()\n"
             puml += "}\n\n"
 
         # Tablas de dimensión
-        for dim in dimension_tables[:8]:
-            puml += f"rectangle \"{dim['name']}\" as {dim['name'].lower()} <<Dimension>> {{\n"
-            puml += f"  **Dimension**\n"
+        for idx, dim in enumerate(dimension_tables[:8], start=1):
+            dim_alias = f"dim_{idx}"
+            puml += f"class \"{dim['name']}\" as {dim_alias} <<Dimension>> {{\n"
             for method in dim.get("methods", [])[:3]:
-                puml += f"  -- {method}\n"
+                clean_m = re.sub(r'[^a-zA-Z0-9_]', '', str(method))
+                if clean_m:
+                    puml += f"  +{clean_m}()\n"
             puml += "}\n\n"
 
         # Relaciones
         if fact_table:
-            for dim in dimension_tables[:8]:
-                puml += f"{dim['name'].lower()} --> fact : FK\n"
+            for idx in range(1, len(dimension_tables[:8]) + 1):
+                puml += f"dim_{idx} --> fact : FK\n"
 
         puml += "@enduml"
 
@@ -863,34 +1196,36 @@ python app.py  # o npm run dev
 
         # Generar diagrama PlantUML copo de nieve
         puml = "@startuml\n"
-        puml += "!include <archimate/Archimate>\n"
         puml += "skinparam backgroundColor #FEFEFE\n"
         puml += "title Diagrama Copo de Nieve de Data Warehouse\n\n"
 
         # Tabla central (hechos)
         central = model_classes[0]
-        puml += f"rectangle \"{central['name']}\" as central <<Fact Table>> {{\n"
-        puml += "  **Central Fact**\n"
+        puml += f"class \"{central['name']}\" as central <<FactTable>> {{\n"
         for method in central.get("methods", [])[:3]:
-            puml += f"  -- {method}\n"
+            clean_m = re.sub(r'[^a-zA-Z0-9_]', '', str(method))
+            if clean_m:
+                puml += f"  +{clean_m}()\n"
         puml += "}\n\n"
 
         # Dimensiones primarias
         for i, dim in enumerate(model_classes[1:5]):
-            puml += f"rectangle \"{dim['name']}\" as dim{i} <<Dimension>> {{\n"
-            puml += f"  **Dimension**\n"
+            puml += f"class \"{dim['name']}\" as dim{i} <<Dimension>> {{\n"
             for method in dim.get("methods", [])[:2]:
-                puml += f"  -- {method}\n"
+                clean_m = re.sub(r'[^a-zA-Z0-9_]', '', str(method))
+                if clean_m:
+                    puml += f"  +{clean_m}()\n"
             puml += "}\n\n"
             puml += f"dim{i} --> central : FK\n\n"
 
         # Sub-dimensiones (copo de nieve)
         for i, dim in enumerate(model_classes[5:8]):
             parent_dim = i % 4  # Ciclar entre dimensiones primarias
-            puml += f"rectangle \"{dim['name']}\" as subdim{i} <<Sub-Dimension>> {{\n"
-            puml += f"  **Sub-Dimension**\n"
+            puml += f"class \"{dim['name']}\" as subdim{i} <<SubDimension>> {{\n"
             for method in dim.get("methods", [])[:2]:
-                puml += f"  -- {method}\n"
+                clean_m = re.sub(r'[^a-zA-Z0-9_]', '', str(method))
+                if clean_m:
+                    puml += f"  +{clean_m}()\n"
             puml += "}\n\n"
             puml += f"subdim{i} --> dim{parent_dim} : FK\n\n"
 
@@ -1317,7 +1652,14 @@ ALLOWED_HOSTS=*
         high_cx_fns     = [f for f in fns if f.get("complexity", 1) > 10]
 
         doc_pct = round(documented_fns / max(len(fns), 1) * 100)
-        quality_label = "Excelente [GREEN]" if score >= 80 else "Bueno [YELLOW]" if score >= 60 else "Necesita mejoras [RED]"
+
+        # Etiqueta de calidad con color (sin emojis)
+        if score >= 80:
+            quality_text, quality_color = "Excelente", "#16a34a"
+        elif score >= 60:
+            quality_text, quality_color = "Bueno", "#d97706"
+        else:
+            quality_text, quality_color = "Necesita mejoras", "#dc2626"
 
         recommendations = []
         if doc_pct < 50:
@@ -1334,7 +1676,8 @@ ALLOWED_HOSTS=*
 
 ### 8.1 Análisis de Métricas
 
-**Score de Calidad:** {score}/100 ({quality_label})
+**Score de Calidad:** {score}/100 — **{quality_text}**
+{self._color_bar_html(quality_color)}
 
 **Distribución de Documentación:**
 - Funciones documentadas: {documented_fns}/{len(fns)} ({doc_pct}%)

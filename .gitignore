@@ -11,8 +11,8 @@ ios/build/
 
 # Archivos de entorno
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
 # Uploads y temporales
 uploads/

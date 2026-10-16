@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import html as _html
 import io
 import re
 import base64
@@ -7,6 +8,32 @@ import mimetypes
 import subprocess
 
 EXPORT_BASE = Path('./exports')
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Ajustes para decidir cuándo una tabla debe ir en una página horizontal.
+# Se pueden afinar sin tocar el resto del código.
+# ─────────────────────────────────────────────────────────────────────────────
+PORTRAIT_WIDTH_PX      = 640    # ancho útil aprox. de una página A4 vertical (px CSS)
+CHAR_PX                = 8.0    # ancho medio estimado de un carácter
+CELL_PAD_PX            = 32     # padding horizontal total por columna (1rem + 1rem)
+NATURAL_CAP_CHARS      = 32     # una celda "natural" no pasa de este nº de caracteres
+NATURAL_OVERFLOW_RATIO = 1.35   # tolerancia antes de pasar a horizontal
+LANDSCAPE_MIN_COLS     = 7      # 7 o más columnas → siempre horizontal
+
+_TABLE_RE = re.compile(r'<table\b[^>]*>.*?</table>', re.DOTALL | re.IGNORECASE)
+_ROW_RE   = re.compile(r'<tr\b[^>]*>(.*?)</tr>', re.DOTALL | re.IGNORECASE)
+_CELL_RE  = re.compile(r'<t[hd]\b[^>]*>(.*?)</t[hd]>', re.DOTALL | re.IGNORECASE)
+_TAG_RE   = re.compile(r'<[^>]+>')
+# Fila separadora de tabla markdown con cualquier nº de columnas: | --- | :---: | ---: |
+_SEP_RE   = re.compile(r'^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$')
+# Encabezado (+ párrafo opcional) que está justo antes de una tabla:
+# se mueve junto con la tabla a la página horizontal para no quedar huérfano.
+_LEAD_RE  = re.compile(
+    r'<h[1-6][^>]*>(?:(?!</h[1-6]>).)*</h[1-6]>\s*'
+    r'(?:<p[^>]*>(?:(?!</p>).)*</p>\s*)?$',
+    re.DOTALL | re.IGNORECASE,
+)
+_EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
 
 
 class DocumentExporter:
@@ -27,7 +54,7 @@ class DocumentExporter:
             line = lines[i]
             if '|' in line and i + 1 < len(lines):
                 sep_line = lines[i + 1]
-                if re.match(r'^\s*\|?\s*(:?-+:?\s*\|)+\s*(:?-+:?\s*)?\|?\s*$', sep_line):
+                if _SEP_RE.match(sep_line):
                     headers = [cell.strip() for cell in re.split(r'\s*\|\s*', line.strip().strip('|'))]
                     rows = []
                     i += 2
@@ -60,6 +87,67 @@ class DocumentExporter:
             raise RuntimeError(f"Node markdown conversion failed: {result.stderr.strip()}")
         return result.stdout
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Tablas anchas → página horizontal (solo esa página)
+    # ─────────────────────────────────────────────────────────────────────────
+    def _is_wide_table(self, table_html: str) -> bool:
+        """Estima si una tabla HTML cabe en una página A4 vertical."""
+        grid = []
+        for row in _ROW_RE.findall(table_html):
+            cells = _CELL_RE.findall(row)
+            texts = [re.sub(r'\s+', ' ', _html.unescape(_TAG_RE.sub('', c))).strip() for c in cells]
+            if texts:
+                grid.append(texts)
+        if not grid:
+            return False
+
+        n_cols = max(len(r) for r in grid)
+        if n_cols >= LANDSCAPE_MIN_COLS:
+            return True
+
+        min_total = 0.0   # ancho mínimo (palabra más larga de cada columna)
+        nat_total = 0.0   # ancho "natural" (texto más largo, con tope)
+        for c in range(n_cols):
+            longest_token = 0
+            longest_text = 0
+            for r in grid:
+                if c < len(r):
+                    text = r[c]
+                    longest_text = max(longest_text, len(text))
+                    for tok in text.split():
+                        longest_token = max(longest_token, len(tok))
+            min_total += longest_token * CHAR_PX + CELL_PAD_PX
+            nat_total += min(longest_text, NATURAL_CAP_CHARS) * CHAR_PX + CELL_PAD_PX
+
+        return (min_total > PORTRAIT_WIDTH_PX
+                or nat_total > PORTRAIT_WIDTH_PX * NATURAL_OVERFLOW_RATIO)
+
+    def _wrap_wide_tables(self, html_body: str) -> str:
+        """
+        Envuelve cada tabla ancha en <div class="table-landscape">.
+        La regla CSS `page: landscape` hace que solo esa página sea horizontal;
+        el contenido anterior y posterior vuelve a orientación vertical.
+        """
+        out = []
+        pos = 0
+        for m in _TABLE_RE.finditer(html_body):
+            table_html = m.group(0)
+            if not self._is_wide_table(table_html):
+                continue
+            start, end = m.span()
+            before = html_body[pos:start]
+            lead = _LEAD_RE.search(before)
+            if lead:
+                out.append(before[:lead.start()])
+                intro = before[lead.start():]
+            else:
+                out.append(before)
+                intro = ''
+            out.append(f'<div class="table-landscape">{intro}{table_html}</div>')
+            pos = end
+        out.append(html_body[pos:])
+        return ''.join(out)
+
     def to_html(self) -> str:
         md = self.to_markdown()
         project_name = self.project.get('name', 'Proyecto')
@@ -72,6 +160,8 @@ class DocumentExporter:
                 html_body = markdown_to_html(md, extensions=['fenced_code', 'tables', 'attr_list', 'sane_lists', 'extra'])
             except Exception:
                 html_body = md
+                # Las tablas se convierten primero para que el reemplazo de '---' no rompa sus separadores
+                html_body = self._markdown_table_to_html(html_body)
                 html_body = re.sub(r'^#### (.+)$', r'<h4>\1</h4>', html_body, flags=re.MULTILINE)
                 html_body = re.sub(r'^### (.+)$',  r'<h3>\1</h3>', html_body, flags=re.MULTILINE)
                 html_body = re.sub(r'^## (.+)$',   r'<h2>\1</h2>', html_body, flags=re.MULTILINE)
@@ -80,9 +170,9 @@ class DocumentExporter:
                 html_body = re.sub(r'\*(.+?)\*',      r'<em>\1</em>',        html_body)
                 html_body = re.sub(r'`([^`]+)`', r'<code>\1</code>', html_body)
                 html_body = re.sub(r'```[\w]*\n(.*?)```', r'<pre><code>\1</code></pre>', html_body, flags=re.DOTALL)
-                html_body = html_body.replace('---', '<hr>')
-                html_body = self._markdown_table_to_html(html_body)
+                html_body = re.sub(r'^---$', '<hr>', html_body, flags=re.MULTILINE)
 
+        # Todas las tablas comparten el mismo diseño (el de «Stack Tecnológico»)
         html_body = re.sub(r'<table(?![^>]*class=)', '<table class="report-table"', html_body)
 
         # Inject section IDs onto h1/h2/h3 headings
@@ -117,6 +207,9 @@ class DocumentExporter:
             return ''.join(html_parts)
 
         toc_html = _build_toc_html(toc_headings)
+
+        # Tablas anchas → solo esa página en horizontal
+        html_body = self._wrap_wide_tables(html_body)
 
         # Wrap diagram heading + image
         html_body = re.sub(
@@ -157,6 +250,9 @@ class DocumentExporter:
 
         score = self.results.get('quality_score', 0)
         score_color = '#10b981' if score >= 70 else '#f59e0b' if score >= 40 else '#ef4444'
+        score_label = 'Excelente' if score >= 80 else 'Aceptable' if score >= 60 else 'Requiere mejoras'
+        primary_lang = self.results.get('primary_language', '—')
+        generated_at = datetime.utcnow().strftime('%d/%m/%Y %H:%M')
 
         return f"""<!DOCTYPE html>
 <html lang="es">
@@ -167,61 +263,260 @@ class DocumentExporter:
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
   *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
   :root {{
-    --bg: #0f172a; --surface: #1e293b; --border: #334155;
-    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
-    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+    --bg: #0b1120; --surface: #151d30; --surface2: #1a2540;
+    --border: #2a3a5c; --border-light: #334670;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399; --accent4: #f472b6;
+    --text: #c8d6e5; --text2: #8899b0; --muted: #5c6f8a; --white: #f0f4f8;
+    --radius: 12px; --radius-sm: 8px; --radius-lg: 16px;
   }}
-  body {{ background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; font-size: 12pt; line-height: 1.6; text-align: justify; }}
+  body {{
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11.5pt; line-height: 1.7; text-align: justify;
+  }}
   .container {{ max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }}
-  .doc-header {{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }}
-  .doc-header::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }}
-  .doc-header h1 {{ font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }}
-  .doc-header .subtitle {{ color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }}
-  .stats-row {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }}
-  .stat {{ background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }}
-  .stat .val {{ font-size: 1.8rem; font-weight: 800; color: var(--white); }}
-  .stat .lbl {{ font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }}
-  .quality-badge {{ display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: {score_color}; margin-top: 1rem; }}
-  h1, h2, h3, h4 {{ font-family: Arial, Helvetica, sans-serif; text-align: left; }}
-  h1 {{ font-size: 20pt; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }}
-  h2 {{ font-size: 16pt; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }}
-  h3 {{ font-size: 13pt; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }}
-  h4 {{ font-size: 12pt; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }}
-  p, li {{ margin: 0.75rem 0; font-size: 12pt; text-align: justify; }}
-  code {{ background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.3); padding: 0.2rem 0.55rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: #7dd3fc; }}
-  pre {{ background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }}
-  pre code {{ background: none; border: none; padding: 0; color: #bae6fd; font-size: 0.95rem; font-weight: 600; }}
-  table {{ width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }}
-  .report-table {{ width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }}
-  .report-table thead tr {{ background: rgba(56,189,248,0.08); }}
-  .report-table th, .report-table td {{ padding: 0.85rem 1rem; border: 1px solid var(--border); }}
-  .report-table th {{ color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }}
-  .report-table tr:nth-child(even) td {{ background: rgba(255,255,255,0.03); }}
+
+  /* ── PORTADA ──────────────────────────── */
+  .doc-header {{
+    background:
+      radial-gradient(circle at 92% 0%, rgba(129,140,248,0.22) 0%, transparent 42%),
+      radial-gradient(circle at 0% 100%, rgba(56,189,248,0.16) 0%, transparent 45%),
+      linear-gradient(160deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 4rem 2.5rem 2.5rem; margin-bottom: 3rem;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  }}
+  .doc-header::before {{
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent4), #f59e0b);
+  }}
+  .cover-eyebrow {{
+    display: inline-block; padding: 0.4rem 1.2rem; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent);
+    background: rgba(56,189,248,0.10); border: 1px solid rgba(56,189,248,0.35);
+  }}
+  .cover-title {{
+    font-size: 2.9rem; font-weight: 800; color: var(--white);
+    line-height: 1.1; letter-spacing: -0.02em; text-transform: uppercase;
+    margin: 1.4rem 0 0.2rem; overflow-wrap: anywhere; text-align: center;
+  }}
+  .cover-rule {{
+    width: 96px; height: 4px; border-radius: 4px; margin: 1.1rem auto 1.2rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent4));
+  }}
+  .doc-header .subtitle {{
+    color: var(--text2); font-size: 0.95rem; letter-spacing: 0.02em; text-align: center;
+  }}
+  .cover-meta {{
+    display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; margin-top: 1.8rem;
+  }}
+  .cover-meta-item {{
+    display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+    padding: 0.55rem 1.3rem; border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  }}
+  .cover-meta-item .cm-lbl {{
+    font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.14em;
+  }}
+  .cover-meta-item .cm-val {{ font-size: 0.9rem; font-weight: 700; color: var(--white); }}
+  .stats-row {{
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2rem; width: 100%;
+  }}
+  .stat {{
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: var(--radius); padding: 1.1rem 0.8rem; text-align: center;
+  }}
+  .stat:nth-child(2) {{ border-top-color: var(--accent2); }}
+  .stat:nth-child(3) {{ border-top-color: var(--accent3); }}
+  .stat:nth-child(4) {{ border-top-color: var(--accent4); }}
+  .stat .val {{ font-size: 1.9rem; font-weight: 800; color: var(--white); line-height: 1; }}
+  .stat .lbl {{
+    font-size: 0.68rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.12em; margin-top: 0.3rem;
+    font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  }}
+  .cover-brand {{
+    margin-top: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+  }}
+  .cover-brand span {{ color: var(--accent); font-weight: 700; }}
+
+  /* ── HEADINGS ──────────────────────────── */
+  h1, h2, h3, h4 {{
+    font-family: 'Inter', sans-serif; text-align: left;
+    page-break-after: avoid; break-after: avoid-page;
+  }}
+  h1 {{
+    font-size: 20pt; font-weight: 800; color: var(--white);
+    margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent);
+    position: relative;
+  }}
+  h1::after {{
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 80px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }}
+  h2 {{
+    font-size: 16pt; font-weight: 700; color: var(--white);
+    margin: 2rem 0 0.75rem; padding-left: 0.85rem;
+    border-left: 3px solid var(--accent2);
+  }}
+  h3 {{
+    font-size: 13pt; font-weight: 700; color: var(--accent);
+    margin: 1.5rem 0 0.5rem; padding-left: 0.6rem;
+    border-left: 3px solid rgba(56,189,248,0.3);
+  }}
+  h4 {{
+    font-size: 12pt; font-weight: 600; color: var(--text);
+    margin: 1rem 0 0.4rem;
+  }}
+  p, li {{ margin: 0.6rem 0; font-size: 11.5pt; text-align: justify; }}
+
+  /* ── CODE ──────────────────────────────── */
+  code {{
+    background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.2);
+    padding: 0.15rem 0.5rem; border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.92rem;
+    font-weight: 600; color: #7dd3fc;
+  }}
+  pre {{
+    background: linear-gradient(180deg, #0a1628 0%, #0d1b2a 100%);
+    border: 1px solid var(--border); border-left: 4px solid var(--accent);
+    border-radius: var(--radius); padding: 1.25rem 1.5rem;
+    overflow-x: auto; margin: 1rem 0;
+    page-break-inside: avoid; break-inside: avoid;
+  }}
+  pre code {{
+    background: none; border: none; padding: 0;
+    color: #bae6fd; font-size: 0.9rem; font-weight: 500;
+  }}
+
+  /* ── TABLES (diseño único = «Stack Tecnológico») ───────── */
+  table {{
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin: 1.2rem 0; font-size: 0.9rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden;
+    page-break-inside: avoid; break-inside: avoid;
+  }}
+  .report-table {{
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin: 1.2rem 0; font-size: 0.92rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden;
+    page-break-inside: avoid; break-inside: avoid;
+  }}
+  .report-table thead {{ display: table-header-group; }}
+  .report-table thead tr {{ background: linear-gradient(180deg, rgba(56,189,248,0.12) 0%, rgba(56,189,248,0.04) 100%); }}
+  .report-table th, .report-table td {{
+    padding: 0.85rem 1rem; border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
+  }}
+  .report-table th {{
+    color: var(--white); text-align: left; font-weight: 700;
+    text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em;
+    background: rgba(15,23,42,0.95);
+  }}
+  .report-table tr {{ page-break-inside: avoid; break-inside: avoid; }}
+  .report-table tr:last-child td {{ border-bottom: none; }}
+  .report-table tr:nth-child(even) td {{ background: rgba(255,255,255,0.02); }}
+  .report-table tr:hover td {{ background: rgba(56,189,248,0.04); }}
   .report-table td {{ color: var(--text); }}
-  th {{ background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }}
-  td {{ padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }}
-  tr:nth-child(even) td {{ background: rgba(255,255,255,0.02); }}
-  blockquote {{ border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem; background: rgba(52,211,153,0.1); border-radius: 0 8px 8px 0; margin: 1rem 0; color: #6ee7b7; font-size: 1.05rem; font-weight: 600; font-style: italic; }}
+  .report-table td code {{ white-space: normal; overflow-wrap: anywhere; }}
+  th {{
+    background: var(--surface); color: var(--white);
+    padding: 0.75rem 1rem; text-align: left; font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em;
+  }}
+  td {{
+    padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text);
+  }}
+  tr:last-child td {{ border-bottom: none; }}
+  tr:nth-child(even) td {{ background: rgba(255,255,255,0.015); }}
+
+  /* ── TABLAS ANCHAS → PÁGINA HORIZONTAL ─────────────────── */
+  .table-landscape {{ max-width: 100%; }}
+  .table-landscape table, .table-landscape .report-table {{
+    page-break-inside: auto; break-inside: auto;
+  }}
+
+  /* ── CODE FRAGMENT ─────────────────────── */
+  .code-fragment {{
+    margin: 1.5rem 0; padding: 1.25rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    page-break-inside: avoid; break-inside: avoid;
+  }}
+  .code-fragment-header {{
+    display: flex; align-items: center; gap: 10px; margin-bottom: 0.8rem;
+  }}
+  .code-fragment-header .frag-icon {{
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }}
+  .code-fragment-header .frag-title {{
+    font-weight: 700; font-size: 0.95rem; color: var(--white);
+  }}
+  .code-fragment-header .frag-file {{
+    font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+  }}
+  .code-explanation {{
+    margin-top: 0.8rem; padding: 0.8rem 1rem;
+    background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.15);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem; color: var(--text); line-height: 1.65;
+  }}
+  .code-explanation strong {{ color: var(--accent); }}
+
+  /* ── MISC ──────────────────────────────── */
+  blockquote {{
+    border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem;
+    background: rgba(52,211,153,0.07); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1rem 0; color: #6ee7b7; font-size: 1rem;
+    font-weight: 500; font-style: italic;
+    page-break-inside: avoid; break-inside: avoid;
+  }}
   ul {{ padding-left: 1.5rem; margin: 0.5rem 0; }}
   li {{ margin: 0.3rem 0; }}
-  hr {{ border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }}
+  hr {{ border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 2.5rem 0; }}
   strong {{ color: var(--white); font-weight: 700; }}
   em {{ color: var(--accent2); font-style: italic; }}
-  .toc {{ background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }}
+
+  /* ── TOC ────────────────────────────────── */
+  .toc {{
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2rem;
+  }}
   .toc h3 {{ color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }}
   .toc-list {{ list-style: none; padding-left: 0; }}
   .toc-list li {{ margin: 0.35rem 0; }}
-  .toc-list a {{ color: var(--accent); text-decoration: none; }}
-  .toc-list a:hover {{ text-decoration: underline; }}
+  .toc-list a {{ color: var(--accent); text-decoration: none; transition: color 0.2s; }}
+  .toc-list a:hover {{ text-decoration: underline; color: var(--white); }}
   .toc-list .toc-h1 {{ font-weight: 700; font-size: 1rem; margin-top: 0.9rem; }}
   .toc-list .toc-h1 a {{ color: var(--white); }}
   .toc-list .toc-h2 {{ padding-left: 1.25rem; font-size: 0.92rem; }}
   .toc-list .toc-h3 {{ padding-left: 2.5rem; font-size: 0.85rem; }}
   .toc-list .toc-h3 a {{ color: var(--accent2); }}
-  .doc-footer {{ margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }}
+
+  /* ── FOOTER ────────────────────────────── */
+  .doc-footer {{
+    margin-top: 4rem; padding: 2rem 1.5rem 1.5rem;
+    border-top: 2px solid var(--border); text-align: center;
+    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);
+    border-radius: var(--radius);
+  }}
   .doc-footer span {{ color: var(--accent); font-weight: 700; }}
   .doc-footer .footer-grid {{ display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }}
   .doc-footer .footer-item {{ display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }}
@@ -229,19 +524,38 @@ class DocumentExporter:
   .doc-footer .footer-item .fi-val {{ color: var(--text); font-size: 0.82rem; }}
   .doc-footer .footer-divider {{ border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }}
   .doc-footer .footer-brand {{ color: var(--muted); font-size: 0.72rem; }}
-  .diagram-section {{ margin: 2rem 0; }}
+  .diagram-section {{ margin: 2rem 0; page-break-inside: avoid; break-inside: avoid; }}
+
   @media print {{
-    @page {{ margin: 2cm; @bottom-center {{ content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; }} }}
-    .doc-header {{ page-break-after: always; min-height: 85vh; }}
-    .toc {{ page-break-after: always; }}
-    h2 {{ page-break-before: auto; page-break-after: avoid; }}
-    h3 {{ page-break-after: avoid; }}
-    .diagram-section {{ page-break-inside: avoid; }}
-    pre {{ page-break-inside: avoid; }}
+    @page {{
+      margin: 2cm;
+      @bottom-center {{ content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; }}
+    }}
+    /* Página horizontal: la usan solo las tablas anchas (.table-landscape) */
+    @page landscape {{
+      size: A4 landscape;
+      margin: 1.5cm;
+    }}
+    /* Todo lo demás vuelve explícitamente a vertical (si no, "page:auto" hereda la horizontal) */
+    .content > * {{ page: portrait; }}
+    .content > .table-landscape {{ page: landscape; }}
+    .doc-footer {{ page: portrait; }}
+    .doc-header {{ page-break-after: always; break-after: always; min-height: 85vh; }}
+    .toc {{ page-break-after: always; break-after: always; }}
+    h1, h2, h3, h4, h5, h6 {{
+      page-break-after: avoid !important; break-after: avoid-page !important;
+      break-inside: avoid !important;
+    }}
+    .diagram-section, .report-table, pre, blockquote, .stat, table, .code-fragment {{
+      page-break-inside: avoid !important; break-inside: avoid !important;
+    }}
+    .table-landscape table, .table-landscape .report-table {{
+      page-break-inside: auto !important; break-inside: auto !important;
+    }}
     body {{ background: white !important; color: #1e293b !important; }}
     .container {{ max-width: 100%; padding: 0; }}
   }}
-  .diagram-section h3 {{ margin-bottom: 0.75rem !important; }}
+  .diagram-section h3 {{ margin-bottom: 0.75rem !important; page-break-after: avoid !important; break-after: avoid-page !important; }}
   .diagram-section img {{ margin-top: 0 !important; }}
   .material-icons {{ font-size: 1.2em; vertical-align: middle; }}
   .material-symbols-outlined {{ font-size: 1.2em; vertical-align: middle; }}
@@ -250,15 +564,22 @@ class DocumentExporter:
 <body>
 <div class="container">
   <div class="doc-header">
-    <h1><span class="material-icons">description</span> {project_name}</h1>
-    <div class="subtitle">Documentación Técnica Profesional · Generado {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC</div>
-    <div class="quality-badge">Score de Calidad: {score}/100</div>
+    <span class="cover-eyebrow">Documentación Técnica Profesional</span>
+    <div class="cover-title">{project_name}</div>
+    <div class="cover-rule"></div>
+    <div class="subtitle">Arquitectura · API · Código · Calidad</div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><span class="cm-lbl">Lenguaje principal</span><span class="cm-val">{primary_lang}</span></div>
+      <div class="cover-meta-item"><span class="cm-lbl">Score de calidad</span><span class="cm-val" style="color:{score_color}">{score}/100 · {score_label}</span></div>
+      <div class="cover-meta-item"><span class="cm-lbl">Generado</span><span class="cm-val">{generated_at} UTC</span></div>
+    </div>
     <div class="stats-row">
       <div class="stat"><div class="val">{self.results.get('total_files', 0)}</div><div class="lbl">Archivos</div></div>
       <div class="stat"><div class="val">{len(self.results.get('functions', []))}</div><div class="lbl">Funciones</div></div>
       <div class="stat"><div class="val">{len(self.results.get('classes', []))}</div><div class="lbl">Clases</div></div>
       <div class="stat"><div class="val">{len(self.results.get('endpoints', []))}</div><div class="lbl">Endpoints</div></div>
     </div>
+    <div class="cover-brand">Generado por <span>AutoDocs AI</span></div>
   </div>
   <div class="toc">
     <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
@@ -293,7 +614,7 @@ class DocumentExporter:
       </div>
       <div class="footer-item">
         <span class="fi-label">Generado</span>
-        <span class="fi-val">{datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC</span>
+        <span class="fi-val">{generated_at} UTC</span>
       </div>
     </div>
     <hr class="footer-divider">
@@ -358,31 +679,49 @@ class DocumentExporter:
         return str(html_path)
 
     def _pdf_with_reportlab(self, output_path: str) -> str:
-        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.pagesizes import A4, landscape
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import cm
         from reportlab.lib import colors
         from reportlab.platypus import (
-            SimpleDocTemplate, Paragraph, Spacer,
-            Table, TableStyle, HRFlowable, PageBreak, KeepTogether,
+            BaseDocTemplate, PageTemplate, Frame, NextPageTemplate,
+            Paragraph, Spacer, Table, TableStyle, HRFlowable, PageBreak, KeepTogether,
         )
         from reportlab.platypus.tableofcontents import TableOfContents
-        from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+        from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
         from reportlab.pdfgen import canvas as _pdfcanvas
 
         project_name = self.project.get('name', 'Proyecto')
         score = self.results.get('quality_score', 0)
         md = self.to_markdown()
 
-        class _AutoDocsDocTemplate(SimpleDocTemplate):
-            _toc_anchor_counter = 0
+        # ── Geometría de páginas (vertical y horizontal) ──────────────────────
+        PORTRAIT   = A4
+        LANDSCAPE  = landscape(A4)
+        P_MARGIN   = 2.5 * cm
+        L_MARGIN   = 1.5 * cm
+        portrait_w  = PORTRAIT[0]  - 2 * P_MARGIN
+        landscape_w = LANDSCAPE[0] - 2 * L_MARGIN
+
+        class _AutoDocsDocTemplate(BaseDocTemplate):
+            def __init__(self, filename, **kw):
+                BaseDocTemplate.__init__(self, filename, pagesize=PORTRAIT, **kw)
+                portrait_frame = Frame(
+                    P_MARGIN, P_MARGIN, portrait_w, PORTRAIT[1] - 2 * P_MARGIN,
+                    id='frame_portrait', leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+                landscape_frame = Frame(
+                    L_MARGIN, 2.0 * cm, landscape_w, LANDSCAPE[1] - 2.0 * cm - 1.5 * cm,
+                    id='frame_landscape', leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+                self.addPageTemplates([
+                    PageTemplate(id='portrait',  frames=[portrait_frame],  pagesize=PORTRAIT),
+                    PageTemplate(id='landscape', frames=[landscape_frame], pagesize=LANDSCAPE),
+                ])
 
             def afterFlowable(self, flowable):
                 if isinstance(flowable, Paragraph):
                     style_name = getattr(flowable.style, 'name', '')
                     level_by_style = {'H1': 0, 'H2': 1, 'H3': 2}
                     if style_name in level_by_style:
-                        self._toc_anchor_counter += 1
                         text = flowable.getPlainText()
                         self.notify('TOCEntry', (level_by_style[style_name], text, self.page))
 
@@ -411,15 +750,14 @@ class DocumentExporter:
                 if page_num >= 1:
                     self.setFont('Helvetica', 8)
                     self.setFillColor(colors.HexColor('#64748b'))
+                    # usa el ancho real de la página (vertical u horizontal)
                     self.drawCentredString(
-                        A4[0] / 2, 1.2 * cm,
+                        self._pagesize[0] / 2, 1.2 * cm,
                         f"Página {page_num} de {content_pages}"
                     )
 
         doc = _AutoDocsDocTemplate(
-            output_path, pagesize=A4,
-            leftMargin=2.5*cm, rightMargin=2.5*cm,
-            topMargin=2.5*cm, bottomMargin=2.5*cm,
+            output_path,
             title=f"{project_name} — Documentación Técnica",
             author="AutoDocs AI",
         )
@@ -429,12 +767,12 @@ class DocumentExporter:
             return ParagraphStyle(name, parent=base[parent], **kw)
 
         styles = {
-            'title': S('T', 'Title', fontSize=24, textColor=colors.HexColor('#0f172a'), spaceAfter=8, alignment=TA_CENTER),
-            'sub': S('Su','Normal', fontSize=10, textColor=colors.HexColor('#64748b'), spaceAfter=16, alignment=TA_CENTER),
-            'h1': S('H1','Heading1',fontSize=18, textColor=colors.HexColor('#0f172a'), spaceBefore=20, spaceAfter=8),
-            'h2': S('H2','Heading2',fontSize=14, textColor=colors.HexColor('#1e293b'), spaceBefore=16, spaceAfter=6),
-            'h3': S('H3','Heading3',fontSize=12, textColor=colors.HexColor('#334155'), spaceBefore=12, spaceAfter=4),
-            'h4': S('H4','Heading4',fontSize=10, textColor=colors.HexColor('#475569'), spaceBefore=10, spaceAfter=3),
+            'title': S('T', 'Title', fontSize=24, textColor=colors.HexColor('#0f172a'), spaceAfter=8, alignment=TA_CENTER, keepWithNext=True),
+            'sub': S('Su','Normal', fontSize=10, textColor=colors.HexColor('#64748b'), spaceAfter=16, alignment=TA_CENTER, keepWithNext=True),
+            'h1': S('H1','Heading1',fontSize=18, textColor=colors.HexColor('#0f172a'), spaceBefore=22, spaceAfter=8, keepWithNext=True),
+            'h2': S('H2','Heading2',fontSize=14, textColor=colors.HexColor('#1e293b'), spaceBefore=18, spaceAfter=6, keepWithNext=True),
+            'h3': S('H3','Heading3',fontSize=12, textColor=colors.HexColor('#334155'), spaceBefore=14, spaceAfter=4, keepWithNext=True),
+            'h4': S('H4','Heading4',fontSize=10, textColor=colors.HexColor('#475569'), spaceBefore=10, spaceAfter=3, keepWithNext=True),
             'body': S('Bo','Normal', fontSize=12, fontName='Helvetica', textColor=colors.HexColor('#334155'), leading=17, alignment=TA_JUSTIFY, spaceAfter=5),
             'code': S('Co','Code', fontSize=10, textColor=colors.HexColor('#0369a1'),
                      backColor=colors.HexColor('#e0f2fe'), borderPad=5,
@@ -443,22 +781,97 @@ class DocumentExporter:
                      leftIndent=15, backColor=colors.HexColor('#dcfce7'), spaceAfter=8, alignment=TA_JUSTIFY),
             'location': S('Loc','Normal', fontSize=8, textColor=colors.HexColor('#64748b'),
                         leftIndent=10, spaceAfter=4, alignment=TA_JUSTIFY),
+            'cell': S('Ce','Normal', fontSize=8.5, leading=11, fontName='Helvetica',
+                      textColor=colors.HexColor('#334155'), alignment=TA_LEFT),
+            'cell_head': S('CeH','Normal', fontSize=8.5, leading=11, fontName='Helvetica-Bold',
+                           textColor=colors.white, alignment=TA_LEFT),
         }
 
         story = []
 
-        # Portada simplificada
-        story.append(Spacer(1, 4*cm))
-        story.append(Paragraph(project_name.upper(), styles['title']))
-        story.append(Spacer(1, 1*cm))
-        story.append(Paragraph("Documentación Técnica", styles['sub']))
-        story.append(Spacer(1, 2*cm))
-        story.append(Paragraph(f"Generado: {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC", styles['sub']))
-        story.append(Spacer(1, 2*cm))
-        story.append(Paragraph("AutoDocs AI", styles['sub']))
+        # ── Portada ───────────────────────────────────────────────────────────
+        score_hex = '#16a34a' if score >= 70 else '#ca8a04' if score >= 40 else '#dc2626'
+        score_label = 'Excelente' if score >= 80 else 'Aceptable' if score >= 60 else 'Requiere mejoras'
+        primary_lang = self.results.get('primary_language', '—')
+
+        cover_eyebrow = S('CvE', 'Normal', fontSize=9, textColor=colors.HexColor('#93c5fd'),
+                          alignment=TA_CENTER, fontName='Helvetica-Bold', leading=12)
+        cover_title = S('CvT', 'Title', fontSize=30, leading=36, textColor=colors.white,
+                        alignment=TA_CENTER, fontName='Helvetica-Bold')
+        cover_sub = S('CvS', 'Normal', fontSize=11, leading=15, textColor=colors.HexColor('#cbd5e1'),
+                      alignment=TA_CENTER)
+
+        def _esc(t):
+            return str(t).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+        band = Table(
+            [[Paragraph('DOCUMENTACIÓN TÉCNICA PROFESIONAL', cover_eyebrow)],
+             [Paragraph(_esc(project_name.upper()), cover_title)],
+             [Paragraph('Arquitectura · API · Código · Calidad', cover_sub)]],
+            colWidths=[portrait_w],
+        )
+        band.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#0f172a')),
+            ('LINEABOVE', (0, 0), (-1, 0), 8, colors.HexColor('#3b82f6')),
+            ('TOPPADDING', (0, 0), (-1, 0), 34),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 1), (-1, 1), 10),
+            ('BOTTOMPADDING', (0, 1), (-1, 1), 10),
+            ('BOTTOMPADDING', (0, 2), (-1, 2), 34),
+            ('LEFTPADDING', (0, 0), (-1, -1), 20),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+        ]))
+
+        kpi_vals = [str(self.results.get('total_files', 0)),
+                    str(len(self.results.get('functions', []))),
+                    str(len(self.results.get('classes', []))),
+                    str(len(self.results.get('endpoints', [])))]
+        kpi_lbls = ['ARCHIVOS', 'FUNCIONES', 'CLASES', 'ENDPOINTS']
+        kpi_colors = ['#3b82f6', '#8b5cf6', '#10b981', '#ec4899']
+        kpi_w = portrait_w / 4
+        kpi = Table([kpi_vals, kpi_lbls], colWidths=[kpi_w] * 4)
+        kpi_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f8fafc')),
+            ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#f8fafc')),
+            ('FONTSIZE', (0, 0), (-1, 0), 22),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#1d4ed8')),
+            ('FONTSIZE', (0, 1), (-1, 1), 7),
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+            ('TEXTCOLOR', (0, 1), (-1, 1), colors.HexColor('#64748b')),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('INNERGRID', (0, 0), (-1, -1), 2, colors.white),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('TOPPADDING', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
+            ('TOPPADDING', (0, 1), (-1, 1), 2),
+            ('BOTTOMPADDING', (0, 1), (-1, 1), 12),
+        ]
+        for i, c in enumerate(kpi_colors):
+            kpi_style.append(('LINEABOVE', (i, 0), (i, 0), 4, colors.HexColor(c)))
+        kpi.setStyle(TableStyle(kpi_style))
+
+        meta_style = S('CvM', 'Normal', fontSize=10, leading=15, textColor=colors.HexColor('#475569'),
+                       alignment=TA_CENTER)
+        story.append(Spacer(1, 2.5*cm))
+        story.append(band)
+        story.append(Spacer(1, 1.2*cm))
+        story.append(kpi)
+        story.append(Spacer(1, 1.2*cm))
+        story.append(Paragraph(f"<b>Lenguaje principal:</b> {_esc(primary_lang)}", meta_style))
+        story.append(Paragraph(
+            f'<b>Score de calidad:</b> <font color="{score_hex}"><b>{score}/100 · {score_label}</b></font>',
+            meta_style))
+        story.append(Paragraph(
+            f"<b>Generado:</b> {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC", meta_style))
+        story.append(Spacer(1, 1.5*cm))
+        story.append(HRFlowable(width="40%", thickness=2, color=colors.HexColor('#3b82f6'), hAlign='CENTER'))
+        story.append(Spacer(1, 0.4*cm))
+        story.append(Paragraph("Generado por AutoDocs AI", styles['sub']))
         story.append(PageBreak())
 
-        # Índice
+        # ── Índice ────────────────────────────────────────────────────────────
         toc = TableOfContents()
         toc.levelStyles = [
             S('TOC1', 'Normal', fontName='Helvetica-Bold', fontSize=12,
@@ -476,7 +889,7 @@ class DocumentExporter:
         story.append(toc)
         story.append(PageBreak())
 
-        # Contenido
+        # ── Contenido ─────────────────────────────────────────────────────────
         story.append(Paragraph(f"{project_name}", styles['title']))
         story.append(Paragraph("Documentación Técnica · AutoDocs AI · " +
                                 datetime.utcnow().strftime('%d/%m/%Y'), styles['sub']))
@@ -529,9 +942,11 @@ class DocumentExporter:
                 anchor = f'sec{heading_anchor_counter[0]}'
                 text = f'<a name="{anchor}"/>{text}'
             try:
-                story.append(Paragraph(text, style))
+                para = Paragraph(text, style)
             except Exception:
-                story.append(Paragraph(re.sub(r'<[^>]+>', '', text), style))
+                para = Paragraph(re.sub(r'<[^>]+>', '', text), style)
+            para.keepWithNext = True
+            story.append(para)
 
         def flush_code():
             if code_buf:
@@ -541,6 +956,14 @@ class DocumentExporter:
                 story.append(code_para)
                 story.append(Spacer(1, 0.3*cm))
                 code_buf.clear()
+
+        def inline_markup(text):
+            text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+            text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
+            text = re.sub(r'`([^`]+)`',
+                          r'<font name="Courier-Bold" color="#0369a1" size="8">\1</font>', text)
+            return text
 
         def safe_para(text, style):
             text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -620,7 +1043,7 @@ class DocumentExporter:
                 return None
             header_line = lines[start_index].strip()
             sep_line = lines[start_index + 1].strip()
-            if '|' not in header_line or not re.match(r'^\s*\|?\s*(:?-+:?\s*\|)+\s*(:?-+:?\s*)?\|?\s*$', sep_line):
+            if '|' not in header_line or not _SEP_RE.match(sep_line):
                 return None
 
             headers = [cell.strip() for cell in re.split(r'\s*\|\s*', header_line.strip().strip('|'))]
@@ -643,6 +1066,100 @@ class DocumentExporter:
             data = [headers] + rows
             return data, index - start_index
 
+        # ── Tablas: texto con ajuste de línea, anchos proporcionales y orientación dinámica ──
+        def _plain_cell(text):
+            text = _EMOJI_RE.sub('', text)
+            return re.sub(r'[*`]', '', text).strip()
+
+        def _column_metrics(table_data):
+            """Devuelve (anchos mínimos, anchos naturales) en puntos por columna."""
+            n_cols = len(table_data[0])
+            char_w, pad = 4.6, 12
+            mins, nats = [], []
+            for c in range(n_cols):
+                longest_token = 1
+                longest_text = 1
+                for row in table_data:
+                    txt = _plain_cell(row[c])
+                    longest_text = max(longest_text, len(txt))
+                    for tok in txt.split():
+                        longest_token = max(longest_token, len(tok))
+                mins.append(longest_token * char_w + pad)
+                nats.append(min(longest_text, 30) * char_w + pad)
+            return mins, nats
+
+        def _is_wide(table_data):
+            n_cols = len(table_data[0])
+            if n_cols >= 7:
+                return True
+            mins, nats = _column_metrics(table_data)
+            return sum(mins) > portrait_w or sum(nats) > portrait_w * 1.35
+
+        def _col_widths(table_data, available):
+            mins, nats = _column_metrics(table_data)
+            total = sum(nats) or 1
+            widths = [n * available / total for n in nats]
+            widths = [max(w, min(m, available / len(widths))) for w, m in zip(widths, mins)]
+            total = sum(widths) or 1
+            return [w * available / total for w in widths]
+
+        def build_report_table(table_data, available):
+            data = []
+            for r_idx, row in enumerate(table_data):
+                st = styles['cell_head'] if r_idx == 0 else styles['cell']
+                cells = []
+                for cell in row:
+                    txt = inline_markup(_EMOJI_RE.sub('', cell).strip())
+                    try:
+                        cells.append(Paragraph(txt, st))
+                    except Exception:
+                        cells.append(Paragraph(re.sub(r'<[^>]+>', '', txt), st))
+                data.append(cells)
+            tbl = Table(data, colWidths=_col_widths(table_data, available), repeatRows=1)
+            tbl.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#f8fafc'), colors.white]),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 5),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ]))
+            return tbl
+
+        # Estado de orientación: 'exit' guarda los marcadores [volver a vertical] de la última
+        # tabla horizontal; si la siguiente tabla también es ancha se cancelan (misma página).
+        state = {'exit': None}
+
+        def _pop_lead_in():
+            """Saca de la historia los encabezados/espacios previos a una tabla para llevarlos con ella."""
+            pending = []
+            while story and len(pending) < 12:
+                last = story[-1]
+                is_heading = isinstance(last, Paragraph) and getattr(last.style, 'name', '') in ('H1', 'H2', 'H3', 'H4')
+                if isinstance(last, (Spacer, HRFlowable)) or is_heading:
+                    pending.insert(0, story.pop())
+                else:
+                    break
+            return pending
+
+        def emit_wide_table(tbl, pending):
+            ex = state['exit']
+            if ex and len(story) >= 2 and story[-1] is ex[1] and story[-2] is ex[0]:
+                story.pop(); story.pop()          # seguimos en horizontal, sin salto intermedio
+            else:
+                story.append(NextPageTemplate('landscape'))
+                story.append(PageBreak())
+            story.extend(pending)
+            story.append(tbl)   # sin Spacer final: evita una página horizontal en blanco
+            npt, pb = NextPageTemplate('portrait'), PageBreak()
+            story.append(npt)
+            story.append(pb)
+            state['exit'] = (npt, pb)
+
         lines = md.split('\n')
         idx = 0
         while idx < len(lines):
@@ -663,27 +1180,15 @@ class DocumentExporter:
             table_result = parse_table(lines, idx)
             if table_result:
                 table_data, consumed = table_result
-                tbl = Table(table_data, colWidths=[None] * len(table_data[0]))
-                tbl.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                    ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-                    ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
-                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor('#334155')),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 10),
-                    ('FONTSIZE', (0, 1), (-1, -1), 9),
-                    ('LEFTPADDING', (0, 0), (-1, -1), 6),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-                    ('TOPPADDING', (0, 0), (-1, -1), 4),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-                ]))
-                story.append(tbl)
-                story.append(Spacer(1, 0.3*cm))
+                if _is_wide(table_data):
+                    pending = _pop_lead_in()
+                    tbl = build_report_table(table_data, landscape_w)
+                    emit_wide_table(tbl, pending)
+                else:
+                    tbl = build_report_table(table_data, portrait_w)
+                    story.append(tbl)
+                    story.append(Spacer(1, 0.3*cm))
+                    state['exit'] = None
                 idx += consumed
                 continue
 
@@ -702,6 +1207,7 @@ class DocumentExporter:
                     group = [heading_para, Spacer(1, 0.2*cm)] + img_flowables
                     story.append(KeepTogether(group))
                     idx = look + 1
+                    state['exit'] = None
                     continue
 
             if line.strip() == '---':
@@ -728,6 +1234,9 @@ class DocumentExporter:
                     story.extend(imgs)
                 else:
                     safe_para(line, styles['body'])
+            # Cualquier contenido que no sea espacio/encabezado/separador "cierra" el modo horizontal
+            if line.strip() and line.strip() != '---' and not line.startswith('#'):
+                state['exit'] = None
             idx += 1
 
         if in_code:

@@ -2,110 +2,177 @@ import os
 import json
 import re
 import requests
+from pathlib import Path
 from typing import Optional, List
+from dotenv import load_dotenv
+
+# Asegurar carga de variables de entorno desde backend y raíz del proyecto
+load_dotenv()
+_backend_env = Path(__file__).resolve().parents[1] / '.env'
+if _backend_env.exists():
+    load_dotenv(_backend_env, override=False)
+_root_env = Path(__file__).resolve().parents[2] / '.env'
+if _root_env.exists():
+    load_dotenv(_root_env, override=False)
 
 
 class AIEnhancer:
     """
-    Mejora la documentación técnica usando IA (Google Gemini).
+    Mejora la documentación técnica usando IA (Groq con modelos compatibles y fallback local Ollama).
     Genera descripciones más detalladas, explica patrones de diseño,
     y proporciona insights técnicos avanzados.
     """
 
+    GROQ_CANDIDATE_MODELS = [
+        "qwen/qwen3.8-27b",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant",
+    ]
+
     def __init__(self):
-        # Soporte para múltiples API keys
+        # Soporte para múltiples API keys de Groq
         api_keys_str = os.getenv('GROQ_API_KEY', '')
-        print(f"[AI] GROQ_API_KEY encontrada: {bool(api_keys_str)}")
         if api_keys_str:
-            # Separar por comas si hay múltiples keys
             self.api_keys = [key.strip() for key in api_keys_str.split(',') if key.strip()]
-            print(f"[AI] Total de API keys cargadas: {len(self.api_keys)}")
+            print(f"[AI] Total de API keys de Groq cargadas: {len(self.api_keys)}")
         else:
             self.api_keys = []
-            print("[AI] WARNING: No se encontró GROQ_API_KEY")
-        
+            print("[AI] Aviso: No se encontró GROQ_API_KEY en variables de entorno")
+
         self.current_key_index = 0
+        self.working_groq_model = None
         self.API_URL = "https://api.groq.com/openai/v1/chat/completions"
+        self._ollama_model = None
+        self._ollama_checked = False
 
     def get_api_key(self) -> Optional[str]:
         """Obtiene la API key actual con rotación."""
         if not self.api_keys:
             return None
-        
         key = self.api_keys[self.current_key_index]
-        # Rotar a la siguiente key para la siguiente llamada
         self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
         return key
 
-    def is_available(self) -> bool:
-        """Verifica si la API de Gemini está configurada y disponible."""
-        return bool(self.api_keys)
+    def _check_ollama(self) -> Optional[str]:
+        """Verifica si Ollama está corriendo en localhost y qué modelo está disponible."""
+        if self._ollama_checked:
+            return self._ollama_model
+        try:
+            r = requests.get("http://localhost:11434/api/tags", timeout=2)
+            if r.status_code == 200:
+                models = [m.get("name", "") for m in r.json().get("models", [])]
+                if models:
+                    preferred = next((m for m in models if "mistral" in m.lower() or "llama" in m.lower() or "qwen" in m.lower()), models[0])
+                    self._ollama_model = preferred
+                    print(f"[AI] Servidor Ollama local detectado con modelo: {self._ollama_model}")
+        except Exception:
+            self._ollama_model = None
+        self._ollama_checked = True
+        return self._ollama_model
 
-    def _call_ai(self, system_prompt: str, user_prompt: str, max_tokens: int = 400):
-        if not self.is_available():
-            print("[AI] GROQ_API_KEY no está configurada")
+    def is_available(self) -> bool:
+        """Verifica si alguna IA (Groq o Ollama local) está disponible."""
+        return bool(self.api_keys) or bool(self._check_ollama())
+
+    def _call_groq(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
+        """Intenta llamar a la API de Groq probando modelos compatibles y rotando keys."""
+        if not self.api_keys:
             return None
 
-        # Intentar con cada API key disponible hasta que una funcione
+        models_to_try = (
+            [self.working_groq_model] + [m for m in self.GROQ_CANDIDATE_MODELS if m != self.working_groq_model]
+            if self.working_groq_model else list(self.GROQ_CANDIDATE_MODELS)
+        )
+
         for attempt in range(len(self.api_keys)):
             api_key = self.get_api_key()
-            
-            payload = {
-                "model": "llama-3.3-70b-versatile",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt
-                    }
-                ],
-                "max_tokens": max_tokens,
-                "temperature": 0.7
-            }
-
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}",
                 "User-Agent": "AutoDocs/1.0"
             }
 
-            try:
-                response = requests.post(
-                    self.API_URL,
-                    json=payload,
-                    headers=headers,
-                    timeout=30,
-                    verify=True
-                )
-
-                if response.status_code == 200:
-                    result = response.json()
-                    content = (
-                        result.get("choices", [{}])[0]
-                        .get("message", {})
-                        .get("content", "")
-                        .strip()
-                    )
-                    if content:
-                        print(f"[AI] Llamada exitosa con API key #{attempt + 1}")
-                        return content
-                else:
-                    print(f"[AI] HTTP Error con API key #{attempt + 1}: {response.status_code} - {response.text[:200]}")
-                    # Si es error de autenticación, intentar con la siguiente key
-                    if response.status_code in [401, 403]:
+            for model_name in models_to_try:
+                payload = {
+                    "model": model_name,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "max_tokens": max_tokens,
+                    "temperature": 0.7
+                }
+                try:
+                    response = requests.post(self.API_URL, json=payload, headers=headers, timeout=25)
+                    if response.status_code == 200:
+                        result = response.json()
+                        content = (
+                            result.get("choices", [{}])[0]
+                            .get("message", {})
+                            .get("content", "")
+                            .strip()
+                        )
+                        if content:
+                            self.working_groq_model = model_name
+                            print(f"[AI] Llamada exitosa con Groq ({model_name})")
+                            return content
+                    elif response.status_code == 429:
+                        print(f"[AI] Groq rate-limit (429) en {model_name}, probando modelo alternativo...")
                         continue
-                    # Si es otro error, retornar None
-                    return None
+                    elif response.status_code in [401, 403]:
+                        print(f"[AI] Groq API key inválida o expirada #{attempt + 1}")
+                        break
+                    elif response.status_code == 404:
+                        continue
+                    else:
+                        print(f"[AI] Groq HTTP {response.status_code} ({model_name}): {response.text[:120]}")
+                except Exception as e:
+                    print(f"[AI] Error llamando a Groq ({model_name}): {e}")
+                    continue
 
-            except Exception as e:
-                print(f"[AI] Error llamando a la API con key #{attempt + 1}: {e}")
-                # Si es error de conexión, intentar con la siguiente key
-                continue
+        return None
 
-        print("[AI] Todas las API keys fallaron")
+    def _call_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
+        """Fallback local con Ollama si está disponible."""
+        model = self._check_ollama()
+        if not model:
+            return None
+        try:
+            full_prompt = f"System: {system_prompt}\n\nUser: {user_prompt}\n\nAssistant:"
+            payload = {
+                "model": model,
+                "prompt": full_prompt,
+                "stream": False,
+                "options": {
+                    "num_predict": max_tokens,
+                    "temperature": 0.7
+                }
+            }
+            r = requests.post("http://localhost:11434/api/generate", json=payload, timeout=15)
+            if r.status_code == 200:
+                ans = r.json().get("response", "").strip()
+                if ans:
+                    print(f"[AI] Llamada exitosa con Ollama local ({model})")
+                    return ans
+        except Exception as e:
+            print(f"[AI] Error llamando a Ollama local: {e}")
+        return None
+
+    def _call_ai(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
+        """Ejecuta llamada de IA priorizando Groq y con fallback en Ollama local."""
+        # 1. Intentar con Groq
+        res = self._call_groq(system_prompt, user_prompt, max_tokens=max_tokens)
+        if res:
+            return res
+
+        # 2. Fallback a Ollama local
+        res = self._call_ollama(system_prompt, user_prompt, max_tokens=max_tokens)
+        if res:
+            return res
+
+        print("[AI] No se pudo obtener respuesta de ninguna IA disponible")
         return None
 
     def enhance_function_description(self, function: dict, context: str = "") -> str:

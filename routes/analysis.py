@@ -927,28 +927,28 @@ def generate_sql_analysis(sql_text):
 
 def generate_er_diagram_plantuml(tables, table_columns, foreign_keys):
     """Genera código PlantUML para diagrama E-R."""
-    plantuml_code = "@startuml database\n"
-    plantuml_code += "!theme plain\n"
-    plantuml_code += "skinparam backgroundColor #f1f5f9\n"
-    plantuml_code += "skinparam rectangle {\n"
-    plantuml_code += "  BackgroundColor #38bdf8\n"
-    plantuml_code += "  BorderColor #0f172a\n"
-    plantuml_code += "  FontColor #0f1418\n"
-    plantuml_code += "}\n\n"
+    plantuml_code = "@startuml\n"
+    plantuml_code += "skinparam backgroundColor #f8fafc\n"
+    plantuml_code += "skinparam roundcorner 8\n\n"
 
     for table in tables:
         columns = table_columns.get(table, [])
-        plantuml_code += f'entity "{table}" {{\n'
+        safe_table = re.sub(r'[^a-zA-Z0-9_]', '_', str(table))
+        plantuml_code += f'entity "{table}" as {safe_table} {{\n'
         for col in columns[:8]:
-            plantuml_code += f'  {col["name"]}: {col["type"]}\n'
+            col_name = re.sub(r'[^a-zA-Z0-9_]', '', str(col.get("name", "col")))
+            col_type = re.sub(r'[^a-zA-Z0-9_() ]', '', str(col.get("type", "text")))
+            plantuml_code += f'  + {col_name}: {col_type}\n'
         if len(columns) > 8:
-            plantuml_code += f'  ... ({len(columns) - 8} more columns)\n'
+            plantuml_code += f'  -- ({len(columns) - 8} columnas más) --\n'
         plantuml_code += "}\n\n"
 
     for table, fk_info in foreign_keys.items():
         ref_table = fk_info.get('references')
         if ref_table in tables:
-            plantuml_code += f'{table} }}--|| {ref_table}\n'
+            safe_src = re.sub(r'[^a-zA-Z0-9_]', '_', str(table))
+            safe_dst = re.sub(r'[^a-zA-Z0-9_]', '_', str(ref_table))
+            plantuml_code += f'{safe_src} }}o--|| {safe_dst}\n'
 
     plantuml_code += "@enduml\n"
     return plantuml_code
@@ -966,13 +966,14 @@ def generate_snowflake_plantuml(tables, table_columns, foreign_keys):
     dimension_tables = [t for t in tables if t != fact_table]
 
     plantuml_code = "@startuml\n"
-    plantuml_code += "skinparam backgroundColor #f1f5f9\n"
-    plantuml_code += "skinparam rectangle {\n  BackgroundColor #ffffff\n  BorderColor #0f172a\n  FontColor #0f1418\n}\n\n"
-    plantuml_code += f'entity "{fact_table}" as fact <<Fact Table>> {{\n  **Fact Table**\n}}\n\n'
+    plantuml_code += "skinparam backgroundColor #f8fafc\n\n"
+    safe_fact = f"fact_{re.sub(r'[^a-zA-Z0-9_]', '_', str(fact_table))}"
+    plantuml_code += f'class "{fact_table}" as {safe_fact} <<FactTable>> {{\n  + fact_id\n}}\n\n'
 
     for idx, dim in enumerate(dimension_tables[:8], start=1):
-        plantuml_code += f'entity "{dim}" as dim{idx} <<Dimension>> {{\n  **Dimension**\n}}\n\n'
-        plantuml_code += f'fact }}--|| dim{idx} : FK\n'
+        safe_dim = f"dim_{idx}_{re.sub(r'[^a-zA-Z0-9_]', '_', str(dim))}"
+        plantuml_code += f'class "{dim}" as {safe_dim} <<Dimension>> {{\n  + dim_id\n}}\n\n'
+        plantuml_code += f'{safe_fact} }}o--|| {safe_dim} : FK\n'
 
     dim_refs = {
         table: fk_info.get('references')
@@ -981,9 +982,11 @@ def generate_snowflake_plantuml(tables, table_columns, foreign_keys):
     }
     for idx, (dim_table, parent) in enumerate(dim_refs.items(), start=1):
         if parent in dimension_tables:
-            plantuml_code += f'entity "{dim_table}_sub" as subdim{idx} <<Sub-Dimension>> {{\n  **Sub-Dimension**\n}}\n\n'
+            safe_sub = f"sub_{idx}_{re.sub(r'[^a-zA-Z0-9_]', '_', str(dim_table))}"
             parent_idx = dimension_tables.index(parent) + 1
-            plantuml_code += f'subdim{idx} }}--|| dim{parent_idx} : FK\n'
+            safe_parent = f"dim_{parent_idx}_{re.sub(r'[^a-zA-Z0-9_]', '_', str(parent))}"
+            plantuml_code += f'class "{dim_table}" as {safe_sub} <<SubDimension>> {{\n  + sub_id\n}}\n\n'
+            plantuml_code += f'{safe_sub} }}o--|| {safe_parent} : FK\n'
 
     plantuml_code += "@enduml\n"
     return plantuml_code

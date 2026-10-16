@@ -2758,10 +2758,28 @@
                 const res = await fetch(url, { headers: headers() });
                 if (!res.ok) throw new Error('Error al generar PDF');
                 const blob = await res.blob();
+                // Obtener nombre del archivo de la cabecera Content-Disposition o generarlo dinámicamente con nombre y fecha/hora
+                let downloadFilename = '';
+                const disposition = res.headers.get('Content-Disposition');
+                if (disposition && disposition.includes('filename=')) {
+                    const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (match && match[1]) {
+                        downloadFilename = match[1].replace(/['"]/g, '').trim();
+                    }
+                }
+                if (!downloadFilename) {
+                    const projTitle = (document.getElementById('proj-title')?.textContent || 'proyecto').trim();
+                    const safeTitle = projTitle.replace(/[^\w\-.]/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '') || 'proyecto';
+                    const now = new Date();
+                    const pad = (n) => String(n).padStart(2, '0');
+                    const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+                    downloadFilename = `${safeTitle}_${ts}.pdf`;
+                }
+
                 // Crear enlace de descarga
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `docs_${projectId}.pdf`;
+                a.download = downloadFilename;
                 document.body.appendChild(a); 
                 a.click(); 
                 document.body.removeChild(a);

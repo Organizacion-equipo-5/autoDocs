@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>juego — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+    --text: #cbd5e1; --muted: #64748b; --white: #f1f5f9;
+  }
+  body { background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; font-size: 12pt; line-height: 1.6; text-align: justify; }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+  .doc-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .doc-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .doc-header h1 { font-size: 2rem; font-weight: 800; color: var(--white); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .doc-header .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat .val { font-size: 1.8rem; font-weight: 800; color: var(--white); }
+  .stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+  .quality-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #10b981; margin-top: 1rem; }
+  h1, h2, h3, h4 { font-family: Arial, Helvetica, sans-serif; text-align: left; }
+  h1 { font-size: 20pt; font-weight: 800; color: var(--white); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  h2 { font-size: 16pt; font-weight: 700; color: var(--white); margin: 2rem 0 0.75rem; padding-left: 0.75rem; border-left: 3px solid var(--accent2); }
+  h3 { font-size: 13pt; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 12pt; font-weight: 600; color: var(--text); margin: 1rem 0 0.4rem; }
+  p, li { margin: 0.75rem 0; font-size: 12pt; text-align: justify; }
+  code { background: rgba(56,189,248,0.14); border: 1px solid rgba(56,189,248,0.3); padding: 0.2rem 0.55rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: #7dd3fc; }
+  pre { background: #0d1b2a; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; border: none; padding: 0; color: #bae6fd; font-size: 0.95rem; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  .report-table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem; }
+  .report-table thead tr { background: rgba(56,189,248,0.08); }
+  .report-table th, .report-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); }
+  .report-table th { color: var(--white); text-align: left; font-weight: 700; background: rgba(15,23,42,0.95); }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .report-table td { color: var(--text); }
+  th { background: var(--surface); color: var(--white); padding: 0.7rem 1rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  blockquote { border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem; background: rgba(52,211,153,0.1); border-radius: 0 8px 8px 0; margin: 1rem 0; color: #6ee7b7; font-size: 1.05rem; font-weight: 600; font-style: italic; }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc-list { list-style: none; padding-left: 0; }
+  .toc-list li { margin: 0.35rem 0; }
+  .toc-list a { color: var(--accent); text-decoration: none; }
+  .toc-list a:hover { text-decoration: underline; }
+  .toc-list .toc-h1 { font-weight: 700; font-size: 1rem; margin-top: 0.9rem; }
+  .toc-list .toc-h1 a { color: var(--white); }
+  .toc-list .toc-h2 { padding-left: 1.25rem; font-size: 0.92rem; }
+  .toc-list .toc-h3 { padding-left: 2.5rem; font-size: 0.85rem; }
+  .toc-list .toc-h3 a { color: var(--accent2); }
+  .doc-footer { margin-top: 4rem; padding: 2rem 1.5rem 1.5rem; border-top: 2px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--surface); border-radius: 12px; }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; }
+  @media print {
+    @page { margin: 2cm; @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; } }
+    .doc-header { page-break-after: always; min-height: 85vh; }
+    .toc { page-break-after: always; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .diagram-section { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <h1><span class="material-icons">description</span> juego</h1>
+    <div class="subtitle">Documentación Técnica Profesional · Generado 16/10/2026 02:11 UTC</div>
+    <div class="quality-badge">Score de Calidad: 71/100</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">21</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">42</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">0</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">3</div><div class="lbl">Endpoints</div></div>
+    </div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ul class="toc-list"><li class="toc-h1"><a href="#sec1">1. Documentación del Proyecto</a></li><li class="toc-h2"><a href="#sec2">Resumen Ejecutivo</a></li><li class="toc-h2"><a href="#sec3">Stack Tecnológico</a></li><li class="toc-h2"><a href="#sec4">Estadísticas del Proyecto</a></li><li class="toc-h2"><a href="#sec5">2. Documentación de Arquitectura y Diseño</a></li><li class="toc-h3"><a href="#sec6">2.1 Estructura de Directorios</a></li><li class="toc-h3"><a href="#sec7">2.2 Distribución por Capas</a></li><li class="toc-h3"><a href="#sec8">2.3 Distribución de Lenguajes</a></li><li class="toc-h3"><a href="#sec9">2.4 Diagrama de Infraestructura</a></li><li class="toc-h3"><a href="#sec10">2.5 Diagrama de Casos de Uso</a></li><li class="toc-h3"><a href="#sec11">2.6 Diagrama de Clases</a></li><li class="toc-h3"><a href="#sec12">2.7 Patrones Detectados</a></li><li class="toc-h3"><a href="#sec13">2.8 Insights de Arquitectura (IA)</a></li><li class="toc-h2"><a href="#sec14">3. Documentación Técnica de Código</a></li><li class="toc-h3"><a href="#sec15">3.1 Guía de Configuración del Entorno de Desarrollo</a></li><li class="toc-h3"><a href="#sec16">3.2 Documentación de API</a></li><li class="toc-h3"><a href="#sec17">1. ¿Cuál es su propósito en lenguaje simple?</a></li><li class="toc-h3"><a href="#sec18">2. ¿Qué hace este endpoint?</a></li><li class="toc-h3"><a href="#sec19">3.3 Estado de Comentarios y Docstrings</a></li><li class="toc-h3"><a href="#sec20">3.4 Planes de Prueba (Testing)</a></li><li class="toc-h2"><a href="#sec21">4. Clases</a></li><li class="toc-h2"><a href="#sec22">5. Documentación de Funciones</a></li><li class="toc-h3"><a href="#sec23">Módulo: backend/server.js</a></li><li class="toc-h3"><a href="#sec24">Módulo: backend/test.js</a></li><li class="toc-h3"><a href="#sec25">Módulo: backend/words.js</a></li><li class="toc-h3"><a href="#sec26">Módulo: mobile/App.js</a></li><li class="toc-h3"><a href="#sec27">Módulo: mobile/components/Keyboard.js</a></li><li class="toc-h3"><a href="#sec28">Módulo: mobile/components/HangmanDrawing.js</a></li><li class="toc-h3"><a href="#sec29">Módulo: mobile/hooks/useSocket.js</a></li><li class="toc-h3"><a href="#sec30">Módulo: mobile/data/words.js</a></li><li class="toc-h3"><a href="#sec31">Módulo: mobile/app/GameScreen.js</a></li><li class="toc-h3"><a href="#sec32">Módulo: mobile/app/HomeScreen.js</a></li><li class="toc-h3"><a href="#sec33">Módulo: mobile/app/WaitingScreen.js</a></li><li class="toc-h2"><a href="#sec34">6. Modelos de Datos</a></li><li class="toc-h3"><a href="#sec35">Esquema General Inferido</a></li><li class="toc-h2"><a href="#sec36">7. Guía de Despliegue y Mantenimiento</a></li><li class="toc-h3"><a href="#sec37">7.1 Requisitos del Sistema</a></li><li class="toc-h3"><a href="#sec38">7.2 Instalación Local</a></li><li class="toc-h3"><a href="#sec39">7.3 Despliegue con Docker</a></li><li class="toc-h3"><a href="#sec40">7.4 Variables de Entorno Recomendadas</a></li><li class="toc-h3"><a href="#sec41">7.5 Checklist de Despliegue</a></li><li class="toc-h3"><a href="#sec42">7.6 Registro de Cambios (Changelog)</a></li><li class="toc-h2"><a href="#sec43">8. Reporte de Calidad del Código</a></li><li class="toc-h3"><a href="#sec44">8.1 Análisis de Métricas</a></li><li class="toc-h3"><a href="#sec45">8.2 Funciones con Alta Complejidad Ciclomática</a></li><li class="toc-h3"><a href="#sec46">8.3 Recomendaciones</a></li><li class="toc-h3"><a href="#sec47">8.4 Errores de Análisis</a></li><li class="toc-h2"><a href="#sec48">9. Análisis de Datos del Proyecto</a></li><li class="toc-h3"><a href="#sec49">9.1 Tipos y Fuentes de Datos Detectados</a></li><li class="toc-h3"><a href="#sec50">9.2 Esquema de Data Warehouse Inferido</a></li><li class="toc-h3"><a href="#sec51">9.3 Reporte de Calidad de Datos</a></li><li class="toc-h3"><a href="#sec52">9.4 Minería de Datos Aplicada al Código</a></li><li class="toc-h3"><a href="#sec53">9.5 Pipeline ETL Utilizado</a></li></ul>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-10-16 02:11 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>JavaScript</strong> y cuenta con
+21 archivos fuente, 42 funciones, 0 clases y
+3 endpoints de API documentados. El score de calidad del código es
+<strong>71/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JavaScript</td>
+<td>14 archivos</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>6 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>42</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>71/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>0 / 42</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 0</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3 id="sec6">2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── (raíz)/
+├── backend/
+├── mobile/
+</code></pre>
+<h3 id="sec7">2.2 Distribución por Capas</h3>
+<ul>
+<li>
+<p><strong><code>(raíz)/</code></strong> — 1 archivos [.gitignore(1)]</p>
+<blockquote>
+<p><em>Módulo funcional <code>(raíz)</code>; contiene componentes fuente especializados.</em></p>
+</blockquote>
+</li>
+<li>
+<p><strong><code>backend/</code></strong> — 9 archivos [.js(3), .env(1), .sql(1), .sin ext(1), .json(2), .example(1)]</p>
+<blockquote>
+<p><em>Núcleo del servidor; aloja rutas, controladores, servicios y configuración del sistema.</em></p>
+</blockquote>
+</li>
+<li>
+<p><strong><code>mobile/</code></strong> — 15 archivos [.js(11), .json(4)]</p>
+<blockquote>
+<p><em>Módulo funcional <code>mobile</code>; contiene componentes fuente especializados.</em></p>
+</blockquote>
+</li>
+</ul>
+<h3 id="sec8">2.3 Distribución de Lenguajes</h3>
+<ul>
+<li><strong>JavaScript:</strong> 14 archivos (67%)</li>
+<li><strong>JSON:</strong> 6 archivos (29%)</li>
+<li><strong>SQL:</strong> 1 archivos (5%)</li>
+</ul>
+<h3 id="sec9">2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Descripción de la Arquitectura de Infraestructura:</strong>
+El diagrama de infraestructura detalla la topología técnica y las fronteras de comunicación del sistema:
+- <strong>Capa Cliente (Frontend / Consumidores):</strong> Comprende navegadores web, clientes móviles y scripts de consola (CLI) que se comunican mediante peticiones HTTP/REST estructuradas.
+- <strong>Capa de Transporte y API (Backend):</strong> Módulos de enrutamiento y middleware que autentican tokens, validan parámetros de entrada y dirigen el flujo hacia los servicios.
+- <strong>Capa de Lógica de Negocio y Servicios:</strong> Núcleo de la aplicación donde se ejecutan los algoritmos de negocio, validaciones complejas y la coordinación de datos.
+- <strong>Capa de Almacenamiento y Persistencia:</strong> Bases de datos relacionales o NoSQL para almacenamiento duradero, combinadas con sistemas de caché en memoria para optimizar lecturas frecuentes.
+- <strong>Capa de Integraciones Externas:</strong> Puntos de conexión con servicios de terceros (APIs de pago, mensajería, autenticación OAuth y servicios en la nube).</p>
+<h3 id="sec10">2.5 Diagrama de Casos de Uso</h3>
+<p><strong>Descripción del Modelo de Casos de Uso:</strong>
+Mapea las capacidades operativas provistas por el sistema y su interacción con los actores:
+- <strong>Actor (Usuario / Consumidor):</strong> Representa al usuario autenticado o cliente de API que consume los servicios de la plataforma.
+- <strong>Casos de Uso Principales:</strong> Cada nodo del diagrama corresponde a una funcionalidad sustantiva del sistema (autenticación, gestión de proyectos, análisis estático, consultas y reportes).
+- <strong>Flujo de Interacción:</strong> Las peticiones del usuario disparan casos de uso atómicos, garantizando trazabilidad, seguridad y respuestas normalizadas.</p>
+<h3 id="sec11">2.6 Diagrama de Clases</h3>
+<p><strong>Descripción del Diagrama de Clases del Dominio:</strong>
+Representa la jerarquía orientada a objetos y las entidades estructurales detectadas en el proyecto:
+- <strong>Entidades de Dominio:</strong> Clases que modelan los datos centrales del negocio y encapsulan las operaciones clave.
+- <strong>Cohesión y Encapsulamiento:</strong> Cada clase organiza métodos específicos para mantener la responsabilidad única y desacoplar componentes.
+- <strong>Relaciones e Interacción:</strong> Detalla las dependencias y asociaciones estructurales para facilitar el mantenimiento y la extensibilidad del sistema.</p>
+<h3 id="sec12">2.7 Patrones Detectados</h3>
+<ul>
+<li><strong>API REST</strong>: 3 endpoints detectados (Express.js)</li>
+<li><strong>Testing</strong>: 1 funciones de prueba detectadas</li>
+<li><strong>Programación Asíncrona</strong>: 12 funciones async/await</li>
+</ul>
+<h3 id="sec13">2.8 Insights de Arquitectura (IA)</h3>
+<p>No se pudieron generar insights de arquitectura</p>
+<hr />
+<h2 id="sec14">3. Documentación Técnica de Código</h2>
+<h3 id="sec15">3.1 Guía de Configuración del Entorno de Desarrollo</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Crear entorno virtual (recomendado para Python)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# 3. Instalar dependencias
+npm install
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores locales
+
+# 5. Ejecutar en modo desarrollo
+python app.py  # o npm run dev
+</code></pre>
+<h3 id="sec16">3.2 Documentación de API</h3>
+<p>Total de endpoints detectados: <strong>3</strong></p>
+<h4>Módulo: <code>backend/server.js</code></h4>
+<h5>[GET] <code>GET /health</code></h5>
+<ul>
+<li><strong>Framework:</strong> Express.js</li>
+<li><strong>Archivo:</strong> <code>backend/server.js</code></li>
+</ul>
+<p><strong>Descripción funcional:</strong></p>
+<blockquote>
+<p>Endpoint GET /health</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>Authorization</code> (Header, condicional): Bearer JWT token para autenticación de usuario.</li>
+</ul>
+<p><strong>Códigos de respuesta esperados:</strong></p>
+<ul>
+<li><code>200</code> — Operación procesada con éxito para <code>GET /health</code>.</li>
+<li><code>400</code> — Solicitud incorrecta; datos o parámetros con formato no válido.</li>
+<li><code>401</code> — No autorizado; falta token de acceso o credenciales expiradas.</li>
+<li><code>404</code> — Recurso no encontrado en el servidor.</li>
+<li><code>500</code> — Error interno en el procesamiento del servidor.</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /rooms</code></h5>
+<ul>
+<li><strong>Framework:</strong> Express.js</li>
+<li><strong>Archivo:</strong> <code>backend/server.js</code></li>
+</ul>
+<p><strong>Descripción funcional:</strong></p>
+<blockquote>
+<p>Endpoint POST /rooms</p>
+</blockquote>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud con los datos a procesar.</li>
+<li><code>Authorization</code> (Header, condicional): Bearer JWT token para autenticación de usuario.</li>
+</ul>
+<p><strong>Códigos de respuesta esperados:</strong></p>
+<ul>
+<li><code>201</code> — Recurso creado exitosamente para <code>POST /rooms</code>.</li>
+<li><code>400</code> — Solicitud incorrecta; datos o parámetros con formato no válido.</li>
+<li><code>401</code> — No autorizado; falta token de acceso o credenciales expiradas.</li>
+<li><code>404</code> — Recurso no encontrado en el servidor.</li>
+<li><code>500</code> — Error interno en el procesamiento del servidor.</li>
+</ul>
+<hr />
+<h5>[POST] <code>POST /rooms/:code/join</code></h5>
+<ul>
+<li><strong>Framework:</strong> Express.js</li>
+<li><strong>Archivo:</strong> <code>backend/server.js</code></li>
+</ul>
+<p><strong>Descripción funcional:</strong></p>
+<blockquote>
+<p>Aquí tienes la explicación de esta funcionalidad, desglosada para que cualquier persona pueda entenderla sin necesidad de saber programar.</p>
+</blockquote>
+<h3 id="sec17">1. ¿Cuál es su propósito en lenguaje simple?</h3>
+<p>Imagina que estás en una sala de espera de un hospital o en una sala de reuniones de una oficina. Para entrar en esa sala específica, no basta con llegar al edificio; necesitas una <strong>llave</strong> o un <strong>código de acceso</strong> que te permita abrir la puerta y sentarte dentro.</p>
+<p>Este "punto de contacto" (lo que técnicamente llamamos endpoint) es simplemente <strong>la puerta de entrada a esa sala</strong>. Su único trabajo es verificar que tienes la llave correcta y, si es así, dejarte pasar al interior.</p>
+<h3 id="sec18">2. ¿Qué hace este endpoint?</h3>
+<p>En términos muy básicos, esta función hace dos cosas:
+1.  <strong>Revisa tu invitación:</strong> Mira el código que le enviaste para confirmar que es válido y que la sala realmente existe.
+2.  <strong>Te deja entrar:</strong> Si el código es correcto, "abre la puerta" y registra tu presencia dentro de esa sala. A partir de ese momento, formas parte de ese grupo específico y puedes interactuar con lo que haya dentro (como conversar o ver contenido).</p>
+<p>Es como cuando entras a un grupo de WhatsApp usando un enlace de invitación: el sistema revisa el enlace y si es bueno, te añade al grupo</p>
+<p><strong>Parámetros esperados:</strong></p>
+<ul>
+<li><code>code</code> (Path, requerido): Parámetro identificador en la URL del recurso.</li>
+<li><code>body</code> (JSON, requerido): Cuerpo de la solicitud con los datos a procesar.</li>
+<li><code>Authorization</code> (Header, condicional): Bearer JWT token para autenticación de usuario.</li>
+</ul>
+<p><strong>Códigos de respuesta esperados:</strong></p>
+<ul>
+<li><code>201</code> — Recurso creado exitosamente para <code>POST /rooms/:code/join</code>.</li>
+<li><code>400</code> — Solicitud incorrecta; datos o parámetros con formato no válido.</li>
+<li><code>401</code> — No autorizado; falta token de acceso o credenciales expiradas.</li>
+<li><code>404</code> — Recurso no encontrado en el servidor.</li>
+<li><code>500</code> — Error interno en el procesamiento del servidor.</li>
+</ul>
+<hr />
+<h3 id="sec19">3.3 Estado de Comentarios y Docstrings</h3>
+<p><strong>Total de funciones:</strong> 42</p>
+<ul>
+<li><strong>[OK] Documentadas:</strong> 0 (0%)</li>
+<li><strong>[X] Sin documentar:</strong> 42 (100%)</li>
+</ul>
+<p><strong>Visualización de documentación:</strong></p>
+<pre><code class="language-text">[░░░░░░░░░░░░░░░░░░░░]
+0% documentado
+</code></pre>
+<p><strong>Funciones que requieren documentación:</strong></p>
+<ul>
+<li><code>generateRoomCode()</code> en <code>backend/server.js</code></li>
+<li><code>getRoomByCode(code)</code> en <code>backend/server.js</code></li>
+<li><code>getUsedWords(roomId)</code> en <code>backend/server.js</code></li>
+<li><code>maskWord(word, guessedLetters)</code> en <code>backend/server.js</code></li>
+<li><code>checkWin(word, guessedLetters)</code> en <code>backend/server.js</code></li>
+<li>... y 37 más</li>
+</ul>
+<h3 id="sec20">3.4 Planes de Prueba (Testing)</h3>
+<p>Se detectaron <strong>1 funciones de prueba</strong>:</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función de Test</th>
+<th>Archivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>testConnection</code></td>
+<td><code>backend/test.js</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec21">4. Clases</h2>
+<p>No se detectaron clases en este proyecto.</p>
+<hr />
+<h2 id="sec22">5. Documentación de Funciones</h2>
+<p>Total: <strong>42 funciones</strong></p>
+<h3 id="sec23">Módulo: <code>backend/server.js</code></h3>
+<p><strong><code>generateRoomCode</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>La función <code>generateRoomCode</code> crea un código único e identificable para cada sala virtual. No requiere datos externos; genera automáticamente una combinación aleatoria de caracteres o números. Su resultado es un código breve y fácil de compartir, similar a una contraseña de Wi-Fi. En la práctica, permite que los usuarios se unan a reuniones o espacios de chat específicos sin necesidad de registros complejos. Es fundamental porque actúa como la "puerta de entrada" controlada: sin este código, no habría forma de distinguir entre diferentes sesiones ni de garantizar que solo las personas autorizadas accedan a cada espacio interactivo, manteniendo el orden y la privacidad dentro del sistema.</p>
+</blockquote>
+<hr />
+<p><strong><code>async getRoomByCode</code></strong></p>
+<ul>
+<li>Parámetros: <code>code</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>La función <code>getRoomByCode</code> actúa como un buscador específico dentro de la aplicación. Su propósito es localizar una sala o habitación concreta basándose en una etiqueta única que la identifica.</p>
+</blockquote>
+<p>Para funcionar, necesita únicamente ese identificador único, conocido como "código". Al recibirlo, el sistema consulta su registro interno para encontrar el espacio correspondiente.</p>
+<p>El resultado es la información completa de esa sala, como su nombre, capacidad o características, devuelta al usuario o a otra parte del sistema que la requiera.</p>
+<p>En la vida real, es similar a buscar un hotel por su código de confirmación o encontrar una sala de reuniones mediante su número. Sirve para que los usuarios accedan rápidamente a los detalles de un lugar específico sin tener que revisar toda la lista disponible.</p>
+<p>Su importancia radica en permitir el acceso directo y eficiente a los recursos del sistema. Sin ella, sería imposible gestionar o visualizar una sala individual de manera precisa, lo que complicaría la experiencia del usuario y la organización interna de la plataforma.</p>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>code</code>: Parámetro de entrada procesado por <code>getRoomByCode</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async getUsedWords</code></strong></p>
+<ul>
+<li>Parámetros: <code>roomId</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p><strong>getUsedWords</strong> actúa como un contador de palabras utilizado en una sala específica.</p>
+</blockquote>
+<ol>
+<li><strong>Propósito:</strong> Registra y cuenta cuántas veces se han empleado ciertas palabras dentro de una conversación o sesión concreta.</li>
+<li><strong>Datos requeridos:</strong> Necesita saber la "identificación" única de la sala donde ocurre la interacción (roomId), similar a una clave de acceso para un grupo privado.</li>
+<li><strong>Resultado:</strong> Devuelve una lista o registro de las palabras que se han usado en esa sala, posiblemente con su frecuencia de aparición.</li>
+<li><strong>Uso práctico:</strong> Es útil para analizar tendencias de conversación, detectar temas recurrentes o medir la participación lingüística en foros, chats o salas de debate.</li>
+<li><strong>Importancia:</strong> Permite al sistema comprender el contenido de las interacciones, facilitando funciones de moderación, análisis de sentimiento o generación de resumos automáticos.</li>
+</ol>
+<p>Al estar integrada en el servidor, garantiza que este análisis sea consistente y disponible para otras partes de la aplicación que necesiten datos sobre el lenguaje utilizado.</p>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>roomId</code>: Parámetro de entrada procesado por <code>getUsedWords</code>.</li>
+</ul>
+<hr />
+<p><strong><code>maskWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>word, guessedLetters</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p><strong>Propósito:</strong> Revela parcialmente la palabra secreta en un juego de adivinanzas, mostrando solo las letras que ya se han intentado correctamente.</p>
+</blockquote>
+<p><strong>Datos de entrada:</strong> Necesita la palabra completa oculta y la lista de letras que el jugador ha adivinado con éxito.</p>
+<p><strong>Resultado:</strong> Devuelve una versión "mascarada" de la palabra (por ejemplo, "p_l_a" en lugar de "palabra"), donde las letras correctas son visibles y las restantes aparecen como espacios o símbolos ocultos.</p>
+<p><strong>Uso práctico:</strong> Es la lógica central de juegos tipo "Ahorcado" o "Wordle", permitiendo al jugador ver su progreso sin revelar la solución completa.</p>
+<p><strong>Importancia:</strong> Es crucial para la experiencia de usuario, ya que transforma el estado interno del juego en información visualmente comprensible, manteniendo el desafío activo al ocultar los errores.</p>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>word</code>: Parámetro de entrada procesado por <code>maskWord</code>.</li>
+<li><code>guessedLetters</code>: Parámetro de entrada procesado por <code>maskWord</code>.</li>
+</ul>
+<hr />
+<p><strong><code>checkWin</code></strong></p>
+<ul>
+<li>Parámetros: <code>word, guessedLetters</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p><code>checkWin</code> verifica si el jugador ha adivinado correctamente todas las letras de la palabra oculta. Necesita dos datos: la palabra objetivo y la lista de letras que el usuario ya ha intentado. Su resultado es una confirmación simple: "sí" o "no", indicando si el juego está terminado con éxito. En la práctica, esta función actúa como el árbitro final del juego; cada vez que el jugador introduce una nueva letra, el sistema consulta esta regla para decidir si mostrar un mensaje de victoria o permitir seguir intentando. Es crucial para el flujo del juego porque define el momento exacto de finalización, asegurando que el usuario solo reciba el premio o la siguiente pantalla cuando haya ganado legítimamente, manteniendo así la integridad y la lógica coherente de la experiencia de usuario.</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>word</code>: Parámetro de entrada procesado por <code>checkWin</code>.</li>
+<li><code>guessedLetters</code>: Parámetro de entrada procesado por <code>checkWin</code>.</li>
+</ul>
+<hr />
+<p><strong><code>serializeRoom</code></strong></p>
+<ul>
+<li>Parámetros: <code>room</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función serializeRoom</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>room</code>: Parámetro de entrada procesado por <code>serializeRoom</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async startRound</code></strong></p>
+<ul>
+<li>Parámetros: <code>roomCode</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>La función <code>startRound</code> actúa como el botón de "comenzar" para una nueva ronda de juego. Su propósito es iniciar la actividad dentro de una sala específica, preparando el terreno para que los participantes interactúen.</p>
+</blockquote>
+<p>Para funcionar, necesita un único dato: el código de la sala (<code>roomCode</code>), que es como la dirección única de esa habitación virtual. Al recibir este código, el sistema identifica el grupo de usuarios correcto.</p>
+<p>El resultado principal es el estado activo de la ronda; el juego deja de estar en espera y comienza oficialmente. En la vida real, esto es similar a dar inicio a una partida de cartas o a una lección de clase online.</p>
+<p>Su importancia es crítica: sin esta función, los usuarios podrían estar conectados y ver la sala, pero nunca podrían comenzar a jugar o interactuar. Es el disparador fundamental que activa la experiencia del usuario.</p>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>roomCode</code>: Parámetro de entrada procesado por <code>startRound</code>.</li>
+</ul>
+<hr />
+<h4><code>generateRoomCode()</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>La función <code>generateRoomCode</code> crea un código único e identificable para cada sala virtual. No requiere datos externos; genera automáticamente una combinación aleatoria de caracteres o números. Su resultado es un código breve y fácil de compartir, similar a una contraseña de Wi-Fi. En la práctica, permite que los usuarios se unan a reuniones o espacios de chat específicos sin necesidad de registros complejos. Es fundamental porque actúa como la "puerta de entrada" controlada: sin este código, no habría forma de distinguir entre diferentes sesiones ni de garantizar que solo las personas autorizadas accedan a cada espacio interactivo, manteniendo el orden y la privacidad dentro del sistema.</p>
+</blockquote>
+<h4><code>getRoomByCode(code)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>La función <code>getRoomByCode</code> actúa como un buscador específico dentro de la aplicación. Su propósito es localizar una sala o habitación concreta basándose en una etiqueta única que la identifica.</p>
+</blockquote>
+<p>Para funcionar, necesita únicamente ese identificador único, conocido como "código". Al recibirlo, el sistema consulta su registro interno para encontrar el espacio correspondiente.</p>
+<p>El resultado es la información completa de esa sala, como su nombre, capacidad o características, devuelta al usuario o a otra parte del sistema que la requiera.</p>
+<p>En la vida real, es similar a buscar un hotel por su código de confirmación o encontrar una sala de reuniones mediante su número. Sirve para que los usuarios accedan rápidamente a los detalles de un lugar específico sin tener que revisar toda la lista disponible.</p>
+<p>Su importancia radica en permitir el acceso directo y eficiente a los recursos del sistema. Sin ella, sería imposible gestionar o visualizar una sala individual de manera precisa, lo que complicaría la experiencia del usuario y la organización interna de la plataforma.</p>
+<h4><code>getUsedWords(roomId)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p><strong>getUsedWords</strong> actúa como un contador de palabras utilizado en una sala específica.</p>
+</blockquote>
+<ol>
+<li><strong>Propósito:</strong> Registra y cuenta cuántas veces se han empleado ciertas palabras dentro de una conversación o sesión concreta.</li>
+<li><strong>Datos requeridos:</strong> Necesita saber la "identificación" única de la sala donde ocurre la interacción (roomId), similar a una clave de acceso para un grupo privado.</li>
+<li><strong>Resultado:</strong> Devuelve una lista o registro de las palabras que se han usado en esa sala, posiblemente con su frecuencia de aparición.</li>
+<li><strong>Uso práctico:</strong> Es útil para analizar tendencias de conversación, detectar temas recurrentes o medir la participación lingüística en foros, chats o salas de debate.</li>
+<li><strong>Importancia:</strong> Permite al sistema comprender el contenido de las interacciones, facilitando funciones de moderación, análisis de sentimiento o generación de resumos automáticos.</li>
+</ol>
+<p>Al estar integrada en el servidor, garantiza que este análisis sea consistente y disponible para otras partes de la aplicación que necesiten datos sobre el lenguaje utilizado.</p>
+<h4><code>maskWord(word, guessedLetters)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p><strong>Propósito:</strong> Revela parcialmente la palabra secreta en un juego de adivinanzas, mostrando solo las letras que ya se han intentado correctamente.</p>
+</blockquote>
+<p><strong>Datos de entrada:</strong> Necesita la palabra completa oculta y la lista de letras que el jugador ha adivinado con éxito.</p>
+<p><strong>Resultado:</strong> Devuelve una versión "mascarada" de la palabra (por ejemplo, "p_l_a" en lugar de "palabra"), donde las letras correctas son visibles y las restantes aparecen como espacios o símbolos ocultos.</p>
+<p><strong>Uso práctico:</strong> Es la lógica central de juegos tipo "Ahorcado" o "Wordle", permitiendo al jugador ver su progreso sin revelar la solución completa.</p>
+<p><strong>Importancia:</strong> Es crucial para la experiencia de usuario, ya que transforma el estado interno del juego en información visualmente comprensible, manteniendo el desafío activo al ocultar los errores.</p>
+<h4><code>checkWin(word, guessedLetters)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p><code>checkWin</code> verifica si el jugador ha adivinado correctamente todas las letras de la palabra oculta. Necesita dos datos: la palabra objetivo y la lista de letras que el usuario ya ha intentado. Su resultado es una confirmación simple: "sí" o "no", indicando si el juego está terminado con éxito. En la práctica, esta función actúa como el árbitro final del juego; cada vez que el jugador introduce una nueva letra, el sistema consulta esta regla para decidir si mostrar un mensaje de victoria o permitir seguir intentando. Es crucial para el flujo del juego porque define el momento exacto de finalización, asegurando que el usuario solo reciba el premio o la siguiente pantalla cuando haya ganado legítimamente, manteniendo así la integridad y la lógica coherente de la experiencia de usuario.</p>
+</blockquote>
+<h4><code>serializeRoom(room)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función serializeRoom</p>
+</blockquote>
+<h4><code>startRound(roomCode)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/server.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>La función <code>startRound</code> actúa como el botón de "comenzar" para una nueva ronda de juego. Su propósito es iniciar la actividad dentro de una sala específica, preparando el terreno para que los participantes interactúen.</p>
+</blockquote>
+<p>Para funcionar, necesita un único dato: el código de la sala (<code>roomCode</code>), que es como la dirección única de esa habitación virtual. Al recibir este código, el sistema identifica el grupo de usuarios correcto.</p>
+<p>El resultado principal es el estado activo de la ronda; el juego deja de estar en espera y comienza oficialmente. En la vida real, esto es similar a dar inicio a una partida de cartas o a una lección de clase online.</p>
+<p>Su importancia es crítica: sin esta función, los usuarios podrían estar conectados y ver la sala, pero nunca podrían comenzar a jugar o interactuar. Es el disparador fundamental que activa la experiencia del usuario.</p>
+<h3 id="sec24">Módulo: <code>backend/test.js</code></h3>
+<p><strong><code>async testConnection</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función testConnection</p>
+</blockquote>
+<hr />
+<h4><code>testConnection()</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/test.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función testConnection</p>
+</blockquote>
+<h3 id="sec25">Módulo: <code>backend/words.js</code></h3>
+<p><strong><code>isValidWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>word</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función isValidWord</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>word</code>: Parámetro de entrada procesado por <code>isValidWord</code>.</li>
+</ul>
+<hr />
+<p><strong><code>normalizeWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>word</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función normalizeWord</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>word</code>: Parámetro de entrada procesado por <code>normalizeWord</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async fetchFromPalabrasDev</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función fetchFromPalabrasDev</p>
+</blockquote>
+<hr />
+<p><strong><code>async fetchBatchFromPalabrasDev</code></strong></p>
+<ul>
+<li>Parámetros: <code>count = 5</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p><strong>fetchBatchFromPalabrasDev</strong></p>
+</blockquote>
+<ol>
+<li>
+<p><strong>Propósito</strong>: Esta función actúa como un "buscador de lotes". Su tarea principal es solicitar un grupo específico de palabras de una fuente de datos de desarrollo, permitiendo manejarlas en bloques organizados en lugar de una por una.</p>
+</li>
+<li>
+<p><strong>Datos necesarios</strong>: Solo requiere saber la cantidad de elementos que se desean recuperar. Por defecto, pide 5 palabras, aunque este número se puede ajustar según las necesidades del momento.</p>
+</li>
+<li>
+<p><strong>Resultado</strong>: Devuelve una lista concreta con las palabras solicitadas, lista para ser procesada o mostrada inmediatamente.</p>
+</li>
+<li>
+<p><strong>Uso práctico</strong>: Es útil para cargar contenido de forma progresiva. Por ejemplo, al abrir una aplicación de memoria, esta función permite cargar las primeras cinco tarjetas de palabras para que la interfaz no se frene mientras carga el resto.</p>
+</li>
+<li>
+<p><strong>Importancia</strong>: Optimiza el rendimiento del sistema y mejora la experiencia del usuario al dividir grandes volúmenes de información en porciones manejables y rápidas de cargar.</p>
+</li>
+</ol>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>count = 5</code>: Parámetro de entrada procesado por <code>fetchBatchFromPalabrasDev</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async getRandomWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>usedWords = []</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función getRandomWord</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>usedWords = []</code>: Parámetro de entrada procesado por <code>getRandomWord</code>.</li>
+</ul>
+<hr />
+<h4><code>isValidWord(word)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función isValidWord</p>
+</blockquote>
+<h4><code>normalizeWord(word)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función normalizeWord</p>
+</blockquote>
+<h4><code>fetchFromPalabrasDev()</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función fetchFromPalabrasDev</p>
+</blockquote>
+<h4><code>fetchBatchFromPalabrasDev(count = 5)</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p><strong>fetchBatchFromPalabrasDev</strong></p>
+</blockquote>
+<ol>
+<li>
+<p><strong>Propósito</strong>: Esta función actúa como un "buscador de lotes". Su tarea principal es solicitar un grupo específico de palabras de una fuente de datos de desarrollo, permitiendo manejarlas en bloques organizados en lugar de una por una.</p>
+</li>
+<li>
+<p><strong>Datos necesarios</strong>: Solo requiere saber la cantidad de elementos que se desean recuperar. Por defecto, pide 5 palabras, aunque este número se puede ajustar según las necesidades del momento.</p>
+</li>
+<li>
+<p><strong>Resultado</strong>: Devuelve una lista concreta con las palabras solicitadas, lista para ser procesada o mostrada inmediatamente.</p>
+</li>
+<li>
+<p><strong>Uso práctico</strong>: Es útil para cargar contenido de forma progresiva. Por ejemplo, al abrir una aplicación de memoria, esta función permite cargar las primeras cinco tarjetas de palabras para que la interfaz no se frene mientras carga el resto.</p>
+</li>
+<li>
+<p><strong>Importancia</strong>: Optimiza el rendimiento del sistema y mejora la experiencia del usuario al dividir grandes volúmenes de información en porciones manejables y rápidas de cargar.</p>
+</li>
+</ol>
+<h4><code>getRandomWord(usedWords = [])</code></h4>
+<p><strong>Ubicación:</strong> <code>backend/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función getRandomWord</p>
+</blockquote>
+<h3 id="sec26">Módulo: <code>mobile/App.js</code></h3>
+<p><strong><code>App</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función App</p>
+</blockquote>
+<hr />
+<h4><code>App()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/App.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función App</p>
+</blockquote>
+<h3 id="sec27">Módulo: <code>mobile/components/Keyboard.js</code></h3>
+<p><strong><code>Keyboard</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ guessedLetters, onGuess, disabled, currentWord }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Función Keyboard</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ guessedLetters</code>: Parámetro de entrada procesado por <code>Keyboard</code>.</li>
+<li><code>onGuess</code>: Parámetro de entrada procesado por <code>Keyboard</code>.</li>
+<li><code>disabled</code>: Parámetro de entrada procesado por <code>Keyboard</code>.</li>
+<li><code>currentWord }</code>: Parámetro de entrada procesado por <code>Keyboard</code>.</li>
+</ul>
+<hr />
+<p><strong><code>getLetterStatus</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>getLetterStatus</code> sobre los datos del contexto, procesando los parámetros (letter).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>letter</code>: Parámetro de entrada procesado por <code>getLetterStatus</code>.</li>
+</ul>
+<hr />
+<p><strong><code>renderKey</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>renderKey</code> sobre los datos del contexto, procesando los parámetros (letter).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>letter</code>: Parámetro de entrada procesado por <code>renderKey</code>.</li>
+</ul>
+<hr />
+<h4><code>Keyboard({ guessedLetters, onGuess, disabled, currentWord })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/components/Keyboard.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Función Keyboard</p>
+</blockquote>
+<h4><code>getLetterStatus(letter)</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/components/Keyboard.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>getLetterStatus</code> sobre los datos del contexto, procesando los parámetros (letter).</p>
+</blockquote>
+<h4><code>renderKey(letter)</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/components/Keyboard.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>renderKey</code> sobre los datos del contexto, procesando los parámetros (letter).</p>
+</blockquote>
+<h3 id="sec28">Módulo: <code>mobile/components/HangmanDrawing.js</code></h3>
+<p><strong><code>HangmanDrawing</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ wrongAttempts, size = 200 }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>HangmanDrawing</code> sobre los datos del contexto, procesando los parámetros ({ wrongAttempts, size = 200 }).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ wrongAttempts</code>: Parámetro de entrada procesado por <code>HangmanDrawing</code>.</li>
+<li><code>size = 200 }</code>: Parámetro de entrada procesado por <code>HangmanDrawing</code>.</li>
+</ul>
+<hr />
+<h4><code>HangmanDrawing({ wrongAttempts, size = 200 })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/components/HangmanDrawing.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>HangmanDrawing</code> sobre los datos del contexto, procesando los parámetros ({ wrongAttempts, size = 200 }).</p>
+</blockquote>
+<h3 id="sec29">Módulo: <code>mobile/hooks/useSocket.js</code></h3>
+<p><strong><code>useSocket</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>useSocket</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<h4><code>useSocket()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/hooks/useSocket.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>useSocket</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h3 id="sec30">Módulo: <code>mobile/data/words.js</code></h3>
+<p><strong><code>async getRandomWord</code></strong></p>
+<ul>
+<li>Parámetros: <code>usedWords = []</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>getRandomWord</code> sobre los datos del contexto de forma asíncrona, procesando los parámetros (usedWords = []).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>usedWords = []</code>: Parámetro de entrada procesado por <code>getRandomWord</code>.</li>
+</ul>
+<hr />
+<p><strong><code>getRandomWordFallback</code></strong></p>
+<ul>
+<li>Parámetros: <code>usedWords = []</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>getRandomWordFallback</code> sobre los datos del contexto, procesando los parámetros (usedWords = []).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>usedWords = []</code>: Parámetro de entrada procesado por <code>getRandomWordFallback</code>.</li>
+</ul>
+<hr />
+<h4><code>getRandomWord(usedWords = [])</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/data/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>getRandomWord</code> sobre los datos del contexto de forma asíncrona, procesando los parámetros (usedWords = []).</p>
+</blockquote>
+<h4><code>getRandomWordFallback(usedWords = [])</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/data/words.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>getRandomWordFallback</code> sobre los datos del contexto, procesando los parámetros (usedWords = []).</p>
+</blockquote>
+<h3 id="sec31">Módulo: <code>mobile/app/GameScreen.js</code></h3>
+<p><strong><code>useSounds</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>useSounds</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>buildInitialSPState</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ word, playerName, difficulty, hintsCount, playerWins }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>buildInitialSPState</code> sobre los datos del contexto, procesando los parámetros ({ word, playerName, difficulty, hintsCount, playerWins }).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ word</code>: Parámetro de entrada procesado por <code>buildInitialSPState</code>.</li>
+<li><code>playerName</code>: Parámetro de entrada procesado por <code>buildInitialSPState</code>.</li>
+<li><code>difficulty</code>: Parámetro de entrada procesado por <code>buildInitialSPState</code>.</li>
+<li><code>hintsCount</code>: Parámetro de entrada procesado por <code>buildInitialSPState</code>.</li>
+<li><code>playerWins }</code>: Parámetro de entrada procesado por <code>buildInitialSPState</code>.</li>
+</ul>
+<hr />
+<p><strong><code>GameScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ route, navigation }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>GameScreen</code> sobre los datos del contexto, procesando los parámetros ({ route, navigation }).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ route</code>: Parámetro de entrada procesado por <code>GameScreen</code>.</li>
+<li><code>navigation }</code>: Parámetro de entrada procesado por <code>GameScreen</code>.</li>
+</ul>
+<hr />
+<p><strong><code>clearTimerInterval</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>clearTimerInterval</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>resetTimer</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>resetTimer</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>startTimer</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>startTimer</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>StatCell</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ icon, color, label, value }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>StatCell</code> sobre los datos del contexto, procesando los parámetros ({ icon, color, label, value }).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ icon</code>: Parámetro de entrada procesado por <code>StatCell</code>.</li>
+<li><code>color</code>: Parámetro de entrada procesado por <code>StatCell</code>.</li>
+<li><code>label</code>: Parámetro de entrada procesado por <code>StatCell</code>.</li>
+<li><code>value }</code>: Parámetro de entrada procesado por <code>StatCell</code>.</li>
+</ul>
+<hr />
+<p><strong><code>shakeScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>shakeScreen</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>bounceWin</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>bounceWin</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>flashLoss</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>flashLoss</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>pulseLetter</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>pulseLetter</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>handleHint</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleHint</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>processGuess</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter, isHint = false</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>processGuess</code> sobre los datos del contexto, procesando los parámetros (letter, isHint = false).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>letter</code>: Parámetro de entrada procesado por <code>processGuess</code>.</li>
+<li><code>isHint = false</code>: Parámetro de entrada procesado por <code>processGuess</code>.</li>
+</ul>
+<hr />
+<p><strong><code>handleGuess</code></strong></p>
+<ul>
+<li>Parámetros: <code>letter</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleGuess</code> sobre los datos del contexto, procesando los parámetros (letter).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>letter</code>: Parámetro de entrada procesado por <code>handleGuess</code>.</li>
+</ul>
+<hr />
+<p><strong><code>handleExit</code></strong></p>
+<ul>
+<li>Parámetros: <code>confirmed = false</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleExit</code> sobre los datos del contexto, procesando los parámetros (confirmed = false).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>confirmed = false</code>: Parámetro de entrada procesado por <code>handleExit</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async handleNewGame</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleNewGame</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<h4><code>useSounds()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>useSounds</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>buildInitialSPState({ word, playerName, difficulty, hintsCount, playerWins })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>buildInitialSPState</code> sobre los datos del contexto, procesando los parámetros ({ word, playerName, difficulty, hintsCount, playerWins }).</p>
+</blockquote>
+<h4><code>GameScreen({ route, navigation })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>GameScreen</code> sobre los datos del contexto, procesando los parámetros ({ route, navigation }).</p>
+</blockquote>
+<h4><code>clearTimerInterval()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>clearTimerInterval</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>resetTimer()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>resetTimer</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>startTimer()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>startTimer</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>StatCell({ icon, color, label, value })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>StatCell</code> sobre los datos del contexto, procesando los parámetros ({ icon, color, label, value }).</p>
+</blockquote>
+<h4><code>shakeScreen()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>shakeScreen</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>bounceWin()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>bounceWin</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>flashLoss()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>flashLoss</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>pulseLetter()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>pulseLetter</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>handleHint()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleHint</code> sobre los datos del contexto sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>processGuess(letter, isHint = false)</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>processGuess</code> sobre los datos del contexto, procesando los parámetros (letter, isHint = false).</p>
+</blockquote>
+<h4><code>handleGuess(letter)</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleGuess</code> sobre los datos del contexto, procesando los parámetros (letter).</p>
+</blockquote>
+<h4><code>handleExit(confirmed = false)</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleExit</code> sobre los datos del contexto, procesando los parámetros (confirmed = false).</p>
+</blockquote>
+<h4><code>handleNewGame()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/GameScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>handleNewGame</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h3 id="sec32">Módulo: <code>mobile/app/HomeScreen.js</code></h3>
+<p><strong><code>HomeScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ route, navigation }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>HomeScreen</code> sobre los datos del contexto, procesando los parámetros ({ route, navigation }).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ route</code>: Parámetro de entrada procesado por <code>HomeScreen</code>.</li>
+<li><code>navigation }</code>: Parámetro de entrada procesado por <code>HomeScreen</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async createRoom</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>createRoom</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<p><strong><code>async joinRoom</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>joinRoom</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<h4><code>HomeScreen({ route, navigation })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/HomeScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>HomeScreen</code> sobre los datos del contexto, procesando los parámetros ({ route, navigation }).</p>
+</blockquote>
+<h4><code>createRoom()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/HomeScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>createRoom</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h4><code>joinRoom()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/HomeScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>joinRoom</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<h3 id="sec33">Módulo: <code>mobile/app/WaitingScreen.js</code></h3>
+<p><strong><code>WaitingScreen</code></strong></p>
+<ul>
+<li>Parámetros: <code>{ route, navigation }</code></li>
+<li>Async: —</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>WaitingScreen</code> sobre los datos del contexto, procesando los parámetros ({ route, navigation }).</p>
+</blockquote>
+<p><strong>Parámetros:</strong></p>
+<ul>
+<li><code>{ route</code>: Parámetro de entrada procesado por <code>WaitingScreen</code>.</li>
+<li><code>navigation }</code>: Parámetro de entrada procesado por <code>WaitingScreen</code>.</li>
+</ul>
+<hr />
+<p><strong><code>async shareCode</code></strong></p>
+<ul>
+<li>Parámetros: <code>—</code></li>
+<li>Async: [ASYNC]</li>
+<li>Complejidad ciclomática: [LOW] 1</li>
+<li>Documentada: [X]</li>
+</ul>
+<p><strong>Descripción técnica:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>shareCode</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<h4><code>WaitingScreen({ route, navigation })</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/WaitingScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>WaitingScreen</code> sobre los datos del contexto, procesando los parámetros ({ route, navigation }).</p>
+</blockquote>
+<h4><code>shareCode()</code></h4>
+<p><strong>Ubicación:</strong> <code>mobile/app/WaitingScreen.js</code></p>
+<p><strong>Descripción detallada:</strong></p>
+<blockquote>
+<p>Ejecuta la funcionalidad <code>shareCode</code> sobre los datos del contexto de forma asíncrona sin requerir parámetros obligatorios.</p>
+</blockquote>
+<hr />
+<h2 id="sec34">6. Modelos de Datos</h2>
+<p>No se detectaron clases con nombres de modelo explícitos.</p>
+<h3 id="sec35">Esquema General Inferido</h3>
+<p>Basado en el análisis de código y funciones detectadas, las entidades principales del dominio son:</p>
+<ul>
+<li>Entidades estructurales inferidas a partir de los módulos de la aplicación.</li>
+</ul>
+<hr />
+<h2 id="sec36">7. Guía de Despliegue y Mantenimiento</h2>
+<h3 id="sec37">7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: JavaScript</li>
+<li><strong>Archivos detectados</strong>: 21</li>
+</ul>
+<h3 id="sec38">7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+npm start
+</code></pre>
+<h3 id="sec39">7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM node:20-slim
+
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 8000
+CMD [&quot;node index.js&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3 id="sec40">7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3 id="sec41">7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3 id="sec42">7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-10-16
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec43">8. Reporte de Calidad del Código</h2>
+<h3 id="sec44">8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 71/100 (Bueno [YELLOW])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 0/42 (0%)
+- Clases documentadas: 0/0</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 1.0
+- Complejidad máxima: 1
+- Funciones con alta complejidad (&gt;10): 0</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: ↓ Baja
+</code></pre>
+<h3 id="sec45">8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<p>No hay funciones con complejidad &gt; 10. [OK]</p>
+<h3 id="sec46">8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 42 funciones sin documentar</li>
+</ul>
+<h3 id="sec47">8.4 Errores de Análisis</h3>
+<p>Sin errores detectados. [OK]</p>
+<hr />
+<h2 id="sec48">9. Análisis de Datos del Proyecto</h2>
+<h3 id="sec49">9.1 Tipos y Fuentes de Datos Detectados</h3>
+<p><strong>Datos Estructurados:</strong> 0 archivos</p>
+<p><strong>Datos Semi-estructurados:</strong> 0 archivos</p>
+<p><strong>Datos No Estructurados:</strong> 0 archivos</p>
+<h3 id="sec50">9.2 Esquema de Data Warehouse Inferido</h3>
+<p>No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.</p>
+<h3 id="sec51">9.3 Reporte de Calidad de Datos</h3>
+<p><strong>Problemas Detectados en el Código:</strong></p>
+<ul>
+<li><strong>Funciones sin documentar:</strong> 42</li>
+<li><code>generateRoomCode</code> en <code>backend/server.js</code></li>
+<li><code>getRoomByCode</code> en <code>backend/server.js</code></li>
+<li><code>getUsedWords</code> en <code>backend/server.js</code></li>
+<li><code>maskWord</code> en <code>backend/server.js</code></li>
+<li><code>checkWin</code> en <code>backend/server.js</code></li>
+<li>... y 37 más</li>
+</ul>
+<h3 id="sec52">9.4 Minería de Datos Aplicada al Código</h3>
+<p><em>Análisis automático realizado sobre las funciones y clases extraídas del proyecto.</em></p>
+<h4>A) Funciones de Alta Complejidad Ciclomática</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Umbral</th>
+<th>Cantidad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Alta</td>
+<td>&gt; 5</td>
+<td>0</td>
+<td>Requieren refactorización urgente</td>
+</tr>
+<tr>
+<td>🟡 Media</td>
+<td>4–5</td>
+<td>0</td>
+<td>Candidatas a simplificación</td>
+</tr>
+<tr>
+<td>🟢 Baja</td>
+<td>≤ 3</td>
+<td>42</td>
+<td>Complejidad aceptable</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.</p>
+</blockquote>
+<h4>B) Funciones Sin Documentación</h4>
+<p><strong>42 de 42 funciones</strong> carecen de docstring (100%).</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generateRoomCode</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRoomByCode</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getUsedWords</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>maskWord</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>checkWin</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>serializeRoom</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>startRound</code></td>
+<td><code>backend/server.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>testConnection</code></td>
+<td><code>backend/test.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>isValidWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>normalizeWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>fetchFromPalabrasDev</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>fetchBatchFromPalabrasDev</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>App</code></td>
+<td><code>mobile/App.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>Keyboard</code></td>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getLetterStatus</code></td>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>renderKey</code></td>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>HangmanDrawing</code></td>
+<td><code>mobile/components/HangmanDrawing.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>useSocket</code></td>
+<td><code>mobile/hooks/useSocket.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>mobile/data/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><em>... y 22 funciones más sin documentar.</em></p>
+<p>💡 <strong>Sugerencia:</strong> Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.</p>
+<h4>C) Detección de Funciones con Nombres Similares (Posibles Duplicados)</h4>
+<p><em>Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse.</em></p>
+<p>Se detectaron <strong>1 grupos de funciones con nombres similares</strong> repartidas en distintos archivos:</p>
+<p><strong>Patrón: <code>*_getrandomword</code> / <code>getrandomword_*</code></strong> — aparece en 2 archivos distintos</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>backend/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>getRandomWord</code></td>
+<td><code>mobile/data/words.js</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>getRandomWord</code> y <code>getRandomWord</code> realizan operaciones similares (<code>getrandomword</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/getrandomword.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>backend/words.js</code>, <code>mobile/data/words.js</code>).</p>
+<hr />
+<h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Funciones</th>
+<th>Complejidad Promedio</th>
+<th>Documentadas</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mobile/app/GameScreen.js</code></td>
+<td>16</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟡 Revisar</td>
+</tr>
+<tr>
+<td><code>backend/server.js</code></td>
+<td>7</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>backend/words.js</code></td>
+<td>5</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/components/Keyboard.js</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/app/HomeScreen.js</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/data/words.js</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/app/WaitingScreen.js</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>backend/test.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/App.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/components/HangmanDrawing.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>mobile/hooks/useSocket.js</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+</tbody>
+</table>
+<p>💡 <strong><code>mobile/app/GameScreen.js</code></strong> tiene 16 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).</p>
+<h3 id="sec53">9.5 Pipeline ETL Utilizado</h3>
+<p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Fases del Pipeline:</strong></p>
+<ul>
+<li><strong>Extract:</strong> Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales</li>
+<li><strong>Transform:</strong> Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones</li>
+<li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
+</ul>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-10-16 02:11 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">juego</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">21</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">0</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">42</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">3</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#10b981">71/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">16/10/2026 02:11 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>

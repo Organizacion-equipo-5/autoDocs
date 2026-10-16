@@ -1,0 +1,42 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+title Pipeline ETL - AutoDocs AI
+
+package "Extract" {
+  [ZIP Source] as zip
+  [GitHub Repo] as github
+  [CSV Dataset] as csv
+  [JSON Data] as json
+  [Directory] as dir
+}
+
+package "Transform" {
+  [Data Cleaner] as cleaner
+  [AI Enhancer] as ai
+  [Pattern Mining] as mining
+  [Rules Engine] as rules
+}
+
+package "Load" {
+  [HTML Export] as html
+  [PDF Export] as pdf
+  [MongoDB] as mongo
+  [JSON File] as json_file
+}
+
+zip --> cleaner
+github --> cleaner
+csv --> cleaner
+json --> cleaner
+dir --> cleaner
+
+cleaner --> ai
+ai --> mining
+mining --> rules
+
+rules --> html
+rules --> pdf
+rules --> mongo
+rules --> json_file
+
+@enduml

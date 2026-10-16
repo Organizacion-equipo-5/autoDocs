@@ -6,10 +6,19 @@ from services.exporter import DocumentExporter
 from services.doc_generator import DocGenerator
 from datetime import datetime
 import os
+import re
 import traceback
 import json
 
 export_bp = Blueprint('export', __name__)
+
+
+def _build_export_filename(project_name: str, ext: str) -> str:
+    """Construye un nombre de archivo seguro con el nombre del proyecto y fecha/hora actual."""
+    clean_name = re.sub(r'[^\w\-.]', '_', str(project_name).strip())
+    clean_name = re.sub(r'_+', '_', clean_name).strip('_') or 'proyecto'
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    return f"{clean_name}_{timestamp}.{ext}"
 
 
 def _log_export_event(db, user_id, project_id, export_type, metadata=None):
@@ -120,19 +129,25 @@ def export_pdf(project_id):
 
         if file_path.endswith('.html'):
             print(f"[Export] PDF falló, enviando HTML como fallback")
-            return send_file(
+            html_name = _build_export_filename(project.get('name', 'proyecto'), 'html')
+            resp = send_file(
                 file_path,
                 as_attachment=True,
-                download_name=f"{project['name']}_documentacion.html",
+                download_name=html_name,
                 mimetype='text/html'
             )
+            resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
+            return resp
 
-        return send_file(
+        pdf_name = _build_export_filename(project.get('name', 'proyecto'), 'pdf')
+        resp = send_file(
             file_path,
             as_attachment=True,
-            download_name=f"{project['name']}_documentacion.pdf",
+            download_name=pdf_name,
             mimetype='application/pdf'
         )
+        resp.headers['Access-Control-Expose-Headers'] = 'Content-Disposition'
+        return resp
     except Exception as exc:
         error_text = traceback.format_exc()
         print(f"[Export] Error al generar PDF para proyecto {project_id}: {exc}\n{error_text}")
@@ -169,10 +184,14 @@ def export_html(project_id):
     html = exporter.to_html()
     _log_export_event(db, user_id, project_id, "export_html", {"format": "html", "selected": bool(selected)})
 
+    filename = _build_export_filename(project.get('name', 'proyecto'), 'html')
     return Response(
         html,
         mimetype='text/html',
-        headers={'Content-Disposition': f'attachment; filename={project["name"]}_docs.html'}
+        headers={
+            'Content-Disposition': f'attachment; filename="{filename}"',
+            'Access-Control-Expose-Headers': 'Content-Disposition'
+        }
     )
 
 @export_bp.route('/<project_id>/markdown', methods=['GET'])
@@ -206,8 +225,12 @@ def export_markdown(project_id):
     md = exporter.to_markdown()
     _log_export_event(db, user_id, project_id, "export_markdown", {"format": "markdown", "selected": bool(selected)})
 
+    filename = _build_export_filename(project.get('name', 'proyecto'), 'md')
     return Response(
         md,
         mimetype='text/markdown',
-        headers={'Content-Disposition': f'attachment; filename={project["name"]}_docs.md'}
+        headers={
+            'Content-Disposition': f'attachment; filename="{filename}"',
+            'Access-Control-Expose-Headers': 'Content-Disposition'
+        }
     )

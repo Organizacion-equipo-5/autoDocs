@@ -250,6 +250,23 @@ class ProjectAnalyzer:
                 fn(self.project_path / item["path"])
 
     # ── Python ────────────────────────────────────────────────────────
+    def _extract_code_snippet(self, source: str, node, max_lines: int = 15) -> str:
+        """Extrae un fragmento de código fuente de un nodo AST."""
+        try:
+            lines = source.splitlines()
+            start = node.lineno - 1  # 0-indexed
+            end = getattr(node, 'end_lineno', None)
+            if end is None:
+                end = min(start + max_lines, len(lines))
+            else:
+                end = min(end, start + max_lines)
+            snippet_lines = lines[start:end]
+            if end < getattr(node, 'end_lineno', end):
+                snippet_lines.append('    # ... (código continúa)')
+            return '\n'.join(snippet_lines)
+        except Exception:
+            return ""
+
     def _analyze_python_file(self, filepath: Path):
         try:
             source = filepath.read_text(encoding='utf-8', errors='ignore')
@@ -263,6 +280,7 @@ class ProjectAnalyzer:
                         "docstring": ast.get_docstring(node) or "",
                         "is_async": isinstance(node, ast.AsyncFunctionDef),
                         "complexity": self._estimate_complexity(node),
+                        "code_snippet": self._extract_code_snippet(source, node),
                     })
                 elif isinstance(node, ast.ClassDef):
                     bases = []
@@ -276,6 +294,7 @@ class ProjectAnalyzer:
                         "methods": [n.name for n in ast.walk(node)
                                     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))],
                         "bases": bases, "docstring": ast.get_docstring(node) or "",
+                        "code_snippet": self._extract_code_snippet(source, node),
                     })
             self._detect_python_endpoints(source, rel)
         except Exception as e:

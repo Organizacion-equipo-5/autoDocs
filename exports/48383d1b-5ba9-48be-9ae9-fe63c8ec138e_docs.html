@@ -1,0 +1,5005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Franco — Documentación Técnica</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b1120; --surface: #151d30; --surface2: #1a2540;
+    --border: #2a3a5c; --border-light: #334670;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #34d399; --accent4: #f472b6;
+    --text: #c8d6e5; --text2: #8899b0; --muted: #5c6f8a; --white: #f0f4f8;
+    --radius: 12px; --radius-sm: 8px; --radius-lg: 16px;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11.5pt; line-height: 1.7; text-align: justify;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 3rem 2rem; }
+
+  /* ── PORTADA ──────────────────────────── */
+  .doc-header {
+    background:
+      radial-gradient(circle at 92% 0%, rgba(129,140,248,0.22) 0%, transparent 42%),
+      radial-gradient(circle at 0% 100%, rgba(56,189,248,0.16) 0%, transparent 45%),
+      linear-gradient(160deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 4rem 2.5rem 2.5rem; margin-bottom: 3rem;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  }
+  .doc-header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent4), #f59e0b);
+  }
+  .cover-eyebrow {
+    display: inline-block; padding: 0.4rem 1.2rem; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent);
+    background: rgba(56,189,248,0.10); border: 1px solid rgba(56,189,248,0.35);
+  }
+  .cover-title {
+    font-size: 2.9rem; font-weight: 800; color: var(--white);
+    line-height: 1.1; letter-spacing: -0.02em; text-transform: uppercase;
+    margin: 1.4rem 0 0.2rem; overflow-wrap: anywhere; text-align: center;
+  }
+  .cover-rule {
+    width: 96px; height: 4px; border-radius: 4px; margin: 1.1rem auto 1.2rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent4));
+  }
+  .doc-header .subtitle {
+    color: var(--text2); font-size: 0.95rem; letter-spacing: 0.02em; text-align: center;
+  }
+  .cover-meta {
+    display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; margin-top: 1.8rem;
+  }
+  .cover-meta-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+    padding: 0.55rem 1.3rem; border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  }
+  .cover-meta-item .cm-lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.14em;
+  }
+  .cover-meta-item .cm-val { font-size: 0.9rem; font-weight: 700; color: var(--white); }
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2rem; width: 100%;
+  }
+  .stat {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: var(--radius); padding: 1.1rem 0.8rem; text-align: center;
+  }
+  .stat:nth-child(2) { border-top-color: var(--accent2); }
+  .stat:nth-child(3) { border-top-color: var(--accent3); }
+  .stat:nth-child(4) { border-top-color: var(--accent4); }
+  .stat .val { font-size: 1.9rem; font-weight: 800; color: var(--white); line-height: 1; }
+  .stat .lbl {
+    font-size: 0.68rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.12em; margin-top: 0.3rem;
+    font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  }
+  .cover-brand {
+    margin-top: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+  }
+  .cover-brand span { color: var(--accent); font-weight: 700; }
+
+  /* ── HEADINGS ──────────────────────────── */
+  h1, h2, h3, h4 {
+    font-family: 'Inter', sans-serif; text-align: left;
+    page-break-after: avoid; break-after: avoid-page;
+  }
+  h1 {
+    font-size: 20pt; font-weight: 800; color: var(--white);
+    margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent);
+    position: relative;
+  }
+  h1::after {
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 80px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  h2 {
+    font-size: 16pt; font-weight: 700; color: var(--white);
+    margin: 2rem 0 0.75rem; padding-left: 0.85rem;
+    border-left: 3px solid var(--accent2);
+  }
+  h3 {
+    font-size: 13pt; font-weight: 700; color: var(--accent);
+    margin: 1.5rem 0 0.5rem; padding-left: 0.6rem;
+    border-left: 3px solid rgba(56,189,248,0.3);
+  }
+  h4 {
+    font-size: 12pt; font-weight: 600; color: var(--text);
+    margin: 1rem 0 0.4rem;
+  }
+  p, li { margin: 0.6rem 0; font-size: 11.5pt; text-align: justify; }
+
+  /* ── CODE ──────────────────────────────── */
+  code {
+    background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.2);
+    padding: 0.15rem 0.5rem; border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.92rem;
+    font-weight: 600; color: #7dd3fc;
+  }
+  pre {
+    background: linear-gradient(180deg, #0a1628 0%, #0d1b2a 100%);
+    border: 1px solid var(--border); border-left: 4px solid var(--accent);
+    border-radius: var(--radius); padding: 1.25rem 1.5rem;
+    overflow-x: auto; margin: 1rem 0;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  pre code {
+    background: none; border: none; padding: 0;
+    color: #bae6fd; font-size: 0.9rem; font-weight: 500;
+  }
+
+  /* ── TABLES (diseño único = «Stack Tecnológico») ───────── */
+  table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin: 1.2rem 0; font-size: 0.9rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .report-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin: 1.2rem 0; font-size: 0.92rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .report-table thead { display: table-header-group; }
+  .report-table thead tr { background: linear-gradient(180deg, rgba(56,189,248,0.12) 0%, rgba(56,189,248,0.04) 100%); }
+  .report-table th, .report-table td {
+    padding: 0.85rem 1rem; border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
+  }
+  .report-table th {
+    color: var(--white); text-align: left; font-weight: 700;
+    text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em;
+    background: rgba(15,23,42,0.95);
+  }
+  .report-table tr { page-break-inside: avoid; break-inside: avoid; }
+  .report-table tr:last-child td { border-bottom: none; }
+  .report-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .report-table tr:hover td { background: rgba(56,189,248,0.04); }
+  .report-table td { color: var(--text); }
+  .report-table td code { white-space: normal; overflow-wrap: anywhere; }
+  th {
+    background: var(--surface); color: var(--white);
+    padding: 0.75rem 1rem; text-align: left; font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em;
+  }
+  td {
+    padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+
+  /* ── TABLAS ANCHAS → PÁGINA HORIZONTAL ─────────────────── */
+  .table-landscape { max-width: 100%; }
+  .table-landscape table, .table-landscape .report-table {
+    page-break-inside: auto; break-inside: auto;
+  }
+
+  /* ── CODE FRAGMENT ─────────────────────── */
+  .code-fragment {
+    margin: 1.5rem 0; padding: 1.25rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .code-fragment-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 0.8rem;
+  }
+  .code-fragment-header .frag-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .code-fragment-header .frag-title {
+    font-weight: 700; font-size: 0.95rem; color: var(--white);
+  }
+  .code-fragment-header .frag-file {
+    font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+  }
+  .code-explanation {
+    margin-top: 0.8rem; padding: 0.8rem 1rem;
+    background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.15);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem; color: var(--text); line-height: 1.65;
+  }
+  .code-explanation strong { color: var(--accent); }
+
+  /* ── MISC ──────────────────────────────── */
+  blockquote {
+    border-left: 3px solid var(--accent3); padding: 0.9rem 1.1rem;
+    background: rgba(52,211,153,0.07); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1rem 0; color: #6ee7b7; font-size: 1rem;
+    font-weight: 500; font-style: italic;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin: 0.3rem 0; }
+  hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 2.5rem 0; }
+  strong { color: var(--white); font-weight: 700; }
+  em { color: var(--accent2); font-style: italic; }
+
+  /* ── TOC ────────────────────────────────── */
+  .toc {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2rem;
+  }
+  .toc h3 { color: var(--white); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .toc-list { list-style: none; padding-left: 0; }
+  .toc-list li { margin: 0.35rem 0; }
+  .toc-list a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+  .toc-list a:hover { text-decoration: underline; color: var(--white); }
+  .toc-list .toc-h1 { font-weight: 700; font-size: 1rem; margin-top: 0.9rem; }
+  .toc-list .toc-h1 a { color: var(--white); }
+  .toc-list .toc-h2 { padding-left: 1.25rem; font-size: 0.92rem; }
+  .toc-list .toc-h3 { padding-left: 2.5rem; font-size: 0.85rem; }
+  .toc-list .toc-h3 a { color: var(--accent2); }
+
+  /* ── FOOTER ────────────────────────────── */
+  .doc-footer {
+    margin-top: 4rem; padding: 2rem 1.5rem 1.5rem;
+    border-top: 2px solid var(--border); text-align: center;
+    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);
+    border-radius: var(--radius);
+  }
+  .doc-footer span { color: var(--accent); font-weight: 700; }
+  .doc-footer .footer-grid { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .doc-footer .footer-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+  .doc-footer .footer-item .fi-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .doc-footer .footer-item .fi-val { color: var(--text); font-size: 0.82rem; }
+  .doc-footer .footer-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+  .doc-footer .footer-brand { color: var(--muted); font-size: 0.72rem; }
+  .diagram-section { margin: 2rem 0; page-break-inside: avoid; break-inside: avoid; }
+
+  @media print {
+    @page {
+      margin: 2cm;
+      @bottom-center { content: "Página " counter(page) " de " counter(pages); font-family: 'JetBrains Mono', monospace; font-size: 9pt; color: #64748b; }
+    }
+    /* Página horizontal: la usan solo las tablas anchas (.table-landscape) */
+    @page landscape {
+      size: A4 landscape;
+      margin: 1.5cm;
+    }
+    /* Todo lo demás vuelve explícitamente a vertical (si no, "page:auto" hereda la horizontal) */
+    .content > * { page: portrait; }
+    .content > .table-landscape { page: landscape; }
+    .doc-footer { page: portrait; }
+    .doc-header { page-break-after: always; break-after: always; min-height: 85vh; }
+    .toc { page-break-after: always; break-after: always; }
+    h1, h2, h3, h4, h5, h6 {
+      page-break-after: avoid !important; break-after: avoid-page !important;
+      break-inside: avoid !important;
+    }
+    .diagram-section, .report-table, pre, blockquote, .stat, table, .code-fragment {
+      page-break-inside: avoid !important; break-inside: avoid !important;
+    }
+    .table-landscape table, .table-landscape .report-table {
+      page-break-inside: auto !important; break-inside: auto !important;
+    }
+    body { background: white !important; color: #1e293b !important; }
+    .container { max-width: 100%; padding: 0; }
+  }
+  .diagram-section h3 { margin-bottom: 0.75rem !important; page-break-after: avoid !important; break-after: avoid-page !important; }
+  .diagram-section img { margin-top: 0 !important; }
+  .material-icons { font-size: 1.2em; vertical-align: middle; }
+  .material-symbols-outlined { font-size: 1.2em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="doc-header">
+    <span class="cover-eyebrow">Documentación Técnica Profesional</span>
+    <div class="cover-title">Franco</div>
+    <div class="cover-rule"></div>
+    <div class="subtitle">Arquitectura · API · Código · Calidad</div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><span class="cm-lbl">Lenguaje principal</span><span class="cm-val">PHP</span></div>
+      <div class="cover-meta-item"><span class="cm-lbl">Score de calidad</span><span class="cm-val" style="color:#10b981">80/100 · Excelente</span></div>
+      <div class="cover-meta-item"><span class="cm-lbl">Generado</span><span class="cm-val">16/10/2026 21:12 UTC</span></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">540</div><div class="lbl">Archivos</div></div>
+      <div class="stat"><div class="val">100</div><div class="lbl">Funciones</div></div>
+      <div class="stat"><div class="val">246</div><div class="lbl">Clases</div></div>
+      <div class="stat"><div class="val">0</div><div class="lbl">Endpoints</div></div>
+    </div>
+    <div class="cover-brand">Generado por <span>AutoDocs AI</span></div>
+  </div>
+  <div class="toc">
+    <h3><span class="material-icons">list</span> Tabla de Contenidos</h3>
+    <ul class="toc-list"><li class="toc-h1"><a href="#sec1">1. Documentación del Proyecto</a></li><li class="toc-h2"><a href="#sec2">Resumen Ejecutivo</a></li><li class="toc-h2"><a href="#sec3">Stack Tecnológico</a></li><li class="toc-h2"><a href="#sec4">Estadísticas del Proyecto</a></li><li class="toc-h2"><a href="#sec5">2. Documentación de Arquitectura y Diseño</a></li><li class="toc-h3"><a href="#sec6">2.1 Estructura de Directorios</a></li><li class="toc-h3"><a href="#sec7">2.2 Distribución por Capas</a></li><li class="toc-h3"><a href="#sec8">2.3 Distribución de Lenguajes</a></li><li class="toc-h3"><a href="#sec9">2.4 Diagrama de Infraestructura</a></li><li class="toc-h3"><a href="#sec10">2.5 Diagrama de Casos de Uso</a></li><li class="toc-h3"><a href="#sec11">2.6 Diagrama de Clases</a></li><li class="toc-h3"><a href="#sec12">2.7 Patrones Detectados</a></li><li class="toc-h3"><a href="#sec13">2.8 Insights de Arquitectura (IA)</a></li><li class="toc-h2"><a href="#sec14">3. Documentación Técnica de Código</a></li><li class="toc-h2"><a href="#sec15">4. Documentación de Módulos y Clases</a></li><li class="toc-h3"><a href="#sec16">4.1 Tabla Resumen de Módulos</a></li><li class="toc-h3"><a href="#sec17">4.2 Detalle de Clases</a></li><li class="toc-h3"><a href="#sec18">1. ¿Cuál es su propósito en lenguaje simple?</a></li><li class="toc-h3"><a href="#sec19">2. ¿Qué representa esta clase en el sistema? (Analogía del mundo real)</a></li><li class="toc-h3"><a href="#sec20">1. Propósito de la clase (en palabras muy simples)</a></li><li class="toc-h3"><a href="#sec21">2. Qué representa esta clase en el sistema (una analogía)</a></li><li class="toc-h3"><a href="#sec22">1. Propósito de la clase (en lenguaje muy simple)</a></li><li class="toc-h3"><a href="#sec23">2. Qué representa esta clase en el sistema (analogía del mundo real)</a></li><li class="toc-h2"><a href="#sec24">5. Documentación de Funciones</a></li><li class="toc-h3"><a href="#sec25">5.1 Resumen por Módulo</a></li><li class="toc-h3"><a href="#sec26">5.2 Detalle por Módulo</a></li><li class="toc-h2"><a href="#sec27">6. Modelos de Datos</a></li><li class="toc-h3"><a href="#sec28">Esquema General Inferido</a></li><li class="toc-h2"><a href="#sec29">7. Guía de Despliegue y Mantenimiento</a></li><li class="toc-h3"><a href="#sec30">7.1 Requisitos del Sistema</a></li><li class="toc-h3"><a href="#sec31">7.2 Instalación Local</a></li><li class="toc-h3"><a href="#sec32">7.3 Despliegue con Docker</a></li><li class="toc-h3"><a href="#sec33">7.4 Variables de Entorno Recomendadas</a></li><li class="toc-h3"><a href="#sec34">7.5 Checklist de Despliegue</a></li><li class="toc-h3"><a href="#sec35">7.6 Registro de Cambios (Changelog)</a></li><li class="toc-h2"><a href="#sec36">8. Reporte de Calidad del Código</a></li><li class="toc-h3"><a href="#sec37">8.1 Análisis de Métricas</a></li><li class="toc-h3"><a href="#sec38">8.2 Funciones con Alta Complejidad Ciclomática</a></li><li class="toc-h3"><a href="#sec39">8.3 Recomendaciones</a></li><li class="toc-h3"><a href="#sec40">8.4 Errores de Análisis</a></li><li class="toc-h2"><a href="#sec41">9. Análisis de Datos del Proyecto</a></li><li class="toc-h3"><a href="#sec42">9.1 Tipos y Fuentes de Datos Detectados</a></li><li class="toc-h3"><a href="#sec43">9.2 Esquema de Data Warehouse Inferido</a></li><li class="toc-h3"><a href="#sec44">9.3 Reporte de Calidad de Datos</a></li><li class="toc-h3"><a href="#sec45">9.4 Minería de Datos Aplicada al Código</a></li><li class="toc-h3"><a href="#sec46">9.5 Pipeline ETL Utilizado</a></li></ul>
+  </div>
+  <div class="content"><h1 id="sec1">Documentación del Proyecto</h1>
+<blockquote>
+<p>Generado automáticamente por <strong>AutoDocs AI</strong> — 2026-10-16 21:12 UTC</p>
+</blockquote>
+<h2 id="sec2">Resumen Ejecutivo</h2>
+<p>Este proyecto está desarrollado principalmente en <strong>PHP</strong> y cuenta con
+540 archivos fuente, 100 funciones, 246 clases y
+0 endpoints de API documentados. El score de calidad del código es
+<strong>80/100</strong>.</p>
+<h2 id="sec3">Stack Tecnológico</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Lenguaje</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PHP</td>
+<td>512 archivos</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>3 archivos</td>
+</tr>
+<tr>
+<td>Shell</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>Batch</td>
+<td>3 archivos</td>
+</tr>
+<tr>
+<td>XML</td>
+<td>1 archivos</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>12 archivos</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>7 archivos</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td>1 archivos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec4">Estadísticas del Proyecto</h2>
+<table class="report-table">
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total de archivos</td>
+<td>540</td>
+</tr>
+<tr>
+<td>Funciones</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Clases</td>
+<td>246</td>
+</tr>
+<tr>
+<td>Endpoints API</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Score de calidad</td>
+<td>80/100</td>
+</tr>
+<tr>
+<td>Funciones documentadas</td>
+<td>0 / 100</td>
+</tr>
+<tr>
+<td>Clases documentadas</td>
+<td>0 / 246</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
+<h3 id="sec6">2.1 Estructura de Directorios</h3>
+<pre><code>proyecto/
+├── LaravelProject-main/
+</code></pre>
+<h3 id="sec7">2.2 Distribución por Capas</h3>
+<ul>
+<li><strong><code>LaravelProject-main/</code></strong> — 50 archivos [.editorconfig(1), .example(1), .websocket(1), .gitattributes(1), .gitignore(1), .sin ext(1), .json(3), .lock(1), .sh(1), .bat(3), .xml(1), .md(1), .js(1), .php(33)]</li>
+</ul>
+<h3 id="sec8">2.3 Distribución de Lenguajes</h3>
+<ul>
+<li>PHP: 512 archivos (95%)</li>
+<li>JavaScript: 12 archivos (2%)</li>
+<li>CSS: 7 archivos (1%)</li>
+<li>JSON: 3 archivos (1%)</li>
+<li>Batch: 3 archivos (1%)</li>
+<li>Shell: 1 archivos (0%)</li>
+<li>XML: 1 archivos (0%)</li>
+<li>HTML: 1 archivos (0%)</li>
+</ul>
+<h3 id="sec9">2.4 Diagrama de Infraestructura</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<h3 id="sec10">2.5 Diagrama de Casos de Uso</h3>
+<h3 id="sec11">2.6 Diagrama de Clases</h3>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<blockquote>
+<p>⚠️ <strong>Clases con información incompleta:</strong> Las siguientes clases aparecen sin métodos ni atributos documentados: <code>loader</code>, <code>Kernel</code>, <code>AutoBackup</code>, <code>BackupCreated</code>, <code>ModoConsultaSesionActualizada</code>, <code>NotificationSent</code>, <code>NuevaAsistenciaRegistrada</code>, <code>QrScannedEvent</code>, <code>Handler</code>, <code>Kernel</code> y 236 más. Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.</p>
+</blockquote>
+<h3 id="sec12">2.7 Patrones Detectados</h3>
+<ul>
+<li>No se detectaron patrones específicos</li>
+</ul>
+<h3 id="sec13">2.8 Insights de Arquitectura (IA)</h3>
+<p><strong>1. Patrones arquitectónicos probables</strong><br />
+- La alta cantidad de clases (246) y ausencia de endpoints sugiere una arquitectura monolítica tradicional, probablemente basada en <strong>MVC</strong> (Controladores, Modelos y Vistas).<br />
+- La presencia de JavaScript, CSS y HTML indica una capa de presentación integrada, típica de frameworks PHP como Laravel, Symfony o CodeIgniter.</p>
+<p><strong>2. Buenas prácticas detectadas</strong><br />
+- Uso intensivo de clases → indica <strong>orientación a objetos</strong> y separación de responsabilidades.<br />
+- Diversidad de formatos (JSON, XML) sugiere que el proyecto ya maneja <strong>intercambio de datos estructurados</strong>.<br />
+- Existencia de scripts Shell/Batch muestra automatización de despliegues o tareas de CI.</p>
+<p><strong>3. Áreas de mejora sugeridas</strong><br />
+- <strong>Endpoints REST/GraphQL</strong>: agregar una capa API para desacoplar front‑end y permitir consumo externo.<br />
+- <strong>Modularización</strong>: dividir el monolito en módulos o paquetes (por dominio) para reducir acoplamiento.<br />
+- <strong>Gestión de dependencias</strong>: usar Composer con versiones bloqueadas y revisar duplicados.<br />
+- <strong>Pruebas automatizadas</strong>: incorporar PHPUnit y pruebas de integración para los 100 funciones.</p>
+<p><strong>4. Complejidad del proyecto</strong><br />
+- 246 clases + 100 funciones → complejidad media‑alta; riesgo de <em>spaghetti code</em> si no hay una clara arquitectura de capas.<br />
+- Falta de endpoints indica que la lógica de negocio está fuertemente acoplada a la UI.</p>
+<p><strong>5. Recomendaciones de escalabilidad</strong><br />
+- <strong>Refactorizar a micro‑servicios</strong> o al</p>
+<hr />
+<h2 id="sec14">3. Documentación Técnica de Código</h2>
+<p>No se detectaron endpoints en este proyecto.</p>
+<hr />
+<h2 id="sec15">4. Documentación de Módulos y Clases</h2>
+<p>El proyecto contiene <strong>246 clases</strong> distribuidas en los siguientes módulos.</p>
+<div class="table-landscape"><h3 id="sec16">4.1 Tabla Resumen de Módulos</h3>
+<table class="report-table">
+<thead>
+<tr>
+<th>Clase</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Herencia</th>
+<th>Métodos</th>
+<th>Documentada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>loader</code></strong></td>
+<td><code>LaravelProject-main\artisan</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Kernel</code></strong></td>
+<td><code>LaravelProject-main\app\Console\Kernel.php</code></td>
+<td>0</td>
+<td>ConsoleKernel</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AutoBackup</code></strong></td>
+<td><code>LaravelProject-main\app\Console\Commands\AutoBackup.php</code></td>
+<td>0</td>
+<td>Command</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BackupCreated</code></strong></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ModoConsultaSesionActualizada</code></strong></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotificationSent</code></strong></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NuevaAsistenciaRegistrada</code></strong></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>QrScannedEvent</code></strong></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Handler</code></strong></td>
+<td><code>LaravelProject-main\app\Exceptions\Handler.php</code></td>
+<td>0</td>
+<td>ExceptionHandler</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Kernel</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Kernel.php</code></td>
+<td>0</td>
+<td>HttpKernel</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>names</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Kernel.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AdminAttendanceController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AdminAttendanceController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AlumnoClinicController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnoClinicController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AlumnosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoCirugiaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoEndodonciaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoEndodonciaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoPeriodontologiaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoProtesisFijaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisFijaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoProtesisRemovibleController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexosExpedienteController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexosExpedienteController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ApiAuthController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ApiAuthController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AsignacionExpedienteAlumnosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AsignacionExpedienteAlumnosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AsignacionMateriasController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AsignacionMateriasController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AsistenciaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AsistenciaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AuthController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AuthController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AutorizacionController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AutorizacionController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AvisoPrivacidadController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AvisoPrivacidadController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BackupController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\BackupController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BajaAlumnoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\BajaAlumnoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BiopeliculaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\BiopeliculaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BiopeliculaInController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\BiopeliculaInController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BiopsiaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\BiopsiaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CartaConformidadController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\CartaConformidadController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CesionPacientesController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\CesionPacientesController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CitasController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\CitasController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ClinicaAdmisionController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ClinicaAdmisionController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConformidadAdultoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ConformidadAdultoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConformidadPediatricoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ConformidadPediatricoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConsentimientoAdultoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ConsentimientoAdultoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConsultaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ConsultaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ContactoEmergenciaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ContactoEmergenciaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Controller</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\Controller.php</code></td>
+<td>0</td>
+<td>BaseController</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CoordinadorController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\CoordinadorController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CPediatricoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\CPediatricoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DocumentosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\DocumentosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DocumentosPacientesController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\DocumentosPacientesController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EstadosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\EstadosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ExpedienteParcialAlumnoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ExpedienteParcialAlumnoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ExpedientePersonalDocenteController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ExpedientePersonalDocenteController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>FotografiasPacientesController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\FotografiasPacientesController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>GoogleCalendarController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\GoogleCalendarController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>GruposController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\GruposController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>IcdasController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ICDASController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ImportarAlumnosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ImportarAlumnosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>InicioController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\InicioController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MaestroAttendanceController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\MaestroAttendanceController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MaestrosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\MaestrosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MunicipiosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\MunicipiosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NavigationController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\NavigationController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotaAnestesicaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\NotaAnestesicaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotasEvolucionController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\NotasEvolucionController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotasEvolucionPediatricoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\NotasEvolucionPediatricoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotificationController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\NotificationController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OclusionController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\OclusionController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OdontogereatriaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\OdontogereatriaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OdontogramaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\OdontogramaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OdontogramaIController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\OdontogramaIController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OdontologiaEsteticaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\OdontologiaEsteticaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PacientesController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\PacientesController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PagoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\PagoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PasswordResetQrController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\PasswordResetQrController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PdfTemplateController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\PdfTemplateController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PeriodontogramaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\PeriodontogramaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PreventivaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\PreventivaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ProtesisTotalController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ProtesisTotalController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RadiografiaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\RadiografiaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RadiografiasPacientesController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\RadiografiasPacientesController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RecetaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\RecetaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RecursoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\RecursoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ReferenciaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ReferenciaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RegistroTratamientoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\RegistroTratamientoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ResumenTratamientosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\ResumenTratamientosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SemesterTransitionController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SemesterTransitionController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudAdultoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SolicitudAdultoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudFirmaEstudianteController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SolicitudFirmaEstudianteController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudFirmaFOCDController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SolicitudFirmaFOCDController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudTratamientoController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SolicitudTratamientoController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SoporteDeviceController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SoporteDeviceController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SupervisionModoConsultaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\SupervisionModoConsultaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TelefonosPacientesController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\TelefonosPacientesController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TerminosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\TerminosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientoIndividualOperatoriaController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\TratamientoIndividualOperatoriaController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\TratamientosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientoSemestreController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\TratamientoSemestreController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>UsuariosController</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Controllers\UsuariosController.php</code></td>
+<td>0</td>
+<td>Controller</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AdminIsAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\AdminIsAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AlumnoIsAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\AlumnoIsAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AlumnoOrAdmin</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\AlumnoOrAdmin.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Authenticate</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\Authenticate.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BackupAuthentication</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\BackupAuthentication.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CheckClinicAccess</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\CheckClinicAccess.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ClinicaAdminIsAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\ClinicaAdminIsAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EncryptCookies</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\EncryptCookies.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EnsureActiveAlumnoSession</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\EnsureActiveAlumnoSession.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EnsureModoConsultaActivo</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\EnsureModoConsultaActivo.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ForceHttps</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\ForceHttps.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>IsAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\IsAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MaestroIsAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\MaestroIsAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MaestroOrAdmin</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\MaestroOrAdmin.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ModoConsulta</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\ModoConsulta.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NavigationStack</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\NavigationStack.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PreventRequestsDuringMaintenance</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\PreventRequestsDuringMaintenance.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RadiologoIsAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\RadiologoIsAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RedirectIfAuthenticated</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\RedirectIfAuthenticated.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RegistrarAccesoModoConsulta</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\RegistrarAccesoModoConsulta.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TrimStrings</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\TrimStrings.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TrustHosts</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\TrustHosts.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TrustProxies</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\TrustProxies.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ValidateSignature</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\ValidateSignature.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>VerifyCsrfToken</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Middleware\VerifyCsrfToken.php</code></td>
+<td>0</td>
+<td>Middleware</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>GuardarModoConsultaRequest</code></strong></td>
+<td><code>LaravelProject-main\app\Http\Requests\GuardarModoConsultaRequest.php</code></td>
+<td>0</td>
+<td>FormRequest</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Administrativos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Administrativos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AlumnoMaestroParcial</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AlumnoMaestroParcial.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Alumnos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Alumnos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoCirugia</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AnexoCirugia.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoPeriodontologia</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AnexoPeriodontologia.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoProtesisFija</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AnexoProtesisFija.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexoProtesisRemovible</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AnexoProtesisRemovible.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AnexosExpediente</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AnexosExpediente.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AsignacionExpedienteAlumno</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AsignacionExpedienteAlumno.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AsignacionMaterias</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AsignacionMaterias.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Asistencia</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Asistencia.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Autorizacion</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Autorizacion.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AvisoPrivacidad</code></strong></td>
+<td><code>LaravelProject-main\app\Models\AvisoPrivacidad.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Biopelicula</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Biopelicula.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BiopeliculaEvaluacion</code></strong></td>
+<td><code>LaravelProject-main\app\Models\BiopeliculaEvaluacion.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Biopsia</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Biopsia.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CartaConformidad</code></strong></td>
+<td><code>LaravelProject-main\app\Models\CartaConformidad.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CesionPaciente</code></strong></td>
+<td><code>LaravelProject-main\app\Models\CesionPaciente.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Citas</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Citas.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ClinicaAdmision</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ClinicaAdmision.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Clinicas</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Clinicas.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConfiguracionSemestre</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ConfiguracionSemestre.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConfiguracionSistema</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ConfiguracionSistema.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Consentimiento</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Consentimiento.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ConsultaActiva</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ConsultaActiva.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ContactoEmergenciaPaciente</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ContactoEmergenciaPaciente.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CuotasTratamiento</code></strong></td>
+<td><code>LaravelProject-main\app\Models\CuotasTratamiento.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DeviceResetLog</code></strong></td>
+<td><code>LaravelProject-main\app\Models\DeviceResetLog.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DocumentosPacientes</code></strong></td>
+<td><code>LaravelProject-main\app\Models\DocumentosPacientes.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Estados</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Estados.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EvaluacionSupervision</code></strong></td>
+<td><code>LaravelProject-main\app\Models\EvaluacionSupervision.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Expediente</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Expediente.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ExpedienteParcialAlumno</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ExpedienteParcialAlumno.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ExpedientePersonalDocente</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ExpedientePersonalDocente.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>FirmaReferenciaPaciente</code></strong></td>
+<td><code>LaravelProject-main\app\Models\FirmaReferenciaPaciente.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>FOCD024Endodoncia</code></strong></td>
+<td><code>LaravelProject-main\app\Models\FOCD024Endodoncia.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>FotografiasPacientes</code></strong></td>
+<td><code>LaravelProject-main\app\Models\FotografiasPacientes.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>GrupoMaestro</code></strong></td>
+<td><code>LaravelProject-main\app\Models\GrupoMaestro.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Grupos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Grupos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>HistoriaClinicaGeneral</code></strong></td>
+<td><code>LaravelProject-main\app\Models\HistoriaClinicaGeneral.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>HistoriaClinicaPediatrico</code></strong></td>
+<td><code>LaravelProject-main\app\Models\HistoriaClinicaPediatrico.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>HorarioMaestro</code></strong></td>
+<td><code>LaravelProject-main\app\Models\HorarioMaestro.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Icdas</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Icdas.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Maestros</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Maestros.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Materias</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Materias.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MateriaSemestre</code></strong></td>
+<td><code>LaravelProject-main\app\Models\MateriaSemestre.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Medicamentos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Medicamentos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ModoConsulta</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ModoConsulta.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ModoConsultaAcceso</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ModoConsultaAcceso.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Municipios</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Municipios.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotaAnestesica</code></strong></td>
+<td><code>LaravelProject-main\app\Models\NotaAnestesica.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotaEvolucion</code></strong></td>
+<td><code>LaravelProject-main\app\Models\NotaEvolucion.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotaInicial</code></strong></td>
+<td><code>LaravelProject-main\app\Models\NotaInicial.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Notification</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Notification.php</code></td>
+<td>0</td>
+<td>DatabaseNotification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Oclusion</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Oclusion.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Odontogereatria</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Odontogereatria.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Odontograma</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Odontograma.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OdontologiaEsteticaDato</code></strong></td>
+<td><code>LaravelProject-main\app\Models\OdontologiaEsteticaDato.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Pacientes</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Pacientes.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PacienteSinAsignar</code></strong></td>
+<td><code>LaravelProject-main\app\Models\PacienteSinAsignar.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Padecimientos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Padecimientos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Pago</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Pago.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PaseLista</code></strong></td>
+<td><code>LaravelProject-main\app\Models\PaseLista.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PasswordResetQr</code></strong></td>
+<td><code>LaravelProject-main\app\Models\PasswordResetQr.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PeriodoEvaluacion</code></strong></td>
+<td><code>LaravelProject-main\app\Models\PeriodoEvaluacion.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Periodontograma</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Periodontograma.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Preventiva</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Preventiva.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ProtesisTotal</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ProtesisTotal.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>QrToken</code></strong></td>
+<td><code>LaravelProject-main\app\Models\QrToken.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RadiografiasPacientes</code></strong></td>
+<td><code>LaravelProject-main\app\Models\RadiografiasPacientes.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Receta</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Receta.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Recurso</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Recurso.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Referencia</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Referencia.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RegistroEvaluacionParcial</code></strong></td>
+<td><code>LaravelProject-main\app\Models\RegistroEvaluacionParcial.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ResumenTratamientos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\ResumenTratamientos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Semestre</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Semestre.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudAtencion</code></strong></td>
+<td><code>LaravelProject-main\app\Models\SolicitudAtencion.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudTratamiento</code></strong></td>
+<td><code>LaravelProject-main\app\Models\SolicitudTratamiento.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TelefonosPacientes</code></strong></td>
+<td><code>LaravelProject-main\app\Models\TelefonosPacientes.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientoDetalle</code></strong></td>
+<td><code>LaravelProject-main\app\Models\TratamientoDetalle.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientoExpedienteMaestro</code></strong></td>
+<td><code>LaravelProject-main\app\Models\TratamientoExpedienteMaestro.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Tratamientos</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Tratamientos.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientoSemestre</code></strong></td>
+<td><code>LaravelProject-main\app\Models\TratamientoSemestre.php</code></td>
+<td>0</td>
+<td>Model</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>User</code></strong></td>
+<td><code>LaravelProject-main\app\Models\User.php</code></td>
+<td>0</td>
+<td>Authenticatable</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>Usuarios</code></strong></td>
+<td><code>LaravelProject-main\app\Models\Usuarios.php</code></td>
+<td>0</td>
+<td>Authenticatable</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CesionPacienteNotificacion</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\CesionPacienteNotificacion.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>ClinicaAdmisionNotificacion</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\ClinicaAdmisionNotificacion.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>CredencialesUsuario</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\CredencialesUsuario.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DocumentoFirmado</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\DocumentoFirmado.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DocumentoPorFirmar</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\DocumentoPorFirmar.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>FirmaEstudianteCompletada</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\FirmaEstudianteCompletada.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>HistoriaClinicaRechazada</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\HistoriaClinicaRechazada.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RadiografiaAsignada</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\RadiografiaAsignada.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RespuestaDocumento</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\RespuestaDocumento.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudFirmaEstudiante</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\SolicitudFirmaEstudiante.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudFirmaEvaluacion</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\SolicitudFirmaEvaluacion.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudFirmaFOCD</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\SolicitudFirmaFOCD.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SolicitudTratamientoNotification</code></strong></td>
+<td><code>LaravelProject-main\app\Notifications\SolicitudTratamientoNotification.php</code></td>
+<td>0</td>
+<td>Notification</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AppServiceProvider</code></strong></td>
+<td><code>LaravelProject-main\app\Providers\AppServiceProvider.php</code></td>
+<td>0</td>
+<td>ServiceProvider</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AuthServiceProvider</code></strong></td>
+<td><code>LaravelProject-main\app\Providers\AuthServiceProvider.php</code></td>
+<td>0</td>
+<td>ServiceProvider</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BroadcastServiceProvider</code></strong></td>
+<td><code>LaravelProject-main\app\Providers\BroadcastServiceProvider.php</code></td>
+<td>0</td>
+<td>ServiceProvider</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EventServiceProvider</code></strong></td>
+<td><code>LaravelProject-main\app\Providers\EventServiceProvider.php</code></td>
+<td>0</td>
+<td>ServiceProvider</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>RouteServiceProvider</code></strong></td>
+<td><code>LaravelProject-main\app\Providers\RouteServiceProvider.php</code></td>
+<td>0</td>
+<td>ServiceProvider</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>BackupService</code></strong></td>
+<td><code>LaravelProject-main\app\Services\BackupService.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EvaluacionFOCD032Service</code></strong></td>
+<td><code>LaravelProject-main\app\Services\EvaluacionFOCD032Service.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>GoogleCalendarService</code></strong></td>
+<td><code>LaravelProject-main\app\Services\GoogleCalendarService.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>NotificationService</code></strong></td>
+<td><code>LaravelProject-main\app\Services\NotificationService.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>OrthancService</code></strong></td>
+<td><code>LaravelProject-main\app\Services\OrthancService.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>aliases</code></strong></td>
+<td><code>LaravelProject-main\config\app.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>is</code></strong></td>
+<td><code>LaravelProject-main\config\websockets.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>handles</code></strong></td>
+<td><code>LaravelProject-main\config\websockets.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>should</code></strong></td>
+<td><code>LaravelProject-main\config\websockets.php</code></td>
+<td>0</td>
+<td>object</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>UserFactory</code></strong></td>
+<td><code>LaravelProject-main\database\factories\UserFactory.php</code></td>
+<td>0</td>
+<td>Factory</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AlumnosSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\AlumnosSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>AsignarPacientesDecimoSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\AsignarPacientesDecimoSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>DatabaseSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\DatabaseSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>EstadosSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\EstadosSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>GruposSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\GruposSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MaestrosSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\MaestrosSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MateriasSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\MateriasSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>MunicipiosSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\MunicipiosSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>PacientesSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\PacientesSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>TratamientosSemestreSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\seeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>SemestreSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\SemestreSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td><strong><code>UsuariosSeeder</code></strong></td>
+<td><code>LaravelProject-main\database\seeders\UsuariosSeeder.php</code></td>
+<td>0</td>
+<td>Seeder</td>
+<td>0</td>
+<td>❌ No</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="sec17">4.2 Detalle de Clases</h3>
+<h4><code>loader</code></h4>
+<blockquote>
+<p>Aquí tienes una explicación sencilla y clara de la clase <code>loader</code> (o más precisamente, del archivo <code>artisan</code> que la contiene), diseñada para alguien sin conocimientos técnicos.</p>
+</blockquote>
+<h3 id="sec18">1. ¿Cuál es su propósito en lenguaje simple?</h3>
+<p>Imagina que tu aplicación web es una gran casa bien organizada. Para hacer cualquier tarea en esa casa (como limpiar, pintar o cambiar una ventana), no puedes simplemente entrar y empezar a trabajar; necesitas un <strong>manual de instrucciones</strong> o un <strong>centro de control</strong> que te diga exactamente qué pasos seguir y en qué orden.</p>
+<p>La clase <code>loader</code> (asociada al archivo <code>artisan</code>) es ese <strong>centro de control</strong>. Su propósito es ser la "puerta de entrada" para todas las tareas automáticas o administrativas que necesitas realizar en tu proyecto, sin tener que entrar dentro de la web pública o escribir códigos complejos manualmente.</p>
+<h3 id="sec19">2. ¿Qué representa esta clase en el sistema? (Analogía del mundo real)</h3>
+<p>Piensa en esto como el <strong>panel de control de una fábrica</strong>.</p>
+<ul>
+<li><strong>La fábrica</strong> es tu aplicación web.</li>
+<li><strong>Los trabajadores</strong> son las diferentes partes del código que hacen funcionar la web.</li>
+<li><strong>El panel de control (<code>artisan</code>)</strong> es la sala de botones. No es la producción en sí, sino el lugar desde donde el gerente (el programador) dice: "Hoy limpiamos el almac</li>
+</ul>
+<hr />
+<h4><code>Kernel</code></h4>
+<blockquote>
+<p><strong>Clase : Kernel</strong><br />
+<em>Archivo : <code>LaravelProject-main\app\Console\Kernel.php</code></em><br />
+<em>Hereda de : <code>ConsoleKernel</code></em>  </p>
+</blockquote>
+<hr />
+<h3 id="sec20">1. Propósito de la clase (en palabras muy simples)</h3>
+<p>Imagina que tu aplicación es una oficina con muchas tareas que deben hacerse a ciertas horas o cuando alguien lo solicita desde la línea de comandos (una especie de “consola” de texto). El <strong>Kernel</strong> es el encargado de organizar y lanzar esas tareas. Es como el “jefe de agenda” que decide cuándo y cómo se ejecutan los trabajos programados.</p>
+<hr />
+<h3 id="sec21">2. Qué representa esta clase en el sistema (una analogía)</h3>
+<p>Piensa en una <strong>central de correos</strong>:<br />
+- <strong>Los paquetes</strong> son los <em>comandos</em> o <em>tareas</em> que tu aplicación necesita ejecutar.<br />
+- <strong>El personal de la central</strong> son los <em>módulos</em> que saben cómo procesar cada paquete.<br />
+- <strong>El Kernel</strong> es el <em>director de la central</em> que recibe los paquetes, los clasifica y los entrega al personal correcto en el momento preciso.  </p>
+<p>En otras palabras, el Kernel es el “cerebro” que controla los</p>
+<hr />
+<h4><code>AutoBackup</code></h4>
+<blockquote>
+<p><strong>Descripción sencilla de la clase <code>AutoBackup</code></strong></p>
+</blockquote>
+<hr />
+<h3 id="sec22">1. Propósito de la clase (en lenguaje muy simple)</h3>
+<p><code>AutoBackup</code> es una “orden” que le dice al programa que haga una copia de seguridad automática.<br />
+En otras palabras, su trabajo es guardar una réplica de los datos importantes del proyecto, para que si algo sale mal (un error, una caída del servidor, etc.) siempre haya una versión guardada que pueda restaurarse.</p>
+<hr />
+<h3 id="sec23">2. Qué representa esta clase en el sistema (analogía del mundo real)</h3>
+<p>Imagina que tienes una caja fuerte donde guardas tus documentos más valiosos (facturas, fotos, contratos). Cada cierto tiempo, una persona de confianza abre la caja, saca una fotocopia de todo y la guarda en otro lugar seguro.  </p>
+<p><code>AutoBackup</code> es esa “persona de confianza” dentro del software: cada vez que se le indica, crea una “fotocopia” (copia de seguridad) de los archivos y/o la base de datos del proyecto y la guarda en un sitio seguro.</p>
+<hr />
+<hr />
+<h4><code>BackupCreated</code></h4>
+<hr />
+<h4><code>ModoConsultaSesionActualizada</code></h4>
+<hr />
+<h4><code>NotificationSent</code></h4>
+<hr />
+<h4><code>NuevaAsistenciaRegistrada</code></h4>
+<hr />
+<h4><code>QrScannedEvent</code></h4>
+<hr />
+<h4><code>Handler</code></h4>
+<hr />
+<h4><code>Kernel</code></h4>
+<hr />
+<h4><code>names</code></h4>
+<hr />
+<h4><code>AdminAttendanceController</code></h4>
+<hr />
+<h4><code>AlumnoClinicController</code></h4>
+<hr />
+<h4><code>AlumnosController</code></h4>
+<hr />
+<h4><code>AnexoCirugiaController</code></h4>
+<hr />
+<h4><code>AnexoEndodonciaController</code></h4>
+<hr />
+<h4><code>AnexoPeriodontologiaController</code></h4>
+<hr />
+<h4><code>AnexoProtesisFijaController</code></h4>
+<hr />
+<h4><code>AnexoProtesisRemovibleController</code></h4>
+<hr />
+<h4><code>AnexosExpedienteController</code></h4>
+<hr />
+<h4><code>ApiAuthController</code></h4>
+<hr />
+<h4><code>AsignacionExpedienteAlumnosController</code></h4>
+<hr />
+<h4><code>AsignacionMateriasController</code></h4>
+<hr />
+<h4><code>AsistenciaController</code></h4>
+<hr />
+<h4><code>AuthController</code></h4>
+<hr />
+<h4><code>AutorizacionController</code></h4>
+<hr />
+<h4><code>AvisoPrivacidadController</code></h4>
+<hr />
+<h4><code>BackupController</code></h4>
+<hr />
+<h4><code>BajaAlumnoController</code></h4>
+<hr />
+<h4><code>BiopeliculaController</code></h4>
+<hr />
+<h4><code>BiopeliculaInController</code></h4>
+<hr />
+<h4><code>BiopsiaController</code></h4>
+<hr />
+<h4><code>CartaConformidadController</code></h4>
+<hr />
+<h4><code>CesionPacientesController</code></h4>
+<hr />
+<h4><code>CitasController</code></h4>
+<hr />
+<h4><code>ClinicaAdmisionController</code></h4>
+<hr />
+<h4><code>ConformidadAdultoController</code></h4>
+<hr />
+<h4><code>ConformidadPediatricoController</code></h4>
+<hr />
+<h4><code>ConsentimientoAdultoController</code></h4>
+<hr />
+<h4><code>ConsultaController</code></h4>
+<hr />
+<h4><code>ContactoEmergenciaController</code></h4>
+<hr />
+<h4><code>Controller</code></h4>
+<hr />
+<h4><code>CoordinadorController</code></h4>
+<hr />
+<h4><code>CPediatricoController</code></h4>
+<hr />
+<h4><code>DocumentosController</code></h4>
+<hr />
+<h4><code>DocumentosPacientesController</code></h4>
+<hr />
+<h4><code>EstadosController</code></h4>
+<hr />
+<h4><code>ExpedienteParcialAlumnoController</code></h4>
+<hr />
+<h4><code>ExpedientePersonalDocenteController</code></h4>
+<hr />
+<h4><code>FotografiasPacientesController</code></h4>
+<hr />
+<h4><code>GoogleCalendarController</code></h4>
+<hr />
+<h4><code>GruposController</code></h4>
+<hr />
+<h4><code>IcdasController</code></h4>
+<hr />
+<h4><code>ImportarAlumnosController</code></h4>
+<hr />
+<h4><code>InicioController</code></h4>
+<hr />
+<h4><code>MaestroAttendanceController</code></h4>
+<hr />
+<h4><code>MaestrosController</code></h4>
+<hr />
+<h4><code>MunicipiosController</code></h4>
+<hr />
+<h4><code>NavigationController</code></h4>
+<hr />
+<h4><code>NotaAnestesicaController</code></h4>
+<hr />
+<h4><code>NotasEvolucionController</code></h4>
+<hr />
+<h4><code>NotasEvolucionPediatricoController</code></h4>
+<hr />
+<h4><code>NotificationController</code></h4>
+<hr />
+<h4><code>OclusionController</code></h4>
+<hr />
+<h4><code>OdontogereatriaController</code></h4>
+<hr />
+<h4><code>OdontogramaController</code></h4>
+<hr />
+<h4><code>OdontogramaIController</code></h4>
+<hr />
+<h4><code>OdontologiaEsteticaController</code></h4>
+<hr />
+<h4><code>PacientesController</code></h4>
+<hr />
+<h4><code>PagoController</code></h4>
+<hr />
+<h4><code>PasswordResetQrController</code></h4>
+<hr />
+<h4><code>PdfTemplateController</code></h4>
+<hr />
+<h4><code>PeriodontogramaController</code></h4>
+<hr />
+<h4><code>PreventivaController</code></h4>
+<hr />
+<h4><code>ProtesisTotalController</code></h4>
+<hr />
+<h4><code>RadiografiaController</code></h4>
+<hr />
+<h4><code>RadiografiasPacientesController</code></h4>
+<hr />
+<h4><code>RecetaController</code></h4>
+<hr />
+<h4><code>RecursoController</code></h4>
+<hr />
+<h4><code>ReferenciaController</code></h4>
+<hr />
+<h4><code>RegistroTratamientoController</code></h4>
+<hr />
+<h4><code>ResumenTratamientosController</code></h4>
+<hr />
+<h4><code>SemesterTransitionController</code></h4>
+<hr />
+<h4><code>SolicitudAdultoController</code></h4>
+<hr />
+<h4><code>SolicitudFirmaEstudianteController</code></h4>
+<hr />
+<h4><code>SolicitudFirmaFOCDController</code></h4>
+<hr />
+<h4><code>SolicitudTratamientoController</code></h4>
+<hr />
+<h4><code>SoporteDeviceController</code></h4>
+<hr />
+<h4><code>SupervisionModoConsultaController</code></h4>
+<hr />
+<h4><code>TelefonosPacientesController</code></h4>
+<hr />
+<h4><code>TerminosController</code></h4>
+<hr />
+<h4><code>TratamientoIndividualOperatoriaController</code></h4>
+<hr />
+<h4><code>TratamientosController</code></h4>
+<hr />
+<h4><code>TratamientoSemestreController</code></h4>
+<hr />
+<h4><code>UsuariosController</code></h4>
+<hr />
+<h4><code>AdminIsAuthenticated</code></h4>
+<hr />
+<h4><code>AlumnoIsAuthenticated</code></h4>
+<hr />
+<h4><code>AlumnoOrAdmin</code></h4>
+<hr />
+<h4><code>Authenticate</code></h4>
+<hr />
+<h4><code>BackupAuthentication</code></h4>
+<hr />
+<h4><code>CheckClinicAccess</code></h4>
+<hr />
+<h4><code>ClinicaAdminIsAuthenticated</code></h4>
+<hr />
+<h4><code>EncryptCookies</code></h4>
+<hr />
+<h4><code>EnsureActiveAlumnoSession</code></h4>
+<hr />
+<h4><code>EnsureModoConsultaActivo</code></h4>
+<hr />
+<h4><code>ForceHttps</code></h4>
+<hr />
+<h4><code>IsAuthenticated</code></h4>
+<hr />
+<h4><code>MaestroIsAuthenticated</code></h4>
+<hr />
+<h4><code>MaestroOrAdmin</code></h4>
+<hr />
+<h4><code>ModoConsulta</code></h4>
+<hr />
+<h4><code>NavigationStack</code></h4>
+<hr />
+<h4><code>PreventRequestsDuringMaintenance</code></h4>
+<hr />
+<h4><code>RadiologoIsAuthenticated</code></h4>
+<hr />
+<h4><code>RedirectIfAuthenticated</code></h4>
+<hr />
+<h4><code>RegistrarAccesoModoConsulta</code></h4>
+<hr />
+<h4><code>TrimStrings</code></h4>
+<hr />
+<h4><code>TrustHosts</code></h4>
+<hr />
+<h4><code>TrustProxies</code></h4>
+<hr />
+<h4><code>ValidateSignature</code></h4>
+<hr />
+<h4><code>VerifyCsrfToken</code></h4>
+<hr />
+<h4><code>GuardarModoConsultaRequest</code></h4>
+<hr />
+<h4><code>Administrativos</code></h4>
+<hr />
+<h4><code>AlumnoMaestroParcial</code></h4>
+<hr />
+<h4><code>Alumnos</code></h4>
+<hr />
+<h4><code>AnexoCirugia</code></h4>
+<hr />
+<h4><code>AnexoPeriodontologia</code></h4>
+<hr />
+<h4><code>AnexoProtesisFija</code></h4>
+<hr />
+<h4><code>AnexoProtesisRemovible</code></h4>
+<hr />
+<h4><code>AnexosExpediente</code></h4>
+<hr />
+<h4><code>AsignacionExpedienteAlumno</code></h4>
+<hr />
+<h4><code>AsignacionMaterias</code></h4>
+<hr />
+<h4><code>Asistencia</code></h4>
+<hr />
+<h4><code>Autorizacion</code></h4>
+<hr />
+<h4><code>AvisoPrivacidad</code></h4>
+<hr />
+<h4><code>Biopelicula</code></h4>
+<hr />
+<h4><code>BiopeliculaEvaluacion</code></h4>
+<hr />
+<h4><code>Biopsia</code></h4>
+<hr />
+<h4><code>CartaConformidad</code></h4>
+<hr />
+<h4><code>CesionPaciente</code></h4>
+<hr />
+<h4><code>Citas</code></h4>
+<hr />
+<h4><code>ClinicaAdmision</code></h4>
+<hr />
+<h4><code>Clinicas</code></h4>
+<hr />
+<h4><code>ConfiguracionSemestre</code></h4>
+<hr />
+<h4><code>ConfiguracionSistema</code></h4>
+<hr />
+<h4><code>Consentimiento</code></h4>
+<hr />
+<h4><code>ConsultaActiva</code></h4>
+<hr />
+<h4><code>ContactoEmergenciaPaciente</code></h4>
+<hr />
+<h4><code>CuotasTratamiento</code></h4>
+<hr />
+<h4><code>DeviceResetLog</code></h4>
+<hr />
+<h4><code>DocumentosPacientes</code></h4>
+<hr />
+<h4><code>Estados</code></h4>
+<hr />
+<h4><code>EvaluacionSupervision</code></h4>
+<hr />
+<h4><code>Expediente</code></h4>
+<hr />
+<h4><code>ExpedienteParcialAlumno</code></h4>
+<hr />
+<h4><code>ExpedientePersonalDocente</code></h4>
+<hr />
+<h4><code>FirmaReferenciaPaciente</code></h4>
+<hr />
+<h4><code>FOCD024Endodoncia</code></h4>
+<hr />
+<h4><code>FotografiasPacientes</code></h4>
+<hr />
+<h4><code>GrupoMaestro</code></h4>
+<hr />
+<h4><code>Grupos</code></h4>
+<hr />
+<h4><code>HistoriaClinicaGeneral</code></h4>
+<hr />
+<h4><code>HistoriaClinicaPediatrico</code></h4>
+<hr />
+<h4><code>HorarioMaestro</code></h4>
+<hr />
+<h4><code>Icdas</code></h4>
+<hr />
+<h4><code>Maestros</code></h4>
+<hr />
+<h4><code>Materias</code></h4>
+<hr />
+<h4><code>MateriaSemestre</code></h4>
+<hr />
+<h4><code>Medicamentos</code></h4>
+<hr />
+<h4><code>ModoConsulta</code></h4>
+<hr />
+<h4><code>ModoConsultaAcceso</code></h4>
+<hr />
+<h4><code>Municipios</code></h4>
+<hr />
+<h4><code>NotaAnestesica</code></h4>
+<hr />
+<h4><code>NotaEvolucion</code></h4>
+<hr />
+<h4><code>NotaInicial</code></h4>
+<hr />
+<h4><code>Notification</code></h4>
+<hr />
+<h4><code>Oclusion</code></h4>
+<hr />
+<h4><code>Odontogereatria</code></h4>
+<hr />
+<h4><code>Odontograma</code></h4>
+<hr />
+<h4><code>OdontologiaEsteticaDato</code></h4>
+<hr />
+<h4><code>Pacientes</code></h4>
+<hr />
+<h4><code>PacienteSinAsignar</code></h4>
+<hr />
+<h4><code>Padecimientos</code></h4>
+<hr />
+<h4><code>Pago</code></h4>
+<hr />
+<h4><code>PaseLista</code></h4>
+<hr />
+<h4><code>PasswordResetQr</code></h4>
+<hr />
+<h4><code>PeriodoEvaluacion</code></h4>
+<hr />
+<h4><code>Periodontograma</code></h4>
+<hr />
+<h4><code>Preventiva</code></h4>
+<hr />
+<h4><code>ProtesisTotal</code></h4>
+<hr />
+<h4><code>QrToken</code></h4>
+<hr />
+<h4><code>RadiografiasPacientes</code></h4>
+<hr />
+<h4><code>Receta</code></h4>
+<hr />
+<h4><code>Recurso</code></h4>
+<hr />
+<h4><code>Referencia</code></h4>
+<hr />
+<h4><code>RegistroEvaluacionParcial</code></h4>
+<hr />
+<h4><code>ResumenTratamientos</code></h4>
+<hr />
+<h4><code>Semestre</code></h4>
+<hr />
+<h4><code>SolicitudAtencion</code></h4>
+<hr />
+<h4><code>SolicitudTratamiento</code></h4>
+<hr />
+<h4><code>TelefonosPacientes</code></h4>
+<hr />
+<h4><code>TratamientoDetalle</code></h4>
+<hr />
+<h4><code>TratamientoExpedienteMaestro</code></h4>
+<hr />
+<h4><code>Tratamientos</code></h4>
+<hr />
+<h4><code>TratamientoSemestre</code></h4>
+<hr />
+<h4><code>User</code></h4>
+<hr />
+<h4><code>Usuarios</code></h4>
+<hr />
+<h4><code>CesionPacienteNotificacion</code></h4>
+<hr />
+<h4><code>ClinicaAdmisionNotificacion</code></h4>
+<hr />
+<h4><code>CredencialesUsuario</code></h4>
+<hr />
+<h4><code>DocumentoFirmado</code></h4>
+<hr />
+<h4><code>DocumentoPorFirmar</code></h4>
+<hr />
+<h4><code>FirmaEstudianteCompletada</code></h4>
+<hr />
+<h4><code>HistoriaClinicaRechazada</code></h4>
+<hr />
+<h4><code>RadiografiaAsignada</code></h4>
+<hr />
+<h4><code>RespuestaDocumento</code></h4>
+<hr />
+<h4><code>SolicitudFirmaEstudiante</code></h4>
+<hr />
+<h4><code>SolicitudFirmaEvaluacion</code></h4>
+<hr />
+<h4><code>SolicitudFirmaFOCD</code></h4>
+<hr />
+<h4><code>SolicitudTratamientoNotification</code></h4>
+<hr />
+<h4><code>AppServiceProvider</code></h4>
+<hr />
+<h4><code>AuthServiceProvider</code></h4>
+<hr />
+<h4><code>BroadcastServiceProvider</code></h4>
+<hr />
+<h4><code>EventServiceProvider</code></h4>
+<hr />
+<h4><code>RouteServiceProvider</code></h4>
+<hr />
+<h4><code>BackupService</code></h4>
+<hr />
+<h4><code>EvaluacionFOCD032Service</code></h4>
+<hr />
+<h4><code>GoogleCalendarService</code></h4>
+<hr />
+<h4><code>NotificationService</code></h4>
+<hr />
+<h4><code>OrthancService</code></h4>
+<hr />
+<h4><code>aliases</code></h4>
+<hr />
+<h4><code>is</code></h4>
+<hr />
+<h4><code>handles</code></h4>
+<hr />
+<h4><code>should</code></h4>
+<hr />
+<h4><code>UserFactory</code></h4>
+<hr />
+<h4><code>AlumnosSeeder</code></h4>
+<hr />
+<h4><code>AsignarPacientesDecimoSeeder</code></h4>
+<hr />
+<h4><code>DatabaseSeeder</code></h4>
+<hr />
+<h4><code>EstadosSeeder</code></h4>
+<hr />
+<h4><code>GruposSeeder</code></h4>
+<hr />
+<h4><code>MaestrosSeeder</code></h4>
+<hr />
+<h4><code>MateriasSeeder</code></h4>
+<hr />
+<h4><code>MunicipiosSeeder</code></h4>
+<hr />
+<h4><code>PacientesSeeder</code></h4>
+<hr />
+<h4><code>TratamientosSemestreSeeder</code></h4>
+<hr />
+<h4><code>SemestreSeeder</code></h4>
+<hr />
+<h4><code>UsuariosSeeder</code></h4>
+<hr />
+<hr />
+<h2 id="sec24">5. Documentación de Funciones</h2>
+<p>El proyecto contiene <strong>100 funciones</strong> distribuidas en <strong>21 módulos</strong>.</p>
+<div class="table-landscape"><h3 id="sec25">5.1 Resumen por Módulo</h3>
+<table class="report-table">
+<thead>
+<tr>
+<th>Módulo</th>
+<th>Funciones</th>
+<th>Complejidad Prom.</th>
+<th>Documentadas</th>
+<th>Async</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LaravelProject-main\app\Console\Kernel.php</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Console\Commands\AutoBackup.php</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Exceptions\Handler.php</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AdminAttendanceController.php</code></td>
+<td>9</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnoClinicController.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></td>
+<td>20</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></td>
+<td>7</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoEndodonciaController.php</code></td>
+<td>6</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisFijaController.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexosExpedienteController.php</code></td>
+<td>11</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\ApiAuthController.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AsignacionExpedienteAlumnosController.php</code></td>
+<td>2</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AsignacionMateriasController.php</code></td>
+<td>1</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AsistenciaController.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="sec26">5.2 Detalle por Módulo</h3>
+<h4>Módulo: <code>LaravelProject-main\app\Console\Kernel.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>schedule</code></td>
+<td><code>Schedule $schedule</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>commands</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Console\Commands\AutoBackup.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>handle</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Events\BackupCreated.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>backup</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>int $grupoId, string $evento, ?string $horaFin = null</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Events\NotificationSent.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>userId, notification</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>Asistencia $asistencia</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Events\QrScannedEvent.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>Maestros $maestro, string $tipo, string $area</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Exceptions\Handler.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>render</code></td>
+<td><code>request, Throwable $e</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AdminAttendanceController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>soloAdmin</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>guardarFotoAsistencia</code></td>
+<td><code>Request $request, Asistencia $asistencia, Maestros $maestro</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>generarToken</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>validarQr</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>registroManual</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>registrarQrConFoto</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>listarMaestros</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>ultimosRegistros</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>formatearAsistencia</code></td>
+<td><code>Asistencia $asistencia</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AlumnoClinicController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>proximasCitas</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>expedientesResumen</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>resolverTipoTratamiento</code></td>
+<td><code>int $idPaciente</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>activosJson</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>show</code></td>
+<td><code>id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>create</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>generarPasswordSeguro</code></td>
+<td><code>longitud = 12</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>verificarCorreo</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td><code>id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td><code>Request $request, id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>gestionarGrupo</code></td>
+<td><code>Alumnos $alumno</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>asignarGrupo</code></td>
+<td><code>Request $request, Alumnos $alumno</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>desasignarGrupo</code></td>
+<td><code>Alumnos $alumno</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>perfil</code></td>
+<td><code>alumnoId, Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>updateFoto</code></td>
+<td><code>Request $request, id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>guardarFirma</code></td>
+<td><code>Request $request, id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>citas</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>mostrarResumenTratamientos</code></td>
+<td><code>matricula</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>misPacientes</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>create</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td><code>AnexoCirugia $anexo</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td><code>Request $request, AnexoCirugia $anexo</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>AnexoCirugia $anexo</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>verPdf</code></td>
+<td><code>AnexoCirugia $anexo</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AnexoEndodonciaController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>create</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td><code>id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td><code>Request $request, id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>updateMaestro</code></td>
+<td><code>Request $request, id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>todasFirmasDocenteCompletas</code></td>
+<td><code>array $data</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AnexoProtesisFijaController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>verificarFirmasCompletas</code></td>
+<td><code>array $datos</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verificarFirmasCompletas</code></td>
+<td><code>array $datos</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>create</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>todasFirmasDocenteCompletas</code></td>
+<td><code>array $datos</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div class="table-landscape"><h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AnexosExpedienteController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>createHistorialClinico</code></td>
+<td><code>idPaciente, Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>verPaso</code></td>
+<td><code>paso</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>guardarPaso</code></td>
+<td><code>Request $request, paso</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>guardarPasoPediatrico</code></td>
+<td><code>Request $request, string $paso, Expediente $expediente, array $data</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>procesarArchivoImagen</code></td>
+<td><code>file, paciente, string $nombreArchivo</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>procesarImagenBase64</code></td>
+<td><code>base64String, paciente, string $nombreArchivo</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>generarPdfAdulto</code></td>
+<td><code>expediente, HistoriaClinicaGeneral $historiaClinica, Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>generarPdfPediatrico</code></td>
+<td><code>Expediente $expediente, HistoriaClinicaPediatrico $historiaClinica, Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>limpiarOdontograma</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>limpiarDenticion</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>cargarFirmaAlumno</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\ApiAuthController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>login</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>logout</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>normalizarRol</code></td>
+<td><code>string $rol</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>resolverNombre</code></td>
+<td><code>user</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AsignacionExpedienteAlumnosController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>store</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>id</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AsignacionMateriasController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>asignarMateriaMaestro</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4>Módulo: <code>LaravelProject-main\app\Http\Controllers\AsistenciaController.php</code></h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Parámetros</th>
+<th>Líneas de código</th>
+<th>Complejidad</th>
+<th>Doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>horarios</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>guardarHorarios</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>reporte</code></td>
+<td><code>Request $request</code></td>
+<td>—</td>
+<td>🟢 1</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<hr />
+<h2 id="sec27">6. Modelos de Datos</h2>
+<p>No se detectaron clases con nombres de modelo explícitos.</p>
+<h3 id="sec28">Esquema General Inferido</h3>
+<p>Basado en el análisis del código, las entidades principales son:</p>
+<ul>
+<li>No se pudieron inferir entidades del código fuente.</li>
+</ul>
+<hr />
+<h2 id="sec29">7. Guía de Despliegue y Mantenimiento</h2>
+<h3 id="sec30">7.1 Requisitos del Sistema</h3>
+<ul>
+<li><strong>Lenguaje principal</strong>: PHP</li>
+<li><strong>Archivos detectados</strong>: 540</li>
+</ul>
+<h3 id="sec31">7.2 Instalación Local</h3>
+<pre><code class="language-bash"># 1. Clonar el repositorio
+git clone &lt;url-del-repositorio&gt;
+cd &lt;nombre-del-proyecto&gt;
+
+# 2. Instalar dependencias
+composer install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
+
+# 4. Ejecutar el proyecto
+# ejecutar proyecto
+</code></pre>
+<h3 id="sec32">7.3 Despliegue con Docker</h3>
+<pre><code class="language-dockerfile">FROM ubuntu:22.04
+
+WORKDIR /app
+COPY . .
+RUN composer install
+EXPOSE 8000
+CMD [&quot;start&quot;]
+</code></pre>
+<pre><code class="language-bash"># Construir imagen
+docker build -t mi-proyecto .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mi-proyecto
+</code></pre>
+<h3 id="sec33">7.4 Variables de Entorno Recomendadas</h3>
+<pre><code class="language-env"># General
+APP_ENV=production
+SECRET_KEY=clave-secreta-segura
+DEBUG=False
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mi_base_datos
+DB_USER=usuario
+DB_PASSWORD=contraseña
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+</code></pre>
+<h3 id="sec34">7.5 Checklist de Despliegue</h3>
+<ul>
+<li>[ ] Variables de entorno configuradas</li>
+<li>[ ] Base de datos migrada</li>
+<li>[ ] Tests ejecutados y pasando</li>
+<li>[ ] Logs configurados</li>
+<li>[ ] HTTPS habilitado en producción</li>
+<li>[ ] Backups programados</li>
+<li>[ ] Monitoreo configurado</li>
+</ul>
+<h3 id="sec35">7.6 Registro de Cambios (Changelog)</h3>
+<p><strong>Versión 1.0.0</strong> — 2026-10-16
+- Versión inicial analizada por AutoDocs AI
+- Documentación técnica generada automáticamente
+- Análisis de calidad del código completado</p>
+<hr />
+<h2 id="sec36">8. Reporte de Calidad del Código</h2>
+<h3 id="sec37">8.1 Análisis de Métricas</h3>
+<p><strong>Score de Calidad:</strong> 80/100 (Excelente [GREEN])</p>
+<p><strong>Distribución de Documentación:</strong>
+- Funciones documentadas: 0/100 (0%)
+- Clases documentadas: 0/246</p>
+<p><strong>Análisis de Complejidad:</strong>
+- Complejidad promedio: 1.0
+- Complejidad máxima: 1
+- Funciones con alta complejidad (&gt;10): 0</p>
+<p><strong>Tendencia de Complejidad por Archivo:</strong></p>
+<pre><code class="language-text">[Gráfico de regresión lineal mostrando la tendencia de complejidad]
+Eje X: Archivos ordenados por complejidad promedio
+Eje Y: Score de complejidad
+Tendencia: ↓ Baja
+</code></pre>
+<h3 id="sec38">8.2 Funciones con Alta Complejidad Ciclomática</h3>
+<p>No hay funciones con complejidad &gt; 10. [OK]</p>
+<h3 id="sec39">8.3 Recomendaciones</h3>
+<ul>
+<li>Agregar docstrings a las 100 funciones sin documentar</li>
+</ul>
+<h3 id="sec40">8.4 Errores de Análisis</h3>
+<p>Sin errores detectados. [OK]</p>
+<hr />
+<h2 id="sec41">9. Análisis de Datos del Proyecto</h2>
+<h3 id="sec42">9.1 Tipos y Fuentes de Datos Detectados</h3>
+<p><strong>Datos Estructurados:</strong> 0 archivos</p>
+<p><strong>Datos Semi-estructurados:</strong> 0 archivos</p>
+<p><strong>Datos No Estructurados:</strong> 0 archivos</p>
+<h3 id="sec43">9.2 Esquema de Data Warehouse Inferido</h3>
+<p>No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.</p>
+<h3 id="sec44">9.3 Reporte de Calidad de Datos</h3>
+<p><strong>Problemas Detectados en el Código:</strong></p>
+<ul>
+<li><strong>Funciones sin documentar:</strong> 100</li>
+<li><code>schedule</code> en <code>LaravelProject-main\app\Console\Kernel.php</code></li>
+<li><code>commands</code> en <code>LaravelProject-main\app\Console\Kernel.php</code></li>
+<li><code>handle</code> en <code>LaravelProject-main\app\Console\Commands\AutoBackup.php</code></li>
+<li><code>__construct</code> en <code>LaravelProject-main\app\Events\BackupCreated.php</code></li>
+<li><code>broadcastOn</code> en <code>LaravelProject-main\app\Events\BackupCreated.php</code></li>
+<li>
+<p>... y 95 más</p>
+</li>
+<li>
+<p><strong>Problemas de naming conventions:</strong> 6</p>
+</li>
+<li><code>loader</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+<li><code>names</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+<li><code>aliases</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+<li><code>is</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+<li><code>handles</code>: Las clases deben empezar con mayúscula (PascalCase)</li>
+</ul>
+<h3 id="sec45">9.4 Minería de Datos Aplicada al Código</h3>
+<p><em>Análisis automático realizado sobre las funciones y clases extraídas del proyecto.</em></p>
+<h4>A) Funciones de Alta Complejidad Ciclomática</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Umbral</th>
+<th>Cantidad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Alta</td>
+<td>&gt; 5</td>
+<td>0</td>
+<td>Requieren refactorización urgente</td>
+</tr>
+<tr>
+<td>🟡 Media</td>
+<td>4–5</td>
+<td>0</td>
+<td>Candidatas a simplificación</td>
+</tr>
+<tr>
+<td>🟢 Baja</td>
+<td>≤ 3</td>
+<td>100</td>
+<td>Complejidad aceptable</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.</p>
+</blockquote>
+<div class="table-landscape"><h4>B) Funciones Sin Documentación</h4>
+<p><strong>100 de 100 funciones</strong> carecen de docstring (100%).</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>schedule</code></td>
+<td><code>LaravelProject-main\app\Console\Kernel.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>commands</code></td>
+<td><code>LaravelProject-main\app\Console\Kernel.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>handle</code></td>
+<td><code>LaravelProject-main\app\Console\Commands\AutoBackup.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>... y 80 funciones más sin documentar.</em></p>
+<p>💡 <strong>Sugerencia:</strong> Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.</p>
+<h4>C) Detección de Funciones con Nombres Similares (Posibles Duplicados)</h4>
+<p><em>Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse.</em></p>
+<p>Se detectaron <strong>9 grupos de funciones con nombres similares</strong> repartidas en distintos archivos:</p>
+<p><strong>Patrón: <code>*_store</code> / <code>store_*</code></strong> — aparece en 7 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoEndodonciaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisFijaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>store</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AsignacionExpedienteAlumnosController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 7 funciones <code>store</code>, <code>store</code>, <code>store</code>, <code>store</code>... comparten el patrón <code>store</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*__construct</code> / <code>_construct_*</code></strong> — aparece en 5 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>__construct</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 5 funciones <code>__construct</code>, <code>__construct</code>, <code>__construct</code>, <code>__construct</code>... comparten el patrón <code>_construct</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_broadcaston</code> / <code>broadcaston_*</code></strong> — aparece en 5 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastOn</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 5 funciones <code>broadcastOn</code>, <code>broadcastOn</code>, <code>broadcastOn</code>, <code>broadcastOn</code>... comparten el patrón <code>broadcaston</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_broadcastwith</code> / <code>broadcastwith_*</code></strong> — aparece en 5 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastWith</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 5 funciones <code>broadcastWith</code>, <code>broadcastWith</code>, <code>broadcastWith</code>, <code>broadcastWith</code>... comparten el patrón <code>broadcastwith</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_broadcastas</code> / <code>broadcastas_*</code></strong> — aparece en 3 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>broadcastAs</code></td>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 3 funciones <code>broadcastAs</code>, <code>broadcastAs</code>, <code>broadcastAs</code> comparten el patrón <code>broadcastas</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_edit</code> / <code>edit_*</code></strong> — aparece en 3 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>edit</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoEndodonciaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 3 funciones <code>edit</code>, <code>edit</code>, <code>edit</code> comparten el patrón <code>edit</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_destroy</code> / <code>destroy_*</code></strong> — aparece en 3 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>destroy</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AsignacionExpedienteAlumnosController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las 3 funciones <code>destroy</code>, <code>destroy</code>, <code>destroy</code> comparten el patrón <code>destroy</code> en distintos módulos. Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.</p>
+<hr />
+<p><strong>Patrón: <code>*_todasfirmasdocentecompletas</code> / <code>todasfirmasdocentecompletas_*</code></strong> — aparece en 2 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>todasFirmasDocenteCompletas</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>todasFirmasDocenteCompletas</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>todasFirmasDocenteCompletas</code> y <code>todasFirmasDocenteCompletas</code> realizan operaciones similares (<code>todasfirmasdocentecompletas</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/todasfirmasdocentecompletas.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code>, <code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code>).</p>
+<hr />
+<p><strong>Patrón: <code>*_verificarfirmascompletas</code> / <code>verificarfirmascompletas_*</code></strong> — aparece en 2 archivos distintos</p>
+<div class="table-landscape"><table class="report-table">
+<thead>
+<tr>
+<th>Función</th>
+<th>Archivo</th>
+<th>Línea</th>
+<th>Complejidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verificarFirmasCompletas</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisFijaController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>verificarFirmasCompletas</code></td>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></td>
+<td>?</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>verificarFirmasCompletas</code> y <code>verificarFirmasCompletas</code> realizan operaciones similares (<code>verificarfirmascompletas</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/verificarfirmascompletas.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code>, <code>LaravelProject-main\app\Http\Controllers\AnexoProtesisFijaController.php</code>).</p>
+<hr />
+<div class="table-landscape"><h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
+<table class="report-table">
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Funciones</th>
+<th>Complejidad Promedio</th>
+<th>Documentadas</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></td>
+<td>20</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟡 Revisar</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexosExpedienteController.php</code></td>
+<td>11</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟡 Revisar</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AdminAttendanceController.php</code></td>
+<td>9</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoCirugiaController.php</code></td>
+<td>7</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoEndodonciaController.php</code></td>
+<td>6</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\ModoConsultaSesionActualizada.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\NuevaAsistenciaRegistrada.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\QrScannedEvent.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoProtesisRemovibleController.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\ApiAuthController.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AsistenciaController.php</code></td>
+<td>4</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\BackupCreated.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Events\NotificationSent.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AlumnoClinicController.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+<tr>
+<td><code>LaravelProject-main\app\Http\Controllers\AnexoPeriodontologiaController.php</code></td>
+<td>3</td>
+<td>1.0</td>
+<td>0%</td>
+<td>🟢 OK</td>
+</tr>
+</tbody>
+</table></div>
+<p>💡 <strong><code>LaravelProject-main\app\Http\Controllers\AlumnosController.php</code></strong> tiene 20 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).
+💡 <strong><code>LaravelProject-main\app\Http\Controllers\AnexosExpedienteController.php</code></strong> tiene 11 funciones. Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).</p>
+<h4>E) Patrones Frecuentes Adicionales (Análisis IA)</h4>
+<ul>
+<li><strong>broadcast</strong>: 8 ocurrencias</li>
+<li>Ejemplos: ['broadcastOn', 'broadcastWith', 'broadcastAs']</li>
+<li><strong>__construct</strong>: 4 ocurrencias</li>
+<li>Ejemplos: ['__construct']</li>
+</ul>
+<h3 id="sec46">9.5 Pipeline ETL Utilizado</h3>
+<p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
+<div style="margin: 1.5rem 0;"><img src="data:image/png;base64,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"  style="max-width: 60%; max-height: 380px; width: auto; height: auto; display: block; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: 8px;"></div>
+
+<p><strong>Fases del Pipeline:</strong></p>
+<ul>
+<li><strong>Extract:</strong> Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales</li>
+<li><strong>Transform:</strong> Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones</li>
+<li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
+</ul>
+<hr />
+<p><em>Documentación generada automáticamente por AutoDocs AI — 2026-10-16 21:12 UTC</em></p></div>
+  <div class="doc-footer">
+    <div class="footer-grid">
+      <div class="footer-item">
+        <span class="fi-label">Proyecto</span>
+        <span class="fi-val">Franco</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Archivos</span>
+        <span class="fi-val">540</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Clases</span>
+        <span class="fi-val">246</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Funciones</span>
+        <span class="fi-val">100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Endpoints</span>
+        <span class="fi-val">0</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Score</span>
+        <span class="fi-val" style="color:#10b981">80/100</span>
+      </div>
+      <div class="footer-item">
+        <span class="fi-label">Generado</span>
+        <span class="fi-val">16/10/2026 21:12 UTC</span>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-brand">Generado automáticamente por <span>AutoDocs AI</span> &middot; Documentación Técnica Profesional</div>
+  </div>
+</div>
+</body>
+</html>
