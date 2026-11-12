@@ -205,10 +205,9 @@ class TestGetContributorsFromApi:
 
     @patch("services.github_client.requests.get")
     def test_url_invalida_lanza_excepcion(self, mock_get):
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(ValueError) as exc:
             get_contributors_from_api("https://gitlab.com/owner/repo")
-        # ValueError es capturado por el except general
-        assert "error" in str(exc.value).lower()
+        assert "No se pudo extraer" in str(exc.value)
 
     @patch("services.github_client._estimate_active_days", return_value=15)
     @patch("services.github_client.requests.get")
