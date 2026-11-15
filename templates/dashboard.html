@@ -467,6 +467,21 @@
             }
         }
 
+        /* 
+            Ajustes responsivos para móviles.
+            Sidebar siempre expandido en móvil con ancho fijo.
+        */
+        @media (max-width: 1023px) {
+            aside {
+                width: 72px;
+            }
+            .sidebar-nav-item .nav-label,
+            .sidebar-nav-item .nav-badge,
+            .sidebar-user-info {
+                display: none;
+            }
+        }
+
         /* ============================================================
         ESTILOS PARA TARJETAS DE PROYECTOS
         ============================================================ */
@@ -540,6 +555,7 @@
         /* 
             Métricas del proyecto en grid de 3 columnas.
             Separador superior con borde sutil.
+            Responsive: 3 columnas en desktop, 1 columna en móvil.
         */
         .project-metrics {
             display: grid;
@@ -548,6 +564,12 @@
             padding-top: 12px;
             margin-top: 12px;
             border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        @media (max-width: 640px) {
+            .project-metrics {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* 

@@ -390,18 +390,73 @@ def get_etl_diagram():
 @analysis_bp.route('/database/analyze-sql', methods=['POST'])
 @jwt_required()
 def analyze_sql_database():
+    user_id = get_jwt_identity()
     sql_file = request.files.get('file')
+
     if not sql_file or not sql_file.filename.lower().endswith('.sql'):
         return jsonify({"error": "Debes subir un archivo .sql válido."}), 400
 
     try:
         raw_sql = sql_file.read().decode('utf-8', errors='replace')
+        analysis = generate_sql_analysis(raw_sql)
+
+        history_id = str(__import__('uuid').uuid4())
+        db = get_db()
+        db.database_analysis_history.insert_one({
+            "_id": history_id,
+            "user_id": user_id,
+            "filename": sql_file.filename,
+            "analysis": analysis,
+            "created_at": datetime.utcnow().isoformat()
+        })
+
+        analysis["history_id"] = history_id
+        return jsonify(analysis), 200
     except Exception as e:
-        return jsonify({"error": f"Error leyendo el archivo: {str(e)}"}), 400
+        return jsonify({"error": f"No se pudo analizar el archivo: {str(e)}"}), 500
 
-    analysis = generate_sql_analysis(raw_sql)
-    return jsonify(analysis), 200
 
+@analysis_bp.route('/database/history', methods=['GET'])
+@jwt_required()
+def get_database_analysis_history():
+    user_id = get_jwt_identity()
+    db = get_db()
+
+    records = db.database_analysis_history.find(
+        {"user_id": user_id},
+        {"analysis": 0}
+    ).sort("created_at", -1).limit(100)
+
+    return jsonify({
+        "history": [
+            {
+                "id": record["_id"],
+                "filename": record.get("filename"),
+                "created_at": record.get("created_at")
+            }
+            for record in records
+        ]
+    }), 200
+
+
+@analysis_bp.route('/database/history/<history_id>', methods=['GET'])
+@jwt_required()
+def get_database_analysis_history_item(history_id):
+    user_id = get_jwt_identity()
+    record = get_db().database_analysis_history.find_one({
+        "_id": history_id,
+        "user_id": user_id
+    })
+
+    if not record:
+        return jsonify({"error": "Análisis no encontrado"}), 404
+
+    return jsonify({
+        "id": record["_id"],
+        "filename": record.get("filename"),
+        "created_at": record.get("created_at"),
+        "analysis": record.get("analysis", {})
+    }), 200
 
 @analysis_bp.route('/database/download-pdf', methods=['POST'])
 @jwt_required()

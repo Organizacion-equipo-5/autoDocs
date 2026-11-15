@@ -103,6 +103,20 @@
             transition: background 0.25s ease, color 0.25s ease;
             overflow-x: hidden;
         }
+
+        /* Responsive */
+        @media (max-width: 1023px) {
+            .sidebar-shell { width: 64px; }
+        }
+        @media (max-width: 640px) {
+            .sidebar-shell { display: none; }
+            main { padding: 1rem; }
+        }
+            color: var(--color-on-surface);
+            font-family: 'Geist', sans-serif;
+            transition: background 0.25s ease, color 0.25s ease;
+            overflow-x: hidden;
+        }
         
         /* ====== CANVAS DE PARTÍCULAS ====== */
         #particle-canvas {

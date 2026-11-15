@@ -393,6 +393,15 @@
             background: rgba(56, 189, 248, 0.3);
             border-radius: 10px;
         }
+
+        /* Responsive */
+        @media (max-width: 1023px) {
+            aside { width: 64px; }
+        }
+        @media (max-width: 640px) {
+            main { padding: 1rem; }
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body class="font-body-md selection:bg-primary/20 selection:text-on-surface">

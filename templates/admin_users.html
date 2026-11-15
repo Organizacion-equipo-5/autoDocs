@@ -99,6 +99,15 @@
             box-shadow: var(--glass-hover-shadow);
             transform: translateY(-2px);
         }
+
+        /* Responsive */
+        @media (max-width: 1023px) {
+            .sidebar-shell { width: 64px; }
+        }
+        @media (max-width: 640px) {
+            .sidebar-shell { display: none; }
+            main { padding: 1rem; }
+        }
         .glass input, .glass select, .glass textarea { color: #0f1418; }
         .sidebar { background: var(--color-surface-container); backdrop-filter: blur(8px); border-right: 1px solid var(--glass-border); }
         .btn-primary { background: var(--color-primary); color: #0f1418; font-weight: 700; transition: all 0.2s; }

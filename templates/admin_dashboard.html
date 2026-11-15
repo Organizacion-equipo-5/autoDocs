@@ -526,6 +526,16 @@
             overflow-y: auto;
             padding-right: 4px;
         }
+
+        /* Responsive */
+        @media (max-width: 1023px) {
+            .sidebar-shell { width: 64px; }
+        }
+        @media (max-width: 640px) {
+            .sidebar-shell { display: none; }
+            main { padding: 1rem; }
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 { grid-template-columns: 1fr; }
+        }
     </style>
     
     <!-- ============================================================

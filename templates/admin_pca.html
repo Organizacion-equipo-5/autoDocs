@@ -98,6 +98,16 @@
             --color-surface-container-high: #e2e8f0;  /* Contenedores grises */
             --color-on-surface: #0f172a;              /* Texto oscuro */
             --color-on-surface-variant: #334155;      /* Texto secundario oscuro */
+        }
+
+        /* Responsive */
+        @media (max-width: 1023px) {
+            .sidebar-shell { width: 64px; }
+        }
+        @media (max-width: 640px) {
+            .sidebar-shell { display: none; }
+            main { padding: 1rem; }
+        }
             --color-primary: #38bdf8;                 /* Azul claro */
             --color-secondary: #818cf8;               /* Violeta claro */
             --color-outline-variant: #cbd5e1;         /* Bordes grises */
