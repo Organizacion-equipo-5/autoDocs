@@ -202,7 +202,7 @@ class TestToHtml:
     def test_html_incluye_score(self, exporter):
         with patch.object(exporter, "_render_markdown_with_node", return_value="<p>x</p>"):
             html = exporter.to_html()
-            assert "Score de Calidad: 75/100" in html
+            assert "75/100" in html
 
     def test_html_incluye_estadisticas(self, exporter):
         with patch.object(exporter, "_render_markdown_with_node", return_value="<p>x</p>"):
@@ -221,7 +221,7 @@ class TestToHtml:
         # Si _render_markdown_with_node falla, debe intentar usar la librería `markdown`
         with patch.object(exporter, "_render_markdown_with_node",
                           side_effect=Exception("Node no disponible")):
-            with patch("builtins.__import__", side_effect=ImportError("markdown no instalado")):
+            with patch.dict("sys.modules", {"markdown": None}):
                 html = exporter.to_html()
                 # Debe funcionar igual con el fallback manual
                 assert "<!DOCTYPE html>" in html

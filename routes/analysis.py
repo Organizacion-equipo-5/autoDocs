@@ -1034,6 +1034,8 @@ def analyze_document():
     user_id = get_jwt_identity()
 
     use_ai = request.json.get('use_ai', False)
+    document_id = request.json.get('document_id')
+    project_id = request.json.get('project_id')
     
     if use_ai:
         # ... ejecutar análisis con IA ...

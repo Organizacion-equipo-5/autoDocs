@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Compilar, lint y pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-test.txt
+
+      - name: Instalar librerias del sistema (WeasyPrint)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+
+      - name: Compilar
+        run: python -m compileall -q app.py config.py routes services utils
+
+      - name: Analisis estatico (flake8)
+        run: flake8 app.py config.py routes services utils --max-line-length=120 --select=E9,F63,F7,F82
+
+      - name: Ejecutar pruebas con cobertura
+        run: |
+          pytest -q --cov=services --cov-report=term-missing --cov-report=xml \
+            --junitxml=test-results.xml
+
+      - name: Guardar reportes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-pruebas
+          path: |
+            test-results.xml
+            coverage.xml
+
+  docker:
+    name: Construir imagen Docker
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener codigo
+        uses: actions/checkout@v4
+
+      - name: Construir imagen
+        run: docker build -t autodocs:ci .

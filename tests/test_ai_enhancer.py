@@ -228,7 +228,9 @@ class TestCallAI:
         mock_post.side_effect = Exception("Network error")
         result = enhancer_with_multiple_keys._call_ai("sys", "usr")
         assert result is None
-        assert mock_post.call_count == 3  # 3 keys intentadas
+        enh = enhancer_with_multiple_keys
+        # Cada key prueba todos los modelos candidatos de Groq
+        assert mock_post.call_count == len(enh.api_keys) * len(enh.GROQ_CANDIDATE_MODELS)
 
     @patch("services.ai_enhancer.requests.post")
     def test_respuesta_vacia_devuelve_none(self, mock_post, enhancer_with_keys):

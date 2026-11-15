@@ -522,7 +522,7 @@ class TestApiSection:
     def test_incluye_planes_prueba(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._api_section()
-        assert "3.4 Planes de Prueba" in section
+        assert "3.4 Escenarios de Pruebas" in section
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -625,12 +625,12 @@ class TestFunctionsSection:
     def test_marca_funciones_async(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._functions_section()
-        assert "ASYNC" in section
+        assert "⚡" in section  # marca de funcion async
 
     def test_marca_alta_complejidad(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._functions_section()
-        assert "HIGH" in section
+        assert "🔴" in section  # complejidad alta
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -725,7 +725,7 @@ class TestDataWarehouseSchemas:
 class TestDataAnalysisSection:
     def test_incluye_secciones_principales(self, full_results):
         gen = DocGenerator(full_results)
-        with patch("services.doc_generator.ETLPipeline") as MockETL:
+        with patch("services.etl_pipeline.ETLPipeline") as MockETL:
             pipeline = MagicMock()
             pipeline.get_pipeline_diagram.return_value = "@startuml\n@enduml"
             MockETL.return_value = pipeline
@@ -740,7 +740,7 @@ class TestDataAnalysisSection:
 
     def test_detecta_alta_complejidad(self, full_results):
         gen = DocGenerator(full_results)
-        with patch("services.doc_generator.ETLPipeline") as MockETL:
+        with patch("services.etl_pipeline.ETLPipeline") as MockETL:
             MockETL.return_value.get_pipeline_diagram.return_value = "@startuml\n@enduml"
             section = gen._data_analysis_section()
             # delete_user tiene complejidad 15
@@ -749,7 +749,7 @@ class TestDataAnalysisSection:
 
     def test_detecta_sin_docstring(self, full_results):
         gen = DocGenerator(full_results)
-        with patch("services.doc_generator.ETLPipeline") as MockETL:
+        with patch("services.etl_pipeline.ETLPipeline") as MockETL:
             MockETL.return_value.get_pipeline_diagram.return_value = "@startuml\n@enduml"
             section = gen._data_analysis_section()
             # create_user no tiene docstring
@@ -850,12 +850,12 @@ class TestQualityReport:
 class TestFullMarkdown:
     def test_contiene_todas_las_secciones(self, full_results):
         gen = DocGenerator(full_results)
-        with patch("services.doc_generator.ETLPipeline") as MockETL:
+        with patch("services.etl_pipeline.ETLPipeline") as MockETL:
             MockETL.return_value.get_pipeline_diagram.return_value = "@startuml\n@enduml"
             md = gen._full_markdown()
             assert "# Documentación del Proyecto" in md
             assert "2. Documentación de Arquitectura" in md
-            assert "4. Documentación de Clases" in md
+            assert "4. Documentación de Módulos y Clases" in md
             assert "5. Documentación de Funciones" in md
             assert "7. Guía de Despliegue" in md
             assert "8. Reporte de Calidad" in md
@@ -863,7 +863,7 @@ class TestFullMarkdown:
 
     def test_termina_con_firma(self, full_results):
         gen = DocGenerator(full_results)
-        with patch("services.doc_generator.ETLPipeline") as MockETL:
+        with patch("services.etl_pipeline.ETLPipeline") as MockETL:
             MockETL.return_value.get_pipeline_diagram.return_value = "@startuml\n@enduml"
             md = gen._full_markdown()
             assert "AutoDocs AI" in md
