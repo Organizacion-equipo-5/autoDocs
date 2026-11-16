@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     nodejs \
     npm \
-    openjdk-21-jre-headless \
+    openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PlantUML
