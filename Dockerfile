@@ -1,11 +1,11 @@
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
 # System deps for weasyprint (PDF generation), git, and PlantUML (requires Java)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
-    libcairo2 libgdk-pixbuf-xlib-2.0-0 libffi-dev \
+    libcairo2 libgdk-pixbuf-2.0-0 libffi-dev \
     git \
     wget \
     nodejs \
@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir --timeout 300 -r requirements.txt
 
 COPY . .
 
-RUN npm install --no-audit --no-fund
+RUN npm ci --no-audit --no-fund
 
 RUN mkdir -p uploads exports
 
