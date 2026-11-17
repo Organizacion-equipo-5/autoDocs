@@ -22,6 +22,9 @@ def init_db_indexes(app):
         db.analysis_snapshots.create_index(
             [("project_id", 1), ("created_at", 1)]
         )
+        db.github_activity.create_index(
+            [("project_id", 1), ("occurred_at", -1)]
+        )
         db.technical_manuals.create_index(
             [("user_id", 1), ("project_id", 1), ("created_at", -1)]
         )

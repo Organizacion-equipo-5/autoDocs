@@ -23,6 +23,7 @@ class Config:
 
     # PayPal
     PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+    GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
 
     # Upload settings
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', './uploads')

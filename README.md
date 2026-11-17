@@ -159,6 +159,16 @@ El generador produce un paquete con varias secciones:
 - Extracción del propietario, nombre, descripción y metadatos del repositorio.
 - Consulta de colaboradores mediante la API de GitHub.
 - Sincronización del proyecto para volver a analizar cambios.
+- Historial de commits y ramas, con análisis automático al recibir eventos del repositorio.
+
+Para activar la actividad automática, configura `GITHUB_WEBHOOK_SECRET` en el entorno de AutoDocs y agrega un webhook en **Settings → Webhooks → Add webhook** del repositorio:
+
+1. Usa la URL pública `https://<tu-dominio>/api/integrations/github/webhook` y elige `application/json`.
+2. Usa el mismo valor de `GITHUB_WEBHOOK_SECRET` como **Secret**.
+3. Selecciona los eventos **Pushes** y **Branch or tag creation**. AutoDocs ignora la creación de tags.
+4. Guarda el webhook. Los commits y las ramas aparecerán en **Insights → Actividad GitHub**; cada revisión nueva se analizará automáticamente.
+
+La URL debe ser accesible desde GitHub y usar HTTPS. El proyecto debe estar registrado en AutoDocs desde su URL de GitHub.
 
 ### Cuentas, planes y administración
 
@@ -353,6 +363,7 @@ python scripts/create_admin.py \
 | `SECRET_KEY` | Sí | Clave de Flask para sesiones y formularios |
 | `JWT_SECRET_KEY` | Sí | Clave con la que se firman los tokens JWT |
 | `MONGO_URI` | Sí | Cadena de conexión de MongoDB |
+| `GITHUB_WEBHOOK_SECRET` | No | Secreto para verificar la firma de los webhooks de GitHub y activar la actividad automática |
 | `FLASK_DEBUG` | No | `True` o `False`; por defecto `True` en desarrollo |
 | `UPLOAD_FOLDER` | No | Carpeta de proyectos cargados; por defecto `./uploads` |
 | `EXPORT_FOLDER` | No | Carpeta de documentos generados; por defecto `./exports` |
@@ -436,6 +447,15 @@ curl -X POST http://localhost:5000/api/projects/ \
 | `GET` | `/api/projects/:id/contributors` | Consultar colaboradores |
 | `POST` | `/api/projects/:id/contributors/refresh` | Refrescar colaboradores |
 | `POST` | `/api/projects/:id/sync` | Sincronizar con GitHub |
+
+### Insights e integración con GitHub
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/api/insights/:id/history` | Historial de snapshots y tendencia |
+| `GET` | `/api/insights/:id/activity` | Actividad reciente de commits y creación de ramas |
+| `GET` | `/api/insights/:id/compare` | Comparación de dos snapshots |
+| `POST` | `/api/integrations/github/webhook` | Recibir eventos `push` y `create` de GitHub (firma HMAC-SHA256) |
 
 ### Análisis
 

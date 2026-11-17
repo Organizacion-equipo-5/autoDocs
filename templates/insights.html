@@ -134,6 +134,11 @@
         .change-card h3 + h3 { margin-top: 12px; }
         ul.list { margin: 0; padding-left: 18px; font-size: .86rem; }
         ul.list li { margin-bottom: 4px; word-break: break-word; }
+        .activity-list { display: grid; gap: 10px; }
+        .activity-item { border-left: 3px solid var(--primary); background: var(--surface-2); border-radius: 0 12px 12px 0; padding: 12px 14px; }
+        .activity-item h3 { margin: 0 0 4px; font-size: .92rem; }
+        .activity-item p { margin: 0 0 6px; overflow-wrap: anywhere; }
+        .activity-meta { color: var(--muted); font-size: .78rem; display: flex; gap: 8px 14px; flex-wrap: wrap; }
         @media (max-width: 860px) { .split { grid-template-columns: 1fr; } .verdict { align-items: flex-start; } }
         @media (prefers-reduced-motion: no-preference) { .cell, .filter, .btn { transition: transform .1s; } .cell:hover, .filter:hover { transform: translateY(-1px); } }
     </style>
@@ -151,6 +156,7 @@
     <div class="tabs" role="tablist" aria-label="Secciones">
         <button class="tab" role="tab" id="tab-health" aria-controls="panel-health" aria-selected="true" data-tab="health"><span class="material-symbols-outlined" aria-hidden="true">monitor_heart</span> Salud del código</button>
         <button class="tab" role="tab" id="tab-compare" aria-controls="panel-compare" aria-selected="false" data-tab="compare"><span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span> Comparar versiones</button>
+        <button class="tab" role="tab" id="tab-activity" aria-controls="panel-activity" aria-selected="false" data-tab="activity"><span class="material-symbols-outlined" aria-hidden="true">timeline</span> Actividad GitHub</button>
     </div>
 
     <section class="panel" id="panel-health" role="tabpanel" aria-labelledby="tab-health">
@@ -159,6 +165,10 @@
 
     <section class="panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
         <div id="compare-body"><div class="empty">Cargando…</div></div>
+    </section>
+
+    <section class="panel" id="panel-activity" role="tabpanel" aria-labelledby="tab-activity" hidden>
+        <div id="activity-body"><div class="empty">Cargando…</div></div>
     </section>
 </div>
 
@@ -193,10 +203,10 @@
 
     const loaded = {};
     function showTab(name) {
-        if (name !== 'health' && name !== 'compare') name = 'health';
+        if (name !== 'health' && name !== 'compare' && name !== 'activity') name = 'health';
         document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
         document.querySelectorAll('.panel').forEach((p) => { p.hidden = p.id !== 'panel-' + name; });
-        if (!loaded[name]) { loaded[name] = true; ({ health: loadHealth, compare: loadCompare })[name](); }
+        if (!loaded[name]) { loaded[name] = true; ({ health: loadHealth, compare: loadCompare, activity: loadActivity })[name](); }
         try { history.replaceState(null, '', '#' + name); } catch (e) { /* ignorar */ }
     }
     document.querySelectorAll('.tab').forEach((t) => {
@@ -230,6 +240,47 @@
             if (!data.available) { box.innerHTML = empty(data.reason || 'Sin datos todavía.'); return; }
             renderHealth(box, data.health, data.quality_score);
         } catch (e) { box.innerHTML = '<div class="empty err">' + esc(e.message) + '</div>'; }
+    }
+
+    async function loadActivity() {
+        const box = document.getElementById('activity-body');
+        try {
+            const data = await api('/activity');
+            const activities = data.activities || [];
+            if (!activities.length) {
+                box.innerHTML = empty('Aún no hay actividad de GitHub. Configura el webhook del repositorio para registrar commits y ramas.');
+                return;
+            }
+            const statusText = {
+                pending: 'Análisis en espera',
+                analyzing: 'Analizando',
+                completed: 'Análisis completado',
+                error: 'Error en el análisis',
+                recorded: 'Registrado'
+            };
+            const items = activities.map((item) => {
+                const isBranch = item.kind === 'branch';
+                const title = isBranch ? 'Rama creada' : 'Commit';
+                const status = statusText[item.status] || 'Registrado';
+                const shortSha = item.sha ? String(item.sha).slice(0, 7) : '';
+                const safeUrl = typeof item.url === 'string' && /^https:\/\/github\.com\//i.test(item.url)
+                    ? item.url : '';
+                return '<article class="activity-item"><h3>' + esc(title) + ': ' + esc(item.branch || 'rama desconocida') + '</h3>'
+                    + (item.message ? '<p>' + esc(item.message) + '</p>' : '')
+                    + '<div class="activity-meta"><span>' + esc(fmtDate(item.occurred_at || item.received_at)) + '</span>'
+                    + (item.author ? '<span>Por ' + esc(item.author) + '</span>' : '')
+                    + (shortSha ? '<span>' + (safeUrl ? '<a href="' + esc(safeUrl) + '" target="_blank" rel="noopener noreferrer">' : '')
+                        + '<code>' + esc(shortSha) + '</code>' + (safeUrl ? '</a>' : '') + '</span>' : '')
+                    + '<span>' + esc(status) + '</span></div>'
+                    + (item.error ? '<p class="err" style="margin-top:6px">' + esc(item.error) + '</p>' : '')
+                    + '</article>';
+            }).join('');
+            box.innerHTML = '<div class="card"><h2><span class="material-symbols-outlined" aria-hidden="true">timeline</span> Actividad del repositorio</h2>'
+                + '<p class="hint">Se muestran hasta 100 eventos recientes. Cada push o rama nueva inicia un análisis automático.</p>'
+                + '<div class="activity-list">' + items + '</div></div>';
+        } catch (e) {
+            box.innerHTML = '<div class="empty err">' + esc(e.message) + '</div>';
+        }
     }
 
     function renderHealth(box, h, quality) {
@@ -515,7 +566,10 @@
     }
 
     const initial = (location.hash || '').replace('#', '');
-    showTab(initial === 'compare' ? 'compare' : 'health');
+    showTab(initial === 'compare' || initial === 'activity' ? initial : 'health');
+    window.setInterval(() => {
+        if (!document.getElementById('panel-activity').hidden) loadActivity();
+    }, 15000);
 })();
 </script>
 <script src="/static/theme.js"></script>

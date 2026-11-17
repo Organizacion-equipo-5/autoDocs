@@ -110,6 +110,24 @@ def get_history(project_id):
     return jsonify({"snapshots": analysis_history.trend(snapshots), "count": len(snapshots)}), 200
 
 
+@insights_bp.route('/<project_id>/activity', methods=['GET'])
+@jwt_required()
+def get_activity(project_id):
+    user_id = get_jwt_identity()
+    db = get_db()
+    if not _get_project(db, project_id, user_id):
+        return jsonify({"error": "Project not found"}), 404
+
+    activities = list(
+        db.github_activity.find({"project_id": project_id})
+        .sort("occurred_at", -1)
+        .limit(100)
+    )
+    for activity in activities:
+        activity["id"] = str(activity.pop("_id"))
+    return jsonify({"activities": activities, "count": len(activities)}), 200
+
+
 @insights_bp.route('/<project_id>/compare', methods=['GET'])
 @jwt_required()
 def compare(project_id):
