@@ -1,0 +1,6 @@
+Command: python -m pytest -p no:cacheprovider -q
+Environment: PYTHONDONTWRITEBYTECODE=1
+Result: 304 collected; 303 passed; 1 failed; exit code 1; duration 49.25s.
+Failure: tests/test_exporter.py::TestRenderMarkdownWithNode::test_script_no_existe_lanza_error
+Detail: Windows NotADirectoryError after MagicMock-derived path reached subprocess.
+No API/MongoDB service or external endpoint was contacted.
