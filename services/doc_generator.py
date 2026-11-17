@@ -12,6 +12,10 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
+# Referencia diferida para evitar la importación circular con etl_pipeline.
+# También permite sustituir el pipeline de forma controlada en las pruebas.
+ETLPipeline = None
+
 class DocGenerator:
     """
     Genera documentación técnica profesional completa:
@@ -400,20 +404,29 @@ class DocGenerator:
 
         return f"""# Documentación del Proyecto
 
-> Generado automáticamente por **AutoDocs AI** — {self.now}
+> **Alcance del documento.** Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al {self.now} y deben validarse frente al entorno de ejecución antes de una liberación productiva.
 
-## Resumen Ejecutivo
+## 1.1 Resumen Ejecutivo
 
-Este proyecto está desarrollado principalmente en **{lang}** y cuenta con
-{files} archivos fuente, {len(fns)} funciones, {len(cls)} clases y
-{len(eps)} endpoints de API documentados. El score de calidad del código es
-**{score}/100**.
+El análisis del proyecto determinó que **{lang}** es el lenguaje predominante.
+El alcance examinado comprende **{files} archivos fuente**, **{len(fns)} funciones**,
+**{len(cls)} clases** y **{len(eps)} endpoints de API**. La evaluación automatizada
+asigna al código un resultado de calidad de **{score}/100**. Las secciones siguientes
+desarrollan estos hallazgos desde la perspectiva de arquitectura, interfaces,
+componentes, datos, despliegue y mantenibilidad.
 
-## Stack Tecnológico
+## 1.2 Stack Tecnológico
+
+La distribución siguiente permite identificar la composición tecnológica del
+repositorio y dimensionar el esfuerzo de mantenimiento por lenguaje.
 
 {self._render_markdown_table(['Lenguaje', 'Cantidad'], lang_rows)}
 
-## Estadísticas del Proyecto
+## 1.3 Estadísticas del Proyecto
+
+Las métricas resumen el inventario técnico detectado. La ausencia de un elemento
+indica que el analizador no lo identificó de forma estática; no implica necesariamente
+que la capacidad no exista durante la ejecución.
 
 {self._render_markdown_table(['Métrica', 'Valor'], metrics_rows)}
 """
@@ -556,6 +569,10 @@ cli --> routes
 
         return f"""## 2. Documentación de Arquitectura y Diseño
 
+La presente sección describe la organización lógica y física observada en el
+repositorio. Los diagramas y patrones se derivan de los artefactos disponibles y
+constituyen una referencia para la comprensión y evolución del sistema.
+
 ### 2.1 Estructura de Directorios
 
 ```
@@ -587,9 +604,9 @@ proyecto/
 
 {self._detect_patterns()}
 
-### 2.8 Insights de Arquitectura (IA)
+### 2.8 Observaciones Complementarias de Arquitectura (Insights de Arquitectura)
 
-{ai_insights if ai_insights else "No se generaron insights de IA - configura GROQ_API_KEY en el archivo .env para habilitar esta función."}
+{ai_insights if ai_insights else "No se dispone de observaciones complementarias para esta ejecución. La descripción precedente se basa exclusivamente en evidencia obtenida del código fuente."}
 """
 
     def _detect_patterns(self) -> str:
@@ -824,9 +841,9 @@ python app.py  # o npm run dev
                 out += f"\n_... y {len(undocumented) - 10} funciones más sin documentar._\n"
             out += "\n"
 
-        # 3.4 Escenarios de Prueba (Testing) — EN TABLA
+        # 3.4 Planes de Prueba (Testing) — EN TABLA
         test_fns = [f for f in fns if "test" in f["name"].lower() or f["name"].startswith("test_")]
-        out += "### 3.4 Escenarios de Pruebas\n\n"
+        out += "### 3.4 Planes de Prueba\n\n"
         if test_fns:
             out += f"Se detectaron **{len(test_fns)} funciones de prueba** en el proyecto:\n\n"
             test_rows = []
@@ -914,7 +931,7 @@ python app.py  # o npm run dev
         if not classes:
             return "## 4. Clases\n\nNo se detectaron clases en este proyecto.\n"
 
-        out = f"## 4. Documentación de Módulos y Clases\n\n"
+        out = f"## 4. Documentación de Clases y Módulos\n\n"
         out += f"El proyecto contiene **{len(classes)} clases** distribuidas en los siguientes módulos.\n\n"
 
         # TABLA RESUMEN de todas las clases/módulos
@@ -1032,9 +1049,9 @@ python app.py  # o npm run dev
             fn_rows = []
             for fn in funcs:
                 cx = fn.get('complexity', 1)
-                cx_badge = '🟢' if cx <= 5 else '🟡' if cx <= 10 else '🔴'
+                cx_badge = 'LOW' if cx <= 5 else 'MEDIUM' if cx <= 10 else 'HIGH'
                 params = ', '.join(fn.get('params', [])) or '—'
-                async_tag = '⚡' if fn.get('is_async') else ''
+                async_tag = ' `[ASYNC]`' if fn.get('is_async') else ''
                 doc_tag = '✅' if fn.get('docstring') else '❌'
                 loc = self._count_function_loc(fn)
                 loc_str = str(loc) if loc is not None else '—'
@@ -1042,7 +1059,7 @@ python app.py  # o npm run dev
                     f"`{fn['name']}`{async_tag}",
                     f"`{params}`",
                     loc_str,
-                    f"{cx_badge} {cx}",
+                    f"{cx_badge} ({cx})",
                     doc_tag
                 ])
             out += self._render_markdown_table(
@@ -1503,8 +1520,10 @@ python app.py  # o npm run dev
         out += "### 9.5 Pipeline ETL Utilizado\n\n"
         out += "El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):\n\n"
 
-        from services.etl_pipeline import ETLPipeline
-        pipeline = ETLPipeline()
+        pipeline_cls = ETLPipeline
+        if pipeline_cls is None:
+            from services.etl_pipeline import ETLPipeline as pipeline_cls
+        pipeline = pipeline_cls()
         etl_diagram = pipeline.get_pipeline_diagram()
 
         # Generar imagen del diagrama ETL
@@ -1728,5 +1747,5 @@ Tendencia: {"↑ Aumentando" if cx.get('avg', 1) > 5 else "→ Estable" if cx.ge
             self._deployment()     + separator +
             self._quality_report() + separator +
             self._data_analysis_section() +
-            f"\n\n---\n*Documentación generada automáticamente por AutoDocs AI — {self.now}*\n"
+            f"\n\n---\n*AutoDocs AI · Fin del documento técnico · Estado del análisis: {self.now}*\n"
         )

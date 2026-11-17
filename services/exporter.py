@@ -6,6 +6,7 @@ import re
 import base64
 import mimetypes
 import subprocess
+import os
 
 EXPORT_BASE = Path('./exports')
 
@@ -34,6 +35,21 @@ _LEAD_RE  = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 _EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
+_NATIVE_DLL_HANDLE = None
+
+
+def _configure_native_libraries():
+    """Hace visibles a Python las DLL locales requeridas por WeasyPrint en Windows."""
+    global _NATIVE_DLL_HANDLE
+    native_bin = Path(__file__).resolve().parents[1] / '.native' / 'msys64' / 'ucrt64' / 'bin'
+    if os.name != 'nt' or not native_bin.exists():
+        return
+    os.environ['PATH'] = f"{native_bin}{os.pathsep}{os.environ.get('PATH', '')}"
+    if hasattr(os, 'add_dll_directory') and _NATIVE_DLL_HANDLE is None:
+        _NATIVE_DLL_HANDLE = os.add_dll_directory(str(native_bin))
+
+
+_configure_native_libraries()
 
 
 class DocumentExporter:
@@ -73,7 +89,7 @@ class DocumentExporter:
 
     def _render_markdown_with_node(self, md: str) -> str:
         script_path = Path(__file__).resolve().parents[1] / 'markdown_to_html.js'
-        if not script_path.exists():
+        if script_path.exists() is not True:
             raise FileNotFoundError('Node markdown script not found')
         result = subprocess.run(
             ['node', str(script_path)],
@@ -148,7 +164,7 @@ class DocumentExporter:
         out.append(html_body[pos:])
         return ''.join(out)
 
-    def to_html(self) -> str:
+    def _to_html_legacy(self) -> str:
         md = self.to_markdown()
         project_name = self.project.get('name', 'Proyecto')
 
@@ -624,6 +640,379 @@ class DocumentExporter:
 </body>
 </html>"""
 
+    def to_html(self) -> str:
+        """Construye una edición impresa profesional sin omitir el contenido analizado."""
+        md = self.to_markdown()
+        project_name = str(self.project.get('name', 'Proyecto'))
+        safe_project_name = _html.escape(project_name)
+
+        try:
+            html_body = self._render_markdown_with_node(md)
+        except Exception:
+            try:
+                from markdown import markdown as markdown_to_html
+                html_body = markdown_to_html(
+                    md,
+                    extensions=['fenced_code', 'tables', 'attr_list', 'sane_lists', 'extra'],
+                )
+            except Exception:
+                # Último recurso deliberadamente simple: conserva todo el texto aun
+                # cuando Node y la biblioteca Markdown no estén disponibles.
+                html_body = f'<pre class="plain-markdown">{_html.escape(md)}</pre>'
+
+        html_body = re.sub(r'<table(?![^>]*class=)', '<table class="report-table"', html_body)
+
+        headings = []
+        section_number = [0]
+
+        def inject_section_id(match):
+            section_number[0] += 1
+            tag, content = match.group(1), match.group(2)
+            plain = re.sub(r'<[^>]+>', '', _html.unescape(content)).strip()
+            headings.append((int(tag[1]), plain, section_number[0]))
+            return f'<{tag} id="sec{section_number[0]}">{content}</{tag}>'
+
+        html_body = re.sub(
+            r'<(h[123])(?:\s[^>]*)?>(.*?)</\1>',
+            inject_section_id,
+            html_body,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+
+        if headings:
+            toc_items = []
+            for level, text, sec_id in headings:
+                toc_items.append(
+                    f'<li class="toc-h{level}"><a href="#sec{sec_id}"><span>{_html.escape(text)}</span></a></li>'
+                )
+            toc_html = '<ol class="toc-list">' + ''.join(toc_items) + '</ol>'
+        else:
+            toc_html = '<p class="toc-empty">No se detectaron secciones en el análisis.</p>'
+
+        html_body = self._wrap_wide_tables(html_body)
+
+        def image_replacer(match):
+            before, src, after = match.group(1), match.group(2), match.group(3)
+            resolved_src = src
+            if not src.startswith(('http://', 'https://', 'data:')):
+                try:
+                    image_path = Path(src)
+                    if not image_path.is_absolute():
+                        image_path = Path.cwd() / image_path
+                    if not image_path.exists():
+                        image_path = EXPORT_BASE / image_path.name
+                    if image_path.exists():
+                        mime_type = mimetypes.guess_type(str(image_path))[0] or 'image/png'
+                        encoded = base64.b64encode(image_path.read_bytes()).decode('ascii')
+                        resolved_src = f'data:{mime_type};base64,{encoded}'
+                except Exception:
+                    pass
+            return f'<img {before}src="{resolved_src}"{after}>'
+
+        html_body = re.sub(
+            r'<img\s+([^>]*?)src=["\']([^"\']+)["\']([^>]*)>',
+            image_replacer,
+            html_body,
+            flags=re.IGNORECASE,
+        )
+
+        score = self.results.get('quality_score', 0)
+        score_color = '#10b981' if score >= 70 else '#f59e0b' if score >= 40 else '#ef4444'
+        score_label = 'Excelente' if score >= 80 else 'Aceptable' if score >= 60 else 'Requiere mejoras'
+        primary_lang = _html.escape(str(self.results.get('primary_language', 'No determinado')))
+        now = datetime.now()
+        month_names = (
+            '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+        )
+        generated_at = (
+            f'{now.day:02d} de {month_names[now.month]} de {now.year}, '
+            f'{now.hour:02d}:{now.minute:02d}'
+        )
+        total_files = self.results.get('total_files', 0)
+        total_functions = len(self.results.get('functions', []))
+        total_classes = len(self.results.get('classes', []))
+        total_endpoints = len(self.results.get('endpoints', []))
+
+        return f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{safe_project_name} — Documentación técnica</title>
+<style>
+  *, *::before, *::after {{ box-sizing: border-box; }}
+  :root {{
+    --ink: #1f2937;
+    --ink-soft: #475569;
+    --navy: #17365d;
+    --blue: #2f5597;
+    --blue-soft: #dbe7f5;
+    --paper: #ffffff;
+    --panel: #f4f7fb;
+    --rule: #b8c5d6;
+    --muted: #64748b;
+    --score: {score_color};
+  }}
+  @page {{
+    size: A4 portrait;
+    margin: 2.35cm 2.15cm 2.2cm 2.15cm;
+    @top-left {{
+      content: "DOCUMENTACIÓN TÉCNICA";
+      color: #52657a;
+      font-family: "Arial", sans-serif;
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }}
+    @top-right {{
+      content: "{safe_project_name}";
+      color: #52657a;
+      font-family: "Arial", sans-serif;
+      font-size: 7.5pt;
+    }}
+    @bottom-left {{
+      content: "Documento de uso técnico";
+      color: #718096;
+      font-family: "Arial", sans-serif;
+      font-size: 7.5pt;
+    }}
+    @bottom-right {{
+      content: "Página " counter(page) " de " counter(pages);
+      color: #52657a;
+      font-family: "Arial", sans-serif;
+      font-size: 8pt;
+    }}
+  }}
+  @page cover {{ margin: 0; @top-left {{ content: none; }} @top-right {{ content: none; }} @bottom-left {{ content: none; }} @bottom-right {{ content: none; }} }}
+  @page contents {{ @top-left {{ content: "ÍNDICE GENERAL"; }} }}
+  @page landscape {{ size: A4 landscape; margin: 1.7cm; }}
+
+  html {{ font-size: 10.6pt; }}
+  body {{
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Liberation Serif", "Times New Roman", serif;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+  }}
+  .cover {{
+    page: cover;
+    height: 297mm;
+    padding: 31mm 25mm 24mm;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-top: 11mm solid var(--navy);
+    border-bottom: 4mm solid var(--navy);
+  }}
+  .cover-kicker {{
+    color: var(--blue);
+    font-family: "Arial", sans-serif;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    margin-top: 9mm;
+  }}
+  .cover h1 {{
+    border: 0;
+    color: var(--navy);
+    font-family: "Arial", sans-serif;
+    font-size: 29pt;
+    font-weight: 700;
+    line-height: 1.14;
+    margin: 20mm 0 5mm;
+    padding: 0;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }}
+  .cover-subtitle {{
+    color: var(--ink-soft);
+    font-family: "Arial", sans-serif;
+    font-size: 14pt;
+    line-height: 1.35;
+    margin: 0;
+    text-align: left;
+  }}
+  .cover-rule {{ width: 31mm; border-top: 1.2mm solid var(--blue); margin: 12mm 0 0; }}
+  .cover-purpose {{
+    max-width: 135mm;
+    color: #465569;
+    font-size: 11pt;
+    line-height: 1.55;
+    margin-top: 10mm;
+    text-align: left;
+  }}
+  .cover-spacer {{ flex: 1; }}
+  .cover-meta {{
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 4mm 0;
+    font-family: "Arial", sans-serif;
+    font-size: 9pt;
+  }}
+  .cover-meta div {{ padding: 2.1mm 4mm 2.1mm 0; }}
+  .cover-meta strong {{ display: block; color: var(--navy); font-size: 7.5pt; letter-spacing: .07em; text-transform: uppercase; }}
+  .cover-score {{ color: var(--score); font-weight: 700; }}
+  .cover-footer {{ color: var(--muted); font-family: "Arial", sans-serif; font-size: 8pt; margin-top: 7mm; }}
+
+  .toc {{ page: contents; break-after: page; }}
+  .toc-title {{
+    color: var(--navy);
+    font-family: "Arial", sans-serif;
+    font-size: 21pt;
+    border-bottom: 1.2mm solid var(--blue);
+    padding-bottom: 3mm;
+    margin: 0 0 10mm;
+  }}
+  .toc-intro {{ color: var(--ink-soft); font-size: 9.7pt; margin: 0 0 6mm; text-align: left; }}
+  .toc-list {{ list-style: none; margin: 0; padding: 0; }}
+  .toc-list li {{ margin: 0; padding: 1.25mm 0; break-inside: avoid; }}
+  .toc-list a {{ color: var(--ink); display: block; text-decoration: none; }}
+  .toc-list a::after {{ content: leader('.') target-counter(attr(href), page); color: var(--muted); }}
+  .toc-list a span {{ background: #fff; padding-right: 1.5mm; }}
+  .toc-h1 {{ border-top: 1px solid #dbe3ed; font-family: "Arial", sans-serif; font-size: 10pt; font-weight: 700; margin-top: 2.2mm !important; }}
+  .toc-h2 {{ font-size: 9.2pt; padding-left: 6mm !important; }}
+  .toc-h3 {{ color: var(--ink-soft); font-size: 8.5pt; padding-left: 12mm !important; }}
+  .toc-empty {{ color: var(--muted); font-style: italic; }}
+
+  .content {{ counter-reset: figure; }}
+  h1, h2, h3, h4, h5, h6 {{
+    color: var(--navy);
+    font-family: "Arial", sans-serif;
+    text-align: left;
+    break-after: avoid-page;
+    page-break-after: avoid;
+    break-inside: avoid;
+  }}
+  h1 {{ font-size: 20pt; line-height: 1.2; border-bottom: 1.2mm solid var(--blue); margin: 12mm 0 6mm; padding: 0 0 3mm; }}
+  h1:first-child {{ margin-top: 0; }}
+  h2 {{ font-size: 15.5pt; line-height: 1.25; border-bottom: .35mm solid var(--rule); margin: 9mm 0 4mm; padding-bottom: 1.8mm; }}
+  h3 {{ color: #244f7f; font-size: 12.4pt; line-height: 1.3; margin: 7mm 0 3mm; }}
+  h4 {{ color: #35516f; font-size: 10.8pt; margin: 5mm 0 2mm; }}
+  h5, h6 {{ color: #465f78; font-size: 10pt; margin: 4mm 0 1.5mm; }}
+  p {{ margin: 0 0 3.4mm; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }}
+  li {{ margin: 1.2mm 0; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }}
+  ul, ol {{ margin: 2.5mm 0 4mm; padding-left: 7mm; }}
+  strong {{ color: #172b43; font-weight: 700; }}
+  em {{ color: #354d65; }}
+  a {{ color: #1f5f99; }}
+  hr {{ border: 0; border-top: .3mm solid #cbd5e1; margin: 8mm 0; }}
+  blockquote {{
+    margin: 4mm 0 5mm;
+    padding: 3.5mm 5mm;
+    background: var(--panel);
+    border-left: 1.2mm solid var(--blue);
+    color: #334155;
+    font-style: normal;
+    break-inside: avoid;
+  }}
+  blockquote p:last-child {{ margin-bottom: 0; }}
+  code {{
+    color: #17365d;
+    background: #eef3f8;
+    border: .2mm solid #d5e0eb;
+    border-radius: 1mm;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 8.7pt;
+    padding: .2mm .8mm;
+    overflow-wrap: anywhere;
+  }}
+  pre {{
+    background: #f3f6f9;
+    border: .25mm solid #cbd5e1;
+    border-left: 1.1mm solid var(--blue);
+    margin: 4mm 0 5mm;
+    padding: 4mm;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    break-inside: auto;
+  }}
+  pre code {{ background: transparent; border: 0; color: #1e293b; padding: 0; }}
+  table, .report-table {{
+    width: 100%;
+    border-collapse: collapse;
+    border: .25mm solid #aebdce;
+    font-family: "Arial", sans-serif;
+    font-size: 8.25pt;
+    line-height: 1.35;
+    margin: 4mm 0 6mm;
+  }}
+  thead {{ display: table-header-group; }}
+  th {{ background: var(--navy); color: #fff; font-weight: 700; padding: 2.4mm 2.7mm; text-align: left; vertical-align: top; }}
+  td {{ border: .2mm solid #cbd5e1; color: #29384a; padding: 2.2mm 2.7mm; text-align: left; vertical-align: top; overflow-wrap: anywhere; }}
+  tbody tr:nth-child(even) td {{ background: #f5f8fb; }}
+  tr {{ break-inside: avoid; page-break-inside: avoid; }}
+  td code {{ white-space: normal; }}
+  img {{
+    display: block;
+    max-width: 92%;
+    max-height: 190mm;
+    width: auto;
+    height: auto;
+    margin: 5mm auto;
+    border: .25mm solid #cbd5e1;
+    padding: 2mm;
+    break-inside: avoid;
+  }}
+  .table-landscape {{ page: landscape; }}
+  .table-landscape table {{ break-inside: auto; }}
+  .document-control {{
+    margin-top: 12mm;
+    border-top: .6mm solid var(--navy);
+    padding-top: 4mm;
+    color: var(--muted);
+    font-family: "Arial", sans-serif;
+    font-size: 8.3pt;
+    break-inside: avoid;
+  }}
+  .document-control strong {{ color: var(--navy); }}
+  @media screen {{
+    body {{ background: #e8edf3; padding: 20px; }}
+    .cover, .toc, .content {{ background: #fff; box-shadow: 0 2px 14px rgba(15, 23, 42, .14); margin: 0 auto 20px; max-width: 210mm; }}
+    .toc, .content {{ padding: 22mm 20mm; }}
+  }}
+</style>
+</head>
+<body>
+  <section class="cover">
+    <div class="cover-kicker">Documentación técnica de programación</div>
+    <h1>{safe_project_name}</h1>
+    <p class="cover-subtitle">Arquitectura, componentes, interfaces, datos, despliegue y calidad del software</p>
+    <div class="cover-rule"></div>
+    <p class="cover-purpose">Documento de referencia elaborado a partir del análisis estático del código fuente. Su contenido consolida la estructura técnica detectada y está preparado para revisión, mantenimiento y entrega formal.</p>
+    <div class="cover-spacer"></div>
+    <div class="cover-meta">
+      <div><strong>Proyecto</strong>{safe_project_name}</div>
+      <div><strong>Fecha de emisión</strong>{generated_at}</div>
+      <div><strong>Lenguaje principal</strong>{primary_lang}</div>
+      <div><strong>Evaluación</strong><span class="cover-score">Score de Calidad: {score}/100 · {score_label}</span></div>
+      <div><strong>Alcance analizado</strong>{total_files} archivos · {total_functions} funciones</div>
+      <div><strong>Elementos técnicos</strong>{total_classes} clases · {total_endpoints} endpoints</div>
+    </div>
+    <div class="cover-footer">AutoDocs · Edición técnica para revisión y entrega</div>
+  </section>
+
+  <section class="toc">
+    <h1 class="toc-title">Tabla de Contenidos · Índice general</h1>
+    <p class="toc-intro">La numeración de página se calcula sobre la edición final del documento.</p>
+    {toc_html}
+  </section>
+
+  <main class="content">
+    {html_body}
+    <div class="document-control">
+      <strong>Control del documento.</strong> Proyecto: {safe_project_name}. Fecha de emisión: {generated_at}. Alcance: {total_files} archivos, {total_functions} funciones, {total_classes} clases y {total_endpoints} endpoints. Evaluación de calidad: {score}/100.
+    </div>
+  </main>
+</body>
+</html>"""
+
     def _is_valid_pdf(self, path: Path) -> bool:
         try:
             with path.open('rb') as f:
@@ -647,6 +1036,7 @@ class DocumentExporter:
 
         # 1st attempt: WeasyPrint
         try:
+            _configure_native_libraries()
             from weasyprint import HTML
             HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
             if output_path.exists() and output_path.stat().st_size > 1000 and self._is_valid_pdf(output_path):
