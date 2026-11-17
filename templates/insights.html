@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insights — AutoDocs AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta alineada con analysis.html (primary #38bdf8, secondary #818cf8) */
+        :root {
+            --bg: #f1f5f9; --surface: #ffffff; --surface-2: #f8fafc; --border: rgba(100,116,139,.25);
+            --text: #0f172a; --muted: #475569; --primary: #0284c7; --secondary: #4f46e5;
+            --good: #166534; --good-bg: #dcfce7; --warn: #854d0e; --warn-bg: #fef9c3;
+            --orange: #9a3412; --orange-bg: #ffedd5; --bad: #b91c1c; --bad-bg: #fee2e2;
+            --code-bg: #e2e8f0;
+        }
+        html.dark {
+            --bg: #0f1418; --surface: rgba(15,20,24,.75); --surface-2: #151c22; --border: rgba(255,255,255,.1);
+            --text: #e2e8f0; --muted: #94a3b8; --primary: #38bdf8; --secondary: #818cf8;
+            --good: #4ade80; --good-bg: #14532d; --warn: #fbbf24; --warn-bg: #713f12;
+            --orange: #fdba74; --orange-bg: #7c2d12; --bad: #fca5a5; --bad-bg: #7f1d1d;
+            --code-bg: #1e293b;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Geist', system-ui, sans-serif; line-height: 1.5; }
+        code, pre, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 64px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+        .icon-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 12px; padding: 8px 12px; cursor: pointer; font: inherit; display: inline-flex; align-items: center; gap: 6px; }
+        .icon-btn .material-symbols-outlined { font-size: 18px; }
+        h1 { font-size: 1.6rem; margin: 0 0 4px; }
+        .sub { color: var(--muted); font-size: .9rem; margin: 0 0 20px; }
+        .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; }
+        .tab { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); padding: 10px 16px; cursor: pointer; font: inherit; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+        .tab[aria-selected="true"] { color: var(--primary); border-bottom-color: var(--primary); }
+        .panel[hidden] { display: none; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 18px; }
+        .card h2 { font-size: 1.05rem; margin: 0 0 12px; }
+        .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+        .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .tile .n { font-size: 1.7rem; font-weight: 700; }
+        .tile .l { color: var(--muted); font-size: .8rem; }
+        .muted { color: var(--muted); }
+        .empty { color: var(--muted); padding: 24px; text-align: center; border: 1px dashed var(--border); border-radius: 14px; }
+        .err { color: var(--bad); }
+        /* Mapa de calor */
+        .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-bottom: 12px; }
+        .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: currentColor; }
+        .heat { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .cell { border: 1px solid transparent; border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; font: inherit; color: inherit; min-height: 62px; }
+        .cell .s { font-weight: 700; font-size: 1.05rem; }
+        .cell .f { font-size: .72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+        .cell .lv { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; opacity: .85; }
+        .lv-bajo { background: var(--good-bg); color: var(--good); }
+        .lv-medio { background: var(--warn-bg); color: var(--warn); }
+        .lv-alto { background: var(--orange-bg); color: var(--orange); }
+        .lv-crítico { background: var(--bad-bg); color: var(--bad); }
+        .cell[aria-pressed="true"] { border-color: var(--text); }
+        .detail { margin-top: 14px; padding: 12px 14px; background: var(--surface-2); border-radius: 12px; font-size: .9rem; }
+        table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+        td.num, th.num { text-align: right; }
+        .table-scroll { overflow-x: auto; }
+        pre { background: var(--code-bg); border-radius: 10px; padding: 10px 12px; overflow-x: auto; font-size: .78rem; margin: 8px 0 0; }
+        .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+        .pill.good { background: var(--good-bg); color: var(--good); }
+        .pill.bad { background: var(--bad-bg); color: var(--bad); }
+        .pill.neutral { background: var(--code-bg); color: var(--muted); }
+        .dup { border-top: 1px solid var(--border); padding: 12px 0; }
+        .dup:first-child { border-top: 0; padding-top: 0; }
+        /* Comparación */
+        .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; margin-bottom: 14px; }
+        .controls label { display: flex; flex-direction: column; gap: 4px; font-size: .78rem; color: var(--muted); }
+        select, input[type=text] { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font: inherit; max-width: 100%; }
+        .btn { background: var(--primary); color: #00131c; border: 0; border-radius: 10px; padding: 9px 16px; font: inherit; font-weight: 700; cursor: pointer; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .chart { width: 100%; height: auto; display: block; }
+        .chart text { fill: var(--muted); font-size: 11px; font-family: 'Geist', sans-serif; }
+        .chart .grid { stroke: var(--border); stroke-width: 1; }
+        .chart .line { fill: none; stroke: var(--primary); stroke-width: 2.5; }
+        .chart .pt { fill: var(--surface-2); stroke: var(--primary); stroke-width: 2; cursor: pointer; }
+        .chart .pt.sel { fill: var(--primary); }
+        .score-hero { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+        .score-hero .big { font-size: 2.2rem; font-weight: 700; }
+        .changes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+        .changes h3 { font-size: .92rem; margin: 0 0 8px; }
+        ul.list { margin: 0; padding-left: 18px; font-size: .86rem; }
+        ul.list li { margin-bottom: 4px; word-break: break-word; }
+        /* Chat */
+        .chat-log { display: flex; flex-direction: column; gap: 10px; min-height: 260px; max-height: 55vh; overflow-y: auto; padding: 4px; }
+        .msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: .92rem; word-break: break-word; }
+        .msg.user { align-self: flex-end; background: var(--primary); color: #00131c; }
+        .msg.bot { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--border); }
+        .msg code { background: var(--code-bg); padding: 1px 5px; border-radius: 5px; font-size: .82em; }
+        .srcs { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: .78rem; color: var(--muted); }
+        .srcs div { margin-top: 2px; }
+        .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+        .chip { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: .82rem; cursor: pointer; }
+        .chat-form { display: flex; gap: 8px; }
+        .chat-form input { flex: 1; min-width: 0; }
+        .badge { font-size: .68rem; color: var(--muted); margin-top: 6px; }
+        @media (prefers-reduced-motion: no-preference) { .cell, .chip, .btn { transition: transform .1s; } .cell:hover, .chip:hover { transform: translateY(-1px); } }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header class="topbar">
+        <a href="#" id="back-link" class="icon-btn"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span> Volver al análisis</a>
+        <button id="themeButton" class="icon-btn" aria-label="Cambiar tema"><span id="themeIcon" class="material-symbols-outlined" aria-hidden="true">light_mode</span></button>
+    </header>
+
+    <h1 id="proj-title">Insights del proyecto</h1>
+    <p class="sub">Salud del código, evolución entre análisis y preguntas sobre tu documentación.</p>
+
+    <div class="tabs" role="tablist" aria-label="Secciones">
+        <button class="tab" role="tab" id="tab-health" aria-controls="panel-health" aria-selected="true" data-tab="health"><span class="material-symbols-outlined" aria-hidden="true">monitor_heart</span> Salud del código</button>
+        <button class="tab" role="tab" id="tab-compare" aria-controls="panel-compare" aria-selected="false" data-tab="compare"><span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span> Comparar versiones</button>
+        <button class="tab" role="tab" id="tab-chat" aria-controls="panel-chat" aria-selected="false" data-tab="chat"><span class="material-symbols-outlined" aria-hidden="true">forum</span> Chat con la documentación</button>
+    </div>
+
+    <!-- ═════ SALUD DEL CÓDIGO ═════ -->
+    <section class="panel" id="panel-health" role="tabpanel" aria-labelledby="tab-health">
+        <div id="health-body"><div class="empty">Cargando…</div></div>
+    </section>
+
+    <!-- ═════ COMPARAR VERSIONES ═════ -->
+    <section class="panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+        <div id="compare-body"><div class="empty">Cargando…</div></div>
+    </section>
+
+    <!-- ═════ CHAT ═════ -->
+    <section class="panel" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" hidden>
+        <div class="card">
+            <h2>Pregunta sobre tu proyecto</h2>
+            <div class="chat-log" id="chat-log" aria-live="polite">
+                <div class="msg bot">Hola, puedo responder con base en el análisis de este proyecto: funciones, clases, endpoints, archivos y la documentación generada. Por ejemplo: <em>¿dónde se valida el login?</em></div>
+            </div>
+            <div class="chips" id="chat-chips"></div>
+            <form class="chat-form" id="chat-form" autocomplete="off">
+                <input type="text" id="chat-input" maxlength="500" placeholder="Escribe tu pregunta…" aria-label="Pregunta" required>
+                <button class="btn" id="chat-send" type="submit">Enviar</button>
+            </form>
+            <div class="badge" id="chat-note"></div>
+        </div>
+    </section>
+</div>
+
+<script>
+(function () {
+    'use strict';
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/'; return; }
+    const projectId = {{ project_id|tojson }};
+    const API = '/api/insights/' + encodeURIComponent(projectId);
+    const authHeaders = () => ({ 'Authorization': 'Bearer ' + token });
+
+    document.getElementById('back-link').href = '/analysis/' + encodeURIComponent(projectId);
+
+    // ── Utilidades ───────────────────────────────────────────────
+    const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmtDate = (iso) => { try { return new Date(iso).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return iso || ''; } };
+    const fmtNum = (n) => (n == null ? '—' : (Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100)));
+    const signed = (d) => (d == null ? '—' : (d > 0 ? '+' : '') + fmtNum(d));
+    async function api(path, opts) {
+        const res = await fetch(API + path, Object.assign({ headers: authHeaders() }, opts || {}));
+        if (res.status === 401) { window.location.href = '/'; throw new Error('Sesión expirada'); }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || ('Error ' + res.status));
+        return data;
+    }
+    const empty = (msg) => '<div class="empty">' + esc(msg) + '</div>';
+
+    // ── Tema (theme.js usa #themeButton/#themeIcon) ──────────────
+    // ── Pestañas ────────────────────────────────────────────────
+    const loaded = {};
+    function showTab(name) {
+        document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+        document.querySelectorAll('.panel').forEach((p) => { p.hidden = p.id !== 'panel-' + name; });
+        if (!loaded[name]) { loaded[name] = true; ({ health: loadHealth, compare: loadCompare, chat: initChat })[name](); }
+        try { history.replaceState(null, '', '#' + name); } catch (e) { /* ignorar */ }
+    }
+    document.querySelectorAll('.tab').forEach((t) => {
+        t.addEventListener('click', () => showTab(t.dataset.tab));
+        t.addEventListener('keydown', (ev) => {
+            const tabs = Array.from(document.querySelectorAll('.tab'));
+            const i = tabs.indexOf(t);
+            const next = ev.key === 'ArrowRight' ? tabs[(i + 1) % tabs.length] : ev.key === 'ArrowLeft' ? tabs[(i - 1 + tabs.length) % tabs.length] : null;
+            if (next) { ev.preventDefault(); next.focus(); showTab(next.dataset.tab); }
+        });
+    });
+
+    fetch('/api/projects/' + encodeURIComponent(projectId), { headers: authHeaders() })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((p) => { if (p && p.name) document.getElementById('proj-title').textContent = p.name + ' — Insights'; })
+        .catch(() => {});
+
+    // ═════════════ 1. SALUD DEL CÓDIGO ═════════════
+    const LEVELS = [['bajo', '0–24'], ['medio', '25–49'], ['alto', '50–74'], ['crítico', '75–100']];
+
+    async function loadHealth() {
+        const box = document.getElementById('health-body');
+        try {
+            const data = await api('/health');
+            if (!data.available) { box.innerHTML = empty(data.reason || 'Sin datos todavía.'); return; }
+            renderHealth(box, data.health);
+        } catch (e) { box.innerHTML = '<div class="empty err">' + esc(e.message) + '</div>'; }
+    }
+
+    function renderHealth(box, h) {
+        const s = h.summary || {};
+        const heat = (h.heatmap && h.heatmap.files) || [];
+        const dead = (h.dead_code && h.dead_code.items) || [];
+        const dups = (h.duplicates && h.duplicates.items) || [];
+        const tile = (n, l) => '<div class="tile"><div class="n">' + esc(fmtNum(n)) + '</div><div class="l">' + esc(l) + '</div></div>';
+
+        let html = '<div class="tiles">' + tile(s.dead_code, 'Posible código muerto') + tile(s.duplicate_groups, 'Bloques duplicados')
+            + tile(s.duplicated_lines, 'Líneas duplicadas') + tile(s.hot_files, 'Archivos en zona alta/crítica')
+            + tile(s.avg_heat, 'Riesgo de complejidad promedio') + '</div>';
+
+        html += '<div class="card"><h2>Mapa de calor de complejidad</h2>'
+            + '<div class="legend">' + LEVELS.map(([l, r]) => '<span class="lv-' + l + '" style="background:none">' + esc(l) + ' (' + r + ')</span>').join('') + '</div>';
+        if (!heat.length) html += empty('No hay archivos de código para mostrar.');
+        else {
+            html += '<div class="heat" id="heat-grid">' + heat.map((e, i) =>
+                '<button type="button" class="cell lv-' + esc(e.level) + '" data-i="' + i + '" aria-pressed="false" title="' + esc(e.file) + '">'
+                + '<span class="s">' + esc(e.score) + '</span> <span class="lv">' + esc(e.level) + '</span>'
+                + '<span class="f">' + esc(e.file) + '</span></button>').join('') + '</div>'
+                + '<div class="detail" id="heat-detail">Selecciona un archivo para ver el detalle.</div>';
+            if (h.heatmap.total_files > heat.length) html += '<p class="muted" style="font-size:.8rem">Mostrando los ' + heat.length + ' archivos más complejos de ' + h.heatmap.total_files + '.</p>';
+        }
+        html += '</div>';
+
+        html += '<div class="card"><h2>Posible código muerto</h2>';
+        if (!dead.length) html += empty('No se detectó código sin uso.');
+        else {
+            html += '<div class="table-scroll"><table><thead><tr><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Confianza</th></tr></thead><tbody>'
+                + dead.map((d) => '<tr><td><code>' + esc(d.name) + '</code></td><td>' + esc(d.kind) + '</td><td class="mono">' + esc(d.file) + ':' + esc(d.line)
+                    + '</td><td><span class="pill ' + (d.confidence === 'alta' ? 'good' : 'neutral') + '">' + esc(d.confidence) + '</span></td></tr>').join('')
+                + '</tbody></table></div>';
+        }
+        if (h.dead_code && h.dead_code.note) html += '<p class="muted" style="font-size:.8rem;margin-bottom:0">' + esc(h.dead_code.note) + '</p>';
+        html += '</div>';
+
+        html += '<div class="card"><h2>Código duplicado</h2>';
+        if (!dups.length) html += empty('No se detectaron bloques duplicados.');
+        else html += dups.map((g) => '<div class="dup"><strong>' + esc(g.lines) + ' líneas</strong> repetidas en ' + esc(g.occurrences.length) + ' lugares'
+            + '<ul class="list">' + g.occurrences.map((o) => '<li class="mono">' + esc(o.file) + ':' + esc(o.start_line) + '–' + esc(o.end_line) + '</li>').join('') + '</ul>'
+            + (g.snippet ? '<pre>' + esc(g.snippet) + '</pre>' : '') + '</div>').join('');
+        html += '</div>';
+        box.innerHTML = html;
+
+        const grid = document.getElementById('heat-grid');
+        if (grid) grid.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.cell');
+            if (!btn) return;
+            grid.querySelectorAll('.cell').forEach((c) => c.setAttribute('aria-pressed', String(c === btn)));
+            const e = heat[Number(btn.dataset.i)];
+            document.getElementById('heat-detail').innerHTML = '<strong class="mono">' + esc(e.file) + '</strong><br>'
+                + 'Riesgo <strong>' + esc(e.score) + '/100</strong> (' + esc(e.level) + ') · ' + esc(e.language) + ' · ' + esc(e.loc) + ' líneas · ' + esc(e.functions) + ' funciones<br>'
+                + 'Complejidad total: ' + esc(fmtNum(e.total_complexity)) + (e.max_complexity != null ? ' · máxima en una función: ' + esc(e.max_complexity) : '')
+                + (e.source === 'estimado' ? '<br><span class="muted">Complejidad estimada contando ramas (este lenguaje no se analiza con AST).</span>' : '');
+        });
+    }
+
+    // ═════════════ 2. COMPARAR VERSIONES ═════════════
+    let snapshots = [];
+
+    async function loadCompare() {
+        const box = document.getElementById('compare-body');
+        try {
+            const data = await api('/history');
+            snapshots = data.snapshots || [];
+            if (snapshots.length < 2) {
+                box.innerHTML = '<div class="card"><h2>Evolución del score</h2>' + trendChart(snapshots) + '</div>'
+                    + empty('Se necesitan al menos dos análisis para comparar. Vuelve a analizar el proyecto después de hacer cambios, o conecta el webhook de GitHub para que se analice en cada push.');
+                return;
+            }
+            const opt = (s, i) => '<option value="' + esc(s.id) + '">' + esc(fmtDate(s.created_at)) + ' · ' + esc(s.label || (s.source && s.source.event) || 'manual') + ' · score ' + esc(s.quality_score) + '</option>';
+            box.innerHTML = '<div class="card"><h2>Evolución del score de calidad</h2>' + trendChart(snapshots) + '</div>'
+                + '<div class="card"><h2>Comparar dos análisis</h2><div class="controls">'
+                + '<label>Desde (anterior)<select id="cmp-from">' + snapshots.map(opt).join('') + '</select></label>'
+                + '<label>Hasta (nuevo)<select id="cmp-to">' + snapshots.map(opt).join('') + '</select></label>'
+                + '<button class="btn" id="cmp-go" type="button">Comparar</button></div><div id="cmp-result"></div></div>';
+            const from = document.getElementById('cmp-from'), to = document.getElementById('cmp-to');
+            from.value = snapshots[snapshots.length - 2].id;
+            to.value = snapshots[snapshots.length - 1].id;
+            document.getElementById('cmp-go').addEventListener('click', runCompare);
+            box.querySelectorAll('.pt').forEach((p) => p.addEventListener('click', () => { to.value = p.dataset.id; runCompare(); }));
+            runCompare();
+        } catch (e) { box.innerHTML = '<div class="empty err">' + esc(e.message) + '</div>'; }
+    }
+
+    function trendChart(points) {
+        if (!points.length) return empty('Todavía no hay análisis guardados.');
+        const W = 640, H = 220, L = 34, R = 14, T = 12, B = 30;
+        const x = (i) => (points.length === 1 ? (L + W - R) / 2 : L + (i * (W - L - R)) / (points.length - 1));
+        const y = (v) => T + (1 - Math.max(0, Math.min(100, v)) / 100) * (H - T - B);
+        let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Evolución del score de calidad: ' + points.map((p) => p.quality_score).join(', ') + '">';
+        [0, 25, 50, 75, 100].forEach((v) => { svg += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v + '</text>'; });
+        if (points.length > 1) svg += '<polyline class="line" points="' + points.map((p, i) => x(i) + ',' + y(p.quality_score)).join(' ') + '"/>';
+        points.forEach((p, i) => {
+            svg += '<circle class="pt" data-id="' + esc(p.id) + '" cx="' + x(i) + '" cy="' + y(p.quality_score) + '" r="6"><title>' + esc(fmtDate(p.created_at)) + ' — score ' + esc(p.quality_score)
+                + (p.label ? ' — commit ' + esc(p.label) : '') + '</title></circle>';
+        });
+        svg += '<text x="' + L + '" y="' + (H - 8) + '">' + esc(fmtDate(points[0].created_at)) + '</text>';
+        if (points.length > 1) svg += '<text x="' + (W - R) + '" y="' + (H - 8) + '" text-anchor="end">' + esc(fmtDate(points[points.length - 1].created_at)) + '</text>';
+        return svg + '</svg><p class="muted" style="font-size:.8rem;margin:6px 0 0">Haz clic en un punto para compararlo con el análisis elegido en «Desde».</p>';
+    }
+
+    async function runCompare() {
+        const out = document.getElementById('cmp-result');
+        const from = document.getElementById('cmp-from').value, to = document.getElementById('cmp-to').value;
+        if (from === to) { out.innerHTML = empty('Elige dos análisis distintos.'); return; }
+        let a = snapshots.findIndex((s) => s.id === from), b = snapshots.findIndex((s) => s.id === to), f = from, t = to;
+        if (a > b) { f = to; t = from; }
+        out.innerHTML = empty('Comparando…');
+        document.querySelectorAll('.pt').forEach((p) => p.classList.toggle('sel', p.dataset.id === t));
+        try {
+            const data = await api('/compare?from=' + encodeURIComponent(f) + '&to=' + encodeURIComponent(t));
+            out.innerHTML = renderDiff(data.diff);
+        } catch (e) { out.innerHTML = '<div class="empty err">' + esc(e.message) + '</div>'; }
+    }
+
+    function deltaPill(d, lowerIsBetter) {
+        if (!d) return '<span class="pill neutral">sin cambio</span>';
+        const good = lowerIsBetter ? d < 0 : d > 0;
+        return '<span class="pill ' + (good ? 'good' : 'bad') + '">' + esc(signed(d)) + '</span>';
+    }
+    const list = (items, render, limit) => items.length
+        ? '<ul class="list">' + items.slice(0, limit || 12).map((i) => '<li>' + render(i) + '</li>').join('') + (items.length > (limit || 12) ? '<li class="muted">… y ' + (items.length - (limit || 12)) + ' más</li>' : '') + '</ul>'
+        : '<span class="muted">Ninguno</span>';
+    const c = (t) => '<code>' + esc(t) + '</code>';
+
+    function renderDiff(d) {
+        const sc = d.score, fn = d.functions, cl = d.classes, ep = d.endpoints;
+        let html = '<div class="score-hero"><span class="big">' + esc(fmtNum(sc.old)) + ' → ' + esc(fmtNum(sc.new)) + '</span>' + deltaPill(sc.delta, false)
+            + '<span class="muted">' + esc(fmtDate(d.from.created_at)) + ' → ' + esc(fmtDate(d.to.created_at)) + '</span></div>';
+        const rows = Object.keys(d.totals).map((k) => { const m = d.totals[k];
+            return '<tr><td>' + esc(m.label) + '</td><td class="num">' + esc(fmtNum(m.old)) + '</td><td class="num">' + esc(fmtNum(m.new)) + '</td><td class="num">' + deltaPill(m.delta, m.lower_is_better) + '</td></tr>'; }).join('');
+        html += '<div class="table-scroll" style="margin:14px 0"><table><thead><tr><th>Métrica</th><th class="num">Antes</th><th class="num">Ahora</th><th class="num">Cambio</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+        if (!d.summary.has_changes) html += empty('No hay cambios en funciones, clases, endpoints ni score entre estos análisis.');
+        html += '<div class="changes">'
+            + '<div><h3>Endpoints agregados (' + ep.counts.added + ')</h3>' + list(ep.added, (e) => c(e.method + ' ' + e.path) + ' <span class="muted">' + esc(e.file) + '</span>')
+            + '<h3 style="margin-top:12px">Endpoints eliminados (' + ep.counts.removed + ')</h3>' + list(ep.removed, (e) => c(e.method + ' ' + e.path)) + '</div>'
+            + '<div><h3>Clases agregadas (' + cl.counts.added + ')</h3>' + list(cl.added, (x) => c(x.name) + ' <span class="muted">' + esc(x.file) + '</span>')
+            + '<h3 style="margin-top:12px">Clases eliminadas (' + cl.counts.removed + ')</h3>' + list(cl.removed, (x) => c(x.name) + ' <span class="muted">' + esc(x.file) + '</span>')
+            + '<h3 style="margin-top:12px">Clases modificadas (' + cl.counts.changed + ')</h3>' + list(cl.changed, (x) => c(x.name) + ' — ' + esc(x.changes.join('; '))) + '</div>'
+            + '<div><h3>Funciones agregadas (' + fn.counts.added + ')</h3>' + list(fn.added, (f) => c(f.name) + ' <span class="muted">' + esc(f.file) + '</span>')
+            + '<h3 style="margin-top:12px">Funciones eliminadas (' + fn.counts.removed + ')</h3>' + list(fn.removed, (f) => c(f.name) + ' <span class="muted">' + esc(f.file) + '</span>') + '</div>'
+            + '<div><h3>Funciones modificadas (' + fn.counts.changed + ')</h3>' + list(fn.changed, (f) => c(f.name) + ' — ' + esc(f.changes.join('; ')))
+            + '<h3 style="margin-top:12px">Funciones movidas (' + fn.counts.moved + ')</h3>' + list(fn.moved, (m) => c(m.name) + ' <span class="muted">' + esc(m.from) + ' → ' + esc(m.to) + '</span>') + '</div>';
+        if (d.hotspots.length) html += '<div><h3>Archivos más complejos que cambiaron</h3>' + list(d.hotspots, (h) => c(h.file) + ': ' + esc(fmtNum(h.old)) + ' → ' + esc(fmtNum(h.new))) + '</div>';
+        return html + '</div>';
+    }
+
+    // ═════════════ 3. CHAT ═════════════
+    const chatHistory = [];
+    const SUGGESTIONS = ['¿Dónde se valida el login?', '¿Qué endpoints expone el proyecto?', '¿Qué clases hay en el proyecto?', '¿Qué funciones son las más complejas?'];
+
+    // Formato mínimo y seguro: primero se escapa todo y después se marcan `código` y **negritas**.
+    function renderText(text) {
+        return esc(text).replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    }
+    function addMsg(role, html) {
+        const log = document.getElementById('chat-log');
+        const el = document.createElement('div');
+        el.className = 'msg ' + role;
+        el.innerHTML = html;
+        log.appendChild(el);
+        log.scrollTop = log.scrollHeight;
+        return el;
+    }
+    function initChat() {
+        const chips = document.getElementById('chat-chips');
+        SUGGESTIONS.forEach((q) => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'chip'; b.textContent = q;
+            b.addEventListener('click', () => { document.getElementById('chat-input').value = q; ask(q); });
+            chips.appendChild(b);
+        });
+        document.getElementById('chat-form').addEventListener('submit', (ev) => {
+            ev.preventDefault();
+            const input = document.getElementById('chat-input');
+            const q = input.value.trim();
+            if (q) ask(q);
+        });
+    }
+    async function ask(question) {
+        const input = document.getElementById('chat-input'), send = document.getElementById('chat-send');
+        input.value = ''; input.disabled = true; send.disabled = true;
+        addMsg('user', esc(question));
+        const pending = addMsg('bot', '<span class="muted">Buscando en el análisis…</span>');
+        try {
+            const data = await api('/chat', {
+                method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+                body: JSON.stringify({ question: question, history: chatHistory.slice(-6) }),
+            });
+            let html = renderText(data.answer);
+            if (data.sources && data.sources.length) {
+                html += '<div class="srcs"><strong>Fuentes</strong>' + data.sources.slice(0, 5).map((s) =>
+                    '<div>• ' + esc(s.title) + (s.file ? ' — <span class="mono">' + esc(s.file) + (s.line ? ':' + esc(s.line) : '') + '</span>' : '') + '</div>').join('') + '</div>';
+            }
+            html += '<div class="badge">' + (data.mode === 'ai' ? 'Respuesta redactada con IA a partir del análisis' : 'Resultado de búsqueda en el análisis (sin IA)') + '</div>';
+            pending.innerHTML = html;
+            chatHistory.push({ role: 'user', content: question }, { role: 'assistant', content: String(data.answer).slice(0, 600) });
+            document.getElementById('chat-note').textContent = data.ai_available_in_plan === false
+                ? 'Tu plan actual no incluye respuestas con IA: se muestran los resultados de búsqueda del análisis.' : '';
+        } catch (e) {
+            pending.innerHTML = '<span class="err">' + esc(e.message) + '</span>';
+        } finally {
+            input.disabled = false; send.disabled = false; input.focus();
+        }
+    }
+
+    const initial = (location.hash || '').replace('#', '');
+    showTab(['health', 'compare', 'chat'].includes(initial) ? initial : 'health');
+})();
+</script>
+<script src="/static/theme.js"></script>
+</body>
+</html>

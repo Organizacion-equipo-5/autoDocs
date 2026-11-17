@@ -1,0 +1,99 @@
+name: 'AutoDocs AI'
+description: 'Analiza el código, regenera la documentación y comenta en el PR cómo cambió el score de calidad.'
+author: 'Organizacion-equipo-5'
+branding:
+  icon: 'file-text'
+  color: 'blue'
+
+inputs:
+  command:
+    description: "'pr' compara la rama base con el PR y comenta el score; 'docs' genera el documento Markdown del proyecto."
+    required: false
+    default: 'pr'
+  path:
+    description: 'Carpeta del proyecto a analizar (relativa al repositorio).'
+    required: false
+    default: '.'
+  fail-under:
+    description: "(pr) Falla el job si el score del PR es menor a este valor. Vacío = sin umbral."
+    required: false
+    default: ''
+  max-drop:
+    description: "(pr) Falla el job si el score baja más de estos puntos respecto a la rama base. Vacío = sin umbral."
+    required: false
+    default: ''
+  comment:
+    description: "(pr) 'true' publica o actualiza el comentario en el PR."
+    required: false
+    default: 'true'
+  ignore:
+    description: 'Carpetas a excluir del análisis, separadas por comas (por nombre, p. ej. docs,examples).'
+    required: false
+    default: ''
+  output:
+    description: "(docs) Archivo Markdown a generar, relativo al repositorio."
+    required: false
+    default: 'docs/AUTODOCS.md'
+  github-token:
+    description: 'Token para comentar en el PR. Necesita permiso pull-requests: write.'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  score:
+    description: 'Score de calidad (0-100) del código analizado.'
+    value: ${{ steps.run.outputs.score }}
+  base-score:
+    description: '(pr) Score de la rama base.'
+    value: ${{ steps.run.outputs.base_score }}
+  delta:
+    description: '(pr) Cambio del score respecto a la rama base.'
+    value: ${{ steps.run.outputs.delta }}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - id: run
+      shell: bash
+      env:
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_FAIL_UNDER: ${{ inputs.fail-under }}
+        INPUT_MAX_DROP: ${{ inputs.max-drop }}
+        INPUT_COMMENT: ${{ inputs.comment }}
+        INPUT_IGNORE: ${{ inputs.ignore }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -euo pipefail
+        script="$GITHUB_ACTION_PATH/scripts/autodocs_ci.py"
+
+        # Los valores de las entradas se pasan por variables de entorno (nunca interpolados
+        # en el script) para evitar inyección de comandos desde un PR.
+        ignore_args=()
+        if [ -n "$INPUT_IGNORE" ]; then ignore_args=(--ignore "$INPUT_IGNORE"); fi
+
+        case "$INPUT_COMMAND" in
+          pr)
+            args=(pr --path "$INPUT_PATH")
+            if [ -n "$INPUT_FAIL_UNDER" ]; then args+=(--fail-under "$INPUT_FAIL_UNDER"); fi
+            if [ -n "$INPUT_MAX_DROP" ]; then args+=(--max-drop "$INPUT_MAX_DROP"); fi
+            if [ "$INPUT_COMMENT" != "true" ]; then args+=(--no-comment); fi
+            python "$script" "${args[@]}" "${ignore_args[@]}"
+            ;;
+          docs)
+            case "$INPUT_OUTPUT" in
+              /*|*..*) echo "::error::'output' debe ser una ruta relativa dentro del repositorio."; exit 2 ;;
+            esac
+            snapshot="$RUNNER_TEMP/autodocs-snapshot.json"
+            python "$script" analyze --path "$INPUT_PATH" --out "$snapshot" "${ignore_args[@]}"
+            python "$script" report --snapshot "$snapshot" --path "$INPUT_PATH" \
+              --out "$INPUT_OUTPUT" --name "${GITHUB_REPOSITORY:-}" "${ignore_args[@]}"
+            ;;
+          *)
+            echo "::error::command debe ser 'pr' o 'docs' (recibido: $INPUT_COMMAND)"; exit 2 ;;
+        esac

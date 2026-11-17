@@ -1,0 +1,37 @@
+name: AutoDocs — regenerar documentación
+
+# En cada push a main regenera docs/AUTODOCS.md y lo deja como artefacto del workflow
+# y en el resumen del job. Para versionarlo en el repo ver docs/GITHUB_INTEGRATION.md.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/AUTODOCS.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Generar documentación
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: AutoDocs
+        id: autodocs
+        uses: ./
+        with:
+          command: docs
+          ignore: uploads,exports
+          output: docs/AUTODOCS.md
+
+      - name: Mostrar en el resumen del job
+        run: cat docs/AUTODOCS.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guardar documentación
+        uses: actions/upload-artifact@v4
+        with:
+          name: autodocs-documentacion
+          path: docs/AUTODOCS.md

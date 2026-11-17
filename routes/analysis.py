@@ -7,6 +7,8 @@ from services.doc_generator import DocGenerator
 from services.etl_pipeline import ETLPipeline
 from services.ai_enhancer import AIEnhancer
 from services.ml_analyzer import run_ml_analysis
+from services.code_health import analyze_code_health
+from services.analysis_history import save_snapshot
 from utils.project_timeout import mark_stale_projects_as_error
 from datetime import datetime
 from utils.usage_tracker import log_usage_manual
@@ -17,15 +19,19 @@ import re
 analysis_bp = Blueprint('analysis', __name__)
 
 
-def run_analysis_async(project_id, project_path, db):
+def run_analysis_async(project_id, project_path, db, source=None):
     """
     Ejecuta el análisis en segundo plano.
 
     1. Marca el proyecto como "analyzing".
     2. Analiza el código con ProjectAnalyzer.
     3. Genera documentación con DocGenerator.
-    4. Guarda los resultados en la base de datos.
-    5. Actualiza el estado del proyecto a "completed" o "error".
+    4. Calcula código muerto, duplicado y mapa de calor de complejidad.
+    5. Guarda los resultados y un snapshot en el historial (para comparar versiones).
+    6. Actualiza el estado del proyecto a "completed" o "error".
+
+    `source` (opcional) describe qué disparó el análisis, p. ej. un push de GitHub:
+    {"event": "push", "sha": "...", "branch": "main"}.
     """
     try:
         from pathlib import Path
@@ -52,6 +58,11 @@ def run_analysis_async(project_id, project_path, db):
 
         analyzer = ProjectAnalyzer(project_path)
         results = analyzer.analyze()
+
+        try:
+            results["code_health"] = analyze_code_health(project_path, results)
+        except Exception as e:
+            print(f"[DEBUG] Code health failed: {e}")
 
         mining_results = {}
         try:
@@ -90,6 +101,11 @@ def run_analysis_async(project_id, project_path, db):
             },
             upsert=True
         )
+
+        try:
+            save_snapshot(db, project_id, results, source=source)
+        except Exception as e:
+            print(f"[DEBUG] Snapshot failed: {e}")
 
         db.projects.update_one({"_id": project_id}, {
             "$set": {

@@ -1606,6 +1606,12 @@
                 
                 <!-- Acciones rápidas -->
                 <div class="flex gap-3 items-center">
+                    <!-- Insights: salud del código, comparar versiones y chat con la documentación -->
+                    <a href="/insights/{{ project_id|urlencode }}" class="btn-contributors" style="text-decoration:none;">
+                        <span class="material-symbols-outlined text-[18px]">insights</span>
+                        Insights
+                    </a>
+
                     <!-- Botón para abrir modal de colaboradores -->
                     <button onclick="openContributorsModal()" class="btn-contributors">
                         <span class="material-symbols-outlined text-[18px]">group</span>

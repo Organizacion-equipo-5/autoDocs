@@ -1,0 +1,30 @@
+name: AutoDocs — calidad del PR
+
+# Comenta en cada Pull Request cómo cambia el score de calidad respecto a la rama base.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  quality:
+    name: Reporte de calidad
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código (historial completo para comparar con la rama base)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: AutoDocs
+        uses: ./
+        with:
+          command: pr
+          # uploads/ y exports/ contienen proyectos de usuarios y archivos generados, no código de la app
+          ignore: uploads,exports
+          # Descomenta para exigir un mínimo o impedir caídas fuertes:
+          # fail-under: 60
+          # max-drop: 5

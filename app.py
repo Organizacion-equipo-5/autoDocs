@@ -21,6 +21,8 @@ def create_app():
     from routes.export import export_bp
     from routes.web import web_bp
     from routes.admin import admin_bp
+    from routes.insights import insights_bp
+    from routes.github_integration import github_bp
 
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -29,6 +31,8 @@ def create_app():
     app.register_blueprint(export_bp, url_prefix='/api/export')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(plan_recommendation_bp, url_prefix='/api/plan-recommendation')
+    app.register_blueprint(insights_bp, url_prefix='/api/insights')
+    app.register_blueprint(github_bp, url_prefix='/api/integrations/github')
     app.register_blueprint(web_bp)
 
     @app.errorhandler(404)
