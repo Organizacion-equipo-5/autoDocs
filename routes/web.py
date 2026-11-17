@@ -62,6 +62,10 @@ def admin_dashboard():
 def analysis(project_id):
     return render_template('analysis.html', project_id=project_id)
 
+@web_bp.route('/insights/<project_id>')
+def insights(project_id):
+    return render_template('insights.html', project_id=project_id)
+
 @web_bp.route('/docs/<project_id>')
 def docs(project_id):
     return render_template('docs.html', project_id=project_id)

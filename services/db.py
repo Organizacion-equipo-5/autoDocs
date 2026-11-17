@@ -19,6 +19,9 @@ def init_db_indexes(app):
         db.database_analysis_history.create_index(
             [("user_id", 1), ("created_at", -1)]
         )
+        db.analysis_snapshots.create_index(
+            [("project_id", 1), ("created_at", 1)]
+        )
         db.technical_manuals.create_index(
             [("user_id", 1), ("project_id", 1), ("created_at", -1)]
         )

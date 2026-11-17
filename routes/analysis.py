@@ -7,11 +7,12 @@ from services.doc_generator import DocGenerator
 from services.etl_pipeline import ETLPipeline
 from services.ai_enhancer import AIEnhancer
 from services.ml_analyzer import run_ml_analysis
-# from services.code_health import analyze_code_health  # Módulo no implementado aún
-# from services.analysis_history import save_snapshot  # Módulo no implementado aún
+from services.code_health import analyze_code_health
+from services.analysis_history import save_snapshot
 from utils.project_timeout import mark_stale_projects_as_error
 from datetime import datetime
 from utils.usage_tracker import log_usage_manual
+import os
 import threading
 import requests
 import re
@@ -59,14 +60,12 @@ def run_analysis_async(project_id, project_path, db, source=None):
         analyzer = ProjectAnalyzer(project_path)
         results = analyzer.analyze()
 
-        # Código de health analysis desactivado hasta implementar el módulo
-        # try:
-        #     results["code_health"] = analyze_code_health(project_path, results)
-        # except Exception as e:
-        #     print(f"[DEBUG] Code health failed: {e}")
+        try:
+            results["code_health"] = analyze_code_health(project_path, results)
+        except Exception as e:
+            print(f"[DEBUG] Code health failed: {e}")
 
         # Opcional: mejoras con IA (desactivado por defecto para velocidad)
-        import os
         use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
         if use_ai:
             mining_results = {}
@@ -107,11 +106,10 @@ def run_analysis_async(project_id, project_path, db, source=None):
             upsert=True
         )
 
-        # Historial de snapshots desactivado hasta implementar el módulo
-        # try:
-        #     save_snapshot(db, project_id, results, source=source)
-        # except Exception as e:
-        #     print(f"[DEBUG] Snapshot failed: {e}")
+        try:
+            save_snapshot(db, project_id, results, source=source)
+        except Exception as e:
+            print(f"[DEBUG] Snapshot failed: {e}")
 
         db.projects.update_one({"_id": project_id}, {
             "$set": {
