@@ -34,14 +34,14 @@ def get_projects():
             stale_count = mark_stale_projects_as_error(db)
             if stale_count:
                 print(f"[DEBUG] get_projects - {stale_count} proyecto(s) marcados como error por timeout")
-            projects = list(db.projects.find({}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1, "error_message": 1}))
+            projects = list(db.projects.find({}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1, "error_message": 1, "github_url": 1, "github_branch": 1}))
         else:
             # 🔑 Revisa y marca como error SOLO los proyectos atascados de este usuario
             stale_count = mark_stale_projects_as_error(db, {"user_id": user_id})
             if stale_count:
                 print(f"[DEBUG] get_projects - {stale_count} proyecto(s) del usuario marcados como error por timeout")
             # Usuario normal, solo sus proyectos
-            projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1, "error_message": 1}))
+            projects = list(db.projects.find({"user_id": user_id}, {"_id": 1, "name": 1, "language": 1, "status": 1, "created_at": 1, "stats": 1, "error_message": 1, "github_url": 1, "github_branch": 1}))
         
         print(f"[DEBUG] get_projects - found {len(projects)} projects")
         for p in projects:

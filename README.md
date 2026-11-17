@@ -159,9 +159,10 @@ El generador produce un paquete con varias secciones:
 - Extracción del propietario, nombre, descripción y metadatos del repositorio.
 - Consulta de colaboradores mediante la API de GitHub.
 - Sincronización del proyecto para volver a analizar cambios.
-- Historial de commits y ramas, con análisis automático al recibir eventos del repositorio.
+- Selección de la rama que se analiza desde el dashboard.
+- Sondeo automático de la rama seleccionada cada 5 minutos mientras el dashboard está abierto (planes Pro y Enterprise); no requiere configurar un webhook.
 
-Para activar la actividad automática, configura `GITHUB_WEBHOOK_SECRET` en el entorno de AutoDocs y agrega un webhook en **Settings → Webhooks → Add webhook** del repositorio:
+El webhook sigue disponible como alternativa para recibir cambios al instante. Para activarlo, configura `GITHUB_WEBHOOK_SECRET` en el entorno de AutoDocs y agrega un webhook en **Settings → Webhooks → Add webhook** del repositorio:
 
 1. Usa la URL pública `https://<tu-dominio>/api/integrations/github/webhook` y elige `application/json`.
 2. Usa el mismo valor de `GITHUB_WEBHOOK_SECRET` como **Secret**.
@@ -363,7 +364,8 @@ python scripts/create_admin.py \
 | `SECRET_KEY` | Sí | Clave de Flask para sesiones y formularios |
 | `JWT_SECRET_KEY` | Sí | Clave con la que se firman los tokens JWT |
 | `MONGO_URI` | Sí | Cadena de conexión de MongoDB |
-| `GITHUB_WEBHOOK_SECRET` | No | Secreto para verificar la firma de los webhooks de GitHub y activar la actividad automática |
+| `GITHUB_TOKEN` | No | Token opcional para aumentar el límite de consultas a la API de GitHub |
+| `GITHUB_WEBHOOK_SECRET` | No | Secreto para verificar la firma del webhook opcional de GitHub |
 | `FLASK_DEBUG` | No | `True` o `False`; por defecto `True` en desarrollo |
 | `UPLOAD_FOLDER` | No | Carpeta de proyectos cargados; por defecto `./uploads` |
 | `EXPORT_FOLDER` | No | Carpeta de documentos generados; por defecto `./exports` |
@@ -455,6 +457,9 @@ curl -X POST http://localhost:5000/api/projects/ \
 | `GET` | `/api/insights/:id/history` | Historial de snapshots y tendencia |
 | `GET` | `/api/insights/:id/activity` | Actividad reciente de commits y creación de ramas |
 | `GET` | `/api/insights/:id/compare` | Comparación de dos snapshots |
+| `GET` | `/api/integrations/github/projects/:id/branches` | Listar ramas disponibles |
+| `POST` | `/api/integrations/github/projects/:id/branch` | Seleccionar y analizar una rama |
+| `POST` | `/api/integrations/github/projects/:id/poll` | Revisar cambios en la rama seleccionada |
 | `POST` | `/api/integrations/github/webhook` | Recibir eventos `push` y `create` de GitHub (firma HMAC-SHA256) |
 
 ### Análisis

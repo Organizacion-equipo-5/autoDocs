@@ -294,11 +294,47 @@ def test_github_webhook_rejects_invalid_signature(github_webhook_client):
     assert worker_calls == []
 
 
+def test_github_webhook_ignores_unselected_branch(github_webhook_client, monkeypatch):
+    client, activities, worker_calls = github_webhook_client
+    project = {
+        "_id": "project-1",
+        "github_url": "https://github.com/owner/repo",
+        "github_branch": "main",
+    }
+    monkeypatch.setattr(
+        github_integration,
+        "get_db",
+        lambda: SimpleNamespace(
+            projects=SimpleNamespace(find=lambda query: [project]),
+            github_activity=activities,
+        ),
+    )
+    payload = {
+        "ref": "refs/heads/feature/other",
+        "after": "a" * 40,
+        "repository": {"html_url": "https://github.com/owner/repo"},
+        "commits": [{"id": "a" * 40, "message": "change"}],
+    }
+    body = json.dumps(payload).encode()
+
+    response = client.post(
+        "/api/integrations/github/webhook",
+        data=body,
+        content_type="application/json",
+        headers=_webhook_headers(body, "push"),
+    )
+
+    assert response.status_code == 202
+    assert response.get_json()["reason"] == "branch_not_selected"
+    assert worker_calls == []
+
+
 def test_github_activity_worker_checks_out_commit_and_runs_analysis(tmp_path, monkeypatch):
     sha = "b" * 40
     git_calls = []
     analysis_calls = []
     activity_updates = []
+    project_updates = []
 
     def fake_run(command, **kwargs):
         git_calls.append(command)
@@ -322,6 +358,7 @@ def test_github_activity_worker_checks_out_commit_and_runs_analysis(tmp_path, mo
         analysis_snapshots=SimpleNamespace(find_one=lambda query: None),
         projects=SimpleNamespace(find_one=lambda *args: {"status": "completed"}),
     )
+    db.projects.update_one = lambda query, update: project_updates.append(update)
     project = {"_id": "project-1", "file_path": str(tmp_path)}
 
     github_integration._process_github_activity(
@@ -334,6 +371,40 @@ def test_github_activity_worker_checks_out_commit_and_runs_analysis(tmp_path, mo
         str(tmp_path),
         {"event": "push", "branch": "main", "sha": sha, "label": f"main@{sha[:7]}"},
     )]
+    assert activity_updates[-1] == {"status": "completed"}
+    assert project_updates[-1] == {
+        "$set": {"github_branch": "main", "github_sha": sha},
+        "$unset": {"github_pending_sha": ""},
+    }
+
+
+def test_github_activity_worker_completes_project_for_existing_snapshot(tmp_path, monkeypatch):
+    sha = "d" * 40
+    activity_updates = []
+    project_updates = []
+
+    def fake_run(command, **kwargs):
+        output = sha + "\n" if command[1] == "rev-parse" else ""
+        return SimpleNamespace(returncode=0, stdout=output, stderr="")
+
+    monkeypatch.setattr(github_integration.subprocess, "run", fake_run)
+    db = SimpleNamespace(
+        github_activity=SimpleNamespace(
+            update_many=lambda query, update: activity_updates.append(update["$set"])
+        ),
+        analysis_snapshots=SimpleNamespace(find_one=lambda query: {"_id": "snapshot-1"}),
+        projects=SimpleNamespace(
+            update_one=lambda query, update: project_updates.append(update)
+        ),
+    )
+
+    github_integration._process_github_activity(
+        db, {"_id": "project-1", "file_path": str(tmp_path)},
+        "main", sha, "branch_switch", ["activity-1"],
+    )
+
+    assert project_updates[-1]["$set"]["status"] == "completed"
+    assert project_updates[-1]["$unset"] == {"github_pending_sha": ""}
     assert activity_updates[-1] == {"status": "completed"}
 
 

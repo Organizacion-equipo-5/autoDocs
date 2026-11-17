@@ -200,12 +200,20 @@ def get_results(project_id):
     if not project:
         return jsonify({"error": "Project not found"}), 404
 
+    status = project.get("status", "pending")
+    if status != "completed":
+        return jsonify({
+            "status": status,
+            "results": None,
+            "error": project.get("error_message"),
+        }), 200
+
     result = db.analysis_results.find_one({"project_id": project_id})
     if not result:
-        return jsonify({"status": project.get("status", "pending"), "results": None}), 200
+        return jsonify({"status": status, "results": None}), 200
 
     return jsonify({
-        "status": "completed",
+        "status": status,
         "results": result['results'],
         "documentation": result['documentation']
     }), 200

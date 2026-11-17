@@ -1669,6 +1669,13 @@
                 </div>
             </div>
 
+            <div id="analysis-error-state" style="display:none;" class="stagger-in">
+                <div class="glass p-8 rounded-2xl border border-red-500/30">
+                    <h3 class="text-xl font-semibold text-red-500">No se pudo completar el análisis</h3>
+                    <p id="analysis-error-message" class="text-sm mt-2 text-on-surface-variant"></p>
+                </div>
+            </div>
+
             <!-- ============================================================
             RESULTADOS DEL ANÁLISIS
             ============================================================ -->
@@ -1945,6 +1952,7 @@
         // ID del proyecto desde la URL (último segmento de la ruta)
         const projectId = window.location.pathname.split('/').pop();
         let pollInterval;               // Intervalo para verificar el análisis
+        let projectStatusRequestPending = false;
         let cachedResults = null;       // Resultados del análisis en caché
         let cachedContributors = null;  // Datos de colaboradores en caché
         let isRefreshingContributors = false;
@@ -2841,37 +2849,59 @@
          * Carga la información básica del proyecto desde el backend.
          */
         async function loadProject() {
-            const res = await fetch(`/api/projects/${projectId}`, { headers: headers() });
-            if (!res.ok) return;
-            const p = await res.json();
-            document.getElementById('proj-title').textContent = p.name;
-            document.getElementById('proj-lang').textContent = p.language || 'Desconocido';
-            document.getElementById('proj-date').textContent = new Date(p.created_at).toLocaleDateString('es-MX');
-            
-            // Actualizar badge de estado
-            const statusEl = document.getElementById('proj-status');
-            const labels = { 
-                completed:'✓ Completado', 
-                analyzing:'⟳ Analizando', 
-                pending:'○ Pendiente', 
-                error:'✕ Error' 
-            };
-            statusEl.textContent = labels[p.status] || p.status;
-            statusEl.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase border ' +
-                (p.status==='completed' ? 'bg-green-100 text-green-700 border-green-200' :
-                 p.status==='analyzing' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                 p.status==='pending' ? 'bg-surface-container-high text-on-surface-variant border-outline-variant/20' :
-                 'bg-red-100 text-red-700 border-red-200');
+            if (projectStatusRequestPending) return;
+            projectStatusRequestPending = true;
+            try {
+                const res = await fetch(`/api/projects/${projectId}`, { headers: headers() });
+                if (!res.ok) return;
+                const p = await res.json();
+                document.getElementById('proj-title').textContent = p.name;
+                document.getElementById('proj-lang').textContent = p.language || 'Desconocido';
+                document.getElementById('proj-date').textContent = new Date(p.created_at).toLocaleDateString('es-MX');
 
-            // Si el proyecto está en análisis o pendiente, mostrar estado de carga
-            if (p.status==='analyzing' || p.status==='pending') {
-                document.getElementById('loading-state').style.display = 'block';
-                document.getElementById('results-section').style.display = 'none';
-                if (!pollInterval) pollInterval = setInterval(loadResults, 3000);
-            } else if (p.status==='completed') {
-                document.getElementById('loading-state').style.display = 'none';
-                clearInterval(pollInterval);
-                loadResults();
+                const statusEl = document.getElementById('proj-status');
+                const loadingState = document.getElementById('loading-state');
+                const errorState = document.getElementById('analysis-error-state');
+                const resultsSection = document.getElementById('results-section');
+                const labels = {
+                    completed: '✓ Completado',
+                    analyzing: '⟳ Analizando',
+                    pending: '○ Pendiente',
+                    error: '✕ Error'
+                };
+                statusEl.textContent = labels[p.status] || p.status;
+                statusEl.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase border ' +
+                    (p.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
+                     p.status === 'analyzing' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                     p.status === 'pending' ? 'bg-surface-container-high text-on-surface-variant border-outline-variant/20' :
+                     'bg-red-100 text-red-700 border-red-200');
+
+                if (p.status === 'analyzing' || p.status === 'pending') {
+                    loadingState.style.display = 'block';
+                    errorState.style.display = 'none';
+                    resultsSection.style.display = 'none';
+                    document.getElementById('export-btns').style.display = 'none';
+                    if (!pollInterval) pollInterval = setInterval(loadProject, 3000);
+                } else if (p.status === 'completed') {
+                    loadingState.style.display = 'none';
+                    errorState.style.display = 'none';
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                    await loadResults();
+                } else if (p.status === 'error') {
+                    loadingState.style.display = 'none';
+                    resultsSection.style.display = 'none';
+                    document.getElementById('export-btns').style.display = 'none';
+                    errorState.style.display = 'block';
+                    document.getElementById('analysis-error-message').textContent =
+                        p.error_message || 'Ocurrió un error inesperado durante el análisis.';
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+            } catch (error) {
+                console.error('Error al consultar el estado del análisis:', error);
+            } finally {
+                projectStatusRequestPending = false;
             }
         }
 
@@ -2883,8 +2913,22 @@
             const res = await fetch(`/api/analysis/${projectId}/results`, { headers: headers() });
             if (!res.ok) return;
             const data = await res.json();
-            if (data.status!=='completed' || !data.results) return;
-            clearInterval(pollInterval);
+            if (data.status !== 'completed') {
+                if (data.status === 'pending' || data.status === 'analyzing') {
+                    document.getElementById('loading-state').style.display = 'block';
+                    document.getElementById('results-section').style.display = 'none';
+                    document.getElementById('export-btns').style.display = 'none';
+                    if (!pollInterval) pollInterval = setInterval(loadProject, 3000);
+                }
+                return;
+            }
+            if (!data.results) {
+                document.getElementById('analysis-error-state').style.display = 'block';
+                document.getElementById('analysis-error-message').textContent =
+                    'El análisis terminó, pero no se encontraron resultados.';
+                return;
+            }
+            document.getElementById('loading-state').style.display = 'none';
             renderResults(data.results);
             document.getElementById('export-btns').style.display = 'flex';
         }

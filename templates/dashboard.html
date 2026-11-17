@@ -199,6 +199,20 @@
         html.dark .text-on-surface-variant { color: #94a3b8 !important; }
         html.dark .text-primary { color: #38bdf8 !important; }
         html.dark .text-secondary { color: #818cf8 !important; }
+        #syncBranchSelect {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+            color-scheme: light;
+        }
+        #syncBranchSelect option { background: #f8fafc; color: #0f172a; }
+        html.dark #syncBranchSelect {
+            background-color: #1b242c !important;
+            color: #e2e8f0 !important;
+            border-color: #475569 !important;
+            color-scheme: dark;
+        }
+        html.dark #syncBranchSelect option { background: #1b242c; color: #e2e8f0; }
         html.dark .border-outline-variant\/20 { border-color: rgba(148, 163, 184, 0.2) !important; }
         html.dark .bg-primary\/15 { background: rgba(56, 189, 248, 0.15) !important; }
         html.dark .bg-primary\/5 { background: rgba(56, 189, 248, 0.05) !important; }
@@ -1283,6 +1297,11 @@ CUERPO PRINCIPAL DE LA PÁGINA
                     <span class="material-symbols-outlined text-primary text-3xl">sync</span>
                 </div>
                 <p id="syncConfirmMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Esto reemplazará los datos actuales con los del repositorio.</p>
+                <label for="syncBranchSelect" class="w-full text-sm text-on-surface-variant">Rama de GitHub</label>
+                <select id="syncBranchSelect" class="w-full rounded-xl border border-outline-variant/30 bg-surface p-3 text-on-surface">
+                    <option value="">Cargando ramas...</option>
+                </select>
+                <p class="text-xs text-on-surface-variant/60" style="color: #BFBDBD;">La rama seleccionada se revisa cada 5 minutos mientras el dashboard esté abierto.</p>
             </div>
             <div class="flex gap-3">
                 <button onclick="closeSyncConfirmModal()" class="flex-1 py-3 border border-outline-variant/20 text-on-surface-variant rounded-xl font-semibold hover:border-primary hover:text-primary transition-all">
@@ -2152,8 +2171,8 @@ CUERPO PRINCIPAL DE LA PÁGINA
                                     <span class="material-symbols-outlined">edit</span>
                                 </button>
                                 <!-- Botón Sincronizar (solo para planes Pro/Enterprise) -->
-                                ${canSync ? `
-                                <button onclick="event.stopPropagation(); syncProject('${p._id}', '${p.name}')" class="action-icon" title="Actualizar desde GitHub">
+                                ${canSync && p.github_url ? `
+                                <button onclick="event.stopPropagation(); syncProject('${p._id}', '${p.name}', event)" class="action-icon" title="Actualizar desde GitHub">
                                     <span class="material-symbols-outlined">sync</span>
                                 </button>
                                 ` : ''}
@@ -2376,16 +2395,40 @@ CUERPO PRINCIPAL DE LA PÁGINA
          * @param {string} projectId - ID del proyecto.
          * @param {string} projectName - Nombre del proyecto.
          */
-        async function syncProject(projectId, projectName) {
-            syncButtonElement = event.target.closest('button');
+        async function syncProject(projectId, projectName, clickEvent) {
+            syncButtonElement = clickEvent.currentTarget;
             document.getElementById('syncConfirmMessage').textContent = 'Actualizar "' + projectName + '" desde GitHub? Esto reemplazará los datos actuales con los del repositorio.';
             
             const confirmBtn = document.getElementById('confirmSyncBtn');
             confirmBtn.dataset.projectId = projectId;
             confirmBtn.dataset.projectName = projectName;
+
+            const branchSelect = document.getElementById('syncBranchSelect');
+            branchSelect.innerHTML = '<option value="">Cargando ramas...</option>';
+            confirmBtn.disabled = true;
             
             document.getElementById('syncConfirmModal').classList.remove('hidden');
             document.getElementById('syncConfirmModal').classList.add('flex');
+            try {
+                const res = await fetch('/api/integrations/github/projects/' + projectId + '/branches', {
+                    headers: authHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'No se pudieron cargar las ramas');
+                branchSelect.innerHTML = '';
+                data.branches.forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch;
+                    option.textContent = branch;
+                    option.selected = branch === data.selected;
+                    branchSelect.appendChild(option);
+                });
+                if (!data.branches.length) throw new Error('El repositorio no tiene ramas disponibles');
+                confirmBtn.disabled = false;
+            } catch (error) {
+                closeSyncConfirmModal();
+                alert(error.message);
+            }
         }
 
         /**
@@ -2395,6 +2438,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
             document.getElementById('syncConfirmModal').classList.add('hidden');
             document.getElementById('syncConfirmModal').classList.remove('flex');
             syncButtonElement = null;
+            document.getElementById('confirmSyncBtn').disabled = false;
         }
 
         /**
@@ -2404,41 +2448,65 @@ CUERPO PRINCIPAL DE LA PÁGINA
         async function confirmSync() {
             const confirmBtn = document.getElementById('confirmSyncBtn');
             const projectId = confirmBtn.dataset.projectId;
-            const projectName = confirmBtn.dataset.projectName;
+            const branch = document.getElementById('syncBranchSelect').value;
             
-            if (!projectId) return;
-
-            closeSyncConfirmModal();
+            if (!projectId || !branch) return;
 
             const btn = syncButtonElement;
+            closeSyncConfirmModal();
+
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
             }
 
             try {
-                const res = await fetch('/api/projects/' + projectId + '/sync', {
+                const res = await fetch('/api/integrations/github/projects/' + projectId + '/branch', {
                     method: 'POST',
-                    headers: authHeaders()
+                    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch })
                 });
 
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('syncSuccessMessage').textContent = data.message || 'Proyecto sincronizado correctamente. El análisis comenzará pronto.';
-                    document.getElementById('syncSuccessModal').classList.remove('hidden');
-                    document.getElementById('syncSuccessModal').classList.add('flex');
-                    await loadProjects(); // Recargar proyectos
-                } else {
-                    const error = await res.json();
-                    alert(error.error || 'Error al actualizar el proyecto');
-                }
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Error al actualizar el proyecto');
+                document.getElementById('syncSuccessMessage').textContent = data.message || 'Proyecto sincronizado correctamente. El análisis comenzará pronto.';
+                document.getElementById('syncSuccessModal').classList.remove('hidden');
+                document.getElementById('syncSuccessModal').classList.add('flex');
+                await loadProjects();
             } catch (e) {
-                alert('Error al actualizar el proyecto: ' + e.message);
+                alert(e.message);
             } finally {
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = '<span class="material-symbols-outlined">sync</span>';
                 }
+            }
+        }
+
+        let githubPolling = false;
+        async function pollGithubProjects() {
+            if (githubPolling || document.hidden || (localStorage.getItem('userPlan') || 'free') === 'free') return;
+            const projectsToPoll = allProjects.filter(project => project.github_url);
+            if (!projectsToPoll.length) return;
+            githubPolling = true;
+            try {
+                for (const project of projectsToPoll) {
+                    const res = await fetch('/api/integrations/github/projects/' + project._id + '/poll', {
+                        method: 'POST',
+                        headers: authHeaders()
+                    });
+                    if (res.ok) {
+                        const result = await res.json();
+                        if (result.status === 'queued') await loadProjects();
+                    } else if (res.status !== 409) {
+                        const error = await res.json();
+                        console.warn('No se pudo revisar la rama de ' + project.name + ':', error.error);
+                    }
+                }
+            } catch (error) {
+                console.warn('Error al revisar cambios de GitHub:', error);
+            } finally {
+                githubPolling = false;
             }
         }
 
@@ -2770,6 +2838,8 @@ CUERPO PRINCIPAL DE LA PÁGINA
             loadProjects();
             // Recargar proyectos cada 10 segundos (para actualizar estados)
             setInterval(loadProjects, 10000);
+            setTimeout(pollGithubProjects, 15000);
+            setInterval(pollGithubProjects, 300000);
         });
 
         // Cerrar modales con la tecla Escape

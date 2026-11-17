@@ -67,17 +67,19 @@ def list_snapshots(db, project_id):
 
 def trend(snapshots):
     """Project snapshots into the fields needed for a history chart."""
-    return [
-        {
+    points = []
+    for snapshot in snapshots:
+        source = snapshot.get("source") or {}
+        points.append({
             "id": str(snapshot["_id"]),
             "created_at": snapshot.get("created_at"),
             "quality_score": snapshot.get("quality_score", 0),
             "primary_language": snapshot.get("primary_language", "unknown"),
             "totals": snapshot.get("totals", {}),
-            "source": snapshot.get("source", {}),
-        }
-        for snapshot in snapshots
-    ]
+            "source": source,
+            "label": _source_label(source),
+        })
+    return points
 
 
 def _select_snapshot(snapshots, selector):
@@ -128,6 +130,60 @@ def _number(value):
     return value if isinstance(value, (int, float)) else 0
 
 
+def _function_changes(old, new):
+    changes = []
+    old_complexity = _number(old.get("complexity", 1))
+    new_complexity = _number(new.get("complexity", 1))
+    if old_complexity != new_complexity:
+        changes.append(f"Complejidad {old_complexity} → {new_complexity}")
+    if old.get("params") != new.get("params"):
+        changes.append("Parámetros modificados")
+    if old.get("is_async") != new.get("is_async"):
+        changes.append("Cambió a asíncrona" if new.get("is_async") else "Cambió a síncrona")
+    if old.get("docstring") != new.get("docstring"):
+        changes.append("Documentación modificada")
+    if old.get("code_snippet") != new.get("code_snippet"):
+        changes.append("Código modificado")
+    return changes
+
+
+def _class_changes(old, new):
+    changes = []
+    if old.get("bases") != new.get("bases"):
+        changes.append("Clases base modificadas")
+    if old.get("methods") != new.get("methods"):
+        changes.append("Métodos modificados")
+    if old.get("docstring") != new.get("docstring"):
+        changes.append("Documentación modificada")
+    if old.get("code_snippet") != new.get("code_snippet"):
+        changes.append("Código modificado")
+    return changes
+
+
+def _source_label(source):
+    label = source.get("label")
+    if label:
+        return label
+    branch = source.get("branch")
+    sha = source.get("sha")
+    short_sha = sha[:7] if isinstance(sha, str) and sha else None
+    if branch:
+        return branch + ("@" + short_sha if short_sha else "")
+    return short_sha or source.get("event") or "manual"
+
+
+def _snapshot_info(snapshot):
+    source = snapshot.get("source") or {}
+    return {
+        "id": str(snapshot.get("_id", "")),
+        "created_at": snapshot.get("created_at"),
+        "quality_score": snapshot.get("quality_score", 0),
+        "primary_language": snapshot.get("primary_language", "unknown"),
+        "source": source,
+        "label": _source_label(source),
+    }
+
+
 def diff_snapshots(old, new):
     """Compare two snapshots using the response shape consumed by CI reports."""
     old_score = _number(old.get("quality_score", 0))
@@ -162,17 +218,83 @@ def diff_snapshots(old, new):
     }
     changed = []
     for key in sorted(old_functions.keys() & new_functions.keys()):
-        before = _number(old_functions[key].get("complexity", 1))
-        after = _number(new_functions[key].get("complexity", 1))
-        if before != after:
+        old_function = old_functions[key]
+        new_function = new_functions[key]
+        changes = _function_changes(old_function, new_function)
+        if changes:
+            before = _number(old_function.get("complexity", 1))
+            after = _number(new_function.get("complexity", 1))
             changed.append({
-                "name": new_functions[key].get("name", ""),
-                "file": new_functions[key].get("file", ""),
+                "name": new_function.get("name", ""),
+                "file": new_function.get("file", ""),
                 "old_complexity": before,
                 "new_complexity": after,
                 "complexity_delta": after - before,
+                "changes": changes,
             })
     functions["changed"] = changed
+    old_unmatched = functions["removed"]
+    new_unmatched = functions["added"]
+    old_name_counts = {}
+    new_name_counts = {}
+    for function in old_unmatched:
+        name = function.get("name")
+        old_name_counts[name] = old_name_counts.get(name, 0) + 1
+    for function in new_unmatched:
+        name = function.get("name")
+        new_name_counts[name] = new_name_counts.get(name, 0) + 1
+    moved = []
+    moved_old_keys = set()
+    moved_new_keys = set()
+    new_by_name = {
+        function.get("name"): function
+        for function in new_unmatched
+        if function.get("name") and new_name_counts.get(function.get("name")) == 1
+    }
+    for function in old_unmatched:
+        name = function.get("name")
+        if name and old_name_counts.get(name) == 1 and name in new_by_name:
+            target = new_by_name[name]
+            moved.append({
+                "name": name,
+                "from": function.get("file", ""),
+                "to": target.get("file", ""),
+            })
+            moved_old_keys.add(_symbol_key(function, ("name", "file")))
+            moved_new_keys.add(_symbol_key(target, ("name", "file")))
+    functions["removed"] = [
+        item for item in old_unmatched
+        if _symbol_key(item, ("name", "file")) not in moved_old_keys
+    ]
+    functions["added"] = [
+        item for item in new_unmatched
+        if _symbol_key(item, ("name", "file")) not in moved_new_keys
+    ]
+    functions["moved"] = moved
+    functions["counts"] = {
+        "added": len(functions["added"]),
+        "removed": len(functions["removed"]),
+        "changed": len(changed),
+        "moved": len(moved),
+    }
+
+    old_classes = {
+        _symbol_key(item, ("name", "file")): item for item in old.get("classes") or []
+    }
+    new_classes = {
+        _symbol_key(item, ("name", "file")): item for item in new.get("classes") or []
+    }
+    class_changes = []
+    for key in sorted(old_classes.keys() & new_classes.keys()):
+        changes = _class_changes(old_classes[key], new_classes[key])
+        if changes:
+            class_changes.append({
+                "name": new_classes[key].get("name", ""),
+                "file": new_classes[key].get("file", ""),
+                "changes": changes,
+            })
+    classes["changed"] = class_changes
+    classes["counts"]["changed"] = len(class_changes)
 
     old_hotspots = {
         item.get("file"): item.get("score")
@@ -195,20 +317,34 @@ def diff_snapshots(old, new):
         -(item["new"] if item["new"] is not None else -1), item["file"]
     ))
 
+    summary = {
+        "functions_added": functions["counts"]["added"],
+        "functions_removed": functions["counts"]["removed"],
+        "functions_changed": functions["counts"]["changed"],
+        "functions_moved": functions["counts"]["moved"],
+        "classes_added": classes["counts"]["added"],
+        "classes_removed": classes["counts"]["removed"],
+        "classes_changed": classes["counts"]["changed"],
+        "endpoints_added": endpoints["counts"]["added"],
+        "endpoints_removed": endpoints["counts"]["removed"],
+    }
     has_changes = (
         score["delta"] != 0
         or any(metric["delta"] != 0 for metric in totals.values())
         or bool(endpoints["added"] or endpoints["removed"])
-        or bool(functions["added"] or functions["removed"] or changed)
-        or bool(classes["added"] or classes["removed"])
+        or bool(functions["added"] or functions["removed"] or changed or moved)
+        or bool(classes["added"] or classes["removed"] or class_changes)
         or bool(hotspots)
     )
+    summary["has_changes"] = has_changes
     return {
+        "from": _snapshot_info(old),
+        "to": _snapshot_info(new),
         "score": score,
         "totals": totals,
         "endpoints": endpoints,
         "functions": functions,
         "classes": classes,
         "hotspots": hotspots,
-        "summary": {"has_changes": has_changes},
+        "summary": summary,
     }
