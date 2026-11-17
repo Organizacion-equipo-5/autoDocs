@@ -386,10 +386,18 @@ def sync_project(project_id):
         return jsonify({"error": "Este proyecto no tiene URL de GitHub asociada"}), 400
 
     project_path = project.get('file_path')
-    if not project_path or not Path(project_path).exists():
-        return jsonify({"error": "Ruta del proyecto no encontrada"}), 400
-
     try:
+        # Render puede perder el almacenamiento local al reiniciar el servicio.
+        # Si la ruta guardada ya no existe, recuperar el repositorio desde GitHub.
+        if not project_path or not Path(project_path).is_dir():
+            project_path = clone_github_repo(github_url, project_id)
+            if not Path(project_path).is_dir():
+                raise ValueError("El repositorio clonado no tiene una ruta válida")
+            db.projects.update_one(
+                {"_id": project_id},
+                {"$set": {"file_path": project_path}}
+            )
+
         # Realizar git pull
         result = subprocess.run(
             ['git', 'pull'],
