@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Arquitectura de AutoDocs AI">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowBoth" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#34d399"/>
+    </marker>
+    <style>
+      .title { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 27px; font-weight: 700; fill: #f8fafc; }
+      .subtitle { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 13.5px; font-weight: 400; fill: #94a3b8; }
+      .panel { fill: #0f1a2b; stroke: #22334d; stroke-width: 1.5; }
+      .card { fill: #13203a; stroke: #263a57; stroke-width: 1.2; }
+      .label { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 10.5px; font-weight: 700; letter-spacing: 1.6px; fill: #7dd3fc; }
+      .h { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 14.5px; font-weight: 600; fill: #e2e8f0; }
+      .muted { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 10.8px; font-weight: 400; fill: #94a3b8; }
+      .chip { fill: #0b1626; stroke: #2a4060; stroke-width: 1; }
+      .chiptext { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 11.5px; font-weight: 500; fill: #cbd5e1; }
+      .flowtitle { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 12.5px; font-weight: 600; fill: #e2e8f0; }
+      .flowsub { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 10px; font-weight: 400; fill: #94a3b8; }
+      .num { font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 700; fill: #0b1220; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="800" rx="24" fill="#0b1220"/>
+
+  <text x="48" y="54" class="title">Arquitectura de AutoDocs AI</text>
+  <text x="48" y="80" class="subtitle">Aplicación Flask con análisis estático, IA generativa, machine learning y persistencia en MongoDB</text>
+
+  <!-- Cliente -->
+  <rect x="40" y="110" width="240" height="550" rx="18" class="panel"/>
+  <text x="60" y="144" class="label">CLIENTE</text>
+
+  <rect x="56" y="162" width="208" height="108" rx="12" class="card"/>
+  <circle cx="72" cy="178" r="3.5" fill="#fb7185"/>
+  <circle cx="84" cy="178" r="3.5" fill="#fbbf24"/>
+  <circle cx="96" cy="178" r="3.5" fill="#34d399"/>
+  <text x="70" y="202" class="h">Navegador web</text>
+  <text x="70" y="222" class="muted">Dashboard renderizado en servidor</text>
+  <text x="70" y="239" class="muted">Carga de ZIP o repositorio Git</text>
+  <text x="70" y="256" class="muted">Revisión de score y documentación</text>
+
+  <rect x="56" y="292" width="208" height="112" rx="12" class="card"/>
+  <text x="70" y="316" class="label">ENTREGABLES</text>
+  <rect x="70" y="328" width="56" height="26" rx="7" class="chip"/>
+  <text x="98" y="345" text-anchor="middle" class="chiptext">PDF</text>
+  <rect x="132" y="328" width="56" height="26" rx="7" class="chip"/>
+  <text x="160" y="345" text-anchor="middle" class="chiptext">HTML</text>
+  <rect x="194" y="328" width="56" height="26" rx="7" class="chip"/>
+  <text x="222" y="345" text-anchor="middle" class="chiptext">MD</text>
+  <text x="70" y="376" class="muted">README, diagramas de clases y</text>
+  <text x="70" y="392" class="muted">reporte de calidad del proyecto</text>
+
+  <rect x="56" y="424" width="208" height="90" rx="12" class="card"/>
+  <text x="70" y="448" class="label">SESIÓN</text>
+  <text x="70" y="472" class="h">JWT con vigencia de 24 h</text>
+  <text x="70" y="491" class="muted">Registro, login, perfil y</text>
+  <text x="70" y="506" class="muted">recuperación por código SMTP</text>
+
+  <text x="70" y="558" class="muted">Interfaz responsive con tema</text>
+  <text x="70" y="574" class="muted">claro y oscuro</text>
+  <text x="70" y="602" class="muted">Jinja2 + Tailwind CSS +</text>
+  <text x="70" y="618" class="muted">JavaScript sin framework</text>
+
+  <!-- Flechas cliente <-> app -->
+  <line x1="264" y1="216" x2="318" y2="216" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <text x="266" y="206" class="muted">ZIP / repo</text>
+  <line x1="318" y1="348" x2="264" y2="348" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <text x="266" y="338" class="muted">descarga</text>
+
+  <!-- Aplicación Flask -->
+  <rect x="320" y="110" width="560" height="550" rx="18" class="panel"/>
+  <text x="344" y="144" class="label">APLICACIÓN FLASK 3.0</text>
+  <text x="344" y="164" class="muted">Blueprints, API REST y renderizado de plantillas</text>
+
+  <rect x="344" y="184" width="512" height="150" rx="14" class="card"/>
+  <text x="360" y="210" class="h">Rutas y blueprints</text>
+  <rect x="360" y="222" width="112" height="30" rx="8" class="chip"/>
+  <text x="416" y="242" text-anchor="middle" class="chiptext">auth</text>
+  <rect x="480" y="222" width="112" height="30" rx="8" class="chip"/>
+  <text x="536" y="242" text-anchor="middle" class="chiptext">projects</text>
+  <rect x="600" y="222" width="112" height="30" rx="8" class="chip"/>
+  <text x="656" y="242" text-anchor="middle" class="chiptext">analysis</text>
+  <rect x="720" y="222" width="112" height="30" rx="8" class="chip"/>
+  <text x="776" y="242" text-anchor="middle" class="chiptext">export</text>
+  <rect x="360" y="260" width="112" height="30" rx="8" class="chip"/>
+  <text x="416" y="280" text-anchor="middle" class="chiptext">admin</text>
+  <rect x="480" y="260" width="112" height="30" rx="8" class="chip"/>
+  <text x="536" y="280" text-anchor="middle" class="chiptext">payments</text>
+  <rect x="600" y="260" width="112" height="30" rx="8" class="chip"/>
+  <text x="656" y="280" text-anchor="middle" class="chiptext">plan-rec.</text>
+  <rect x="720" y="260" width="112" height="30" rx="8" class="chip"/>
+  <text x="776" y="280" text-anchor="middle" class="chiptext">web</text>
+
+  <rect x="344" y="350" width="512" height="170" rx="14" class="card"/>
+  <text x="360" y="376" class="h">Servicios de dominio</text>
+
+  <rect x="360" y="390" width="160" height="56" rx="10" class="chip"/>
+  <text x="372" y="414" class="chiptext" font-weight="600">ProjectAnalyzer</text>
+  <text x="372" y="431" class="muted">AST + regex y métricas</text>
+
+  <rect x="530" y="390" width="160" height="56" rx="10" class="chip"/>
+  <text x="542" y="414" class="chiptext" font-weight="600">AIEnhancer</text>
+  <text x="542" y="431" class="muted">Groq con fallback Ollama</text>
+
+  <rect x="700" y="390" width="160" height="56" rx="10" class="chip"/>
+  <text x="712" y="414" class="chiptext" font-weight="600">DocGenerator</text>
+  <text x="712" y="431" class="muted">README y PlantUML</text>
+
+  <rect x="360" y="452" width="160" height="56" rx="10" class="chip"/>
+  <text x="372" y="476" class="chiptext" font-weight="600">ML Analyzer</text>
+  <text x="372" y="493" class="muted">Regresión, PCA y árboles</text>
+
+  <rect x="530" y="452" width="160" height="56" rx="10" class="chip"/>
+  <text x="542" y="476" class="chiptext" font-weight="600">Exporter</text>
+  <text x="542" y="493" class="muted">PDF, HTML y Markdown</text>
+
+  <rect x="700" y="452" width="160" height="56" rx="10" class="chip"/>
+  <text x="712" y="476" class="chiptext" font-weight="600">ETL y planes</text>
+  <text x="712" y="493" class="muted">SQL y clústeres de uso</text>
+
+  <rect x="344" y="536" width="512" height="104" rx="14" class="card"/>
+  <text x="360" y="560" class="h">Procesamiento asíncrono</text>
+  <text x="360" y="580" class="muted">El análisis se ejecuta en hilos de Flask y no bloquea la petición.</text>
+  <text x="360" y="604" class="chiptext">pending  →  analyzing  →  completed  |  error</text>
+  <text x="360" y="624" class="muted">Archivos temporales en uploads/ y exports/; resultados en MongoDB.</text>
+
+  <!-- Integraciones -->
+  <rect x="920" y="110" width="240" height="550" rx="18" class="panel"/>
+  <text x="940" y="144" class="label">DATOS E INTEGRACIONES</text>
+
+  <rect x="936" y="162" width="208" height="82" rx="12" class="card"/>
+  <text x="952" y="184" class="h">MongoDB 7</text>
+  <text x="952" y="203" class="muted">users · projects · analysis_results</text>
+  <text x="952" y="219" class="muted">usage_logs · índices de arranque</text>
+
+  <rect x="936" y="258" width="208" height="82" rx="12" class="card"/>
+  <text x="952" y="280" class="h">GitHub API</text>
+  <text x="952" y="299" class="muted">Clonado y sincronización</text>
+  <text x="952" y="315" class="muted">Colaboradores y metadatos</text>
+
+  <rect x="936" y="354" width="208" height="82" rx="12" class="card"/>
+  <text x="952" y="376" class="h">Groq / Ollama</text>
+  <text x="952" y="395" class="muted">Rotación de API keys</text>
+  <text x="952" y="411" class="muted">Fallback local con Ollama</text>
+
+  <rect x="936" y="450" width="208" height="82" rx="12" class="card"/>
+  <text x="952" y="472" class="h">PlantUML / Kroki</text>
+  <text x="952" y="491" class="muted">Diagramas de clases</text>
+  <text x="952" y="507" class="muted">Servidor remoto o JAR local</text>
+
+  <rect x="936" y="546" width="208" height="82" rx="12" class="card"/>
+  <text x="952" y="568" class="h">PayPal</text>
+  <text x="952" y="587" class="muted">Planes free, pro y enterprise</text>
+  <text x="952" y="603" class="muted">Upgrade y cancelación</text>
+
+  <line x1="882" y1="203" x2="930" y2="203" stroke="#34d399" stroke-width="1.8" marker-start="url(#arrowBoth)" marker-end="url(#arrowBoth)"/>
+  <line x1="882" y1="299" x2="930" y2="299" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <line x1="882" y1="395" x2="930" y2="395" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <line x1="882" y1="491" x2="930" y2="491" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <line x1="882" y1="587" x2="930" y2="587" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- Flujo -->
+  <rect x="40" y="676" width="1120" height="92" rx="18" class="panel"/>
+  <text x="60" y="702" class="label">FLUJO DE USO</text>
+
+  <rect x="56" y="712" width="196" height="44" rx="11" class="card"/>
+  <circle cx="78" cy="734" r="13" fill="#38bdf8"/>
+  <text x="78" y="738" text-anchor="middle" class="num">1</text>
+  <text x="100" y="730" class="flowtitle">Subir</text>
+  <text x="100" y="745" class="flowsub">ZIP o repositorio</text>
+
+  <rect x="274" y="712" width="196" height="44" rx="11" class="card"/>
+  <circle cx="296" cy="734" r="13" fill="#818cf8"/>
+  <text x="296" y="738" text-anchor="middle" class="num">2</text>
+  <text x="318" y="730" class="flowtitle">Analizar</text>
+  <text x="318" y="745" class="flowsub">AST, regex y métricas</text>
+
+  <rect x="492" y="712" width="196" height="44" rx="11" class="card"/>
+  <circle cx="514" cy="734" r="13" fill="#34d399"/>
+  <text x="514" y="738" text-anchor="middle" class="num">3</text>
+  <text x="536" y="730" class="flowtitle">Generar</text>
+  <text x="536" y="745" class="flowsub">IA y plantillas</text>
+
+  <rect x="710" y="712" width="196" height="44" rx="11" class="card"/>
+  <circle cx="732" cy="734" r="13" fill="#fbbf24"/>
+  <text x="732" y="738" text-anchor="middle" class="num">4</text>
+  <text x="754" y="730" class="flowtitle">Exportar</text>
+  <text x="754" y="745" class="flowsub">PDF, HTML y Markdown</text>
+
+  <rect x="928" y="712" width="196" height="44" rx="11" class="card"/>
+  <circle cx="950" cy="734" r="13" fill="#fb7185"/>
+  <text x="950" y="738" text-anchor="middle" class="num">5</text>
+  <text x="972" y="730" class="flowtitle">Compartir</text>
+  <text x="972" y="745" class="flowsub">README y reportes</text>
+
+  <line x1="252" y1="734" x2="270" y2="734" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="470" y1="734" x2="488" y2="734" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="688" y1="734" x2="706" y2="734" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="906" y1="734" x2="924" y2="734" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arrow)"/>
+</svg>
