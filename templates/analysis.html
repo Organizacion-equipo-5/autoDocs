@@ -1606,6 +1606,12 @@
                 
                 <!-- Acciones rápidas -->
                 <div class="flex gap-3 items-center">
+                    <!-- Insights: salud del código y comparación entre análisis -->
+                    <a href="/insights/{{ project_id|urlencode }}" class="btn-contributors" style="text-decoration:none;">
+                        <span class="material-symbols-outlined text-[18px]">insights</span>
+                        Insights
+                    </a>
+
                     <!-- Botón para abrir modal de colaboradores -->
                     <button onclick="openContributorsModal()" class="btn-contributors">
                         <span class="material-symbols-outlined text-[18px]">group</span>
@@ -3026,6 +3032,562 @@
             loadProject(); 
         });
     </script>
+
+    <!-- ============================================================
+    CHAT DE DOCUMENTACIÓN - BURBUJA FLOTANTE
+    ============================================================ -->
+    <style>
+        /* Botón flotante del chat */
+        .doc-chat-button {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .doc-chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(56, 189, 248, 0.6);
+        }
+
+        .doc-chat-button .material-symbols-outlined {
+            color: white;
+            font-size: 28px;
+        }
+
+        /* Panel del chat */
+        .doc-chat-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 400px;
+            height: min(560px, calc(100vh - 140px));
+            max-height: min(560px, calc(100vh - 140px));
+            background: var(--color-surface, #ffffff);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            border: 1px solid var(--glass-border, rgba(148, 163, 184, 0.2));
+        }
+
+        .doc-chat-panel.open {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header del chat */
+        .doc-chat-header {
+            padding: 16px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .doc-chat-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .doc-chat-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .doc-chat-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Mensajes del chat */
+        .doc-chat-messages {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--color-background, #f1f5f9);
+        }
+
+        .doc-chat-message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .doc-chat-message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .doc-chat-message.assistant {
+            align-self: flex-start;
+            background: var(--color-surface, #ffffff);
+            color: var(--color-on-surface, #0f172a);
+            border: 1px solid var(--glass-border, rgba(148, 163, 184, 0.2));
+            border-bottom-left-radius: 4px;
+        }
+
+        .doc-chat-message.system {
+            align-self: center;
+            max-width: 100%;
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--color-on-surface-variant, #64748b);
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+
+        .doc-chat-message code {
+            font-family: ui-monospace, monospace;
+            font-size: 0.85em;
+            background: rgba(15, 23, 42, 0.08);
+            padding: 1px 5px;
+            border-radius: 5px;
+        }
+
+        .doc-chat-sources {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(148, 163, 184, 0.45);
+            font-size: 12px;
+            color: var(--color-on-surface-variant, #64748b);
+        }
+
+        .doc-chat-sources div {
+            margin-top: 2px;
+            word-break: break-word;
+        }
+
+        .doc-chat-badge {
+            margin-top: 6px;
+            font-size: 11px;
+            opacity: 0.75;
+        }
+
+        .doc-chat-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 0 16px 12px;
+            background: var(--color-background, #f1f5f9);
+        }
+
+        .doc-chat-chip {
+            background: var(--color-surface, #ffffff);
+            color: var(--color-on-surface, #0f172a);
+            border: 1px solid var(--glass-border, rgba(148, 163, 184, 0.35));
+            border-radius: 999px;
+            padding: 6px 10px;
+            font: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .doc-chat-chip:hover {
+            border-color: #38bdf8;
+        }
+
+        .doc-chat-note {
+            padding: 0 16px 8px;
+            background: var(--color-surface, #ffffff);
+            color: var(--color-on-surface-variant, #64748b);
+            font-size: 11px;
+        }
+
+        /* Input del chat */
+        .doc-chat-input-container {
+            padding: 16px;
+            background: var(--color-surface, #ffffff);
+            border-top: 1px solid var(--glass-border, rgba(148, 163, 184, 0.2));
+            display: flex;
+            gap: 8px;
+        }
+
+        .doc-chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--glass-border, rgba(148, 163, 184, 0.2));
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            background: var(--color-background, #f1f5f9);
+            color: var(--color-on-surface, #0f172a);
+            transition: border-color 0.2s;
+        }
+
+        .doc-chat-input:focus {
+            border-color: #38bdf8;
+        }
+
+        .doc-chat-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .doc-chat-send:hover {
+            transform: scale(1.05);
+        }
+
+        .doc-chat-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Indicador de escribiendo */
+        .doc-chat-typing {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: var(--color-surface, #ffffff);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border, rgba(148, 163, 184, 0.2));
+        }
+
+        .doc-chat-typing.active {
+            display: flex;
+        }
+
+        .doc-chat-typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #38bdf8;
+            animation: typing 1.4s infinite;
+        }
+
+        .doc-chat-typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .doc-chat-typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Modo oscuro */
+        html.dark .doc-chat-panel {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        html.dark .doc-chat-messages {
+            background: #0f1418;
+        }
+
+        html.dark .doc-chat-message.assistant {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        html.dark .doc-chat-input-container {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        html.dark .doc-chat-input {
+            background: #0f1418;
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        html.dark .doc-chat-typing {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        html.dark .doc-chat-message code {
+            background: #0f1418;
+        }
+
+        html.dark .doc-chat-chips {
+            background: #0f1418;
+        }
+
+        html.dark .doc-chat-chip {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        html.dark .doc-chat-note {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+    </style>
+
+    <!-- Botón flotante del chat -->
+    <button class="doc-chat-button" id="docChatButton" onclick="toggleDocChat()">
+        <span class="material-symbols-outlined">chat</span>
+    </button>
+
+    <!-- Panel del chat -->
+    <div class="doc-chat-panel" id="docChatPanel">
+        <div class="doc-chat-header">
+            <h3>Chat con la documentación</h3>
+            <button class="doc-chat-close" onclick="toggleDocChat()" aria-label="Cerrar chat">&times;</button>
+        </div>
+        <div class="doc-chat-messages" id="docChatMessages">
+            <div class="doc-chat-message system">
+                Hola, puedo responder con base en el análisis de este proyecto: funciones, clases, endpoints, archivos y la documentación generada. Por ejemplo: ¿dónde se valida el login?
+            </div>
+        </div>
+        <div class="doc-chat-chips" id="docChatChips"></div>
+        <div class="doc-chat-note" id="docChatNote"></div>
+        <div class="doc-chat-input-container">
+            <input
+                type="text"
+                class="doc-chat-input"
+                id="docChatInput"
+                placeholder="Escribe tu pregunta..."
+                onkeypress="handleDocChatKeypress(event)"
+            />
+            <button class="doc-chat-send" id="docChatSend" onclick="sendDocChatMessage()">
+                <span class="material-symbols-outlined">send</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CHAT DE DOCUMENTACIÓN
+        // ============================================================
+
+        let docChatOpen = false;
+        const docChatProjectId = {{ project_id|tojson }};
+        const docChatHistory = [];
+        const docChatSuggestions = [
+            '¿Dónde se valida el login?',
+            '¿Qué endpoints expone el proyecto?',
+            '¿Qué clases hay en el proyecto?',
+            '¿Qué funciones son las más complejas?'
+        ];
+
+        function escapeDocChat(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
+        function renderDocChatText(text) {
+            return escapeDocChat(text)
+                .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+                .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function initDocChatSuggestions() {
+            const chips = document.getElementById('docChatChips');
+            if (!chips || chips.childElementCount) return;
+            docChatSuggestions.forEach((question) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'doc-chat-chip';
+                button.textContent = question;
+                button.addEventListener('click', () => sendDocChatMessage(question));
+                chips.appendChild(button);
+            });
+        }
+
+        function toggleDocChat() {
+            const panel = document.getElementById('docChatPanel');
+            docChatOpen = !docChatOpen;
+            panel.classList.toggle('open', docChatOpen);
+
+            if (docChatOpen) {
+                initDocChatSuggestions();
+                document.getElementById('docChatInput').focus();
+            }
+        }
+
+        function handleDocChatKeypress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendDocChatMessage();
+            }
+        }
+
+        function addDocChatMessage(role, text, asHtml) {
+            const messagesContainer = document.getElementById('docChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `doc-chat-message ${role}`;
+            if (asHtml) messageDiv.innerHTML = text;
+            else messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageDiv;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('docChatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'doc-chat-typing active';
+            typingDiv.id = 'docChatTyping';
+            typingDiv.innerHTML = `
+                <div class="doc-chat-typing-dot"></div>
+                <div class="doc-chat-typing-dot"></div>
+                <div class="doc-chat-typing-dot"></div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typing = document.getElementById('docChatTyping');
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        async function sendDocChatMessage(preset) {
+            const input = document.getElementById('docChatInput');
+            const message = (preset || input.value).trim();
+
+            if (!message || input.disabled) return;
+
+            addDocChatMessage('user', message);
+            input.value = '';
+
+            input.disabled = true;
+            document.getElementById('docChatSend').disabled = true;
+            showTypingIndicator();
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    hideTypingIndicator();
+                    addDocChatMessage('system', 'Por favor, inicia sesión para usar el chat de documentación.');
+                    return;
+                }
+
+                const response = await fetch('/api/insights/' + encodeURIComponent(docChatProjectId) + '/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        question: message,
+                        history: docChatHistory.slice(-6)
+                    })
+                });
+
+                hideTypingIndicator();
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    let html = renderDocChatText(data.answer || 'No encontré una respuesta en el análisis.');
+                    if (data.sources && data.sources.length) {
+                        html += '<div class="doc-chat-sources"><strong>Fuentes</strong>'
+                            + data.sources.slice(0, 5).map((source) =>
+                                '<div>• ' + escapeDocChat(source.title)
+                                + (source.file
+                                    ? ' — <code>' + escapeDocChat(source.file) + (source.line ? ':' + escapeDocChat(source.line) : '') + '</code>'
+                                    : '')
+                                + '</div>'
+                            ).join('')
+                            + '</div>';
+                    }
+                    html += '<div class="doc-chat-badge">'
+                        + (data.mode === 'ai'
+                            ? 'Respuesta redactada con IA a partir del análisis'
+                            : 'Resultado de búsqueda en el análisis (sin IA)')
+                        + '</div>';
+                    addDocChatMessage('assistant', html, true);
+                    docChatHistory.push(
+                        { role: 'user', content: message },
+                        { role: 'assistant', content: String(data.answer || '').slice(0, 600) }
+                    );
+                    document.getElementById('docChatNote').textContent = data.ai_available_in_plan === false
+                        ? 'Tu plan actual no incluye respuestas con IA: se muestran los resultados de búsqueda del análisis.'
+                        : '';
+                } else {
+                    addDocChatMessage('system', data.error || 'Error al procesar tu pregunta.');
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addDocChatMessage('system', 'Error de conexión. Por favor, intenta nuevamente.');
+                console.error('Chat error:', error);
+            } finally {
+                input.disabled = false;
+                document.getElementById('docChatSend').disabled = false;
+                input.focus();
+            }
+        }
+
+        // Cerrar chat al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('docChatPanel');
+            const button = document.getElementById('docChatButton');
+
+            if (docChatOpen && !panel.contains(e.target) && !button.contains(e.target)) {
+                toggleDocChat();
+            }
+        });
+    </script>
+
     <!-- Cargar script de tema (para persistencia de tema) -->
     <script src="/static/theme.js"></script>
 </body>

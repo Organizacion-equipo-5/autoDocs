@@ -65,7 +65,16 @@ class ProjectAnalyzer:
         '.git', '__pycache__', 'node_modules', '.venv', 'venv',
         'env', 'dist', 'build', '.idea', '.vscode', 'migrations',
         '.next', '.nuxt', 'coverage', '.pytest_cache', '.mypy_cache',
-        'target', 'vendor', 'bower_components',
+        'target', 'vendor', 'bower_components', '.gitlab', '.github',
+        'tests', 'test', 'spec', '__tests__', 'cypress', 'e2e',
+    }
+
+    # Ignorar archivos grandes y archivos de prueba (valores desde config)
+    MAX_FILE_SIZE = 500 * 1024  # 500KB - puede sobrescribirse desde config
+    MAX_FILES = 300  # máximo de archivos a analizar
+    IGNORE_FILE_PATTERNS = {
+        'test', 'spec', 'mock', 'fixture', '__pycache__',
+        '.min.js', '.min.css', 'bundle.js', 'webpack',
     }
 
     def __init__(self, project_path: str):
@@ -147,31 +156,55 @@ class ProjectAnalyzer:
         - tamaño
 
         Solo guarda un máximo de 300 archivos para no cargar demasiado la respuesta.
+        Ignora archivos grandes (> 500KB) y archivos de prueba.
         """
         structure = []
         lang_count = defaultdict(int)
         total = 0
+        max_files = 300
+        files_processed = 0
+
         for root, dirs, files in os.walk(self.project_path):
             dirs[:] = [d for d in dirs if d not in self.IGNORE_DIRS]
             rel_root = Path(root).relative_to(self.project_path)
+
             for fname in files:
+                # Limitar a 300 archivos para optimizar
+                if files_processed >= max_files:
+                    break
+
                 full_path = Path(root) / fname
                 ext = Path(fname).suffix.lower()
+
+                # Ignorar archivos de prueba y minificados
+                fname_lower = fname.lower()
+                if any(pattern in fname_lower for pattern in self.IGNORE_FILE_PATTERNS):
+                    continue
+
+                # Ignorar archivos grandes
+                try:
+                    size = os.path.getsize(full_path)
+                    if size > self.MAX_FILE_SIZE:
+                        continue
+                except OSError:
+                    size = 0
+                    continue
+
                 lang = self.LANGUAGE_EXTENSIONS.get(ext)
                 if not lang and full_path.exists():
                     lang = self._guess_language_by_shebang(full_path)
+
                 if lang:
                     lang_count[lang] += 1
                     total += 1
-                try:
-                    size = os.path.getsize(full_path)
-                except OSError:
-                    size = 0
+
                 structure.append({
                     "path": str(rel_root / fname), "name": fname, "type": "file",
                     "language": lang or "other", "size": size, "extension": ext,
                 })
-        self.results["structure"] = structure[:300]
+                files_processed += 1
+
+        self.results["structure"] = structure[:max_files]
         self.results["total_files"] = total
         self.results["languages"] = dict(lang_count)
 

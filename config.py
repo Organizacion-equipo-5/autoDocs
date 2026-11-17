@@ -35,5 +35,10 @@ class Config:
     # Export settings
     EXPORT_FOLDER = os.environ.get('EXPORT_FOLDER', './exports')
 
+    # Performance settings
+    ENABLE_AI_ANALYSIS = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
+    MAX_ANALYSIS_FILES = int(os.environ.get('MAX_ANALYSIS_FILES', '300'))
+    MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', '500000'))  # 500KB
+
     # Debug
     DEBUG = os.environ.get('FLASK_DEBUG', 'True') == 'True'

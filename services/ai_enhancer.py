@@ -39,13 +39,15 @@ class AIEnhancer:
             print(f"[AI] Total de API keys de Groq cargadas: {len(self.api_keys)}")
         else:
             self.api_keys = []
-            print("[AI] Aviso: No se encontró GROQ_API_KEY en variables de entorno")
+            # Silenciar advertencia - IA es opcional
+            pass
 
         self.current_key_index = 0
         self.working_groq_model = None
         self.API_URL = "https://api.groq.com/openai/v1/chat/completions"
+        # Ollama desactivado
         self._ollama_model = None
-        self._ollama_checked = False
+        self._ollama_checked = True  # No verificar Ollama
 
     def get_api_key(self) -> Optional[str]:
         """Obtiene la API key actual con rotación."""
@@ -56,21 +58,8 @@ class AIEnhancer:
         return key
 
     def _check_ollama(self) -> Optional[str]:
-        """Verifica si Ollama está corriendo en localhost y qué modelo está disponible."""
-        if self._ollama_checked:
-            return self._ollama_model
-        try:
-            r = requests.get("http://localhost:11434/api/tags", timeout=2)
-            if r.status_code == 200:
-                models = [m.get("name", "") for m in r.json().get("models", [])]
-                if models:
-                    preferred = next((m for m in models if "mistral" in m.lower() or "llama" in m.lower() or "qwen" in m.lower()), models[0])
-                    self._ollama_model = preferred
-                    print(f"[AI] Servidor Ollama local detectado con modelo: {self._ollama_model}")
-        except Exception:
-            self._ollama_model = None
-        self._ollama_checked = True
-        return self._ollama_model
+        """Ollama desactivado - siempre retorna None."""
+        return None
 
     def is_available(self) -> bool:
         """Verifica si alguna IA (Groq o Ollama local) está disponible."""
@@ -135,44 +124,17 @@ class AIEnhancer:
         return None
 
     def _call_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
-        """Fallback local con Ollama si está disponible."""
-        model = self._check_ollama()
-        if not model:
-            return None
-        try:
-            full_prompt = f"System: {system_prompt}\n\nUser: {user_prompt}\n\nAssistant:"
-            payload = {
-                "model": model,
-                "prompt": full_prompt,
-                "stream": False,
-                "options": {
-                    "num_predict": max_tokens,
-                    "temperature": 0.7
-                }
-            }
-            r = requests.post("http://localhost:11434/api/generate", json=payload, timeout=15)
-            if r.status_code == 200:
-                ans = r.json().get("response", "").strip()
-                if ans:
-                    print(f"[AI] Llamada exitosa con Ollama local ({model})")
-                    return ans
-        except Exception as e:
-            print(f"[AI] Error llamando a Ollama local: {e}")
+        """Ollama desactivado - siempre retorna None."""
         return None
 
     def _call_ai(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
-        """Ejecuta llamada de IA priorizando Groq y con fallback en Ollama local."""
-        # 1. Intentar con Groq
+        """Ejecuta llamada de IA usando solo Groq (Ollama desactivado)."""
+        # Intentar con Groq
         res = self._call_groq(system_prompt, user_prompt, max_tokens=max_tokens)
         if res:
             return res
 
-        # 2. Fallback a Ollama local
-        res = self._call_ollama(system_prompt, user_prompt, max_tokens=max_tokens)
-        if res:
-            return res
-
-        print("[AI] No se pudo obtener respuesta de ninguna IA disponible")
+        # No imprimir error - IA es opcional
         return None
 
     def enhance_function_description(self, function: dict, context: str = "") -> str:
@@ -215,7 +177,6 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
         if result:
             return result
 
-        print(f"[AI] No se pudo mejorar descripción de función: {function['name']}")
         return function.get('docstring', '') or f"Función {function['name']}"
 
     def enhance_class_description(self, class_info: dict, context: str = "") -> str:
@@ -261,7 +222,6 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
         if result:
             return result
 
-        print(f"[AI] No se pudo mejorar descripción de clase: {class_info['name']}")
         return class_info.get('docstring', '') or f"Clase {class_info['name']}"
 
     def enhance_endpoint_description(self, endpoint: dict, context: str = "") -> str:
@@ -303,7 +263,6 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
         if result:
             return result
 
-        print(f"[AI] No se pudo mejorar descripción de endpoint: {endpoint.get('path')}")
         return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
 
     def generate_architecture_insights(self, analysis_results: dict) -> str:
@@ -350,7 +309,6 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         if result:
             return result
 
-        print("[AI] No se pudieron generar insights de arquitectura")
         return "No se pudieron generar insights de arquitectura"
 
     def enhance_documentation(self, analysis_results: dict) -> dict:

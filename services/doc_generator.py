@@ -29,11 +29,13 @@ class DocGenerator:
     def __init__(self, analysis_results: dict):
         self.r = analysis_results
         self.now = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
-        self.ai_enhancer = AIEnhancer()
-        
-        # Mejorar documentación con IA si está disponible
-        if self.ai_enhancer.is_available():
-            self.r = self.ai_enhancer.enhance_documentation(self.r)
+
+        # IA opcional: solo activar si está configurado
+        use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
+        if use_ai:
+            self.ai_enhancer = AIEnhancer()
+            if self.ai_enhancer.is_available():
+                self.r = self.ai_enhancer.enhance_documentation(self.r)
 
     @staticmethod
     def _sanitize_ai_markdown(text: str) -> str:
