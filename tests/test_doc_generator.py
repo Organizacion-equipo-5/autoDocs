@@ -163,8 +163,16 @@ class TestInit:
         gen = DocGenerator(minimal_results)
         assert set(gen.r.keys()) == original_keys
 
+    def test_ia_desactivada_por_defecto(self, minimal_results):
+        with patch.dict("os.environ", {"ENABLE_AI_ANALYSIS": "false"}):
+            with patch("services.doc_generator.AIEnhancer") as MockAI:
+                DocGenerator(minimal_results)
+                MockAI.assert_not_called()
+
     def test_con_ia_disponible_llama_enhance(self, minimal_results):
-        with patch("services.doc_generator.AIEnhancer") as MockAI:
+        # La IA es opcional: solo se activa con ENABLE_AI_ANALYSIS=true
+        with patch.dict("os.environ", {"ENABLE_AI_ANALYSIS": "true"}), \
+                patch("services.doc_generator.AIEnhancer") as MockAI:
             instance = MagicMock()
             instance.is_available.return_value = True
             instance.enhance_documentation.return_value = {**minimal_results, "ai_added": True}
@@ -522,7 +530,7 @@ class TestApiSection:
     def test_incluye_planes_prueba(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._api_section()
-        assert "3.4 Escenarios de Pruebas" in section
+        assert "3.4 Planes de Prueba" in section
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -625,12 +633,12 @@ class TestFunctionsSection:
     def test_marca_funciones_async(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._functions_section()
-        assert "⚡" in section  # marca de funcion async
+        assert "ASYNC" in section
 
     def test_marca_alta_complejidad(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._functions_section()
-        assert "🔴" in section  # complejidad alta
+        assert "HIGH" in section
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -855,7 +863,7 @@ class TestFullMarkdown:
             md = gen._full_markdown()
             assert "# Documentación del Proyecto" in md
             assert "2. Documentación de Arquitectura" in md
-            assert "4. Documentación de Módulos y Clases" in md
+            assert "4. Documentación de Clases" in md
             assert "5. Documentación de Funciones" in md
             assert "7. Guía de Despliegue" in md
             assert "8. Reporte de Calidad" in md
