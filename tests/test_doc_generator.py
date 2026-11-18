@@ -163,7 +163,8 @@ class TestInit:
         gen = DocGenerator(minimal_results)
         assert set(gen.r.keys()) == original_keys
 
-    def test_con_ia_disponible_llama_enhance(self, minimal_results):
+    def test_con_ia_disponible_llama_enhance(self, minimal_results, monkeypatch):
+        monkeypatch.setenv("ENABLE_AI_ANALYSIS", "true")
         with patch("services.doc_generator.AIEnhancer") as MockAI:
             instance = MagicMock()
             instance.is_available.return_value = True
