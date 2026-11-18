@@ -24,3 +24,11 @@ services/exports/
 # Python
 __pycache__/
 *.pyc
+# Dependencias y temporales
+node_modules/
+exports/
+*.pyc
+.pytest_cache/
+.coverage
+coverage.xml
+test-results.xml

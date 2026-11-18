@@ -39,6 +39,9 @@ def create_app():
     app.register_blueprint(chat_bp, url_prefix='/api/chat')
     app.register_blueprint(web_bp)
 
+    from routes.monitoring import init_monitoring
+    init_monitoring(app)
+
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({"error": "Resource not found"}), 404
