@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+import requests
 from flask import Flask
 from flask_jwt_extended import JWTManager, create_access_token
 
@@ -158,6 +159,47 @@ def test_poll_queues_analysis_when_selected_branch_sha_changes(
     assert response.status_code == 202
     assert response.get_json() == {"branch": "main", "status": "queued"}
     assert queued[0][0][2:5] == ("main", "b" * 40, "poll")
+
+
+def test_poll_reports_expired_github_connection_and_clears_token(
+    github_polling_client, monkeypatch
+):
+    client, headers = github_polling_client
+    project = {
+        "_id": "project-1",
+        "user_id": "user-1",
+        "github_url": "https://github.com/owner/repo",
+        "github_branch": "main",
+    }
+    db = _db_for(project)
+    db.users.find_one = lambda query: {
+        "plan": "pro",
+        "github": {"access_token": "expired-token"},
+    }
+    updates = []
+    db.users.update_one = lambda *args, **kwargs: updates.append((args, kwargs))
+    monkeypatch.setattr(github_integration, "get_db", lambda: db)
+
+    def reject_expired_token(*args, **kwargs):
+        response = requests.Response()
+        response.status_code = 401
+        response.url = "https://api.github.com/repos/owner/repo/branches/main"
+        raise requests.HTTPError("401 Unauthorized", response=response)
+
+    monkeypatch.setattr(github_integration, "_github_branch_data", reject_expired_token)
+
+    response = client.post(
+        "/api/integrations/github/projects/project-1/poll",
+        headers=headers,
+    )
+
+    assert response.status_code == 401
+    assert response.get_json() == {
+        "error": "Tu conexión con GitHub expiró. Vuelve a conectarla."
+    }
+    assert updates == [
+        (({"_id": "user-1"}, {"$unset": {"github": ""}}), {})
+    ]
 
 
 def test_select_project_branch_queues_selected_branch_analysis(

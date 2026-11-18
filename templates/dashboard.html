@@ -1216,9 +1216,16 @@ CUERPO PRINCIPAL DE LA PÁGINA
             </div>
         </div>
         <div id="gh-permission-warning" class="hidden mt-2 text-xs text-amber-600">
-            GitHub aún no confirmó el permiso para leer organizaciones. Si al reautorizar vuelve directamente,
-            revoca AutoDocs en GitHub → Settings → Applications y vuelve a conectarlo.
+            GitHub aún no confirmó el permiso para leer organizaciones. Si al reautorizar vuelve directamente
+            sin mostrar una pantalla de autorización, abre los permisos de GitHub, revoca AutoDocs y vuelve
+            aquí para conectarlo otra vez.
         </div>
+        <a href="https://github.com/settings/connections/applications"
+            target="_blank" rel="noopener noreferrer"
+            class="hidden mt-1 text-xs text-primary underline"
+            id="gh-permission-settings">
+            Abrir permisos de aplicaciones en GitHub
+        </a>
         <button type="button" onclick="connectGithub()"
             class="w-full mt-2 py-2 border border-primary/30 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5">
             Reautorizar acceso a organizaciones
@@ -2329,8 +2336,11 @@ async function loadGithubStatus() {
         document.getElementById('gh-login').textContent = st.login;
         off.classList.add('hidden');
         on.classList.remove('hidden');
+        const missingOrgPermission = st.organization_access !== true;
         document.getElementById('gh-permission-warning')
-            .classList.toggle('hidden', st.organization_access === true);
+            .classList.toggle('hidden', !missingOrgPermission);
+        document.getElementById('gh-permission-settings')
+            .classList.toggle('hidden', !missingOrgPermission);
         await loadGithubOrganizations();
         await loadGithubRepos();
     } catch (e) {

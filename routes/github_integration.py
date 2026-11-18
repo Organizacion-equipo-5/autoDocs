@@ -52,6 +52,19 @@ def _github_headers(token=None):
     return headers
 
 
+def _github_unauthorized_response(db, user_id, github_token, error):
+    response = getattr(error, "response", None)
+    if getattr(response, "status_code", None) != 401:
+        return None
+
+    if github_token:
+        db.users.update_one({"_id": user_id}, {"$unset": {"github": ""}})
+        return jsonify({"error": "Tu conexión con GitHub expiró. Vuelve a conectarla."}), 401
+    return jsonify({
+        "error": "La credencial de GitHub configurada en el servidor no es válida."
+    }), 502
+
+
 def _github_branch_data(github_url, branch, etag=None, token=None):
     owner, repo = extract_repo_info(github_url)
     url = f"{GITHUB_API}/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/branches/{quote(branch, safe='')}"
@@ -362,6 +375,9 @@ def get_project_branches(project_id):
             "selected": project.get("github_branch") or default_branch,
         }), 200
     except (requests.RequestException, ValueError) as error:
+        auth_error = _github_unauthorized_response(db, user_id, github_token, error)
+        if auth_error:
+            return auth_error
         logging.getLogger(__name__).exception("Could not load branches for project %s", project_id)
         return jsonify({"error": f"No se pudieron cargar las ramas de GitHub: {error}"}), 502
 
@@ -403,6 +419,9 @@ def select_project_branch(project_id):
             force=True, etag=branch_data.get("etag"),
         )
     except (requests.RequestException, ValueError) as error:
+        auth_error = _github_unauthorized_response(db, user_id, github_token, error)
+        if auth_error:
+            return auth_error
         logging.getLogger(__name__).exception("Could not select branch for project %s", project_id)
         return jsonify({"error": f"No se pudo cambiar de rama: {error}"}), 502
 
@@ -491,6 +510,9 @@ def poll_project_branch(project_id):
         )
         return jsonify({"branch": branch, "status": result}), 202 if result == "queued" else 200
     except (requests.RequestException, subprocess.SubprocessError, ValueError) as error:
+        auth_error = _github_unauthorized_response(db, user_id, github_token, error)
+        if auth_error:
+            return auth_error
         logging.getLogger(__name__).exception("Could not poll branch for project %s", project_id)
         return jsonify({"error": f"No se pudo revisar la rama de GitHub: {error}"}), 502
 
