@@ -34,7 +34,7 @@ def _cfg():
         "client_id": os.getenv("GITHUB_CLIENT_ID", ""),
         "client_secret": os.getenv("GITHUB_CLIENT_SECRET", ""),
         "redirect_uri": os.getenv(
-            "GITHUB_REDIRECT_URI", "http://localhost:5000/api/github/callback"
+            "GITHUB_REDIRECT_URI", "https://autodocs-s5jh.onrender.com/api/github/callback"
         ),
         "scope": " ".join(scopes),
     }
@@ -90,7 +90,7 @@ def _json_for_script(value):
     )
 
 
-def _start_oauth(user_id=None):
+def _start_oauth(user_id=None, client=None):
     cfg = _cfg()
     if not cfg["client_id"] or not cfg["client_secret"]:
         raise ValueError("GitHub OAuth no está configurado en el servidor")
@@ -100,6 +100,7 @@ def _start_oauth(user_id=None):
     db.oauth_states.insert_one({
         "_id": state,
         "user_id": user_id,  # None = login, con valor = vincular cuenta
+        "client": client,    # "mobile" cuando viene de la app Flutter
         "expires_at": (datetime.utcnow() + timedelta(minutes=STATE_TTL_MINUTES)).isoformat(),
     })
     params = urlencode({
@@ -122,6 +123,22 @@ def _set_state_cookie(resp, state):
     )
     return resp
 
+def _mobile_page(message, ok=True):
+    color = "#10B981" if ok else "#EF4444"
+    icon = "✓" if ok else "✕"
+    html = (
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>AutoDocs AI</title></head>"
+        "<body style='font-family:sans-serif;display:flex;align-items:center;"
+        "justify-content:center;min-height:100vh;margin:0;background:#0F1418;color:#DEE3E8;"
+        "text-align:center;padding:24px'>"
+        f"<div><div style='font-size:56px;color:{color}'>{icon}</div>"
+        f"<h2>{message}</h2>"
+        "<p>Ya puedes cerrar esta pestaña y volver a la app AutoDocs AI.</p></div>"
+        "</body></html>"
+    )
+    return make_response(html)
 
 # 1) Iniciar sesión con GitHub (usuario aún no logueado)
 @github_oauth_bp.route("/login", methods=["GET"])
@@ -137,8 +154,10 @@ def github_login():
 @github_oauth_bp.route("/connect-url", methods=["POST"])
 @jwt_required()
 def github_connect_url():
+    body = request.get_json(silent=True) or {}
+    client = "mobile" if body.get("client") == "mobile" else None
     try:
-        state, url = _start_oauth(user_id=get_jwt_identity())
+        state, url = _start_oauth(user_id=get_jwt_identity(), client=client)
     except ValueError as e:
         return jsonify({"error": str(e)}), 500
     return _set_state_cookie(make_response(jsonify({"url": url})), state)
@@ -151,7 +170,11 @@ def github_callback():
     code = request.args.get("code")
     state = request.args.get("state")
 
+    ctx = {"mobile": False}
+
     def fail(msg, link_mode=False):
+        if ctx["mobile"]:
+            return _mobile_page(msg, ok=False)
         dest = "/dashboard" if link_mode else "/"
         resp = redirect(f"{dest}?{urlencode({'github_error': msg})}")
         resp.delete_cookie(STATE_COOKIE)
@@ -160,13 +183,16 @@ def github_callback():
     if request.args.get("error"):
         return fail("Autorización cancelada")
 
-    # Validar state: existe en BD, no expiró y coincide con la cookie
+    # Validar state: existe en BD, no expiró y (si no es móvil) coincide con la cookie
     record = db.oauth_states.find_one_and_delete({"_id": state}) if state else None
+    ctx["mobile"] = bool(record and record.get("client") == "mobile")
     cookie_state = request.cookies.get(STATE_COOKIE)
+    cookie_ok = ctx["mobile"] or (
+        cookie_state and state and secrets.compare_digest(cookie_state, state)
+    )
     if (
         not record
-        or not cookie_state
-        or not secrets.compare_digest(cookie_state, state)
+        or not cookie_ok
         or datetime.utcnow() > datetime.fromisoformat(record["expires_at"])
     ):
         return fail("Estado inválido o expirado. Intenta de nuevo.")
@@ -230,9 +256,11 @@ def github_callback():
         if taken:
             return fail("Esa cuenta de GitHub ya está vinculada a otro usuario", True)
         db.users.update_one({"_id": link_user_id}, {"$set": {"github": github_data}})
+        if ctx["mobile"]:
+            return _mobile_page("GitHub conectado correctamente")
         resp = redirect("/dashboard?github=connected")
         resp.delete_cookie(STATE_COOKIE)
-        return resp
+        return resp         
 
     # ---- Modo login: buscar o crear usuario ----
     user = db.users.find_one({"github.id": gh_user["id"]}) or db.users.find_one({"email": email})

@@ -63,7 +63,10 @@ def me():
     user = db.users.find_one({"_id": user_id}, {"password": 0})
     if not user:
         return jsonify({"error": "User not found"}), 404
+    if isinstance(user.get("github"), dict):
+        user["github"] = {k: v for k, v in user["github"].items() if k != "access_token"}
     return jsonify(user), 200
+
 
 @auth_bp.route('/me', methods=['PUT'])
 @jwt_required()
@@ -86,6 +89,10 @@ def update_me():
 
     db.users.update_one({"_id": user_id}, {"$set": update})
     updated_user = db.users.find_one({"_id": user_id}, {"password": 0})
+    if isinstance(updated_user.get("github"), dict):
+        updated_user["github"] = {
+            k: v for k, v in updated_user["github"].items() if k != "access_token"
+        }
     return jsonify({"message": "Profile updated", "user": updated_user}), 200
 
 def generate_reset_code():
