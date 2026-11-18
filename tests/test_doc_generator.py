@@ -522,7 +522,7 @@ class TestApiSection:
     def test_incluye_planes_prueba(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._api_section()
-        assert "3.4 Escenarios de Pruebas" in section
+        assert "3.4 Planes de Prueba" in section
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -625,12 +625,12 @@ class TestFunctionsSection:
     def test_marca_funciones_async(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._functions_section()
-        assert "⚡" in section  # marca de funcion async
+        assert "`create_user` `[ASYNC]`" in section  # marca de funcion async
 
     def test_marca_alta_complejidad(self, full_results):
         gen = DocGenerator(full_results)
         section = gen._functions_section()
-        assert "🔴" in section  # complejidad alta
+        assert "HIGH (15)" in section  # complejidad alta (delete_user)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -855,7 +855,7 @@ class TestFullMarkdown:
             md = gen._full_markdown()
             assert "# Documentación del Proyecto" in md
             assert "2. Documentación de Arquitectura" in md
-            assert "4. Documentación de Módulos y Clases" in md
+            assert "4. Documentación de Clases y Módulos" in md
             assert "5. Documentación de Funciones" in md
             assert "7. Guía de Despliegue" in md
             assert "8. Reporte de Calidad" in md
