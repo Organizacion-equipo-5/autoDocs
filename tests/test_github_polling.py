@@ -85,6 +85,46 @@ def test_get_project_branches_returns_branch_names_and_selection(
     }
 
 
+def test_get_project_branches_uses_connected_github_token(
+    github_polling_client, monkeypatch
+):
+    client, headers = github_polling_client
+    project = {
+        "_id": "project-1",
+        "user_id": "user-1",
+        "github_url": "https://github.com/owner/private-repo",
+    }
+    db = _db_for(project)
+    db.users.find_one = lambda query: {
+        "plan": "pro",
+        "github": {"access_token": "user-oauth-token"},
+    }
+    monkeypatch.setattr(github_integration, "get_db", lambda: db)
+    request_headers = []
+    responses = iter([
+        _ApiResponse({"default_branch": "main"}),
+        _ApiResponse([{"name": "main"}]),
+    ])
+
+    def fake_get(*args, **kwargs):
+        request_headers.append(kwargs["headers"])
+        return next(responses)
+
+    monkeypatch.setattr(github_integration.requests, "get", fake_get)
+
+    response = client.get(
+        "/api/integrations/github/projects/project-1/branches",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["branches"] == ["main"]
+    assert [item["Authorization"] for item in request_headers] == [
+        "Bearer user-oauth-token",
+        "Bearer user-oauth-token",
+    ]
+
+
 def test_poll_queues_analysis_when_selected_branch_sha_changes(
     github_polling_client, monkeypatch
 ):
@@ -102,7 +142,7 @@ def test_poll_queues_analysis_when_selected_branch_sha_changes(
     monkeypatch.setattr(
         github_integration,
         "_github_branch_data",
-        lambda *args: {"name": "main", "sha": "b" * 40},
+        lambda *args, **kwargs: {"name": "main", "sha": "b" * 40},
     )
     monkeypatch.setattr(
         github_integration,
@@ -135,7 +175,7 @@ def test_select_project_branch_queues_selected_branch_analysis(
     monkeypatch.setattr(
         github_integration,
         "_github_branch_data",
-        lambda *args: {"name": "feature/new", "sha": "c" * 40},
+        lambda *args, **kwargs: {"name": "feature/new", "sha": "c" * 40},
     )
     monkeypatch.setattr(
         github_integration,

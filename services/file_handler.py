@@ -69,7 +69,7 @@ def classify_file_type(filename: str) -> dict:
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def clone_github_repo(github_url: str, project_id: str) -> str:
+def clone_github_repo(github_url: str, project_id: str, token: str = None) -> str:
     """Clone a GitHub repository and return the project path."""
     UPLOAD_BASE.mkdir(parents=True, exist_ok=True)
     
@@ -80,10 +80,19 @@ def clone_github_repo(github_url: str, project_id: str) -> str:
     repo_name = github_url.rstrip('/').split('/')[-1].replace('.git', '')
     clone_path = project_dir / repo_name
     
+    # Si el usuario conectó su GitHub, usamos su token (permite repos privados).
+    # Se manda por header para que NO quede guardado en .git/config.
+    git_cmd = ['git']
+    if token and github_url.startswith('https://github.com/'):
+        import base64
+        basic = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+        git_cmd += ['-c', f'http.extraHeader=Authorization: Basic {basic}']
+    git_cmd += ['clone', github_url, str(clone_path)]
+
     try:
         # Clone the repository with timeout
         result = subprocess.run(
-            ['git', 'clone', github_url, str(clone_path)],
+            git_cmd,
             check=True,
             capture_output=True,
             text=True,

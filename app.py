@@ -6,6 +6,7 @@ from config import Config
 from routes.payments import payments_bp
 from routes.plan_recommendation import plan_recommendation_bp
 from services.db import init_db_indexes
+from routes.github_oauth import github_oauth_bp
 
 def create_app():
     app = Flask(__name__)
@@ -24,6 +25,7 @@ def create_app():
     from routes.insights import insights_bp
     from routes.github_integration import github_bp
     from routes.chat import chat_bp
+    app.register_blueprint(github_oauth_bp, url_prefix='/api/github')
 
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')

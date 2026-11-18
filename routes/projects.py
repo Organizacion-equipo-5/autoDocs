@@ -106,7 +106,8 @@ def create_project():
             error_message = f"Error al guardar el archivo subido: {str(e)}"
     elif github_url:
         try:
-            project_path = clone_github_repo(github_url, project_id)
+            gh_token = (user.get('github') or {}).get('access_token')
+            project_path = clone_github_repo(github_url, project_id, token=gh_token)
         except Exception as e:
             error_message = f"Error al clonar el repositorio: {str(e)}"
 

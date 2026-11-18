@@ -1188,6 +1188,26 @@ CUERPO PRINCIPAL DE LA PÁGINA
                 <span class="text-xs uppercase tracking-widest text-on-surface-variant/40">o</span>
                 <div class="flex-1 h-px bg-outline-variant/20"></div>
             </div>
+            <!-- Conectar GitHub / elegir repositorio -->
+<div class="mb-4">
+    <div id="gh-disconnected" class="hidden">
+        <button type="button" onclick="connectGithub()"
+            class="w-full py-2.5 flex items-center justify-center gap-2 border border-outline-variant/30 rounded-xl font-semibold text-on-surface hover:bg-primary/5 transition-all">
+            <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            Conectar con GitHub
+        </button>
+    </div>
+    <div id="gh-connected" class="hidden">
+        <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
+            Tus repositorios (@<span id="gh-login"></span>)
+        </label>
+        <select id="gh-repo-select" class="modal-input" onchange="onGithubRepoSelect(this)">
+            <option value="">Selecciona un repositorio…</option>
+        </select>
+        <button type="button" onclick="disconnectGithub()"
+            class="text-xs text-primary hover:text-primary/80 mt-1">Desconectar GitHub</button>
+    </div>
+</div>
 
             <!-- Campo: URL de GitHub -->
             <div class="mb-6">
@@ -2240,9 +2260,10 @@ CUERPO PRINCIPAL DE LA PÁGINA
          * Muestra el modal para crear un nuevo proyecto.
          */
         function openUploadModal() {
-            document.getElementById('uploadModal').classList.add('flex');
-            document.getElementById('uploadModal').classList.remove('hidden');
-        }
+    document.getElementById('uploadModal').classList.add('flex');
+    document.getElementById('uploadModal').classList.remove('hidden');
+    loadGithubStatus();
+}
 
         /**
          * Cierra el modal de subida y limpia el formulario.
@@ -2272,7 +2293,81 @@ CUERPO PRINCIPAL DE LA PÁGINA
                 el.classList.add('hidden');
             }
         }
+// ============================================================
+// CONEXIÓN CON GITHUB (modal "Crear proyecto")
+// ============================================================
+async function loadGithubStatus() {
+    const off = document.getElementById('gh-disconnected');
+    const on = document.getElementById('gh-connected');
+    try {
+        const res = await fetch('/api/github/status', { headers: authHeaders() });
+        const st = await res.json();
+        if (!st.connected) {
+            off.classList.remove('hidden');
+            on.classList.add('hidden');
+            return;
+        }
+        document.getElementById('gh-login').textContent = st.login;
+        off.classList.add('hidden');
+        on.classList.remove('hidden');
+        await loadGithubRepos();
+    } catch (e) {
+        off.classList.remove('hidden');
+        on.classList.add('hidden');
+    }
+}
 
+async function loadGithubRepos() {
+    const select = document.getElementById('gh-repo-select');
+    select.innerHTML = '<option value="">Cargando repositorios…</option>';
+    const res = await fetch('/api/github/repos', { headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) {
+        select.innerHTML = '<option value="">' + (data.error || 'Error al cargar repos') + '</option>';
+        if (res.status === 401) loadGithubStatus();
+        return;
+    }
+    select.innerHTML = '<option value="">Selecciona un repositorio…</option>';
+    data.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.html_url;
+        opt.dataset.name = r.name;
+        opt.textContent = r.full_name + (r.private ? ' 🔒' : '');
+        select.appendChild(opt);
+    });
+}
+
+function onGithubRepoSelect(select) {
+    if (!select.value) return;
+    document.getElementById('proj-github').value = select.value;
+    const nameInput = document.getElementById('proj-name');
+    if (!nameInput.value.trim()) nameInput.value = select.selectedOptions[0].dataset.name;
+}
+
+async function connectGithub() {
+    try {
+        const res = await fetch('/api/github/connect-url', { method: 'POST', headers: authHeaders() });
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'No se pudo iniciar la conexión'); return; }
+        window.location.href = data.url;
+    } catch (e) {
+        alert('Error de conexión: ' + e.message);
+    }
+}
+
+async function disconnectGithub() {
+    if (!confirm('¿Desconectar tu cuenta de GitHub?')) return;
+    await fetch('/api/github/disconnect', { method: 'POST', headers: authHeaders() });
+    loadGithubStatus();
+}
+
+// Al volver de GitHub: abrir el modal o mostrar el error
+window.addEventListener('load', () => {
+    const p = new URLSearchParams(location.search);
+    if (p.get('github') === 'connected') openUploadModal();
+    if (p.get('github_error')) alert('GitHub: ' + p.get('github_error'));
+    if (p.has('github') || p.has('github_error')) history.replaceState({}, '', location.pathname);
+});
         // ============================================================
         // CREACIÓN DE PROYECTOS
         // ============================================================

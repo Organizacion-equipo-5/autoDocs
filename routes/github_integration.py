@@ -44,18 +44,18 @@ def _find_project_for_repo(db, owner, repo):
     return None
 
 
-def _github_headers():
+def _github_headers(token=None):
     headers = {"Accept": "application/vnd.github+json"}
-    token = current_app.config.get("GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    token = token or current_app.config.get("GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return headers
 
 
-def _github_branch_data(github_url, branch, etag=None):
+def _github_branch_data(github_url, branch, etag=None, token=None):
     owner, repo = extract_repo_info(github_url)
     url = f"{GITHUB_API}/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/branches/{quote(branch, safe='')}"
-    headers = _github_headers()
+    headers = _github_headers(token)
     if etag:
         headers["If-None-Match"] = etag
     response = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
@@ -320,10 +320,11 @@ def get_project_branches(project_id):
         return jsonify({"error": "La selección de ramas está disponible para planes Pro y Enterprise."}), 403
 
     try:
+        github_token = (user.get("github") or {}).get("access_token")
         owner, repo = extract_repo_info(project["github_url"])
         repo_response = requests.get(
             f"{GITHUB_API}/repos/{quote(owner, safe='')}/{quote(repo, safe='')}",
-            headers=_github_headers(),
+            headers=_github_headers(github_token),
             timeout=REQUEST_TIMEOUT,
         )
         if repo_response.status_code == 404:
@@ -339,7 +340,7 @@ def get_project_branches(project_id):
             branches_response = requests.get(
                 f"{GITHUB_API}/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/branches",
                 params={"per_page": 100, "page": page},
-                headers=_github_headers(),
+                headers=_github_headers(github_token),
                 timeout=REQUEST_TIMEOUT,
             )
             branches_response.raise_for_status()
@@ -393,7 +394,8 @@ def select_project_branch(project_id):
     branch = branch.strip()
 
     try:
-        branch_data = _github_branch_data(project["github_url"], branch)
+        github_token = (user.get("github") or {}).get("access_token")
+        branch_data = _github_branch_data(project["github_url"], branch, token=github_token)
         if branch_data is None:
             return jsonify({"error": "La rama seleccionada no existe en GitHub."}), 404
         result = _queue_branch_analysis(
@@ -433,12 +435,13 @@ def poll_project_branch(project_id):
         return jsonify({"status": "analyzing"}), 202
 
     try:
+        github_token = (user.get("github") or {}).get("access_token")
         branch = project.get("github_branch")
         if not branch:
             owner, repo = extract_repo_info(project["github_url"])
             repo_response = requests.get(
                 f"{GITHUB_API}/repos/{quote(owner, safe='')}/{quote(repo, safe='')}",
-                headers=_github_headers(),
+                headers=_github_headers(github_token),
                 timeout=REQUEST_TIMEOUT,
             )
             if repo_response.status_code == 404:
@@ -450,7 +453,7 @@ def poll_project_branch(project_id):
                 raise ValueError("GitHub no indicó una rama principal para este repositorio.")
 
         branch_data = _github_branch_data(
-            project["github_url"], branch, project.get("github_etag")
+            project["github_url"], branch, project.get("github_etag"), github_token
         )
         if branch_data is None:
             return jsonify({"error": f"La rama '{branch}' ya no existe en GitHub."}), 404
