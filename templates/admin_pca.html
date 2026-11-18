@@ -467,13 +467,13 @@
         // AUTENTICACIÓN Y VERIFICACIÓN DE PERMISOS
         // ============================================================
         
-        // Obtener token de autenticación del localStorage
-        const token = localStorage.getItem('token');
+        // Obtener token de autenticación del sessionStorage
+        const token = sessionStorage.getItem('token');
         // Si no hay token, redirigir al login
         if (!token) window.location.href = '/';
         
-        // Obtener datos del usuario del localStorage
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Obtener datos del usuario del sessionStorage
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
         // Si no es administrador, redirigir al dashboard de usuario
         if (user.role !== 'admin') window.location.href = '/dashboard';
         
@@ -493,7 +493,7 @@
          * Cierra sesión del usuario
          */
         function logout() {
-            localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '/';
         }
 

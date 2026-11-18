@@ -845,10 +845,10 @@
         // ============================================================
         
         /**
-         * Obtener token de autenticación del localStorage.
+         * Obtener token de autenticación del sessionStorage.
          * Si no hay token, redirigir a la página de login.
          */
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) window.location.href = '/';
 
         /**

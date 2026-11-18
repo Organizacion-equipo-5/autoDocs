@@ -865,17 +865,17 @@
         // ============================================================
         
         /** 
-         * Obtener token de autenticación del localStorage.
+         * Obtener token de autenticación del sessionStorage.
          * Si no hay token, redirigir a la página de login.
          */
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) window.location.href = '/';
         
         /**
-         * Obtener datos del usuario del localStorage.
+         * Obtener datos del usuario del sessionStorage.
          * Actualizar los elementos de la UI con la información del usuario.
          */
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
         if (user.name) {
             document.getElementById('user-avatar-sidebar').textContent = user.name[0].toUpperCase();
             document.getElementById('greeting').textContent = 'Hola, ' + user.name;
@@ -898,10 +898,10 @@
         
         /**
          * Cierra sesión del usuario.
-         * Limpia localStorage y redirige a la página de login.
+         * Limpia la sesión de la pestaña y redirige a la página de inicio.
          */
         function logout() { 
-            localStorage.clear(); 
+            sessionStorage.clear();
         }
 
         // ============================================================

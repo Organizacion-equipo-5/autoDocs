@@ -160,7 +160,7 @@ html.dark .history-item .h-date { color:rgba(148,163,184,.7); }
                 <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">settings</span>
                 <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Configuración</span>
             </a>
-            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="localStorage.clear()">
+            <a class="group relative flex items-center justify-center hover:scale-110 transition-transform" href="/" onclick="sessionStorage.clear()">
                 <span class="material-symbols-outlined text-2xl nav-icon group-hover:text-primary">logout</span>
                 <span class="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 text-muted group-hover:text-primary pointer-events-none">Cerrar sesión</span>
             </a>
@@ -499,10 +499,10 @@ function toggleTheme() {
 // ============================================================
 // AUTENTICACIÓN
 // ============================================================
-const token = localStorage.getItem('token');
+const token = sessionStorage.getItem('token');
 if (!token) window.location.href = '/';
 
-const user = JSON.parse(localStorage.getItem('user') || '{}');
+const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 if (user.name) {
     document.getElementById('sidebar-user-name').textContent = user.name;
     document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';

@@ -668,7 +668,7 @@
          * Carga los datos del usuario desde el backend y actualiza la UI
          */
         async function loadUser() {
-            var token = localStorage.getItem('token');
+            var token = sessionStorage.getItem('token');
             if (!token) {
                 document.getElementById('current-plan-label').textContent = 'No autenticado';
                 return;
@@ -680,7 +680,7 @@
                 if (!res.ok) {
                     if (res.status === 422) {
                         console.error('Token invalido o expirado');
-                        localStorage.removeItem('token');
+                        sessionStorage.removeItem('token');
                         document.getElementById('current-plan-label').textContent = 'Sesion expirada';
                         return;
                     }
@@ -724,7 +724,7 @@
          */
         function openModal(plan) {
             selectedPlan = plan;
-            var token = localStorage.getItem('token');
+            var token = sessionStorage.getItem('token');
             
             // Verificar autenticacion
             if (!token) {
@@ -748,7 +748,7 @@
                 .then(function(res) {
                     if (!res.ok) {
                         if (res.status === 422) {
-                            localStorage.removeItem('token');
+                            sessionStorage.removeItem('token');
                             showToast('Sesion expirada. Inicia sesion nuevamente.');
                             setTimeout(function() { location.href = '/'; }, 2000);
                             return;
@@ -842,7 +842,7 @@
          * Procesa el pago enviando los datos al backend
          */
         async function submitPayment() {
-            var token = localStorage.getItem('token');
+            var token = sessionStorage.getItem('token');
             if (!token) {
                 showToast('Inicia sesion primero.');
                 closeModal();
@@ -889,7 +889,7 @@
                 if (!res.ok) {
                     // Manejar sesion expirada
                     if (res.status === 422) {
-                        localStorage.removeItem('token');
+                        sessionStorage.removeItem('token');
                         errEl.textContent = 'Sesion expirada. Inicia sesion nuevamente.';
                         errEl.classList.remove('hidden');
                         btn.disabled = false;
@@ -946,8 +946,8 @@
         /**
          * Cierra la sesion del usuario
          */
-        function logout() { 
-            localStorage.removeItem('token'); 
+        function logout() {
+            sessionStorage.removeItem('token');
         }
 
         // ============================================================

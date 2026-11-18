@@ -652,10 +652,10 @@
     // ============================================================
     // ESTADO Y AUTENTICACION
     // ============================================================
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) window.location.href = '/';
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
     if (user.name) {
       document.getElementById('sidebar-user-name').textContent = user.name;
       document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';

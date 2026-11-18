@@ -25,6 +25,9 @@
         initial-scale=1.0: Establece el nivel de zoom inicial al 100%.
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        if (!sessionStorage.getItem('token')) window.location.replace('/');
+    </script>
     
     <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>Dashboard — AutoDocs AI</title>
@@ -1742,17 +1745,17 @@ CUERPO PRINCIPAL DE LA PÁGINA
         // ============================================================
         
         /** 
-         * Obtener token de autenticación del localStorage.
+         * Obtener token de autenticación del sessionStorage.
          * Si no hay token, redirigir a la página de login.
          */
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) window.location.href = '/';
 
         /**
-         * Obtener datos del usuario del localStorage.
+         * Obtener datos del usuario del sessionStorage.
          * Actualizar los elementos de la UI con la información del usuario.
          */
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
         if (user.name) {
             document.getElementById('sidebar-user-name').textContent = user.name;
             document.getElementById('sidebar-user-plan').textContent = user.plan || 'Plan Gratuito';
@@ -2183,7 +2186,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
             };
 
             // Obtener plan del usuario para determinar funcionalidades disponibles
-            const userPlan = localStorage.getItem('userPlan') || 'free';
+            const userPlan = sessionStorage.getItem('userPlan') || 'free';
             const canSync = userPlan !== 'free'; // Solo Pro/Enterprise pueden sincronizar
 
             // Generar HTML para cada tarjeta de proyecto
@@ -2413,8 +2416,11 @@ async function disconnectGithub() {
 window.addEventListener('load', () => {
     const p = new URLSearchParams(location.search);
     if (p.get('github') === 'connected') openUploadModal();
+    if (p.get('newProject') === '1') openUploadModal();
     if (p.get('github_error')) alert('GitHub: ' + p.get('github_error'));
-    if (p.has('github') || p.has('github_error')) history.replaceState({}, '', location.pathname);
+    if (p.has('github') || p.has('github_error') || p.has('newProject')) {
+        history.replaceState({}, '', location.pathname);
+    }
 });
         // ============================================================
         // CREACIÓN DE PROYECTOS
@@ -2628,7 +2634,7 @@ window.addEventListener('load', () => {
 
         let githubPolling = false;
         async function pollGithubProjects() {
-            if (githubPolling || document.hidden || (localStorage.getItem('userPlan') || 'free') === 'free') return;
+            if (githubPolling || document.hidden || (sessionStorage.getItem('userPlan') || 'free') === 'free') return;
             const projectsToPoll = allProjects.filter(project => project.github_url);
             if (!projectsToPoll.length) return;
             githubPolling = true;
@@ -2745,10 +2751,10 @@ window.addEventListener('load', () => {
 
         /**
          * Cierra sesión del usuario.
-         * Limpia localStorage y redirige a la página de login.
+         * Limpia la sesión de la pestaña y redirige a la página de inicio.
          */
         function logout() {
-            localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '/';
         }
 
@@ -2916,8 +2922,8 @@ window.addEventListener('load', () => {
                         configPlanDetails.textContent = planDetails[plan] || '';
                     }
                     
-                    // Guardar en localStorage para acceso rápido
-                    localStorage.setItem('userPlan', plan);
+                    // Guardar en sessionStorage para acceso rápido
+                    sessionStorage.setItem('userPlan', plan);
                     
                     // Actualizar sidebar
                     const sidebarPlan = document.getElementById('sidebar-user-plan');
@@ -3371,7 +3377,7 @@ window.addEventListener('load', () => {
 
             try {
                 // Obtener token JWT
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 if (!token) {
                     hideTypingIndicator();
                     addDocChatMessage('system', 'Por favor, inicia sesión para usar el chat de documentación.');

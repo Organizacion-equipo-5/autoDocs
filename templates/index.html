@@ -1698,9 +1698,9 @@ CUERPO DE LA PÁGINA
                     return;
                 }
                 
-                // Guardar token y datos del usuario en localStorage
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                // Mantener la sesión solo mientras la pestaña permanezca abierta.
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('user', JSON.stringify(data.user));
 
                 // Redirigir según el rol del usuario
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
@@ -1775,8 +1775,8 @@ CUERPO DE LA PÁGINA
                 }
                 
                 // Guardar token y datos del usuario
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('user', JSON.stringify(data.user));
 
                 // Redirigir según el rol
                 const redirectUrl = data.user.role === 'admin' ? '/admin_dashboard' : '/dashboard';
@@ -2254,9 +2254,9 @@ CUERPO DE LA PÁGINA
                     return;
                 }
                 
-                // Guardar autenticación en localStorage
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                // Mantener la sesión solo mientras la pestaña permanezca abierta.
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('user', JSON.stringify(data.user));
                 succEl.classList.remove('hidden');
                 
                 // Redirigir según el rol del usuario
@@ -2301,10 +2301,9 @@ CUERPO DE LA PÁGINA
             const theme = localStorage.getItem('theme') || 'dark';
             document.body.setAttribute('data-theme', theme);
             updateThemeIcon(theme);
-            // Redirigir al dashboard si ya hay sesión activa
-            if (localStorage.getItem('token')) {
-                window.location.href = '/dashboard';
-            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userPlan');
         });
 
         /**
@@ -2489,10 +2488,6 @@ CUERPO DE LA PÁGINA
             initCanvas();
             animate();
             initTilt();
-            // Redirigir si ya hay sesión activa
-            if (localStorage.getItem('token')) {
-                window.location.href = '/dashboard';
-            }
         });
 
         // Cerrar modal con tecla Escape

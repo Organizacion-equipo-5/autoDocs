@@ -1544,7 +1544,7 @@
          * al login.
          */
         async function cargarRecomendacion() {
-            var token = localStorage.getItem('token');
+            var token = sessionStorage.getItem('token');
             if (!token) {
                 window.location.href = '/';
                 return;
@@ -2077,7 +2077,7 @@
         async function aplicarRecomendacion() {
             if (!lastData) return;
 
-            var token = localStorage.getItem('token');
+            var token = sessionStorage.getItem('token');
             var planKey = lastData.plan_ideal.key;
 
             var payload = {
@@ -2552,7 +2552,7 @@ render = function(data) {
 // Sobrescribir la función cargarRecomendacion para manejar mejor los errores
 const cargarRecomendacionOriginal = cargarRecomendacion;
 cargarRecomendacion = async function() {
-    var token = localStorage.getItem('token');
+    var token = sessionStorage.getItem('token');
     if (!token) {
         window.location.href = '/';
         return;
@@ -2667,7 +2667,7 @@ render = function(data) {
 
 async function verificarEstadoUsuarios() {
     try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) return;
         
         const res = await fetch(API + '/api/users/count', {
@@ -2721,7 +2721,7 @@ const cargarRecomendacionOriginal2 = cargarRecomendacion;
 
 // Sobrescribir con la versión mejorada
 cargarRecomendacion = async function() {
-    var token = localStorage.getItem('token');
+    var token = sessionStorage.getItem('token');
     if (!token) {
         window.location.href = '/';
         return;

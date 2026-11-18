@@ -523,10 +523,10 @@
 
     <script>
         // ==================== AUTENTICACIÓN ====================
-        // Obtener token y usuario del localStorage
-        const token = localStorage.getItem('token');
+        // Obtener token y usuario del sessionStorage
+        const token = sessionStorage.getItem('token');
         if (!token) window.location.href = '/'; // Redirigir si no hay token
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
         if (user.name) {
             // Actualizar datos del usuario en la interfaz
             document.getElementById('sidebar-user-name').textContent = user.name;
@@ -822,7 +822,7 @@
 
         // Funciones auxiliares para navegación
         function openUploadModal() { window.location.href = '/dashboard'; }
-        function logout() { localStorage.clear(); window.location.href = '/'; }
+        function logout() { sessionStorage.clear(); window.location.href = '/'; }
 
         // ==================== PARTÍCULAS Y TILT ====================
         // Configuración del canvas de partículas

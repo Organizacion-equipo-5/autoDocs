@@ -266,8 +266,11 @@ def github_callback():
     html = (
         "<!doctype html><meta charset='utf-8'><title>Iniciando sesión…</title>"
         "<script>"
-        f"localStorage.setItem('token', {_json_for_script(jwt_token)});"
-        f"localStorage.setItem('user', {_json_for_script(json.dumps(user_payload))});"
+        "localStorage.removeItem('token');"
+        "localStorage.removeItem('user');"
+        "localStorage.removeItem('userPlan');"
+        f"sessionStorage.setItem('token', {_json_for_script(jwt_token)});"
+        f"sessionStorage.setItem('user', {_json_for_script(json.dumps(user_payload))});"
         f"location.replace({_json_for_script(dest)});"
         "</script>"
     )

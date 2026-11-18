@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, send_from_directory
+from flask import Blueprint, redirect, render_template, send_from_directory, url_for
 import os
 
 web_bp = Blueprint('web', __name__)
@@ -22,6 +22,14 @@ def index():
 @web_bp.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
+
+@web_bp.route('/new-project')
+def new_project():
+    return redirect(url_for('web.dashboard', newProject='1'))
+
+@web_bp.route('/settings')
+def settings():
+    return redirect(url_for('web.perfil'))
 
 @web_bp.route('/perfil')
 def perfil():

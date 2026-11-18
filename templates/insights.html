@@ -188,7 +188,7 @@
 <script>
 (function () {
     'use strict';
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) { window.location.href = '/'; return; }
     const projectId = {{ project_id|tojson }};
     const API = '/api/insights/' + encodeURIComponent(projectId);

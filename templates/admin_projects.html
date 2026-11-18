@@ -377,12 +377,12 @@
         // ================================================================
         // 1. AUTENTICACIÓN Y SEGURIDAD
         // ================================================================
-        // Obtener token del localStorage
-        const token = localStorage.getItem('token');
+        // Obtener token del sessionStorage
+        const token = sessionStorage.getItem('token');
         // Si no hay token, redirigir al login
         if (!token) window.location.href = '/';
         // Obtener datos del usuario
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
         // Si el usuario no es admin, redirigir al dashboard
         if (user.role !== 'admin') window.location.href = '/dashboard';
         // Mostrar nombre y avatar del usuario en el sidebar
@@ -539,7 +539,7 @@
         // 5. LOGOUT
         // ================================================================
         function logout() { 
-            localStorage.clear(); 
+            sessionStorage.clear();
             window.location.href = '/'; 
         }
 
