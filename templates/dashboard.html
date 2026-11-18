@@ -1204,6 +1204,22 @@ CUERPO PRINCIPAL DE LA PÁGINA
         <select id="gh-repo-select" class="modal-input" onchange="onGithubRepoSelect(this)">
             <option value="">Selecciona un repositorio…</option>
         </select>
+        <div class="mt-3">
+            <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
+                Organizaciones
+            </label>
+            <div id="gh-org-list" class="text-sm text-on-surface-variant/70">
+                Cargando organizaciones…
+            </div>
+        </div>
+        <div id="gh-permission-warning" class="hidden mt-2 text-xs text-amber-600">
+            GitHub aún no confirmó el permiso para leer organizaciones. Si al reautorizar vuelve directamente,
+            revoca AutoDocs en GitHub → Settings → Applications y vuelve a conectarlo.
+        </div>
+        <button type="button" onclick="connectGithub()"
+            class="w-full mt-2 py-2 border border-primary/30 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5">
+            Reautorizar acceso a organizaciones
+        </button>
         <button type="button" onclick="disconnectGithub()"
             class="text-xs text-primary hover:text-primary/80 mt-1">Desconectar GitHub</button>
     </div>
@@ -2310,10 +2326,42 @@ async function loadGithubStatus() {
         document.getElementById('gh-login').textContent = st.login;
         off.classList.add('hidden');
         on.classList.remove('hidden');
+        document.getElementById('gh-permission-warning')
+            .classList.toggle('hidden', st.organization_access === true);
+        await loadGithubOrganizations();
         await loadGithubRepos();
     } catch (e) {
         off.classList.remove('hidden');
         on.classList.add('hidden');
+    }
+}
+
+async function loadGithubOrganizations() {
+    const list = document.getElementById('gh-org-list');
+    list.textContent = 'Cargando organizaciones…';
+    try {
+        const res = await fetch('/api/github/organizations', { headers: authHeaders() });
+        const data = await res.json();
+        if (!res.ok) {
+            list.textContent = data.error || 'No se pudieron cargar las organizaciones.';
+            return;
+        }
+        list.replaceChildren();
+        if (!data.length) {
+            list.textContent = 'No se encontraron organizaciones. Si perteneces a una, actualiza los permisos de GitHub.';
+            return;
+        }
+        data.forEach(org => {
+            const link = document.createElement('a');
+            link.href = org.html_url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = org.login;
+            link.className = 'inline-block mr-2 mb-1 px-2 py-1 rounded-lg bg-primary/10 text-primary';
+            list.appendChild(link);
+        });
+    } catch (error) {
+        list.textContent = 'No se pudieron cargar las organizaciones de GitHub.';
     }
 }
 

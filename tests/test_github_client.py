@@ -91,6 +91,36 @@ class TestExtractRepoInfo:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestGetContributorsFromApi:
+    @patch("services.github_client._estimate_active_days", return_value=1)
+    @patch("services.github_client.requests.get")
+    def test_usa_token_y_pagina_todos_los_contribuidores(self, mock_get, mock_days):
+        first_page = [
+            {"login": f"user-{index}", "contributions": 1}
+            for index in range(100)
+        ]
+        mock_get.side_effect = [
+            _mock_response(200, first_page),
+            _mock_response(200, [{"login": "org-colleague", "contributions": 4}]),
+        ]
+
+        result = get_contributors_from_api(
+            "https://github.com/acme/private-repo",
+            token="oauth-token",
+        )
+
+        assert result["unique_authors"] == 101
+        assert "org-colleague" in {
+            contributor["username"] for contributor in result["contributors"]
+        }
+        assert mock_get.call_count == 2
+        assert [
+            call.kwargs["params"]["page"] for call in mock_get.call_args_list
+        ] == [1, 2]
+        assert all(
+            call.kwargs["headers"]["Authorization"] == "Bearer oauth-token"
+            for call in mock_get.call_args_list
+        )
+
     @patch("services.github_client._estimate_active_days", return_value=30)
     @patch("services.github_client.requests.get")
     def test_respuesta_exitosa(self, mock_get, mock_days):

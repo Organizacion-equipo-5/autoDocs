@@ -2172,7 +2172,7 @@
          * Abre el modal de colaboradores y carga los datos desde el servidor.
          * Muestra el MVP, podio y lista de colaboradores.
          */
-        async function openContributorsModal() {
+        async function openContributorsModal(refresh = false) {
             const modal = document.getElementById('contributors-modal');
             const body = document.getElementById('contributors-body');
             modal.classList.remove('hidden');
@@ -2187,7 +2187,12 @@
 
             try {
                 // Obtener colaboradores del backend
-                const res = await fetch(`/api/projects/${projectId}/contributors`, { headers: headers() });
+                const res = await fetch(
+                    `/api/projects/${projectId}/contributors${refresh ? '/refresh' : ''}`,
+                    refresh
+                        ? { method: 'POST', headers: headers() }
+                        : { headers: headers() }
+                );
                 if (!res.ok) throw new Error('Error al obtener colaboradores');
                 const data = await res.json();
                 cachedContributors = data;
@@ -2469,7 +2474,7 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Actualizando...';
             try {
-                await openContributorsModal();
+                await openContributorsModal(true);
             } catch (e) { console.error(e); }
             btn.disabled = false;
             btn.innerHTML = '<span class="material-symbols-outlined text-sm">refresh</span> Actualizar';

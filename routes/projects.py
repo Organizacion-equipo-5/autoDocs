@@ -152,7 +152,10 @@ def create_project():
     if github_url and not error_message:
         try:
             from services.github_client import get_contributors_from_api
-            contributors_data = get_contributors_from_api(github_url)
+            contributors_data = get_contributors_from_api(
+                github_url,
+                token=(user.get('github') or {}).get('access_token'),
+            )
             
             if contributors_data and contributors_data.get('contributors'):
                 db.projects.update_one(
@@ -286,7 +289,11 @@ def get_project_contributors(project_id):
     
     try:
         from services.github_client import get_contributors_from_api
-        contributors_data = get_contributors_from_api(github_url)
+        user = db.users.find_one({"_id": user_id})
+        contributors_data = get_contributors_from_api(
+            github_url,
+            token=((user or {}).get('github') or {}).get('access_token'),
+        )
         
         if contributors_data and contributors_data.get('contributors'):
             db.projects.update_one(
@@ -331,7 +338,11 @@ def refresh_project_contributors(project_id):
     
     try:
         from services.github_client import get_contributors_from_api
-        contributors_data = get_contributors_from_api(github_url)
+        user = db.users.find_one({"_id": user_id})
+        contributors_data = get_contributors_from_api(
+            github_url,
+            token=((user or {}).get('github') or {}).get('access_token'),
+        )
         
         if contributors_data:
             db.projects.update_one(

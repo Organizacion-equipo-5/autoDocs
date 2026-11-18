@@ -4,7 +4,7 @@ import os
 import secrets
 import uuid
 from datetime import datetime, timedelta
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import requests
 from dotenv import load_dotenv
@@ -26,13 +26,17 @@ STATE_TTL_MINUTES = 10
 
 
 def _cfg():
+    scope = os.getenv("GITHUB_OAUTH_SCOPE", "read:user user:email repo")
+    scopes = scope.split()
+    if "read:org" not in scopes:
+        scopes.append("read:org")
     return {
         "client_id": os.getenv("GITHUB_CLIENT_ID", ""),
         "client_secret": os.getenv("GITHUB_CLIENT_SECRET", ""),
         "redirect_uri": os.getenv(
             "GITHUB_REDIRECT_URI", "http://localhost:5000/api/github/callback"
         ),
-        "scope": os.getenv("GITHUB_OAUTH_SCOPE", "read:user user:email repo"),
+        "scope": " ".join(scopes),
     }
 
 
@@ -42,6 +46,38 @@ def _gh_headers(token):
         "Accept": "application/vnd.github+json",
         "User-Agent": "autoDocs",
     }
+
+
+def _github_get_all_pages(url, token, params=None):
+    results = []
+    page = 1
+    while True:
+        query = dict(params or {})
+        query.update({"per_page": 100, "page": page})
+        response = requests.get(
+            url,
+            headers=_gh_headers(token),
+            params=query,
+            timeout=15,
+        )
+        if response.status_code != 200:
+            return None, response
+        page_results = response.json()
+        if not isinstance(page_results, list):
+            raise ValueError("GitHub devolvió una lista inválida.")
+        results.extend(page_results)
+        if len(page_results) < 100:
+            return results, None
+        page += 1
+
+
+def _github_api_error(db, user_id, response, forbidden_message):
+    if response.status_code == 401:
+        db.users.update_one({"_id": user_id}, {"$unset": {"github": ""}})
+        return jsonify({"error": "Tu conexión con GitHub expiró. Vuelve a conectarla."}), 401
+    if response.status_code == 403:
+        return jsonify({"error": forbidden_message}), 403
+    return jsonify({"error": "GitHub devolvió un error"}), 502
 
 
 def _json_for_script(value):
@@ -151,7 +187,11 @@ def github_callback():
             },
             timeout=15,
         )
-        access_token = token_res.json().get("access_token")
+        token_data = token_res.json()
+        access_token = token_data.get("access_token")
+        granted_scope = token_data.get("scope") or ""
+        if not isinstance(granted_scope, str):
+            return fail("GitHub devolvió permisos inválidos", link_mode)
         if not access_token:
             return fail("GitHub no entregó el token", link_mode)
 
@@ -180,7 +220,7 @@ def github_callback():
         "login": gh_user["login"],
         "avatar_url": gh_user.get("avatar_url", ""),
         "access_token": access_token,  # TODO: cifrar antes de guardar en producción
-        "scope": cfg["scope"],
+        "scope": granted_scope,
         "connected_at": datetime.utcnow().isoformat(),
     }
 
@@ -248,6 +288,7 @@ def github_status():
         "connected": True,
         "login": gh.get("login"),
         "avatar_url": gh.get("avatar_url"),
+        "organization_access": "read:org" in (gh.get("scope") or "").replace(",", " ").split(),
     }), 200
 
 
@@ -255,27 +296,69 @@ def github_status():
 @jwt_required()
 def github_repos():
     db = get_db()
-    user = db.users.find_one({"_id": get_jwt_identity()}, {"github": 1})
+    user_id = get_jwt_identity()
+    user = db.users.find_one({"_id": user_id}, {"github": 1})
     token = ((user or {}).get("github") or {}).get("access_token")
     if not token:
         return jsonify({"error": "GitHub no conectado"}), 400
 
     try:
-        res = requests.get(
+        repos, error_response = _github_get_all_pages(
             f"{GITHUB_API}/user/repos",
-            headers=_gh_headers(token),
-            params={"per_page": 100, "sort": "updated",
-                    "affiliation": "owner,collaborator,organization_member"},
-            timeout=15,
+            token,
+            {
+                "sort": "updated",
+                "affiliation": "owner,collaborator,organization_member",
+            },
         )
+        if error_response:
+            return _github_api_error(
+                db,
+                user_id,
+                error_response,
+                "GitHub no permitió acceder a tus repositorios. Revisa los permisos de la cuenta.",
+            )
+
+        organizations, error_response = _github_get_all_pages(
+            f"{GITHUB_API}/user/orgs",
+            token,
+        )
+        if error_response:
+            return _github_api_error(
+                db,
+                user_id,
+                error_response,
+                "No se pudieron leer tus organizaciones. Vuelve a conectar GitHub para autorizar el permiso read:org.",
+            )
+
+        repos_by_name = {
+            repo.get("full_name"): repo
+            for repo in repos
+            if isinstance(repo, dict) and isinstance(repo.get("full_name"), str)
+        }
+        for organization in organizations:
+            login = organization.get("login") if isinstance(organization, dict) else None
+            if not isinstance(login, str) or not login:
+                continue
+            organization_repos, error_response = _github_get_all_pages(
+                f"{GITHUB_API}/orgs/{quote(login, safe='')}/repos",
+                token,
+                {"type": "all", "sort": "updated"},
+            )
+            if error_response:
+                return _github_api_error(
+                    db,
+                    user_id,
+                    error_response,
+                    f"GitHub no permitió acceder a los repositorios de {login}. Revisa el acceso de la organización.",
+                )
+            for repo in organization_repos:
+                if isinstance(repo, dict) and isinstance(repo.get("full_name"), str):
+                    repos_by_name[repo["full_name"]] = repo
     except requests.RequestException:
         return jsonify({"error": "No se pudo conectar con GitHub"}), 502
-
-    if res.status_code == 401:
-        db.users.update_one({"_id": get_jwt_identity()}, {"$unset": {"github": ""}})
-        return jsonify({"error": "Tu conexión con GitHub expiró. Vuelve a conectarla."}), 401
-    if res.status_code != 200:
-        return jsonify({"error": "GitHub devolvió un error"}), 502
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 502
 
     return jsonify([
         {
@@ -286,7 +369,46 @@ def github_repos():
             "description": r.get("description") or "",
             "default_branch": r.get("default_branch"),
         }
-        for r in res.json()
+        for r in repos_by_name.values()
+    ]), 200
+
+
+@github_oauth_bp.route("/organizations", methods=["GET"])
+@jwt_required()
+def github_organizations():
+    db = get_db()
+    user_id = get_jwt_identity()
+    user = db.users.find_one({"_id": user_id}, {"github": 1})
+    token = ((user or {}).get("github") or {}).get("access_token")
+    if not token:
+        return jsonify({"error": "GitHub no conectado"}), 400
+
+    try:
+        organizations, error_response = _github_get_all_pages(
+            f"{GITHUB_API}/user/orgs",
+            token,
+        )
+    except requests.RequestException:
+        return jsonify({"error": "No se pudo conectar con GitHub"}), 502
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 502
+
+    if error_response:
+        return _github_api_error(
+            db,
+            user_id,
+            error_response,
+            "No se pudieron leer tus organizaciones. Vuelve a conectar GitHub para autorizar el permiso read:org.",
+        )
+
+    return jsonify([
+        {
+            "login": organization["login"],
+            "avatar_url": organization.get("avatar_url", ""),
+            "html_url": f"https://github.com/{organization['login']}",
+        }
+        for organization in organizations
+        if isinstance(organization, dict) and isinstance(organization.get("login"), str)
     ]), 200
 
 
