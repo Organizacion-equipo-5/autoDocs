@@ -90,7 +90,21 @@ def _json_for_script(value):
     )
 
 
-def _start_oauth(user_id=None, client=None):
+def _safe_redirect(value):
+    """Valida un destino local (ruta relativa) para evitar open redirects."""
+    if not isinstance(value, str):
+        return None
+    dest = value.strip()
+    if not dest.startswith("/") or dest.startswith("//"):
+        return None
+    if "\\" in dest or any(ord(c) < 32 for c in dest):
+        return None
+    if any(part == ".." for part in dest.split("/")):
+        return None
+    return dest
+
+
+def _start_oauth(user_id=None, client=None, purpose=None, redirect_to=None):
     cfg = _cfg()
     if not cfg["client_id"] or not cfg["client_secret"]:
         raise ValueError("GitHub OAuth no está configurado en el servidor")
@@ -100,7 +114,9 @@ def _start_oauth(user_id=None, client=None):
     db.oauth_states.insert_one({
         "_id": state,
         "user_id": user_id,  # None = login, con valor = vincular cuenta
-        "client": client,    # "mobile" cuando viene de la app Flutter
+        "client": client,    # "mobile"/"web" según origen
+        "purpose": purpose,  # "login" o "connect" (opcional)
+        "redirect_to": _safe_redirect(redirect_to),
         "expires_at": (datetime.utcnow() + timedelta(minutes=STATE_TTL_MINUTES)).isoformat(),
     })
     params = urlencode({
@@ -156,8 +172,14 @@ def github_login():
 def github_connect_url():
     body = request.get_json(silent=True) or {}
     client = "mobile" if body.get("client") == "mobile" else None
+    redirect_to = _safe_redirect(body.get("redirect_to"))
     try:
-        state, url = _start_oauth(user_id=get_jwt_identity(), client=client)
+        state, url = _start_oauth(
+            user_id=get_jwt_identity(),
+            client=client,
+            purpose="connect",
+            redirect_to=redirect_to,
+        )
     except ValueError as e:
         return jsonify({"error": str(e)}), 500
     return _set_state_cookie(make_response(jsonify({"url": url})), state)
@@ -175,8 +197,9 @@ def github_callback():
     def fail(msg, link_mode=False):
         if ctx["mobile"]:
             return _mobile_page(msg, ok=False)
-        dest = "/dashboard" if link_mode else "/"
-        resp = redirect(f"{dest}?{urlencode({'github_error': msg})}")
+        dest = ctx.get("redirect_to") or ("/dashboard" if link_mode else "/")
+        sep = "&" if "?" in dest else "?"
+        resp = redirect(f"{dest}{sep}{urlencode({'github_error': msg})}")
         resp.delete_cookie(STATE_COOKIE)
         return resp
 
@@ -186,6 +209,7 @@ def github_callback():
     # Validar state: existe en BD, no expiró y (si no es móvil) coincide con la cookie
     record = db.oauth_states.find_one_and_delete({"_id": state}) if state else None
     ctx["mobile"] = bool(record and record.get("client") == "mobile")
+    ctx["redirect_to"] = _safe_redirect((record or {}).get("redirect_to"))
     cookie_state = request.cookies.get(STATE_COOKIE)
     cookie_ok = ctx["mobile"] or (
         cookie_state and state and secrets.compare_digest(cookie_state, state)
@@ -258,9 +282,11 @@ def github_callback():
         db.users.update_one({"_id": link_user_id}, {"$set": {"github": github_data}})
         if ctx["mobile"]:
             return _mobile_page("GitHub conectado correctamente")
-        resp = redirect("/dashboard?github=connected")
+        dest = ctx.get("redirect_to") or "/dashboard"
+        sep = "&" if "?" in dest else "?"
+        resp = redirect(f"{dest}{sep}{urlencode({'github': 'connected'})}")
         resp.delete_cookie(STATE_COOKIE)
-        return resp         
+        return resp
 
     # ---- Modo login: buscar o crear usuario ----
     user = db.users.find_one({"github.id": gh_user["id"]}) or db.users.find_one({"email": email})
@@ -280,6 +306,22 @@ def github_callback():
             "github": github_data,
         }
         db.users.insert_one(user)
+
+    # Flujo móvil/login por canje de código (usado por la app Flutter)
+    if ctx.get("mobile") or record.get("purpose") == "login":
+        one_time = secrets.token_urlsafe(32)
+        db.github_login_codes.insert_one({
+            "_id": one_time,
+            "user_id": user["_id"],
+            "created_at": datetime.utcnow().isoformat(),
+            "expires_at": (datetime.utcnow() + timedelta(minutes=5)).isoformat(),
+        })
+        callback_scheme = os.getenv("MOBILE_OAUTH_CALLBACK_SCHEME", "autodocs")
+        callback_host = os.getenv("MOBILE_OAUTH_CALLBACK_HOST", "oauth")
+        redirect_url = f"{callback_scheme}://{callback_host}/callback?code={quote(one_time, safe='')}"
+        resp = redirect(redirect_url)
+        resp.delete_cookie(STATE_COOKIE)
+        return resp
 
     jwt_token = create_access_token(identity=user["_id"])
     user_payload = {

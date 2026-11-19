@@ -16,6 +16,9 @@
         initial-scale=1.0: Establece el nivel de zoom inicial al 100%.
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Preferencia de idioma compartida por la web -->
+    <script src="/static/web_language.js"></script>
     
     <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>Perfil — AutoDocs AI</title>
@@ -428,6 +431,45 @@
             color: #8ed5ff; 
         }
 
+        /* Selector de idioma: mismo lenguaje visual que el botón de tema */
+        .language-option {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.1rem;
+            border-radius: 0.85rem;
+            border: 1px solid rgba(148,163,184,0.25);
+            color: #475569;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(8px);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .language-option:hover {
+            border-color: rgba(56,189,248,0.5);
+            color: #38bdf8;
+        }
+        .language-option.active {
+            border-color: rgba(56,189,248,0.65);
+            background: rgba(56,189,248,0.14);
+            color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(56,189,248,0.08);
+        }
+        html.dark .language-option {
+            border-color: rgba(148,163,184,0.2);
+            color: #94a3b8;
+            background: rgba(15,20,24,0.5);
+        }
+        html.dark .language-option:hover { color: #8ed5ff; }
+        html.dark .language-option.active {
+            border-color: rgba(142,213,255,0.5);
+            background: rgba(56,189,248,0.16);
+            color: #8ed5ff;
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .min-h-screen.p-6.md\:p-8 { padding: 1rem; }
@@ -464,10 +506,10 @@
                 <div>
                     <div class="flex items-center gap-2 text-sm text-variant-70 mb-1">
                         <span class="material-symbols-outlined text-[18px]" style="color:#38bdf8">account_circle</span>
-                        <span>Panel de usuario</span>
+                        <span data-i18n="profile.kicker">Panel de usuario</span>
                     </div>
-                    <h1 class="section-title">Mi Perfil</h1>
-                    <p class="text-variant-70 text-sm max-w-lg mt-1">Administra tu identidad, credenciales y mantén segura tu cuenta.</p>
+                    <h1 class="section-title" data-i18n="profile.title">Mi Perfil</h1>
+                    <p class="text-variant-70 text-sm max-w-lg mt-1" data-i18n="profile.subtitle">Administra tu identidad, credenciales y mantén segura tu cuenta.</p>
                 </div>
 
                 <!-- 
@@ -480,7 +522,7 @@
                         Botón de tema (claro/oscuro).
                         Cambia el tema de la página y guarda la preferencia.
                     -->
-                    <button id="themeButton" class="theme-btn" title="Cambiar tema">
+                    <button id="themeButton" class="theme-btn" title="Cambiar tema" data-i18n-title="settings.themeTooltip">
                         <span id="themeIcon" class="material-symbols-outlined" style="font-size:20px">light_mode</span>
                     </button>
 
@@ -493,7 +535,7 @@
                     -->
                     <a href="/dashboard" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-divider text-variant-custom hover:text-primary transition-all duration-200 glass text-sm font-medium">
                         <span class="material-symbols-outlined text-lg">arrow_back</span>
-                        Volver al dashboard
+                        <span data-i18n="profile.back">Volver al dashboard</span>
                     </a>
                 </div>
             </div>
@@ -541,15 +583,15 @@
                             </div>
                             
                             <!-- Nombre del usuario -->
-                            <h3 id="displayName" class="text-xl font-bold text-on-surface-custom">Cargando...</h3>
+                            <h3 id="displayName" class="text-xl font-bold text-on-surface-custom" data-i18n="profile.loading">Cargando...</h3>
 
                             <!-- Badges de estado del usuario -->
                             <div class="flex flex-wrap gap-2 justify-center mt-2">
                                 <span class="info-badge text-xs px-3 py-1 rounded-full flex items-center gap-1 text-variant-custom">
-                                    <span class="material-symbols-outlined text-[14px]" style="color:#38bdf8">verified</span> Verificado
+                                    <span class="material-symbols-outlined text-[14px]" style="color:#38bdf8">verified</span> <span data-i18n="profile.verified">Verificado</span>
                                 </span>
                                 <span class="info-badge text-xs px-3 py-1 rounded-full flex items-center gap-1 text-variant-custom">
-                                    <span class="material-symbols-outlined text-[14px]" style="color:#38bdf8">badge</span> Usuario activo
+                                    <span class="material-symbols-outlined text-[14px]" style="color:#38bdf8">badge</span> <span data-i18n="profile.activeUser">Usuario activo</span>
                                 </span>
                             </div>
 
@@ -557,7 +599,7 @@
                             <div class="w-full mt-5 pt-5 border-t border-divider">
                                 <div class="flex items-center justify-between text-sm">
                                     <span class="text-variant-70 flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">schedule</span> Último acceso
+                                        <span class="material-symbols-outlined text-[16px]">schedule</span> <span data-i18n="profile.lastAccess">Último acceso</span>
                                     </span>
                                     <span class="text-on-surface-custom font-mono text-xs">—</span>
                                 </div>
@@ -565,7 +607,7 @@
                                     <span class="text-variant-70 flex items-center gap-1">
                                         <span class="material-symbols-outlined text-[16px]">security</span> 2FA
                                     </span>
-                                    <span class="text-xs font-medium" style="color:#10b981">Activado</span>
+                                    <span class="text-xs font-medium" style="color:#10b981" data-i18n="profile.enabled">Activado</span>
                                 </div>
                             </div>
                         </div>
@@ -588,7 +630,7 @@
                         -->
                         <div class="flex items-center gap-3 mb-6 pb-4 border-b border-divider">
                             <span class="material-symbols-outlined text-2xl" style="color:#38bdf8">edit_note</span>
-                            <h2 class="text-xl font-bold tracking-tight text-on-surface-custom">Información personal</h2>
+                            <h2 class="text-xl font-bold tracking-tight text-on-surface-custom" data-i18n="profile.personalInfo">Información personal</h2>
                         </div>
 
                         <div class="space-y-6">
@@ -604,10 +646,10 @@
                                 <!-- Nombre completo -->
                                 <div class="space-y-2">
                                     <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">badge</span> Nombre completo
+                                        <span class="material-symbols-outlined text-[16px]">badge</span> <span data-i18n="profile.fullName">Nombre completo</span>
                                     </label>
                                     <div class="relative">
-                                        <input id="profileName" type="text" class="input-field pl-9" placeholder="Tu nombre" />
+                                        <input id="profileName" type="text" class="input-field pl-9" placeholder="Tu nombre" data-i18n-placeholder="profile.namePlaceholder" />
                                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-variant-50 text-[18px]">person</span>
                                     </div>
                                 </div>
@@ -615,7 +657,7 @@
                                 <!-- Correo electrónico (solo lectura) -->
                                 <div class="space-y-2">
                                     <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">mail</span> Correo electrónico
+                                        <span class="material-symbols-outlined text-[16px]">mail</span> <span data-i18n="profile.email">Correo electrónico</span>
                                     </label>
                                     <div class="relative">
                                         <input id="profileEmail" type="email" class="input-field pl-9" readonly />
@@ -629,7 +671,7 @@
                             ============================================================ -->
                             <div class="space-y-2">
                                 <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[16px]" style="color:#38bdf8">workspace_premium</span> Plan actual
+                                    <span class="material-symbols-outlined text-[16px]" style="color:#38bdf8">workspace_premium</span> <span data-i18n="profile.currentPlan">Plan actual</span>
                                 </label>
                                 <!-- 
                                     Tarjeta del plan.
@@ -649,7 +691,7 @@
                                         <div class="text-right">
                                             <!-- Precio del plan -->
                                             <p id="currentPlanPrice" class="text-2xl font-bold" style="color:#38bdf8">—</p>
-                                            <p class="text-xs text-variant-50">/mes</p>
+                                            <p class="text-xs text-variant-50" data-i18n="profile.perMonth">/mes</p>
                                         </div>
                                     </div>
                                     <!-- 
@@ -658,7 +700,7 @@
                                     -->
                                     <div class="mt-4 pt-4 border-t border-divider">
                                         <div class="flex items-center justify-between text-sm mb-3">
-                                            <span class="text-variant-70">Proyectos usados</span>
+                                            <span class="text-variant-70" data-i18n="profile.projectsUsed">Proyectos usados</span>
                                             <span class="font-bold" style="color:#38bdf8"><span id="projectsUsed">0</span> / <span id="projectsLimit">3</span></span>
                                         </div>
                                         <!-- Barra de progreso -->
@@ -667,7 +709,7 @@
                                         </div>
                                         <!-- Botón para cambiar de plan -->
                                         <button onclick="location.href='/pricing'" class="w-full py-2.5 rounded-xl border border-divider text-variant-custom hover:text-primary hover:border-primary/50 transition-all text-sm font-medium flex items-center justify-center gap-2">
-                                            <span class="material-symbols-outlined text-[18px]">upgrade</span> Cambiar plan
+                                            <span class="material-symbols-outlined text-[18px]">upgrade</span> <span data-i18n="profile.changePlan">Cambiar plan</span>
                                         </button>
                                     </div>
                                 </div>
@@ -680,7 +722,7 @@
                                 <!-- Nueva contraseña -->
                                 <div class="space-y-2">
                                     <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">lock</span> Nueva contraseña
+                                        <span class="material-symbols-outlined text-[16px]">lock</span> <span data-i18n="profile.newPassword">Nueva contraseña</span>
                                     </label>
                                     <div class="relative">
                                         <input id="profilePassword" type="password" class="input-field pl-9" placeholder="••••••••" />
@@ -693,13 +735,13 @@
                                             <span class="material-symbols-outlined">visibility</span>
                                         </button>
                                     </div>
-                                    <p class="text-[11px] text-variant-50 mt-1">Mínimo 6 caracteres, déjala vacía si no deseas cambiarla</p>
+                                    <p class="text-[11px] text-variant-50 mt-1" data-i18n="profile.passwordHint">Mínimo 6 caracteres, déjala vacía si no deseas cambiarla</p>
                                 </div>
                                 
                                 <!-- Confirmar contraseña -->
                                 <div class="space-y-2">
                                     <label class="text-xs uppercase tracking-wider text-variant-custom flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[16px]">verified</span> Confirmar contraseña
+                                        <span class="material-symbols-outlined text-[16px]">verified</span> <span data-i18n="profile.confirmPassword">Confirmar contraseña</span>
                                     </label>
                                     <div class="relative">
                                         <input id="profilePasswordConfirm" type="password" class="input-field pl-9" placeholder="••••••••" />
@@ -725,7 +767,7 @@
                             <div class="security-card rounded-xl p-3 flex items-start gap-3">
                                 <span class="material-symbols-outlined text-xl flex-shrink-0" style="color:#38bdf8">info</span>
                                 <div class="text-xs text-variant-70 leading-relaxed">
-                                    <span class="font-medium" style="color:#38bdf8">Recomendación de seguridad:</span> Utiliza una contraseña única, combina mayúsculas, números y símbolos. Evita palabras comunes.
+                                    <span class="font-medium" style="color:#38bdf8" data-i18n="profile.securityTitle">Recomendación de seguridad:</span> <span data-i18n="profile.securityText">Utiliza una contraseña única, combina mayúsculas, números y símbolos. Evita palabras comunes.</span>
                                 </div>
                             </div>
 
@@ -754,7 +796,7 @@
                                 Estilos dinámicos para el fondo y borde verde.
                             -->
                             <div id="profileSuccess" class="text-sm hidden rounded-xl p-3 flex items-center gap-2" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10b981">
-                                <span class="material-symbols-outlined text-base">check_circle</span> Perfil actualizado correctamente.
+                                <span class="material-symbols-outlined text-base">check_circle</span> <span data-i18n="profile.success">Perfil actualizado correctamente.</span>
                             </div>
 
                             <!-- ============================================================
@@ -776,7 +818,7 @@
                                     hover:text-primary: Texto azul al pasar el mouse.
                                 -->
                                 <button onclick="loadProfile()" class="px-5 py-2.5 rounded-2xl border border-divider text-variant-custom hover:text-primary transition-all flex items-center gap-2 text-sm glass">
-                                    <span class="material-symbols-outlined text-[18px]">refresh</span> Recargar datos
+                                    <span class="material-symbols-outlined text-[18px]">refresh</span> <span data-i18n="profile.reload">Recargar datos</span>
                                 </button>
                                 
                                 <!-- 
@@ -785,12 +827,58 @@
                                     shadow-lg: Sombra pronunciada.
                                 -->
                                 <button id="saveButton" onclick="saveProfile()" class="btn-primary px-6 py-2.5 rounded-2xl text-sm flex items-center gap-2 shadow-lg">
-                                    <span class="material-symbols-outlined text-[18px]">save</span> Guardar cambios
+                                    <span class="material-symbols-outlined text-[18px]">save</span> <span data-i18n="profile.save">Guardar cambios</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- ============================================================
+            CONFIGURACIÓN: IDIOMA Y GITHUB
+            ============================================================ -->
+            <div class="grid lg:grid-cols-2 gap-6 mt-6">
+                <!-- Idioma de la aplicación y de los documentos generados -->
+                <section class="glass rounded-3xl p-6">
+                    <div class="flex items-center gap-3 mb-5 pb-4 border-b border-divider">
+                        <span class="material-symbols-outlined text-2xl" style="color:#38bdf8">language</span>
+                        <h2 class="text-lg font-bold tracking-tight text-on-surface-custom" data-i18n="settings.languageTitle">Idioma de la aplicación</h2>
+                    </div>
+                    <p class="text-sm text-variant-70 leading-relaxed" data-i18n="settings.languageDescription">Elige el idioma de la interfaz y de los documentos generados.</p>
+                    <div class="flex flex-wrap gap-3 mt-5" role="group" aria-label="Idioma">
+                        <button type="button" class="language-option" data-language="es" onclick="setLanguage('es')">
+                            <span class="material-symbols-outlined text-[18px]">translate</span>
+                            <span data-i18n="settings.spanish">Español</span>
+                        </button>
+                        <button type="button" class="language-option" data-language="en" onclick="setLanguage('en')">
+                            <span class="material-symbols-outlined text-[18px]">language</span>
+                            <span data-i18n="settings.english">English</span>
+                        </button>
+                    </div>
+                    <p id="languageStatus" class="text-xs text-variant-50 mt-4"></p>
+                </section>
+
+                <!-- Conexión con GitHub (misma lógica que la app móvil) -->
+                <section class="glass rounded-3xl p-6">
+                    <div class="flex items-center gap-3 mb-5 pb-4 border-b border-divider">
+                        <span class="material-symbols-outlined text-2xl" style="color:#38bdf8">code</span>
+                        <h2 class="text-lg font-bold tracking-tight text-on-surface-custom" data-i18n="settings.githubTitle">Conexión con GitHub</h2>
+                    </div>
+                    <p class="text-sm text-variant-70 leading-relaxed" data-i18n="settings.githubDescription">Vincula tu cuenta para analizar repositorios privados y cambiar de rama.</p>
+                    <div class="glass rounded-xl p-4 border border-divider mt-5 flex items-center gap-3">
+                        <span id="githubStatusIcon" class="material-symbols-outlined text-xl flex-shrink-0" style="color:#94a3b8">link_off</span>
+                        <div class="min-w-0">
+                            <p id="githubStatusTitle" class="text-sm font-semibold text-on-surface-custom" data-i18n="settings.githubDisconnected">Cuenta no conectada</p>
+                            <p id="githubStatusDetail" class="text-xs text-variant-50 truncate"></p>
+                        </div>
+                    </div>
+                    <button id="githubConnectButton" type="button" onclick="toggleGithubConnection()" class="btn-primary w-full mt-4 py-2.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 shadow-lg">
+                        <span id="githubButtonIcon" class="material-symbols-outlined text-[18px]">link</span>
+                        <span id="githubButtonLabel" data-i18n="settings.githubConnect">Conectar con GitHub</span>
+                    </button>
+                    <p id="githubStatusMessage" class="text-xs text-variant-50 mt-3"></p>
+                </section>
             </div>
         </div>
     </div>
@@ -856,10 +944,178 @@
          * @returns {Object} Headers con token JWT y Content-Type JSON.
          */
         function authHeaders() {
-            return { 
-                'Authorization': 'Bearer ' + token, 
-                'Content-Type': 'application/json' 
+            return {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json',
+                'Accept-Language': window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
             };
+        }
+
+        // ============================================================
+        // IDIOMA (UI + DOCUMENTOS GENERADOS)
+        // ============================================================
+
+        var cachedPlan = null;
+        var cachedGithub = null;
+        var githubBusy = false;
+
+        function i18n(key) {
+            return window.AutoDocsLanguage ? window.AutoDocsLanguage.t(key) : key;
+        }
+
+        function renderLanguageSelection() {
+            var active = window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es';
+            document.querySelectorAll('[data-language]').forEach(function (btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-language') === active);
+                btn.setAttribute('aria-pressed', btn.getAttribute('data-language') === active ? 'true' : 'false');
+            });
+        }
+
+        function renderDynamicTranslations() {
+            renderLanguageSelection();
+
+            if (cachedPlan) {
+                var planNames = {
+                    free: i18n('profile.freePlan'),
+                    pro: i18n('profile.proPlan'),
+                    enterprise: i18n('profile.enterprisePlan')
+                };
+                var planDetails = {
+                    free: i18n('profile.freeDetails'),
+                    pro: i18n('profile.proDetails'),
+                    enterprise: i18n('profile.enterpriseDetails')
+                };
+                document.getElementById('currentPlanName').textContent = planNames[cachedPlan] || cachedPlan;
+                document.getElementById('currentPlanDetails').textContent = planDetails[cachedPlan] || '';
+            }
+
+            if (cachedGithub) renderGithubStatus();
+        }
+
+        /**
+         * Cambia el idioma de la web y lo guarda en la cuenta para que los
+         * documentos generados usen la misma preferencia.
+         */
+        async function setLanguage(lang) {
+            var normalized = window.AutoDocsLanguage ? window.AutoDocsLanguage.normalize(lang) : (lang === 'en' ? 'en' : 'es');
+            if (!normalized) normalized = 'es';
+
+            window.AutoDocsLanguage.set(normalized);
+            window.AutoDocsLanguage.apply(document);
+            renderDynamicTranslations();
+
+            var status = document.getElementById('languageStatus');
+            status.textContent = i18n('settings.languageSaved');
+
+            try {
+                var res = await fetch('/api/auth/me', {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ language: normalized })
+                });
+                if (!res.ok) throw new Error('language update failed');
+            } catch (error) {
+                status.textContent = i18n('settings.languageError');
+            }
+        }
+
+        // ============================================================
+        // GITHUB: MISMA LÓGICA QUE LA APP MÓVIL
+        // ============================================================
+
+        function setGithubBusy(busy) {
+            githubBusy = busy;
+            var button = document.getElementById('githubConnectButton');
+            var label = document.getElementById('githubButtonLabel');
+            button.disabled = busy;
+            if (busy) label.textContent = i18n('settings.githubConnecting');
+            else renderGithubStatus();
+        }
+
+        function renderGithubStatus() {
+            var status = cachedGithub || { connected: false };
+            var title = document.getElementById('githubStatusTitle');
+            var detail = document.getElementById('githubStatusDetail');
+            var icon = document.getElementById('githubStatusIcon');
+            var buttonIcon = document.getElementById('githubButtonIcon');
+            var buttonLabel = document.getElementById('githubButtonLabel');
+
+            if (status.connected) {
+                title.textContent = i18n('settings.githubConnected');
+                detail.textContent = status.login || '';
+                icon.textContent = 'link';
+                icon.style.color = '#10b981';
+                buttonIcon.textContent = 'link_off';
+                buttonLabel.textContent = i18n('settings.githubDisconnect');
+            } else {
+                title.textContent = i18n('settings.githubDisconnected');
+                detail.textContent = status.organization_access === false
+                    ? i18n('settings.githubOrgPermission')
+                    : '';
+                icon.textContent = 'link_off';
+                icon.style.color = '#94a3b8';
+                buttonIcon.textContent = 'link';
+                buttonLabel.textContent = i18n('settings.githubConnect');
+            }
+        }
+
+        async function loadGithubStatus() {
+            var message = document.getElementById('githubStatusMessage');
+            message.textContent = i18n('settings.githubLoading');
+            try {
+                var res = await fetch('/api/github/status', { headers: authHeaders() });
+                if (!res.ok) throw new Error('github status failed');
+                cachedGithub = await res.json();
+                renderGithubStatus();
+                message.textContent = '';
+            } catch (error) {
+                cachedGithub = { connected: false };
+                renderGithubStatus();
+                message.textContent = i18n('settings.githubError');
+            }
+        }
+
+        /**
+         * Conecta o desconecta GitHub. La conexión usa /api/github/connect-url,
+         * igual que "Conectar con GitHub" en la app móvil.
+         */
+        async function toggleGithubConnection() {
+            if (githubBusy) return;
+            var message = document.getElementById('githubStatusMessage');
+            message.textContent = '';
+
+            if (cachedGithub && cachedGithub.connected) {
+                setGithubBusy(true);
+                try {
+                    var res = await fetch('/api/github/disconnect', {
+                        method: 'POST',
+                        headers: authHeaders()
+                    });
+                    if (!res.ok) throw new Error('github disconnect failed');
+                    cachedGithub = { connected: false };
+                    renderGithubStatus();
+                } catch (error) {
+                    message.textContent = i18n('settings.githubDisconnectError');
+                } finally {
+                    setGithubBusy(false);
+                }
+                return;
+            }
+
+            setGithubBusy(true);
+            try {
+                var res = await fetch('/api/github/connect-url', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ client: 'web', redirect_to: '/perfil' })
+                });
+                var data = await res.json();
+                if (!res.ok || !data.url) throw new Error(data.error || 'connect url failed');
+                window.location.href = data.url;
+            } catch (error) {
+                message.textContent = i18n('settings.githubError');
+                setGithubBusy(false);
+            }
         }
 
         // Variable para controlar el estado de guardado (evita envíos múltiples)
@@ -909,6 +1165,16 @@
                 var res = await fetch('/api/auth/me', { headers: authHeaders() });
                 if (!res.ok) return window.location.href = '/';
                 var user = await res.json();
+
+                // Sincronizar el idioma guardado en la cuenta con la preferencia local
+                var serverLang = window.AutoDocsLanguage
+                    ? window.AutoDocsLanguage.normalize(user.language || user.preferred_language || user.locale)
+                    : null;
+                if (serverLang && window.AutoDocsLanguage.get() !== serverLang) {
+                    window.AutoDocsLanguage.set(serverLang);
+                    window.AutoDocsLanguage.apply(document);
+                }
+                renderDynamicTranslations();
                 
                 // Actualizar campos del formulario
                 document.getElementById('profileName').value  = user.name  || '';
@@ -921,15 +1187,16 @@
                     var planData = await planRes.json();
                     
                     // Mapeo de nombres, detalles y precios de planes
+                    cachedPlan = planData.plan;
                     var planNames = { 
-                        free: 'Plan Gratuito', 
-                        pro: 'Plan Pro', 
-                        enterprise: 'Plan Enterprise' 
+                        free: i18n('profile.freePlan'), 
+                        pro: i18n('profile.proPlan'), 
+                        enterprise: i18n('profile.enterprisePlan') 
                     };
                     var planDetails = {
-                        free: '3 proyectos, 10 análisis/mes',
-                        pro: '20 proyectos, 100 análisis/mes, PDF + IA',
-                        enterprise: 'Proyectos ilimitados, análisis ilimitados'
+                        free: i18n('profile.freeDetails'),
+                        pro: i18n('profile.proDetails'),
+                        enterprise: i18n('profile.enterpriseDetails')
                     };
                     var planPrices = { 
                         free: '$0', 
@@ -974,7 +1241,7 @@
                 }
             } catch (error) {
                 // Mostrar mensaje de error
-                document.getElementById('errorMessage').textContent = 'Error al cargar perfil.';
+                document.getElementById('errorMessage').textContent = i18n('profile.loadError');
                 errorEl.classList.remove('hidden');
             }
         }
@@ -1007,21 +1274,21 @@
             
             // Validar nombre
             if (!name) {
-                document.getElementById('errorMessage').textContent = 'El nombre no puede estar vacío.';
+                document.getElementById('errorMessage').textContent = i18n('profile.errorName');
                 errorEl.classList.remove('hidden'); 
                 return;
             }
             
             // Validar coincidencia de contraseñas
             if (password && password !== passwordConfirm) {
-                document.getElementById('errorMessage').textContent = 'Las contraseñas no coinciden.';
+                document.getElementById('errorMessage').textContent = i18n('profile.errorPasswords');
                 errorEl.classList.remove('hidden'); 
                 return;
             }
             
             // Validar longitud mínima de contraseña
             if (password && password.length < 6) {
-                document.getElementById('errorMessage').textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                document.getElementById('errorMessage').textContent = i18n('profile.errorPasswordLength');
                 errorEl.classList.remove('hidden'); 
                 return;
             }
@@ -1033,7 +1300,7 @@
             // Deshabilitar el botón durante el guardado
             isSaving = true;
             var originalBtnText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">progress_activity</span> Guardando...';
+            saveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">progress_activity</span> ' + i18n('profile.saving');
             saveBtn.disabled  = true;
 
             try {
@@ -1046,13 +1313,14 @@
                 
                 if (!res.ok) {
                     var data = await res.json();
-                    document.getElementById('errorMessage').textContent = data.error || 'No se pudo actualizar el perfil.';
+                    document.getElementById('errorMessage').textContent = data.error || i18n('profile.errorUpdate');
                     errorEl.classList.remove('hidden'); 
                     return;
                 }
                 
                 // Actualizar UI con los datos del usuario actualizado
-                var updatedUser = await res.json();
+                var payload = await res.json();
+                var updatedUser = payload.user || payload;
                 if (updatedUser.name) document.getElementById('profileName').value = updatedUser.name;
                 updateProfileUI(updatedUser.name, document.getElementById('profileEmail').value);
                 
@@ -1067,7 +1335,7 @@
                 successEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } catch (error) {
                 // Mostrar mensaje de error genérico
-                document.getElementById('errorMessage').textContent = 'Error de servidor. Intenta de nuevo.';
+                document.getElementById('errorMessage').textContent = i18n('profile.errorServer');
                 errorEl.classList.remove('hidden');
             } finally {
                 // Restaurar el botón
@@ -1104,7 +1372,15 @@
         // INICIALIZACIÓN
         // ============================================================
         
-        // Cargar el perfil al cargar la página
+        // Volver a aplicar textos dinámicos cuando cambie el idioma desde otra pestaña
+        window.addEventListener(
+            (window.AutoDocsLanguage && window.AutoDocsLanguage.EVENT_NAME) || 'autodocs:languagechange',
+            renderDynamicTranslations
+        );
+
+        // Cargar el perfil y el estado de GitHub al cargar la página
+        renderDynamicTranslations();
+        loadGithubStatus();
         loadProfile();
     </script>
 </body>

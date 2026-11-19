@@ -20,7 +20,7 @@ import re
 analysis_bp = Blueprint('analysis', __name__)
 
 
-def run_analysis_async(project_id, project_path, db, source=None):
+def run_analysis_async(project_id, project_path, db, source=None, lang=None):
     """
     Ejecuta el análisis en segundo plano.
 
@@ -33,6 +33,7 @@ def run_analysis_async(project_id, project_path, db, source=None):
 
     `source` (opcional) describe qué disparó el análisis, p. ej. un push de GitHub:
     {"event": "push", "sha": "...", "branch": "main"}.
+    `lang` (opcional) idioma de la documentación generada ('es'/'en').
     """
     try:
         from pathlib import Path
@@ -65,6 +66,24 @@ def run_analysis_async(project_id, project_path, db, source=None):
         except Exception as e:
             print(f"[DEBUG] Code health failed: {e}")
 
+        # Resolver idioma de documentación (param > proyecto > usuario/default)
+        doc_lang = lang
+        if not doc_lang:
+            try:
+                proj = db.projects.find_one({"_id": project_id}, {"doc_language": 1, "preferred_language": 1, "language_code": 1, "user_id": 1})
+                if proj:
+                    doc_lang = proj.get('doc_language') or proj.get('preferred_language') or proj.get('language_code')
+                    if not doc_lang and proj.get('user_id'):
+                        u = db.users.find_one({"_id": proj.get('user_id')}, {"language": 1, "preferred_language": 1})
+                        if u:
+                            doc_lang = u.get('language') or u.get('preferred_language')
+            except Exception:
+                doc_lang = None
+        if not doc_lang:
+            doc_lang = 'es'
+        doc_lang = 'en' if str(doc_lang).lower().startswith('en') else 'es'
+        results['doc_language'] = doc_lang
+
         # Opcional: mejoras con IA (desactivado por defecto para velocidad)
         use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
         if use_ai:
@@ -73,7 +92,9 @@ def run_analysis_async(project_id, project_path, db, source=None):
                 ai_enhancer = AIEnhancer()
                 print(f"[DEBUG] AI Enhancer disponible: {ai_enhancer.is_available()}")
                 try:
-                    mining_results = ai_enhancer.mine_code_patterns(results)
+                    mining_results = ai_enhancer.mine_code_patterns(
+                        results, output_language=doc_lang
+                    )
                     print(f"[DEBUG] Mining results: {mining_results}")
                     results["mining_results"] = mining_results
                 except Exception as e:
@@ -81,7 +102,10 @@ def run_analysis_async(project_id, project_path, db, source=None):
 
                 try:
                     print("[DEBUG] Mejorando documentación con IA...")
-                    results = ai_enhancer.enhance_documentation(results)
+                    try:
+                        results = ai_enhancer.enhance_documentation(results, output_language=doc_lang)
+                    except TypeError:
+                        results = ai_enhancer.enhance_documentation(results)
                     print("[DEBUG] Documentación mejorada")
                 except Exception as e:
                     print(f"[DEBUG] AI enhance failed: {e}")
@@ -90,7 +114,10 @@ def run_analysis_async(project_id, project_path, db, source=None):
 
         documentation = ""
         try:
-            doc_gen = DocGenerator(results)
+            try:
+                doc_gen = DocGenerator(results, lang=doc_lang)
+            except TypeError:
+                doc_gen = DocGenerator(results)
             documentation = doc_gen.generate()
         except Exception as e:
             print(f"[DEBUG] DocGenerator failed: {e}")
@@ -182,12 +209,28 @@ def start_analysis(project_id):
     except Exception:
         pass
 
+    # Idioma solicitado para documentación
+    body = request.get_json(silent=True) or {}
+    req_lang = (body.get('lang') or body.get('language') or body.get('doc_language') or
+                request.args.get('lang') or request.args.get('language') or request.args.get('doc_language'))
+    if not req_lang:
+        req_lang = project.get('doc_language') or project.get('preferred_language')
+        if not req_lang:
+            try:
+                user_doc = db.users.find_one({"_id": user_id}, {"language": 1, "preferred_language": 1}) or {}
+                req_lang = user_doc.get('language') or user_doc.get('preferred_language')
+            except Exception:
+                req_lang = None
+    if req_lang:
+        req_lang = 'en' if str(req_lang).lower().startswith('en') else 'es'
+        db.projects.update_one({"_id": project_id}, {"$set": {"doc_language": req_lang, "updated_at": datetime.utcnow().isoformat()}})
+
     project_path = project.get('file_path', '')
-    thread = threading.Thread(target=run_analysis_async, args=(project_id, project_path, db))
+    thread = threading.Thread(target=run_analysis_async, args=(project_id, project_path, db), kwargs={'lang': req_lang})
     thread.daemon = True
     thread.start()
 
-    return jsonify({"message": "Analysis started", "project_id": project_id}), 202
+    return jsonify({"message": "Analysis started", "project_id": project_id, "doc_language": req_lang or 'es'}), 202
 
 
 @analysis_bp.route('/<project_id>/results', methods=['GET'])
@@ -248,17 +291,37 @@ def suggest_docstring():
     try:
         from services.ai_enhancer import AIEnhancer
 
-        data = request.json
+        data = request.json or {}
         name = data.get('name', '')
         file = data.get('file', '')
         params = data.get('params', '')
         kind = data.get('kind', 'function')
-        lang = data.get('lang', 'Python')
+        # 'lang' suele venir como lenguaje de código (Python/JS); idioma de salida puede venir aparte
+        code_lang = data.get('code_language') or data.get('lang') or 'Python'
+        out_lang = (data.get('output_language') or data.get('doc_language') or data.get('language') or
+                    request.args.get('output_language') or request.args.get('language') or 'es')
+        out_lang = 'en' if str(out_lang).lower().startswith('en') else 'es'
+        out_lang_name = 'English' if out_lang == 'en' else 'Spanish'
+        no_params = 'none' if out_lang == 'en' else 'ninguno'
 
         ai = AIEnhancer()
 
         if kind == 'class':
-            prompt = f"""Genera SOLO el docstring para esta clase en {lang}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
+            if out_lang == 'en':
+                prompt = f"""Generate ONLY the docstring for this class in {code_lang}. Write the docstring text in {out_lang_name}. No explanations, no extra code, only the documentation string ready to paste.
+
+Class: {name}
+File: {file}
+
+Expected format (Python):
+    \"\"\"
+    Brief class description.
+
+    Attributes:
+        attr1: Attribute description.
+    \"\"\""""
+            else:
+                prompt = f"""Genera SOLO el docstring para esta clase en {code_lang}. Escribe el texto del docstring en {out_lang_name}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
 
 Clase: {name}
 Archivo: {file}
@@ -271,10 +334,28 @@ Formato esperado (Python):
         attr1: Descripción del atributo.
     \"\"\""""
         else:
-            prompt = f"""Genera SOLO el docstring para esta función en {lang}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
+            if out_lang == 'en':
+                prompt = f"""Generate ONLY the docstring for this function in {code_lang}. Write the docstring text in {out_lang_name}. No explanations, no extra code, only the documentation string ready to paste.
+
+Function: {name}
+Parameters: {params or no_params}
+File: {file}
+
+Expected format (Python):
+    \"\"\"
+    Brief function description.
+
+    Args:
+        param1: Parameter description.
+
+    Returns:
+        Description of the returned value.
+    \"\"\""""
+            else:
+                prompt = f"""Genera SOLO el docstring para esta función en {code_lang}. Escribe el texto del docstring en {out_lang_name}. Sin explicaciones, sin código adicional, solo el string de documentación listo para pegar.
 
 Función: {name}
-Parámetros: {params or 'ninguno'}
+Parámetros: {params or no_params}
 Archivo: {file}
 
 Formato esperado (Python):
@@ -288,29 +369,44 @@ Formato esperado (Python):
         Descripción del valor retornado.
     \"\"\""""
 
-        suggestion = ai._call_ai(
-            "Eres un experto en generar documentación de código. Genera docstrings claros y concisos.",
-            prompt,
-            max_tokens=500
+        system_prompt = (
+            "You are an expert at writing code documentation. Generate clear and concise docstrings in the requested language."
+            if out_lang == 'en' else
+            "Eres un experto en generar documentación de código. Genera docstrings claros y concisos en el idioma solicitado."
         )
+        suggestion = ai._call_ai(system_prompt, prompt, max_tokens=500)
 
         if suggestion:
             return jsonify({'suggestion': suggestion}), 200
         else:
-            if kind == 'class':
-                fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
+            if out_lang == 'en':
+                if kind == 'class':
+                    fallback = f'    """\n    {name} — class description.\n\n    Attributes:\n        Add main attributes here.\n    """'
+                else:
+                    fallback = f'    """\n    {name} — function description.\n\n    Args:\n        Add parameters here.\n\n    Returns:\n        Describe the return value.\n    """'
             else:
-                fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
+                if kind == 'class':
+                    fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
+                else:
+                    fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
             return jsonify({'suggestion': fallback}), 200
 
     except Exception as e:
         data = request.json or {}
         kind = data.get('kind', 'function')
         name = data.get('name', '')
-        if kind == 'class':
-            fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
+        out_lang = (data.get('output_language') or data.get('doc_language') or data.get('language') or 'es')
+        out_lang = 'en' if str(out_lang).lower().startswith('en') else 'es'
+        if out_lang == 'en':
+            if kind == 'class':
+                fallback = f'    """\n    {name} — class description.\n\n    Attributes:\n        Add main attributes here.\n    """'
+            else:
+                fallback = f'    """\n    {name} — function description.\n\n    Args:\n        Add parameters here.\n\n    Returns:\n        Describe the return value.\n    """'
         else:
-            fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
+            if kind == 'class':
+                fallback = f'    """\n    {name} — descripción de la clase.\n\n    Attributes:\n        Agrega aquí los atributos principales.\n    """'
+            else:
+                fallback = f'    """\n    {name} — descripción de la función.\n\n    Args:\n        Agrega aquí los parámetros.\n\n    Returns:\n        Describe el valor de retorno.\n    """'
         return jsonify({'suggestion': fallback}), 200
 
 @analysis_bp.route('/<project_id>/predictions', methods=['GET'])
@@ -426,7 +522,16 @@ def analyze_sql_database():
 
     try:
         raw_sql = sql_file.read().decode('utf-8', errors='replace')
-        analysis = generate_sql_analysis(raw_sql)
+        req_lang = (
+            request.values.get('lang') or request.values.get('language')
+            or request.args.get('lang') or request.args.get('language')
+        )
+        if not req_lang:
+            user_doc = get_db().users.find_one(
+                {"_id": user_id}, {"language": 1, "preferred_language": 1}
+            ) or {}
+            req_lang = user_doc.get('language') or user_doc.get('preferred_language')
+        analysis = generate_sql_analysis(raw_sql, lang=req_lang)
 
         history_id = str(__import__('uuid').uuid4())
         db = get_db()
@@ -722,7 +827,12 @@ def _split_sql_column_definitions(body):
         parts.append(part)
     return parts
 
-def generate_sql_analysis(sql_text):
+def generate_sql_analysis(sql_text, lang=None):
+    doc_lang = 'en' if str(lang or '').strip().lower().startswith('en') else 'es'
+
+    def tx(spanish, english):
+        return english if doc_lang == 'en' else spanish
+
     suggestions = []
     tables = []
     table_columns = {}
@@ -735,10 +845,16 @@ def generate_sql_analysis(sql_text):
     has_index = bool(re.search(r'create\s+(?:unique\s+)?index\s+', content, flags=re.I))
 
     if not matches:
-        suggestions.append('No se detectaron sentencias CREATE TABLE. Verifica que el archivo sea un esquema SQL válido.')
+        suggestions.append(tx(
+            'No se detectaron sentencias CREATE TABLE. Verifica que el archivo sea un esquema SQL válido.',
+            'No CREATE TABLE statements were found. Make sure the file is a valid SQL schema.',
+        ))
     else:
         tables = [name for name, _ in matches]
-        suggestions.append(f'Se detectaron {len(tables)} tabla(s) en el archivo.')
+        suggestions.append(tx(
+            f'Se detectaron {len(tables)} tabla(s) en el archivo.',
+            f'Detected {len(tables)} table(s) in the file.',
+        ))
 
         for table_name, body in matches:
             columns = []
@@ -929,13 +1045,15 @@ def generate_sql_analysis(sql_text):
     snowflake_diagram_html = generate_er_diagram_image(snowflake_diagram_code) if snowflake_diagram_code else ''
 
     ai_summary = ''
-    summary_text = 'Análisis completado exitosamente.'
+    summary_text = tx('Análisis completado exitosamente.', 'Analysis completed successfully.')
     if tables:
         fk_count = len(foreign_keys)
         pk_count = sum(1 for has_pk in table_pk_status.values() if has_pk)
-        summary_text = (
+        summary_text = tx(
             f'Análisis completado exitosamente. Se detectaron {len(tables)} tabla(s), '
-            f'{fk_count} relación(es) FK y {pk_count}/{len(tables)} tabla(s) con clave primaria.'
+            f'{fk_count} relación(es) FK y {pk_count}/{len(tables)} tabla(s) con clave primaria.',
+            f'Analysis completed successfully. Detected {len(tables)} table(s), '
+            f'{fk_count} FK relationship(s) and {pk_count}/{len(tables)} table(s) with a primary key.',
         )
 
     try:
@@ -953,7 +1071,7 @@ def generate_sql_analysis(sql_text):
                 'type': schema_type,
                 'description': warehouse_description
             }
-        })
+        }, output_language=doc_lang)
 
         enhanced_sections = ai_enhancer.enhance_database_report_sections({
             'summary': summary_text,
@@ -962,7 +1080,7 @@ def generate_sql_analysis(sql_text):
             'suggestions': suggestions,
             'warehouse_description': warehouse_description,
             'tables': tables,
-        })
+        }, output_language=doc_lang)
         if enhanced_sections:
             summary_text = enhanced_sections.get('summary', summary_text)
             data_preparation = enhanced_sections.get('data_preparation', data_preparation)
@@ -974,7 +1092,10 @@ def generate_sql_analysis(sql_text):
     except Exception as e:
         print(f"[AI DB Summary] {e}")
         if not ai_summary:
-            ai_summary = 'Resumen de IA no disponible. Verifica que GROQ_API_KEY esté configurada en .env.'
+            ai_summary = tx(
+                'Resumen de IA no disponible. Verifica que GROQ_API_KEY esté configurada en .env.',
+                'AI summary unavailable. Make sure GROQ_API_KEY is configured in .env.',
+            )
 
     return {
         'summary': summary_text,

@@ -19,6 +19,9 @@
     
     <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>Análisis — AutoDocs AI</title>
+
+    <!-- Preferencia de idioma compartida (UI + documentos generados) -->
+    <script src="/static/web_language.js"></script>
     
     <!-- ============================================================
     LIBRERÍAS Y RECURSOS EXTERNOS
@@ -1466,6 +1469,28 @@
     </div>
 
     <!-- ============================================================
+    MODAL DE IDIOMA PARA EXPORTACIÓN PDF
+    ============================================================ -->
+    <div id="pdf-language-modal" role="dialog" aria-modal="true" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center">
+        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+            <button onclick="closePdfLanguageModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-on-surface mb-1" data-no-i18n>Idioma del documento / Document language</h3>
+            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;" data-no-i18n>Elige en qué idioma quieres descargar la documentación.</p>
+            <div class="flex flex-col gap-3 py-4" data-no-i18n>
+                <label class="flex items-center gap-3 px-4 py-3 rounded-xl border border-outline-variant/20 glass glass-hover cursor-pointer">
+                    <input type="radio" name="pdf-doc-lang" value="es" class="accent-primary" checked>
+                    <span class="font-semibold text-on-surface">Español</span>
+                </label>
+                <label class="flex items-center gap-3 px-4 py-3 rounded-xl border border-outline-variant/20 glass glass-hover cursor-pointer">
+                    <input type="radio" name="pdf-doc-lang" value="en" class="accent-primary">
+                    <span class="font-semibold text-on-surface">English</span>
+                </label>
+            </div>
+            <button onclick="confirmPdfLanguage()" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all active:scale-95" data-no-i18n>Descargar PDF</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
     MODAL DE COLABORADORES
     Muestra el MVP, podio y lista de colaboradores del proyecto
     ============================================================ -->
@@ -2152,16 +2177,23 @@
          * Retorna los encabezados de autenticación para las peticiones fetch.
          * @returns {Object} - Headers con el token JWT.
          */
-        function headers() { 
-            return { 'Authorization': `Bearer ${token}` }; 
+        function headers() {
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Accept-Language': window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
+            };
         }
         
         /**
          * Retorna los encabezados de autenticación con JSON Content-Type.
          * @returns {Object} - Headers con token JWT y Content-Type JSON.
          */
-        function jsonHeaders() { 
-            return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; 
+        function jsonHeaders() {
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept-Language': window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
+            };
         }
 
         // ============================================================
@@ -2528,7 +2560,11 @@
                 const resp = await fetch('/api/analysis/suggest-docstring', {
                     method: 'POST', 
                     headers: jsonHeaders(),
-                    body: JSON.stringify({ name, file, params, kind, lang })
+                    body: JSON.stringify({
+                        name, file, params, kind,
+                        lang,
+                        output_language: window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
+                    })
                 });
                 const data = await resp.json();
                 currentSuggestionText = data.suggestion;
@@ -2772,17 +2808,51 @@
         // EXPORTACIÓN A PDF
         // ============================================================
 
+        let pendingPdfSelections = null;
+
+        /**
+         * Abre el selector de idioma antes de generar el PDF.
+         * El idioma seleccionado se envía explícitamente al endpoint de exportación.
+         */
+        function exportPdf() {
+            pendingPdfSelections = getSelectedItems();
+            const currentLang = window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es';
+            document.querySelectorAll('input[name="pdf-doc-lang"]').forEach(function (radio) {
+                radio.checked = radio.value === currentLang;
+            });
+            const modal = document.getElementById('pdf-language-modal');
+            modal.classList.add('flex');
+            modal.classList.remove('hidden');
+        }
+
+        function closePdfLanguageModal() {
+            const modal = document.getElementById('pdf-language-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function confirmPdfLanguage() {
+            const checked = document.querySelector('input[name="pdf-doc-lang"]:checked');
+            const lang = checked ? checked.value : 'es';
+            const selected = pendingPdfSelections || getSelectedItems();
+            closePdfLanguageModal();
+            downloadPdfWithLanguage(lang, selected);
+        }
+
+        document.getElementById('pdf-language-modal').addEventListener('click', function (e) {
+            if (e.target === this) closePdfLanguageModal();
+        });
+
         /**
          * Genera y descarga un PDF con la documentación del proyecto.
          * Incluye solo los elementos seleccionados en las tablas.
          */
-        async function exportPdf() {
-            const selected = getSelectedItems();
+        async function downloadPdfWithLanguage(lang, selected) {
             document.getElementById('pdf-loading-modal').classList.add('flex');
             document.getElementById('pdf-loading-modal').classList.remove('hidden');
             try {
-                // Construir URL con parámetros de selección
-                const url = `/api/export/${projectId}/pdf?token=${token}&selected=${encodeURIComponent(JSON.stringify(selected))}`;
+                // Construir URL con parámetros de selección e idioma explícito
+                const url = `/api/export/${projectId}/pdf?token=${token}&lang=${encodeURIComponent(lang)}&selected=${encodeURIComponent(JSON.stringify(selected))}`;
                 const res = await fetch(url, { headers: headers() });
                 if (!res.ok) throw new Error('Error al generar PDF');
                 const blob = await res.blob();

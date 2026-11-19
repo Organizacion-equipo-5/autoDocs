@@ -166,12 +166,19 @@ class ETLPipeline:
                 # Enriquecer con IA si está disponible
                 if self.ai_enhancer.is_available():
                     self.log("TRANSFORM", "Enriqueciendo análisis con IA")
-                    analysis_results = self.ai_enhancer.enhance_documentation(analysis_results)
+                    analysis_results = self.ai_enhancer.enhance_documentation(
+                        analysis_results,
+                        output_language=(raw_data.get('doc_language')
+                                         or raw_data.get('language')),
+                    )
                     transformed_data["analysis_results"] = analysis_results
 
                 # Minería de patrones
                 self.log("TRANSFORM", "Aplicando minería de patrones")
-                mining_results = self.ai_enhancer.mine_code_patterns(analysis_results)
+                mining_results = self.ai_enhancer.mine_code_patterns(
+                    analysis_results,
+                    output_language=analysis_results.get('doc_language'),
+                )
                 transformed_data["mining_results"] = mining_results
 
             # Si son datos tabulares (CSV/JSON), aplicar limpieza

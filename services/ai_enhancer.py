@@ -137,19 +137,58 @@ class AIEnhancer:
         # No imprimir error - IA es opcional
         return None
 
-    def enhance_function_description(self, function: dict, context: str = "") -> str:
+    @staticmethod
+    def _normalize_output_language(value=None) -> str:
+        """Normaliza cualquier variante de idioma a 'es' o 'en'."""
+        raw = str(value or '').strip().lower()
+        if raw.startswith('en'):
+            return 'en'
+        return 'es'
+
+    @staticmethod
+    def _localize_system(system_prompt: str, lang: str) -> str:
+        """Añade una instrucción de idioma inequívoca al prompt del sistema."""
+        if lang == 'en':
+            return (
+                system_prompt
+                + " Write the entire response in English. Do not use Spanish words or phrases."
+            )
+        return system_prompt + " Escribe toda la respuesta en español."
+
+    @staticmethod
+    def _localize_prompt(prompt: str, lang: str) -> str:
+        """Fuerza el idioma de salida aunque el prompt base esté en español."""
+        if lang == 'en':
+            return (
+                prompt
+                + "\n\nIMPORTANT: Ignore the language used in this instruction. "
+                + "Write the ENTIRE response in natural English. Do not include any Spanish text."
+            )
+        return (
+            prompt
+            + "\n\nImportante: escribe TODA la respuesta en español natural."
+        )
+
+    def enhance_function_description(self, function: dict, context: str = "",
+                                      output_language: str = "es") -> str:
         """
         Genera una descripción mejorada para una función usando IA.
 
         Args:
             function: Diccionario con información de la función
             context: Contexto adicional del proyecto
+            output_language: Idioma de la descripción ('es' o 'en')
 
         Returns:
             Descripción mejorada de la función
         """
+        lang = self._normalize_output_language(output_language)
+        fallback = (
+            f"Function {function['name']}" if lang == 'en'
+            else f"Función {function['name']}"
+        )
         if not self.is_available():
-            return function.get('docstring', '') or f"Función {function['name']}"
+            return function.get('docstring', '') or fallback
 
         params = ', '.join(function.get('params', []))
         prompt = f"""Analiza esta función y genera una descripción sencilla y comprensible para personas no técnicas:
@@ -170,28 +209,38 @@ Genera una descripción que incluya:
 Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla. Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
 
         result = self._call_ai(
-            "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas.",
-            prompt,
+            self._localize_system(
+                "Eres un experto en documentación técnica de software. Genera descripciones claras, precisas y técnicas.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=300
         )
         if result:
             return result
 
-        return function.get('docstring', '') or f"Función {function['name']}"
+        return function.get('docstring', '') or fallback
 
-    def enhance_class_description(self, class_info: dict, context: str = "") -> str:
+    def enhance_class_description(self, class_info: dict, context: str = "",
+                                   output_language: str = "es") -> str:
         """
         Genera una descripción mejorada para una clase usando IA.
 
         Args:
             class_info: Diccionario con información de la clase
             context: Contexto adicional del proyecto
+            output_language: Idioma de la descripción ('es' o 'en')
 
         Returns:
             Descripción mejorada de la clase
         """
+        lang = self._normalize_output_language(output_language)
+        fallback = (
+            f"Class {class_info['name']}" if lang == 'en'
+            else f"Clase {class_info['name']}"
+        )
         if not self.is_available():
-            return class_info.get('docstring', '') or f"Clase {class_info['name']}"
+            return class_info.get('docstring', '') or fallback
 
         methods = ', '.join(class_info.get('methods', [])[:10])
         bases = ', '.join(class_info.get('bases', []))
@@ -215,28 +264,35 @@ Genera una descripción que incluya:
 Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla."""
 
         result = self._call_ai(
-            "Eres un experto en explicar conceptos técnicos de forma sencilla para personas sin conocimientos de programación. Genera descripciones claras, comprensibles y prácticas.",
-            prompt,
+            self._localize_system(
+                "Eres un experto en explicar conceptos técnicos de forma sencilla para personas sin conocimientos de programación. Genera descripciones claras, comprensibles y prácticas.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=300
         )
         if result:
             return result
 
-        return class_info.get('docstring', '') or f"Clase {class_info['name']}"
+        return class_info.get('docstring', '') or fallback
 
-    def enhance_endpoint_description(self, endpoint: dict, context: str = "") -> str:
+    def enhance_endpoint_description(self, endpoint: dict, context: str = "",
+                                      output_language: str = "es") -> str:
         """
         Genera una descripción mejorada para un endpoint de API usando IA.
 
         Args:
             endpoint: Diccionario con información del endpoint
             context: Contexto adicional del proyecto
+            output_language: Idioma de la descripción ('es' o 'en')
 
         Returns:
             Descripción mejorada del endpoint
         """
+        lang = self._normalize_output_language(output_language)
+        fallback = f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
         if not self.is_available():
-            return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
+            return fallback
 
         prompt = f"""Analiza este endpoint de API y genera una descripción sencilla y comprensible para personas no técnicas:
 
@@ -256,29 +312,39 @@ Genera una descripción que incluya:
 Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla."""
 
         result = self._call_ai(
-            "Eres un experto en explicar conceptos técnicos de forma sencilla para personas sin conocimientos de programación. Genera descripciones claras, comprensibles y prácticas.",
-            prompt,
+            self._localize_system(
+                "Eres un experto en explicar conceptos técnicos de forma sencilla para personas sin conocimientos de programación. Genera descripciones claras, comprensibles y prácticas.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=300
         )
         if result:
             return result
 
-        return f"Endpoint {endpoint.get('method')} {endpoint.get('path')}"
+        return fallback
 
-    def generate_architecture_insights(self, analysis_results: dict) -> str:
+    def generate_architecture_insights(self, analysis_results: dict,
+                                        output_language=None) -> str:
         """
         Genera insights sobre la arquitectura del proyecto usando IA.
 
         Args:
             analysis_results: Resultados del análisis del proyecto
+            output_language: Idioma de salida ('es' o 'en')
 
         Returns:
             Insights sobre arquitectura y patrones detectados
         """
+        lang = self._normalize_output_language(
+            output_language or analysis_results.get('doc_language')
+        )
         if not self.is_available():
+            if lang == 'en':
+                return "AI insights unavailable - configure GROQ_API_KEY in the .env file"
             return "Insights de IA no disponibles - configura GEMINI_API_KEY en el archivo .env"
 
-        lang = analysis_results.get('primary_language', 'desconocido')
+        code_lang = analysis_results.get('primary_language', 'desconocido')
         langs = analysis_results.get('languages', {})
         functions = analysis_results.get('functions', [])
         classes = analysis_results.get('classes', [])
@@ -286,7 +352,7 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
 
         prompt = f"""Analiza esta información de un proyecto de software y genera insights arquitectónicos:
 
-Lenguaje principal: {lang}
+Lenguaje principal: {code_lang}
 Lenguajes detectados: {langs}
 Total funciones: {len(functions)}
 Total clases: {len(classes)}
@@ -302,59 +368,88 @@ Genera insights sobre:
 Mantén los insights concisos y accionables (máximo 200 palabras)."""
 
         result = self._call_ai(
-            "Eres un arquitecto de software senior. Genera insights técnicos y prácticos sobre arquitectura de proyectos.",
-            prompt,
+            self._localize_system(
+                "Eres un arquitecto de software senior. Genera insights técnicos y prácticos sobre arquitectura de proyectos.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=400
         )
         if result:
             return result
 
+        if lang == 'en':
+            return "Architecture insights could not be generated"
         return "No se pudieron generar insights de arquitectura"
 
-    def enhance_documentation(self, analysis_results: dict) -> dict:
+    def enhance_documentation(self, analysis_results: dict,
+                               output_language=None) -> dict:
         """
-        Mejora toda la documentación del proyecto usando IA (Gemini).
+        Mejora toda la documentación del proyecto usando IA (Groq).
 
         Args:
             analysis_results: Resultados del análisis del proyecto
+            output_language: Idioma de salida de la documentación ('es' o 'en')
 
         Returns:
             Resultados con descripciones mejoradas por IA
         """
+        lang = self._normalize_output_language(
+            output_language or analysis_results.get('doc_language')
+        )
+        results = analysis_results
+        results['doc_language'] = lang
+        results['ai_output_language'] = lang
+
         if not self.is_available():
             print("[AI] Groq no configurado, usando documentación básica. "
-                  "Agrega GEMINI_API_KEY en tu archivo .env para habilitar la mejora con IA.")
-            return analysis_results
+                  "Agrega GROQ_API_KEY en tu archivo .env para habilitar la mejora con IA.")
+            return results
 
-        print("[AI] Mejorando documentación con Groq...")
+        print(f"[AI] Mejorando documentación con Groq en {lang}...")
 
         # Contexto del proyecto
         context = (
-            f"Proyecto en {analysis_results.get('primary_language', 'desconocido')} "
-            f"con {len(analysis_results.get('functions', []))} funciones"
+            f"Project in {results.get('primary_language', 'unknown')} "
+            f"with {len(results.get('functions', []))} functions"
+            if lang == 'en' else
+            f"Proyecto en {results.get('primary_language', 'desconocido')} "
+            f"con {len(results.get('functions', []))} funciones"
         )
 
         # Mejorar funciones (limitar a 5 para reducir consumo de tokens)
-        for func in analysis_results.get('functions', [])[:5]:
-            func['ai_description'] = self.enhance_function_description(func, context)
+        for func in results.get('functions', [])[:5]:
+            func['ai_description'] = self.enhance_function_description(
+                func, context, output_language=lang
+            )
 
         # Mejorar clases (limitar a 3)
-        for cls in analysis_results.get('classes', [])[:3]:
-            cls['ai_description'] = self.enhance_class_description(cls, context)
+        for cls in results.get('classes', [])[:3]:
+            cls['ai_description'] = self.enhance_class_description(
+                cls, context, output_language=lang
+            )
 
         # Mejorar endpoints (limitar a 3)
-        for ep in analysis_results.get('endpoints', [])[:3]:
-            ep['ai_description'] = self.enhance_endpoint_description(ep, context)
+        for ep in results.get('endpoints', [])[:3]:
+            ep['ai_description'] = self.enhance_endpoint_description(
+                ep, context, output_language=lang
+            )
 
         # Generar insights de arquitectura
-        analysis_results['ai_architecture_insights'] = self.generate_architecture_insights(analysis_results)
+        results['ai_architecture_insights'] = self.generate_architecture_insights(
+            results, output_language=lang
+        )
 
-        print("[AI] Documentación mejorada exitosamente con Gemini")
-        return analysis_results
+        print("[AI] Documentación mejorada exitosamente con Groq")
+        return results
 
-    def enhance_database_analysis(self, raw_sql: str, metadata: dict) -> str:
+    def enhance_database_analysis(self, raw_sql: str, metadata: dict,
+                                   output_language: str = "es") -> str:
         """Genera un resumen de análisis de base de datos usando Groq."""
+        lang = self._normalize_output_language(output_language)
         if not self.is_available():
+            if lang == 'en':
+                return "AI summary unavailable - configure GROQ_API_KEY in the .env file"
             return "Resumen de IA no disponible - configura GROQ_API_KEY en el archivo .env"
 
         prompt = f"""Analiza este esquema SQL y genera un informe técnico en español que incluya:
@@ -377,14 +472,23 @@ Descripción de esquema: {metadata['warehouse_schema']['description']}
 Responde en formato de párrafo corto y técnico, usando lenguaje claro y profesional. No devuelvas JSON."""
 
         result = self._call_ai(
-            "Eres un experto en análisis de bases de datos y minería de datos. Genera un informe técnico y claro para un equipo de datos.",
-            prompt,
+            self._localize_system(
+                "Eres un experto en análisis de bases de datos y minería de datos. Genera un informe técnico y claro para un equipo de datos.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=450
         )
-        return result or "Resumen de IA no disponible - no se recibió respuesta de Groq."
+        if result:
+            return result
+        if lang == 'en':
+            return "AI summary unavailable - no response received from Groq."
+        return "Resumen de IA no disponible - no se recibió respuesta de Groq."
 
-    def enhance_database_report_sections(self, sections: dict) -> dict:
+    def enhance_database_report_sections(self, sections: dict,
+                                          output_language: str = "es") -> dict:
         """Mejora la redacción de las secciones del informe de base de datos usando Groq."""
+        lang = self._normalize_output_language(output_language)
         if not self.is_available():
             return {}
 
@@ -410,9 +514,12 @@ Responde SOLO con JSON válido con esta estructura:
 }}"""
 
         result = self._call_ai(
-            "Eres un experto en bases de datos y redacción técnica. "
-            "Devuelves únicamente JSON válido, sin markdown ni texto adicional.",
-            prompt,
+            self._localize_system(
+                "Eres un experto en bases de datos y redacción técnica. "
+                "Devuelves únicamente JSON válido, sin markdown ni texto adicional.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=900
         )
         if not result:
@@ -432,7 +539,8 @@ Responde SOLO con JSON válido con esta estructura:
 
         return {}
 
-    def mine_code_patterns(self, analysis_results: dict) -> dict:
+    def mine_code_patterns(self, analysis_results: dict,
+                            output_language=None) -> dict:
         """
         Aplica conceptos de minería de datos al código:
         - Detección de patrones frecuentes (funciones similares)
@@ -445,6 +553,9 @@ Responde SOLO con JSON válido con esta estructura:
         Returns:
             Diccionario con patrones minados del código
         """
+        lang = self._normalize_output_language(
+            output_language or analysis_results.get('doc_language')
+        )
         print("[AI] Iniciando mine_code_patterns...")
         if not self.is_available():
             print("[AI] ERROR: AI Enhancer no está disponible (sin API keys)")
@@ -452,7 +563,11 @@ Responde SOLO con JSON válido con esta estructura:
                 "frequent_patterns": [],
                 "complexity_clusters": [],
                 "function_clusters": [],
-                "insights": "Minería de patrones no disponible - configura GROQ_API_KEY"
+                "insights": (
+                    "Pattern mining unavailable - configure GROQ_API_KEY"
+                    if lang == 'en' else
+                    "Minería de patrones no disponible - configura GROQ_API_KEY"
+                )
             }
 
         print("[AI] AI Enhancer está disponible, procediendo con minería de patrones...")
@@ -500,8 +615,11 @@ Formato de respuesta JSON:
 Responde solo con el JSON, sin texto adicional. Usa lenguaje claro y evita términos técnicos complejos."""
 
         result = self._call_ai(
-            "Eres un experto en explicar conceptos técnicos de minería de datos de forma sencilla para personas sin conocimientos de programación. Genera análisis JSON estructurados con descripciones claras y comprensibles.",
-            prompt,
+            self._localize_system(
+                "Eres un experto en explicar conceptos técnicos de minería de datos de forma sencilla para personas sin conocimientos de programación. Genera análisis JSON estructurados con descripciones claras y comprensibles.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
             max_tokens=600
         )
 
@@ -514,18 +632,24 @@ Responde solo con el JSON, sin texto adicional. Usa lenguaje claro y evita térm
                 if json_start != -1 and json_end > json_start:
                     json_str = result[json_start:json_end]
                     patterns = json.loads(json_str)
-                    patterns["insights"] = "Análisis de minería de datos completado exitosamente"
+                    patterns["insights"] = (
+                        "Data mining analysis completed successfully"
+                        if lang == 'en' else
+                        "Análisis de minería de datos completado exitosamente"
+                    )
                     return patterns
             except Exception as e:
                 print(f"[AI] Error al parsear JSON de minería de patrones: {e}")
 
         # Fallback: análisis simple sin IA
-        return self._mine_patterns_simple(analysis_results)
+        return self._mine_patterns_simple(analysis_results, output_language=lang)
 
-    def _mine_patterns_simple(self, analysis_results: dict) -> dict:
+    def _mine_patterns_simple(self, analysis_results: dict,
+                              output_language: str = "es") -> dict:
         """
         Realiza minería de patrones simple sin IA (fallback).
         """
+        lang = self._normalize_output_language(output_language)
         functions = analysis_results.get("functions", [])
         classes = analysis_results.get("classes", [])
         structure = analysis_results.get("structure", [])
@@ -541,7 +665,14 @@ Responde solo con el JSON, sin texto adicional. Usa lenguaje claro y evita térm
 
         prefix_counts = Counter(prefixes)
         frequent_patterns = [
-            {"pattern": prefix, "frequency": count, "examples": f"Operaciones {prefix} repetidas"}
+            {
+                "pattern": prefix,
+                "frequency": count,
+                "examples": (
+                    f"Repeated {prefix} operations" if lang == 'en'
+                    else f"Operaciones {prefix} repetidas"
+                ),
+            }
             for prefix, count in prefix_counts.most_common(5)
         ]
 
@@ -550,10 +681,14 @@ Responde solo con el JSON, sin texto adicional. Usa lenguaje claro y evita térm
         med_cx = [f for f in functions if 5 < f.get("complexity", 1) <= 10]
         high_cx = [f for f in functions if f.get("complexity", 1) > 10]
 
+        low_label, med_label, high_label = (
+            ("low", "medium", "high") if lang == 'en'
+            else ("baja", "media", "alta")
+        )
         complexity_clusters = [
-            {"cluster": "baja", "count": len(low_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in low_cx) / max(len(low_cx), 1), 2)},
-            {"cluster": "media", "count": len(med_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in med_cx) / max(len(med_cx), 1), 2)},
-            {"cluster": "alta", "count": len(high_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in high_cx) / max(len(high_cx), 1), 2)},
+            {"cluster": low_label, "count": len(low_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in low_cx) / max(len(low_cx), 1), 2)},
+            {"cluster": med_label, "count": len(med_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in med_cx) / max(len(med_cx), 1), 2)},
+            {"cluster": high_label, "count": len(high_cx), "avg_complexity": round(sum(f.get("complexity", 1) for f in high_cx) / max(len(high_cx), 1), 2)},
         ]
 
         # Clustering por directorio
@@ -577,5 +712,9 @@ Responde solo con el JSON, sin texto adicional. Usa lenguaje claro y evita térm
             "complexity_clusters": complexity_clusters,
             "function_clusters": function_clusters,
             "anomalies": [],
-            "insights": "Análisis de minería de datos completado (modo simple sin IA)"
+            "insights": (
+                "Data mining analysis completed (simple mode without AI)"
+                if lang == 'en' else
+                "Análisis de minería de datos completado (modo simple sin IA)"
+            )
         }
