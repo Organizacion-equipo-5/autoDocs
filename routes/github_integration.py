@@ -28,6 +28,23 @@ _PROJECT_LOCKS = {}
 _PROJECT_LOCKS_GUARD = threading.Lock()
 
 
+def _load_branch_context(project_id, free_plan_error):
+    """Valida JWT, proyecto, github_url y plan. Devuelve ((user_id, db, project, user), None) o (None, respuesta_error)."""
+    user_id = get_jwt_identity()
+    db = get_db()
+    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
+    if not project:
+        return None, (jsonify({"error": "Project not found"}), 404)
+    if not project.get("github_url"):
+        return None, (jsonify({"error": "Este proyecto no tiene URL de GitHub asociada."}), 400)
+    user = db.users.find_one({"_id": user_id})
+    if not user:
+        return None, (jsonify({"error": "User not found"}), 404)
+    if user.get("plan", "free") == "free":
+        return None, (jsonify({"error": free_plan_error}), 403)
+    return (user_id, db, project, user), None
+
+
 def _project_lock(project_id):
     with _PROJECT_LOCKS_GUARD:
         return _PROJECT_LOCKS.setdefault(project_id, threading.Lock())
@@ -318,19 +335,13 @@ def _start_activity_worker(db, project, branch, pushed_sha, event_type, activity
 @github_bp.route("/projects/<project_id>/branches", methods=["GET"])
 @jwt_required()
 def get_project_branches(project_id):
-    user_id = get_jwt_identity()
-    db = get_db()
-    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
-    if not project:
-        return jsonify({"error": "Project not found"}), 404
-    if not project.get("github_url"):
-        return jsonify({"error": "Este proyecto no tiene URL de GitHub asociada."}), 400
-
-    user = db.users.find_one({"_id": user_id})
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    if user.get("plan", "free") == "free":
-        return jsonify({"error": "La selección de ramas está disponible para planes Pro y Enterprise."}), 403
+    ctx, err = _load_branch_context(
+        project_id,
+        "La selección de ramas está disponible para planes Pro y Enterprise.",
+    )
+    if err:
+        return err
+    user_id, db, project, user = ctx
 
     try:
         github_token = (user.get("github") or {}).get("access_token")
@@ -385,19 +396,13 @@ def get_project_branches(project_id):
 @github_bp.route("/projects/<project_id>/branch", methods=["POST"])
 @jwt_required()
 def select_project_branch(project_id):
-    user_id = get_jwt_identity()
-    db = get_db()
-    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
-    if not project:
-        return jsonify({"error": "Project not found"}), 404
-    if not project.get("github_url"):
-        return jsonify({"error": "Este proyecto no tiene URL de GitHub asociada."}), 400
-
-    user = db.users.find_one({"_id": user_id})
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    if user.get("plan", "free") == "free":
-        return jsonify({"error": "La selección de ramas está disponible para planes Pro y Enterprise."}), 403
+    ctx, err = _load_branch_context(
+        project_id,
+        "La selección de ramas está disponible para planes Pro y Enterprise.",
+    )
+    if err:
+        return err
+    user_id, db, project, user = ctx
     if project.get("status") == "analyzing":
         return jsonify({"error": "El proyecto ya se está analizando. Inténtalo de nuevo cuando termine."}), 409
 
@@ -437,19 +442,13 @@ def select_project_branch(project_id):
 @github_bp.route("/projects/<project_id>/poll", methods=["POST"])
 @jwt_required()
 def poll_project_branch(project_id):
-    user_id = get_jwt_identity()
-    db = get_db()
-    project = db.projects.find_one({"_id": project_id, "user_id": user_id})
-    if not project:
-        return jsonify({"error": "Project not found"}), 404
-    if not project.get("github_url"):
-        return jsonify({"error": "Este proyecto no tiene URL de GitHub asociada."}), 400
-
-    user = db.users.find_one({"_id": user_id})
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    if user.get("plan", "free") == "free":
-        return jsonify({"error": "El sondeo de ramas está disponible para planes Pro y Enterprise."}), 403
+    ctx, err = _load_branch_context(
+        project_id,
+        "El sondeo de ramas está disponible para planes Pro y Enterprise.",
+    )
+    if err:
+        return err
+    user_id, db, project, user = ctx
     if project.get("status") == "analyzing":
         return jsonify({"status": "analyzing"}), 202
 

@@ -66,9 +66,6 @@ def classify_file_type(filename: str) -> dict:
     else:
         return {'type': 'unstructured', 'category': 'unknown', 'description': f'Archivo {ext} - tipo desconocido'}
 
-def allowed_file(filename: str) -> bool:
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 def clone_github_repo(github_url: str, project_id: str, token: str = None) -> str:
     """Clone a GitHub repository and return the project path."""
     UPLOAD_BASE.mkdir(parents=True, exist_ok=True)

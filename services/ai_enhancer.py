@@ -123,10 +123,6 @@ class AIEnhancer:
 
         return None
 
-    def _call_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
-        """Ollama desactivado - siempre retorna None."""
-        return None
-
     def _call_ai(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
         """Ejecuta llamada de IA usando solo Groq (Ollama desactivado)."""
         # Intentar con Groq

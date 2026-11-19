@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from routes.payments import payments_bp
 from routes.plan_recommendation import plan_recommendation_bp
-from services.db import init_db_indexes
+from services.db import init_db_indexes, close_db
 from routes.github_oauth import github_oauth_bp
 
 def create_app():
@@ -15,6 +15,7 @@ def create_app():
 
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     JWTManager(app)
+    app.teardown_appcontext(close_db)
 
     from routes.auth import auth_bp
     from routes.projects import projects_bp

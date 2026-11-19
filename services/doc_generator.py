@@ -507,47 +507,6 @@ class DocGenerator:
         }
 
     # ─── 1. README ────────────────────────────────────────────────────────────
-    def _cover_page(self) -> str:
-        lang  = self.r.get("primary_language", self.t('unknown'))
-        langs = self.r.get("languages", {})
-        fns   = self.r.get("functions", [])
-        cls   = self.r.get("classes", [])
-        eps   = self.r.get("endpoints", [])
-        files = self.r.get("total_files", 0)
-        score = self.r.get("quality_score", 0)
-        label = self.t('excellent') if score >= 80 else self.t('acceptable') if score >= 60 else self.t('needs_improvement')
-
-        return f"""
-        <div class="cover">
-          <p class="eyebrow">{self.t('cover_eyebrow')}</p>
-          <h1 class="cover-title">{self.r.get('project_name', self.t('project'))}</h1>
-          <div class="cover-rule"></div>
-          <p class="cover-subtitle">
-            {self.t('cover_subtitle')}
-          </p>
-
-          <table class="meta-table">
-            <tr><td>{self.t('project')}:</td><td><strong>{self.r.get('project_name','—')}</strong></td></tr>
-            <tr><td>{self.t('dominant_language')}:</td><td><strong>{lang}</strong></td></tr>
-            <tr><td>{self.t('quality_score')}:</td><td><strong>{score} / 100 ({label})</strong></td></tr>
-            <tr><td>{self.t('analyzed_files')}:</td><td><strong>{files}</strong></td></tr>
-            <tr><td>{self.t('generation_date')}:</td><td><strong>{self.now}</strong></td></tr>
-            <tr><td>{self.t('generation_engine')}:</td><td><strong>AutoDocs AI Enterprise (Groq AI + PlantUML/Kroki)</strong></td></tr>
-          </table>
-
-          <div class="kpi-row">
-            <div class="kpi"><span class="kpi-num">{files}</span><span class="kpi-lbl">{self.t('files')}</span></div>
-            <div class="kpi"><span class="kpi-num">{len(fns)}</span><span class="kpi-lbl">{self.t('functions')}</span></div>
-            <div class="kpi"><span class="kpi-num">{len(cls)}</span><span class="kpi-lbl">{self.t('classes')}</span></div>
-            <div class="kpi"><span class="kpi-num">{len(eps)}</span><span class="kpi-lbl">{self.t('endpoints')}</span></div>
-          </div>
-
-          <p class="cover-footer">
-            {self.t('cover_footer')}
-          </p>
-        </div>
-        <div class="page-break"></div>
-        """
     def _readme(self) -> str:
         lang   = self.r.get("primary_language", self.t('unknown'))
         langs  = self.r.get("languages", {})
