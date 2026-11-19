@@ -65,6 +65,61 @@ def filter_results_by_selection(results, selected):
     
     return filtered
 
+
+def _normalize_lang(value):
+    """Normaliza cualquier variante de idioma a 'es'/'en'."""
+    if not value:
+        return None
+    value = str(value).strip().lower()
+    if value.startswith('en'):
+        return 'en'
+    if value.startswith('es'):
+        return 'es'
+    return None
+
+
+def _get_request_lang(default='es'):
+    """Idioma explícito de la petición (query/header) o el valor por defecto."""
+    lang = None
+    for key in ('lang', 'language', 'doc_language', 'output_language'):
+        lang = _normalize_lang(request.args.get(key))
+        if lang:
+            return lang
+
+    # Accept-Language puede traer varias preferencias: "es-ES,es;q=0.9,en;q=0.8"
+    for part in request.headers.get('Accept-Language', '').split(','):
+        code = part.split(';', 1)[0].strip()
+        lang = _normalize_lang(code)
+        if lang:
+            return lang
+
+    return _normalize_lang(default) or 'es'
+
+
+def _resolve_saved_lang(db, user_id, project_id, result=None):
+    """Idioma guardado para el proyecto/cuenta, sin usar el lenguaje de código."""
+    project = db.projects.find_one(
+        {"_id": project_id},
+        {"doc_language": 1, "preferred_language": 1, "language_code": 1},
+    ) or {}
+    candidates = [
+        (result or {}).get('results', {}).get('doc_language'),
+        project.get('doc_language'),
+        project.get('preferred_language'),
+        project.get('language_code'),
+    ]
+    user = db.users.find_one(
+        {"_id": user_id},
+        {"language": 1, "preferred_language": 1},
+    ) or {}
+    candidates.extend([user.get('language'), user.get('preferred_language')])
+
+    for candidate in candidates:
+        lang = _normalize_lang(candidate)
+        if lang:
+            return lang
+    return 'es'
+
 def get_identity_flexible():
     """Acepta JWT del header Authorization O del query param ?token="""
     try:
@@ -98,6 +153,7 @@ def export_pdf(project_id):
 
     # Get selected items from query parameter
     selected = request.args.get('selected')
+    lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
     try:
         results_to_use = result.get('results')
@@ -105,11 +161,22 @@ def export_pdf(project_id):
             # Filter results based on selection
             if selected:
                 results_to_use = filter_results_by_selection(results_to_use, selected)
-            documentation = DocGenerator(results_to_use).generate()
+            if isinstance(results_to_use, dict):
+                results_to_use['doc_language'] = lang
+            try:
+                documentation = DocGenerator(results_to_use, lang=lang).generate()
+            except TypeError:
+                documentation = DocGenerator(results_to_use).generate()
             db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
-            exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
+            try:
+                exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation}, lang=lang)
+            except TypeError:
+                exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
         else:
-            exporter = DocumentExporter(project, result)
+            try:
+                exporter = DocumentExporter(project, result, lang=lang)
+            except TypeError:
+                exporter = DocumentExporter(project, result)
         file_path = exporter.to_pdf()
 
         # Verificar que el archivo existe y tenga contenido
@@ -170,17 +237,29 @@ def export_html(project_id):
 
     # Get selected items from query parameter
     selected = request.args.get('selected')
+    lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
     results_to_use = result.get('results')
     if results_to_use:
         # Filter results based on selection
         if selected:
             results_to_use = filter_results_by_selection(results_to_use, selected)
-        documentation = DocGenerator(results_to_use).generate()
+        if isinstance(results_to_use, dict):
+            results_to_use['doc_language'] = lang
+        try:
+            documentation = DocGenerator(results_to_use, lang=lang).generate()
+        except TypeError:
+            documentation = DocGenerator(results_to_use).generate()
         db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
-        exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
+        try:
+            exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation}, lang=lang)
+        except TypeError:
+            exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
     else:
-        exporter = DocumentExporter(project, result)
+        try:
+            exporter = DocumentExporter(project, result, lang=lang)
+        except TypeError:
+            exporter = DocumentExporter(project, result)
     html = exporter.to_html()
     _log_export_event(db, user_id, project_id, "export_html", {"format": "html", "selected": bool(selected)})
 
@@ -211,17 +290,29 @@ def export_markdown(project_id):
 
     # Get selected items from query parameter
     selected = request.args.get('selected')
+    lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
     results_to_use = result.get('results')
     if results_to_use:
         # Filter results based on selection
         if selected:
             results_to_use = filter_results_by_selection(results_to_use, selected)
-        documentation = DocGenerator(results_to_use).generate()
+        if isinstance(results_to_use, dict):
+            results_to_use['doc_language'] = lang
+        try:
+            documentation = DocGenerator(results_to_use, lang=lang).generate()
+        except TypeError:
+            documentation = DocGenerator(results_to_use).generate()
         db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
-        exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
+        try:
+            exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation}, lang=lang)
+        except TypeError:
+            exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation})
     else:
-        exporter = DocumentExporter(project, result)
+        try:
+            exporter = DocumentExporter(project, result, lang=lang)
+        except TypeError:
+            exporter = DocumentExporter(project, result)
     md = exporter.to_markdown()
     _log_export_event(db, user_id, project_id, "export_markdown", {"format": "markdown", "selected": bool(selected)})
 

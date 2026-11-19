@@ -16,6 +16,149 @@ from pathlib import Path
 # También permite sustituir el pipeline de forma controlada en las pruebas.
 ETLPipeline = None
 
+DOC_I18N = {
+    'es': {
+        'unknown': 'Desconocido',
+        'project': 'Proyecto',
+        'files': 'Archivos',
+        'functions': 'Funciones',
+        'classes': 'Clases',
+        'endpoints': 'Endpoints',
+        'excellent': 'Excelente',
+        'acceptable': 'Aceptable',
+        'needs_improvement': 'Requiere mejoras',
+        'doc_title': 'Documentación del Proyecto',
+        'scope_note': 'Alcance del documento.',
+        'scope_text': 'Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al {now} y deben validarse frente al entorno de ejecución antes de una liberación productiva.',
+        'exec_summary': '1.1 Resumen Ejecutivo',
+        'stack': '1.2 Stack Tecnológico',
+        'stats': '1.3 Estadísticas del Proyecto',
+        'language': 'Lenguaje',
+        'quantity': 'Cantidad',
+        'metric': 'Métrica',
+        'value': 'Valor',
+        'total_files': 'Total de archivos',
+        'api_endpoints': 'Endpoints API',
+        'quality_score': 'Score de calidad',
+        'documented_functions': 'Funciones documentadas',
+        'documented_classes': 'Clases documentadas',
+        'files_unit': '{c} archivos',
+        'arch_title': '2. Documentación de Arquitectura y Diseño',
+        'arch_intro': 'La presente sección describe la organización lógica y física observada en el repositorio. Los diagramas y patrones se derivan de los artefactos disponibles y constituyen una referencia para la comprensión y evolución del sistema.',
+        'dir_structure': '2.1 Estructura de Directorios',
+        'layer_dist': '2.2 Distribución por Capas',
+        'lang_dist': '2.3 Distribución de Lenguajes',
+        'infra_diagram': '2.4 Diagrama de Infraestructura',
+        'usecase_diagram': '2.5 Diagrama de Casos de Uso',
+        'class_diagram': '2.6 Diagrama de Clases',
+        'patterns': '2.7 Patrones Detectados',
+        'arch_insights': '2.8 Observaciones Complementarias de Arquitectura (Insights de Arquitectura)',
+        'no_insights': 'No se dispone de observaciones complementarias para esta ejecución. La descripción precedente se basa exclusivamente en evidencia obtenida del código fuente.',
+        'no_patterns': '- No se detectaron patrones específicos',
+        'code_docs_title': '## 3. Documentación Técnica de Código',
+        'no_endpoints': 'No se detectaron endpoints en este proyecto.',
+        'env_setup': '### 3.1 Guía de Configuración del Entorno de Desarrollo',
+        'endpoint_catalog': '### 3.2 Catálogo de Endpoints de API',
+        'doc_status': '### 3.3 Estado de Comentarios y Docstrings',
+        'test_plans': '### 3.4 Planes de Prueba',
+        'data_models_title': '## 4. Modelos de Datos',
+        'deployment_title': '## 5. Guía de Despliegue',
+        'quality_title': '## 6. Reporte de Calidad',
+        'classes_title': '## 7. Documentación de Clases',
+        'functions_title': '## 8. Documentación de Funciones',
+        'method': 'Método', 'path': 'Ruta', 'file': 'Archivo', 'framework': 'Framework',
+        'property': 'Propiedad', 'code_col': 'Código', 'description': 'Descripción', 'status': 'Estado',
+        'success_op': 'Operación exitosa', 'bad_request': 'Solicitud incorrecta', 'unauthorized': 'No autorizado',
+        'not_found': 'Recurso no encontrado', 'server_error': 'Error interno del servidor',
+        'documented': 'Documentadas', 'undocumented': 'Sin documentar', 'total_functions': 'Total de funciones',
+        'code_fragments': '#### Fragmentos de Código con Documentación',
+        'need_docs': '#### Funciones que Requieren Documentación',
+        'function_col': 'Función', 'params_col': 'Parámetros', 'file_col': 'Archivo',
+        'test_function': 'Función de Test', 'complexity': 'Complejidad', 'implemented': 'Implementada',
+        'no_tests': '> ⚠️ No se detectaron pruebas automatizadas en este proyecto.',
+        'generated_by': 'Generado automáticamente por AutoDocs AI',
+        'dominant_language': 'Lenguaje Dominante',
+        'generation_date': 'Fecha de Generación',
+        'generation_engine': 'Motor de Generación',
+        'analyzed_files': 'Total Archivos Analizados',
+        'cover_subtitle': 'Documento Maestro de Arquitectura, Endpoints, Modelos de Dominio y Métricas de Calidad',
+        'cover_eyebrow': 'Auditoría & Especificación Técnica de Software',
+        'cover_footer': 'Documento técnico confidencial · Generado automáticamente por AutoDocs AI · Distribución interna',
+        'and_more': 'y {n} más',
+        'primary_lang_label': 'El análisis del proyecto determinó que **{lang}** es el lenguaje predominante.',
+    },
+    'en': {
+        'unknown': 'Unknown',
+        'project': 'Project',
+        'files': 'Files',
+        'functions': 'Functions',
+        'classes': 'Classes',
+        'endpoints': 'Endpoints',
+        'excellent': 'Excellent',
+        'acceptable': 'Acceptable',
+        'needs_improvement': 'Needs improvement',
+        'doc_title': 'Project Documentation',
+        'scope_note': 'Document scope.',
+        'scope_text': 'This edition consolidates elements identified through static source code analysis. Values reflect the project state as of {now} and should be validated against the runtime environment before a production release.',
+        'exec_summary': '1.1 Executive Summary',
+        'stack': '1.2 Technology Stack',
+        'stats': '1.3 Project Statistics',
+        'language': 'Language',
+        'quantity': 'Count',
+        'metric': 'Metric',
+        'value': 'Value',
+        'total_files': 'Total files',
+        'api_endpoints': 'API endpoints',
+        'quality_score': 'Quality score',
+        'documented_functions': 'Documented functions',
+        'documented_classes': 'Documented classes',
+        'files_unit': '{c} files',
+        'arch_title': '2. Architecture and Design Documentation',
+        'arch_intro': 'This section describes the logical and physical organization observed in the repository. Diagrams and patterns are derived from available artifacts and serve as a reference for understanding and evolving the system.',
+        'dir_structure': '2.1 Directory Structure',
+        'layer_dist': '2.2 Layer Distribution',
+        'lang_dist': '2.3 Language Distribution',
+        'infra_diagram': '2.4 Infrastructure Diagram',
+        'usecase_diagram': '2.5 Use Case Diagram',
+        'class_diagram': '2.6 Class Diagram',
+        'patterns': '2.7 Detected Patterns',
+        'arch_insights': '2.8 Additional Architecture Observations (Architecture Insights)',
+        'no_insights': 'No additional observations are available for this run. The preceding description is based solely on evidence obtained from the source code.',
+        'no_patterns': '- No specific patterns detected',
+        'code_docs_title': '## 3. Technical Code Documentation',
+        'no_endpoints': 'No endpoints were detected in this project.',
+        'env_setup': '### 3.1 Development Environment Setup Guide',
+        'endpoint_catalog': '### 3.2 API Endpoint Catalog',
+        'doc_status': '### 3.3 Comments and Docstrings Status',
+        'test_plans': '### 3.4 Test Plans',
+        'data_models_title': '## 4. Data Models',
+        'deployment_title': '## 5. Deployment Guide',
+        'quality_title': '## 6. Quality Report',
+        'classes_title': '## 7. Class Documentation',
+        'functions_title': '## 8. Function Documentation',
+        'method': 'Method', 'path': 'Path', 'file': 'File', 'framework': 'Framework',
+        'property': 'Property', 'code_col': 'Code', 'description': 'Description', 'status': 'Status',
+        'success_op': 'Successful operation', 'bad_request': 'Bad request', 'unauthorized': 'Unauthorized',
+        'not_found': 'Resource not found', 'server_error': 'Internal server error',
+        'documented': 'Documented', 'undocumented': 'Undocumented', 'total_functions': 'Total functions',
+        'code_fragments': '#### Documented Code Fragments',
+        'need_docs': '#### Functions Requiring Documentation',
+        'function_col': 'Function', 'params_col': 'Parameters', 'file_col': 'File',
+        'test_function': 'Test Function', 'complexity': 'Complexity', 'implemented': 'Implemented',
+        'no_tests': '> ⚠️ No automated tests were detected in this project.',
+        'generated_by': 'Automatically generated by AutoDocs AI',
+        'dominant_language': 'Dominant language',
+        'generation_date': 'Generation date',
+        'generation_engine': 'Generation engine',
+        'analyzed_files': 'Total analyzed files',
+        'cover_subtitle': 'Master Document of Architecture, Endpoints, Domain Models and Quality Metrics',
+        'cover_eyebrow': 'Software Audit & Technical Specification',
+        'cover_footer': 'Confidential technical document · Automatically generated by AutoDocs AI · Internal distribution',
+        'and_more': 'and {n} more',
+        'primary_lang_label': 'The project analysis determined that **{lang}** is the predominant language.',
+    }
+}
+
 class DocGenerator:
     """
     Genera documentación técnica profesional completa:
@@ -26,16 +169,37 @@ class DocGenerator:
     5. Modelos de Datos
     """
 
-    def __init__(self, analysis_results: dict):
+    def __init__(self, analysis_results: dict, lang: str = None):
         self.r = analysis_results
         self.now = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+        raw_lang = lang or (analysis_results or {}).get('language') or (analysis_results or {}).get('doc_language') or 'es'
+        raw_lang = str(raw_lang).lower()
+        self.lang = 'en' if raw_lang.startswith('en') else 'es'
 
         # IA opcional: solo activar si está configurado
         use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
         if use_ai:
             self.ai_enhancer = AIEnhancer()
             if self.ai_enhancer.is_available():
-                self.r = self.ai_enhancer.enhance_documentation(self.r)
+                # Pasar intención de idioma a la mejora si es posible
+                try:
+                    self.r = self.ai_enhancer.enhance_documentation(self.r, output_language=self.lang)
+                except TypeError:
+                    self.r = self.ai_enhancer.enhance_documentation(self.r)
+
+    def t(self, key, **kwargs):
+        d = DOC_I18N.get(self.lang, DOC_I18N['es'])
+        text = d.get(key, DOC_I18N['es'].get(key, key))
+        if kwargs:
+            try:
+                return text.format(**kwargs)
+            except Exception:
+                return text
+        return text
+
+    def tx(self, spanish, english):
+        """Texto inline con dos variantes; mantiene el diseño y cambia solo el idioma."""
+        return english if self.lang == 'en' else spanish
 
     @staticmethod
     def _sanitize_ai_markdown(text: str) -> str:
@@ -344,48 +508,48 @@ class DocGenerator:
 
     # ─── 1. README ────────────────────────────────────────────────────────────
     def _cover_page(self) -> str:
-        lang  = self.r.get("primary_language", "Desconocido")
+        lang  = self.r.get("primary_language", self.t('unknown'))
         langs = self.r.get("languages", {})
         fns   = self.r.get("functions", [])
         cls   = self.r.get("classes", [])
         eps   = self.r.get("endpoints", [])
         files = self.r.get("total_files", 0)
         score = self.r.get("quality_score", 0)
-        label = "Excelente" if score >= 80 else "Aceptable" if score >= 60 else "Requiere mejoras"
+        label = self.t('excellent') if score >= 80 else self.t('acceptable') if score >= 60 else self.t('needs_improvement')
 
         return f"""
         <div class="cover">
-          <p class="eyebrow">Auditoría &amp; Especificación Técnica de Software</p>
-          <h1 class="cover-title">{self.r.get('project_name', 'Proyecto')}</h1>
+          <p class="eyebrow">{self.t('cover_eyebrow')}</p>
+          <h1 class="cover-title">{self.r.get('project_name', self.t('project'))}</h1>
           <div class="cover-rule"></div>
           <p class="cover-subtitle">
-            Documento Maestro de Arquitectura, Endpoints, Modelos de Dominio y Métricas de Calidad
+            {self.t('cover_subtitle')}
           </p>
 
           <table class="meta-table">
-            <tr><td>Proyecto:</td><td><strong>{self.r.get('project_name','—')}</strong></td></tr>
-            <tr><td>Lenguaje Dominante:</td><td><strong>{lang}</strong></td></tr>
-            <tr><td>Score de Calidad:</td><td><strong>{score} / 100 ({label})</strong></td></tr>
-            <tr><td>Total Archivos Analizados:</td><td><strong>{files}</strong></td></tr>
-            <tr><td>Fecha de Generación:</td><td><strong>{self.now}</strong></td></tr>
-            <tr><td>Motor de Generación:</td><td><strong>AutoDocs AI Enterprise (Groq IA + PlantUML/Kroki)</strong></td></tr>
+            <tr><td>{self.t('project')}:</td><td><strong>{self.r.get('project_name','—')}</strong></td></tr>
+            <tr><td>{self.t('dominant_language')}:</td><td><strong>{lang}</strong></td></tr>
+            <tr><td>{self.t('quality_score')}:</td><td><strong>{score} / 100 ({label})</strong></td></tr>
+            <tr><td>{self.t('analyzed_files')}:</td><td><strong>{files}</strong></td></tr>
+            <tr><td>{self.t('generation_date')}:</td><td><strong>{self.now}</strong></td></tr>
+            <tr><td>{self.t('generation_engine')}:</td><td><strong>AutoDocs AI Enterprise (Groq AI + PlantUML/Kroki)</strong></td></tr>
           </table>
 
           <div class="kpi-row">
-            <div class="kpi"><span class="kpi-num">{files}</span><span class="kpi-lbl">Archivos</span></div>
-            <div class="kpi"><span class="kpi-num">{len(fns)}</span><span class="kpi-lbl">Funciones</span></div>
-            <div class="kpi"><span class="kpi-num">{len(cls)}</span><span class="kpi-lbl">Clases</span></div>
-            <div class="kpi"><span class="kpi-num">{len(eps)}</span><span class="kpi-lbl">Endpoints</span></div>
+            <div class="kpi"><span class="kpi-num">{files}</span><span class="kpi-lbl">{self.t('files')}</span></div>
+            <div class="kpi"><span class="kpi-num">{len(fns)}</span><span class="kpi-lbl">{self.t('functions')}</span></div>
+            <div class="kpi"><span class="kpi-num">{len(cls)}</span><span class="kpi-lbl">{self.t('classes')}</span></div>
+            <div class="kpi"><span class="kpi-num">{len(eps)}</span><span class="kpi-lbl">{self.t('endpoints')}</span></div>
           </div>
 
           <p class="cover-footer">
-            Documento técnico confidencial · Generado automáticamente por AutoDocs AI · Distribución interna
+            {self.t('cover_footer')}
           </p>
         </div>
         <div class="page-break"></div>
         """
     def _readme(self) -> str:
-        lang   = self.r.get("primary_language", "Desconocido")
+        lang   = self.r.get("primary_language", self.t('unknown'))
         langs  = self.r.get("languages", {})
         fns    = self.r.get("functions", [])
         cls    = self.r.get("classes", [])
@@ -393,44 +557,55 @@ class DocGenerator:
         files  = self.r.get("total_files", 0)
         score  = self.r.get("quality_score", 0)
 
-        lang_rows = [[l, f"{c} archivos"] for l, c in langs.items()]
+        lang_rows = [[l, self.t('files_unit', c=c)] for l, c in langs.items()]
         metrics_rows = [
-            ["Total de archivos", str(files)],
-            ["Funciones", str(len(fns))],
-            ["Clases", str(len(cls))],
-            ["Endpoints API", str(len(eps))],
-            ["Score de calidad", f"{score}/100"],
-            ["Funciones documentadas", f"{sum(1 for f in fns if f.get('docstring'))} / {len(fns)}"],
-            ["Clases documentadas", f"{sum(1 for c in cls if c.get('docstring'))} / {len(cls)}"],
+            [self.t('total_files'), str(files)],
+            [self.t('functions'), str(len(fns))],
+            [self.t('classes'), str(len(cls))],
+            [self.t('api_endpoints'), str(len(eps))],
+            [self.t('quality_score'), f"{score}/100"],
+            [self.t('documented_functions'), f"{sum(1 for f in fns if f.get('docstring'))} / {len(fns)}"],
+            [self.t('documented_classes'), f"{sum(1 for c in cls if c.get('docstring'))} / {len(cls)}"],
         ]
 
-        return f"""# Documentación del Proyecto
-
-> **Alcance del documento.** Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al {self.now} y deben validarse frente al entorno de ejecución antes de una liberación productiva.
-
-## 1.1 Resumen Ejecutivo
-
-El análisis del proyecto determinó que **{lang}** es el lenguaje predominante.
+        if self.lang == 'en':
+            exec_summary = f"""The project analysis determined that **{lang}** is the predominant language.
+The examined scope includes **{files} source files**, **{len(fns)} functions**,
+**{len(cls)} classes** and **{len(eps)} API endpoints**. The automated evaluation
+assigns the code a quality score of **{score}/100**. The following sections
+develop these findings from the perspective of architecture, interfaces,
+components, data, deployment and maintainability."""
+            stack_intro = "The following distribution identifies the repository's technology composition and helps estimate maintenance effort by language."
+            stats_intro = "These metrics summarize the detected technical inventory. If an element is absent, it means the analyzer did not identify it statically; it does not necessarily mean the capability does not exist at runtime."
+        else:
+            exec_summary = f"""El análisis del proyecto determinó que **{lang}** es el lenguaje predominante.
 El alcance examinado comprende **{files} archivos fuente**, **{len(fns)} funciones**,
 **{len(cls)} clases** y **{len(eps)} endpoints de API**. La evaluación automatizada
 asigna al código un resultado de calidad de **{score}/100**. Las secciones siguientes
 desarrollan estos hallazgos desde la perspectiva de arquitectura, interfaces,
-componentes, datos, despliegue y mantenibilidad.
+componentes, datos, despliegue y mantenibilidad."""
+            stack_intro = "La distribución siguiente permite identificar la composición tecnológica del repositorio y dimensionar el esfuerzo de mantenimiento por lenguaje."
+            stats_intro = "Las métricas resumen el inventario técnico detectado. La ausencia de un elemento indica que el analizador no lo identificó de forma estática; no implica necesariamente que la capacidad no exista durante la ejecución."
 
-## 1.2 Stack Tecnológico
+        return f"""# {self.t('doc_title')}
 
-La distribución siguiente permite identificar la composición tecnológica del
-repositorio y dimensionar el esfuerzo de mantenimiento por lenguaje.
+> **{self.t('scope_note')}** {self.t('scope_text', now=self.now)}
 
-{self._render_markdown_table(['Lenguaje', 'Cantidad'], lang_rows)}
+## {self.t('exec_summary')}
 
-## 1.3 Estadísticas del Proyecto
+{exec_summary}
 
-Las métricas resumen el inventario técnico detectado. La ausencia de un elemento
-indica que el analizador no lo identificó de forma estática; no implica necesariamente
-que la capacidad no exista durante la ejecución.
+## {self.t('stack')}
 
-{self._render_markdown_table(['Métrica', 'Valor'], metrics_rows)}
+{stack_intro}
+
+{self._render_markdown_table([self.t('language'), self.t('quantity')], lang_rows)}
+
+## {self.t('stats')}
+
+{stats_intro}
+
+{self._render_markdown_table([self.t('metric'), self.t('value')], metrics_rows)}
 """
 
     # ─── 2. ARQUITECTURA ──────────────────────────────────────────────────────
@@ -447,20 +622,22 @@ que la capacidad no exista durante la ejecución.
         dirs = {}
         for item in struct:
             parts = item["path"].replace("\\", "/").split("/")
-            top = parts[0] if len(parts) > 1 else "(raíz)"
+            top = parts[0] if len(parts) > 1 else self.tx("(raíz)", "(root)")
             dirs.setdefault(top, []).append(item)
 
         dir_section = ""
         for d, items in list(dirs.items())[:20]:
             exts = {}
             for i in items:
-                ext = i["name"].rsplit(".", 1)[-1] if "." in i["name"] else "sin ext"
+                ext = i["name"].rsplit(".", 1)[-1] if "." in i["name"] else self.tx("sin ext", "no ext")
                 exts[ext] = exts.get(ext, 0) + 1
             ext_str = ", ".join(f".{e}({n})" for e, n in exts.items())
-            dir_section += f"- **`{d}/`** — {len(items)} archivos [{ext_str}]\n"
+            files_label = self.tx("archivos", "files")
+            dir_section += f"- **`{d}/`** — {len(items)} {files_label} [{ext_str}]\n"
 
+        files_word = self.tx('archivos', 'files')
         lang_dist = "\n".join(
-            f"- {l}: {c} archivos ({round(c/max(sum(langs.values()),1)*100)}%)"
+            f"- {l}: {c} {files_word} ({round(c/max(sum(langs.values()),1)*100)}%)"
             for l, c in sorted(langs.items(), key=lambda x: -x[1])
         )
 
@@ -468,15 +645,15 @@ que la capacidad no exista durante la ejecución.
         use_cases_puml = "@startuml\n"
         use_cases_puml += "left to right direction\n"
         use_cases_puml += "skinparam packageStyle rectangle\n"
-        use_cases_puml += "actor \"Usuario\" as user\n"
-        use_cases_puml += "rectangle \"Sistema\" {\n"
+        use_cases_puml += f"actor \"{self.tx('Usuario', 'User')}\" as user\n"
+        use_cases_puml += f"rectangle \"{self.tx('Sistema', 'System')}\" {{\n"
         for idx, ep in enumerate(eps[:10], start=1):
             method = ep.get("method", "GET")
             path_label = ep.get("path", "/").replace('"', '')
             use_cases_puml += f'  usecase "{method} {path_label}" as uc_{idx}\n'
             use_cases_puml += f'  user --> uc_{idx}\n'
         if len(eps) > 10:
-            use_cases_puml += '  usecase "Otros endpoints" as uc_other\n'
+            use_cases_puml += f'  usecase "{self.tx("Otros endpoints", "Other endpoints")}" as uc_other\n'
             use_cases_puml += '  user --> uc_other\n'
         use_cases_puml += "}\n@enduml"
         
@@ -487,27 +664,27 @@ que la capacidad no exista durante la ejecución.
             if diagram_path:
                 use_case_diagram = (
                     f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                    f"<img src=\"{diagram_path}\" alt=\"Diagrama de Casos de Uso\" "
+                    f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama de Casos de Uso', 'Use Case Diagram')}\" "
                     f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
                     f"</div>\n"
                 )
 
         # Diagrama de infraestructura en PlantUML
-        infra_puml = """@startuml
+        infra_puml = f"""@startuml
 skinparam componentStyle rectangle
-package "Cliente / Frontend" {
-  [Navegador] as browser
-  [App Móvil] as mobile
+package "{self.tx('Cliente / Frontend', 'Client / Frontend')}" {{
+  [{self.tx('Navegador', 'Browser')}] as browser
+  [{self.tx('App Móvil', 'Mobile app')}] as mobile
   [CLI] as cli
-}
-package "API / Backend" {
-  [Rutas] as routes
-  [Lógica de Negocio] as logic
+}}
+package "{self.tx('API / Backend', 'API / Backend')}" {{
+  [{self.tx('Rutas', 'Routes')}] as routes
+  [{self.tx('Lógica de Negocio', 'Business logic')}] as logic
   routes --> logic
-}
-database "Base de Datos" as db
-database "Caché" as cache
-[Servicios Ext.] as ext
+}}
+database "{self.tx('Base de Datos', 'Database')}" as db
+database "{self.tx('Caché', 'Cache')}" as cache
+[{self.tx('Servicios Ext.', 'External services')}] as ext
 logic --> db
 logic --> cache
 logic --> ext
@@ -522,7 +699,7 @@ cli --> routes
         if diagram_path:
             infra_diagram = (
                 f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{diagram_path}\" alt=\"Diagrama de Infraestructura\" "
+                f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama de Infraestructura', 'Infrastructure Diagram')}\" "
                 f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
                 f"</div>\n"
             )
@@ -540,7 +717,7 @@ cli --> routes
                 if clean_m:
                     class_puml += f'  +{clean_m}()\n'
             if len(methods) > 5:
-                class_puml += f'  ... ({len(methods) - 5} más)\n'
+                class_puml += f'  ... ({len(methods) - 5} {self.tx("más", "more")})\n'
             class_puml += '}\n'
         class_puml += "@enduml"
         
@@ -549,12 +726,20 @@ cli --> routes
         basic_class_warning = ""
         if basic_classes:
             names = ", ".join(f"`{c.get('name', '?')}`" for c in basic_classes[:10])
-            extra = f" y {len(basic_classes) - 10} más" if len(basic_classes) > 10 else ""
-            basic_class_warning = (
-                f"\n\n> ⚠️ **Clases con información incompleta:** Las siguientes clases aparecen sin métodos ni atributos documentados: "
-                f"{names}{extra}. "
-                f"Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.\n"
-            )
+            extra_n = len(basic_classes) - 10
+            extra = (f" and {extra_n} more" if self.lang == 'en' else f" y {extra_n} más") if extra_n > 0 else ""
+            if self.lang == 'en':
+                basic_class_warning = (
+                    f"\n\n> ⚠️ **Classes with incomplete information:** The following classes appear without documented methods or attributes: "
+                    f"{names}{extra}. "
+                    f"To display the diagram correctly, add methods, properties or docstrings to these classes in your source code and regenerate the documentation.\n"
+                )
+            else:
+                basic_class_warning = (
+                    f"\n\n> ⚠️ **Clases con información incompleta:** Las siguientes clases aparecen sin métodos ni atributos documentados: "
+                    f"{names}{extra}. "
+                    f"Para que el diagrama se visualice correctamente, agrega métodos, propiedades o docstrings a estas clases en tu código fuente y regenera la documentación.\n"
+                )
 
         # Generar diagrama de clases
         class_diagram = ""
@@ -563,52 +748,51 @@ cli --> routes
             if diagram_path:
                 class_diagram = (
                     f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                    f"<img src=\"{diagram_path}\" alt=\"Diagrama de Clases\" "
+                    f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama de Clases', 'Class Diagram')}\" "
                     f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
                     f"</div>\n"
                 )
             class_diagram += basic_class_warning
 
-        return f"""## 2. Documentación de Arquitectura y Diseño
+        root_name = 'project' if self.lang == 'en' else 'proyecto'
+        return f"""## {self.t('arch_title')}
 
-La presente sección describe la organización lógica y física observada en el
-repositorio. Los diagramas y patrones se derivan de los artefactos disponibles y
-constituyen una referencia para la comprensión y evolución del sistema.
+{self.t('arch_intro')}
 
-### 2.1 Estructura de Directorios
+### {self.t('dir_structure')}
 
 ```
-proyecto/
+{root_name}/
 {chr(10).join(f'├── {d}/' for d in list(dirs.keys())[:15])}
 ```
 
-### 2.2 Distribución por Capas
+### {self.t('layer_dist')}
 
 {dir_section}
 
-### 2.3 Distribución de Lenguajes
+### {self.t('lang_dist')}
 
 {lang_dist}
 
-### 2.4 Diagrama de Infraestructura
+### {self.t('infra_diagram')}
 
 {infra_diagram}
 
-### 2.5 Diagrama de Casos de Uso
+### {self.t('usecase_diagram')}
 
 {use_case_diagram}
 
-### 2.6 Diagrama de Clases
+### {self.t('class_diagram')}
 
 {class_diagram}
 
-### 2.7 Patrones Detectados
+### {self.t('patterns')}
 
 {self._detect_patterns()}
 
-### 2.8 Observaciones Complementarias de Arquitectura (Insights de Arquitectura)
+### {self.t('arch_insights')}
 
-{ai_insights if ai_insights else "No se dispone de observaciones complementarias para esta ejecución. La descripción precedente se basa exclusivamente en evidencia obtenida del código fuente."}
+{ai_insights if ai_insights else self.t('no_insights')}
 """
 
     def _detect_patterns(self) -> str:
@@ -619,19 +803,22 @@ proyecto/
 
         if eps:
             frameworks = set(e.get("framework", "") for e in eps)
-            patterns.append(f"- **API REST**: {len(eps)} endpoints detectados ({', '.join(frameworks)})")
+            if self.lang == 'en':
+                patterns.append(f"- **REST API**: {len(eps)} endpoints detected ({', '.join(frameworks)})")
+            else:
+                patterns.append(f"- **API REST**: {len(eps)} endpoints detectados ({', '.join(frameworks)})")
         if any("Model" in c["name"] or "model" in c["name"].lower() for c in cls):
-            patterns.append("- **Patrón MVC**: clases Model detectadas")
+            patterns.append("- **MVC Pattern**: Model classes detected" if self.lang == 'en' else "- **Patrón MVC**: clases Model detectadas")
         if any("test" in f["name"].lower() or "Test" in f["name"] for f in fns):
             tc = sum(1 for f in fns if "test" in f["name"].lower())
-            patterns.append(f"- **Testing**: {tc} funciones de prueba detectadas")
+            patterns.append(f"- **Testing**: {tc} test functions detected" if self.lang == 'en' else f"- **Testing**: {tc} funciones de prueba detectadas")
         if any("__init__" in f["name"] for f in fns):
-            patterns.append("- **Programación Orientada a Objetos**: constructores detectados")
+            patterns.append("- **Object-Oriented Programming**: constructors detected" if self.lang == 'en' else "- **Programación Orientada a Objetos**: constructores detectados")
         async_fns = sum(1 for f in fns if f.get("is_async"))
         if async_fns:
-            patterns.append(f"- **Programación Asíncrona**: {async_fns} funciones async/await")
+            patterns.append(f"- **Asynchronous Programming**: {async_fns} async/await functions" if self.lang == 'en' else f"- **Programación Asíncrona**: {async_fns} funciones async/await")
 
-        return "\n".join(patterns) if patterns else "- No se detectaron patrones específicos"
+        return "\n".join(patterns) if patterns else self.t('no_patterns')
 
     # ─── 3. API DOCS ──────────────────────────────────────────────────────────
     def _api_docs(self) -> list:
@@ -646,11 +833,11 @@ proyecto/
                 "description": description,
                 "parameters":  [],
                 "responses": {
-                    "200": {"description": "Operación exitosa"},
-                    "400": {"description": "Solicitud incorrecta"},
-                    "401": {"description": "No autorizado"},
-                    "404": {"description": "Recurso no encontrado"},
-                    "500": {"description": "Error interno del servidor"},
+                    "200": {"description": self.tx("Operación exitosa", "Successful operation")},
+                    "400": {"description": self.tx("Solicitud incorrecta", "Bad request")},
+                    "401": {"description": self.tx("No autorizado", "Unauthorized")},
+                    "404": {"description": self.tx("Recurso no encontrado", "Resource not found")},
+                    "500": {"description": self.tx("Error interno del servidor", "Internal server error")},
                 }
             })
         return docs
@@ -683,33 +870,55 @@ proyecto/
         is_async = fn.get('is_async', False)
         cx = fn.get('complexity', 1)
 
+        purpose = self.tx('Propósito', 'Purpose')
+        parameters = self.tx('Parámetros', 'Parameters')
+        receives = self.tx('Recibe', 'Receives')
+        kind = self.tx('Tipo', 'Type')
+        complexity = self.tx('Complejidad', 'Complexity')
+
         parts = []
         if docstring:
-            parts.append(f"<strong>Propósito:</strong> {docstring}")
+            parts.append(f"<strong>{purpose}:</strong> {docstring}")
         else:
-            parts.append(f"<strong>Propósito:</strong> Función <code>{name}</code> detectada en el proyecto.")
+            detected = self.tx(
+                f"Función <code>{name}</code> detectada en el proyecto.",
+                f"Function <code>{name}</code> detected in the project.",
+            )
+            parts.append(f"<strong>{purpose}:</strong> {detected}")
 
         if params:
             param_list = ', '.join(f'<code>{p}</code>' for p in params if p != 'self')
             if param_list:
-                parts.append(f"<strong>Parámetros:</strong> Recibe {param_list}.")
+                parts.append(f"<strong>{parameters}:</strong> {receives} {param_list}.")
 
         if is_async:
-            parts.append("<strong>Tipo:</strong> Función asíncrona (<code>async/await</code>), diseñada para operaciones no bloqueantes.")
+            parts.append(
+                f"<strong>{kind}:</strong> " + self.tx(
+                    "Función asíncrona (<code>async/await</code>), diseñada para operaciones no bloqueantes.",
+                    "Asynchronous function (<code>async/await</code>), designed for non-blocking operations.",
+                )
+            )
 
         if cx > 10:
-            parts.append(f"<strong>Complejidad:</strong> Alta ({cx}). Se recomienda refactorizar para mejorar la legibilidad.")
+            parts.append(f"<strong>{complexity}:</strong> " + self.tx(
+                f"Alta ({cx}). Se recomienda refactorizar para mejorar la legibilidad.",
+                f"High ({cx}). Refactoring is recommended to improve readability.",
+            ))
         elif cx > 5:
-            parts.append(f"<strong>Complejidad:</strong> Moderada ({cx}). Contiene múltiples ramas de decisión.")
+            parts.append(f"<strong>{complexity}:</strong> " + self.tx(
+                f"Moderada ({cx}). Contiene múltiples ramas de decisión.",
+                f"Moderate ({cx}). It contains multiple decision branches.",
+            ))
 
         return ' '.join(parts)
 
     def _api_section(self) -> str:
         eps = self.r.get("endpoints", [])
+        title = self.t('code_docs_title')
         if not eps:
-            return "## 3. Documentación Técnica de Código\n\nNo se detectaron endpoints en este proyecto.\n"
+            return f"{title}\n\n{self.t('no_endpoints')}\n"
 
-        out = "## 3. Documentación Técnica de Código\n\n"
+        out = f"{title}\n\n"
 
         # 3.1 Guía de configuración del entorno
         lang = self.r.get("primary_language", "Python")
@@ -717,10 +926,10 @@ proyecto/
             "Python": "pip install -r requirements.txt",
             "JavaScript": "npm install",
             "TypeScript": "npm install",
-        }.get(lang, "# instalar dependencias")
+        }.get(lang, self.tx("# instalar dependencias", "# install dependencies"))
 
-        out += "### 3.1 Guía de Configuración del Entorno de Desarrollo\n\n"
-        out += f"""```bash
+        out += f"{self.t('env_setup')}\n\n"
+        out += self.tx(f"""```bash
 # 1. Clonar el repositorio
 git clone <url-del-repositorio>
 cd <nombre-del-proyecto>
@@ -741,11 +950,35 @@ cp .env.example .env
 python app.py  # o npm run dev
 ```
 
-"""
+""", f"""```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd <project-name>
+
+# 2. Create a virtual environment (recommended for Python)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\\Scripts\\activate     # Windows
+
+# 3. Install dependencies
+{install_cmd}
+
+# 4. Configure environment variables
+cp .env.example .env
+# Edit .env with your local values
+
+# 5. Run in development mode
+python app.py  # or npm run dev
+```
+
+""")
 
         # 3.2 Tabla resumen de endpoints
-        out += f"### 3.2 Catálogo de Endpoints de API\n\n"
-        out += f"El proyecto expone **{len(eps)} endpoints**. A continuación se presenta el catálogo completo organizado por módulo:\n\n"
+        out += f"{self.t('endpoint_catalog')}\n\n"
+        out += self.tx(
+            f"El proyecto expone **{len(eps)} endpoints**. A continuación se presenta el catálogo completo organizado por módulo:\n\n",
+            f"The project exposes **{len(eps)} endpoints**. The complete catalog organized by module is shown below:\n\n",
+        )
 
         # Tabla resumen de todos los endpoints
         ep_rows = []
@@ -758,17 +991,18 @@ python app.py  # o npm run dev
                 ep.get('framework', '—'),
             ])
         out += self._render_markdown_table(
-            ['Método', 'Ruta', 'Archivo', 'Framework'],
+            [self.t('method'), self.t('path'), self.t('file'), self.t('framework')],
             ep_rows
         )
 
         # Detalle por módulo
         by_file = {}
         for ep in eps:
-            by_file.setdefault(ep.get("file", "desconocido"), []).append(ep)
+            by_file.setdefault(ep.get("file", self.t('unknown')), []).append(ep)
 
+        module_word = self.tx('Módulo', 'Module')
         for f, endpoints in by_file.items():
-            out += f"\n#### Módulo: `{f}`\n\n"
+            out += f"\n#### {module_word}: `{f}`\n\n"
             for ep in endpoints:
                 method = ep.get('method', 'GET')
                 out += f"##### `{method} {ep.get('path')}`\n\n"
@@ -779,23 +1013,23 @@ python app.py  # o npm run dev
 
                 # Tabla de detalle del endpoint
                 detail_rows = [
-                    ['Framework', ep.get('framework', 'Desconocido')],
-                    ['Archivo', f"`{ep.get('file')}`"],
+                    ['Framework', ep.get('framework', self.t('unknown'))],
+                    [self.t('file'), f"`{ep.get('file')}`"],
                 ]
                 if method in ('POST', 'PUT', 'PATCH'):
-                    detail_rows.append(['Body', 'JSON (requerido)'])
+                    detail_rows.append(['Body', self.tx('JSON (requerido)', 'JSON (required)')])
                 detail_rows.append(['Auth', 'Bearer JWT Token'])
-                out += self._render_markdown_table(['Propiedad', 'Valor'], detail_rows)
+                out += self._render_markdown_table([self.t('property'), self.t('value')], detail_rows)
 
                 # Tabla de códigos de respuesta
                 resp_rows = [
-                    ['`200`', '✅ Operación exitosa'],
-                    ['`400`', '⚠️ Solicitud incorrecta'],
-                    ['`401`', '🔒 No autorizado'],
-                    ['`404`', '❌ Recurso no encontrado'],
-                    ['`500`', '🔥 Error interno del servidor'],
+                    ['`200`', f"✅ {self.t('success_op')}"],
+                    ['`400`', f"⚠️ {self.t('bad_request')}"],
+                    ['`401`', f"🔒 {self.t('unauthorized')}"],
+                    ['`404`', f"❌ {self.t('not_found')}"],
+                    ['`500`', f"🔥 {self.t('server_error')}"],
                 ]
-                out += self._render_markdown_table(['Código', 'Descripción'], resp_rows)
+                out += self._render_markdown_table([self.t('code_col'), self.t('description')], resp_rows)
                 out += "---\n\n"
 
         # 3.3 Estado de documentación
@@ -804,22 +1038,26 @@ python app.py  # o npm run dev
         undocumented = [f for f in fns if not f.get("docstring")]
         doc_pct = round(len(documented) / max(len(fns), 1) * 100)
 
-        out += "### 3.3 Estado de Comentarios y Docstrings\n\n"
+        out += f"{self.t('doc_status')}\n\n"
 
         # Tabla de resumen de documentación
         doc_summary_rows = [
-            ['Total de funciones', str(len(fns))],
-            ['✅ Documentadas', f"{len(documented)} ({doc_pct}%)"],
-            ['❌ Sin documentar', f"{len(undocumented)} ({100 - doc_pct}%)"],
+            [self.t('total_functions'), str(len(fns))],
+            [f"✅ {self.t('documented')}", f"{len(documented)} ({doc_pct}%)"],
+            [f"❌ {self.t('undocumented')}", f"{len(undocumented)} ({100 - doc_pct}%)"],
         ]
-        out += self._render_markdown_table(['Métrica', 'Valor'], doc_summary_rows)
+        out += self._render_markdown_table([self.t('metric'), self.t('value')], doc_summary_rows)
 
-        out += f"\n```text\n[{'█' * int(doc_pct/5)}{'░' * int((100-doc_pct)/5)}] {doc_pct}% documentado\n```\n\n"
+        documented_word = self.tx('documentado', 'documented')
+        out += f"\n```text\n[{'█' * int(doc_pct/5)}{'░' * int((100-doc_pct)/5)}] {doc_pct}% {documented_word}\n```\n\n"
 
         # Fragmentos de código con docstrings como ejemplos
         if documented:
-            out += "#### Fragmentos de Código con Documentación\n\n"
-            out += "A continuación se muestran fragmentos reales del proyecto que cuentan con docstrings correctamente implementados:\n\n"
+            out += f"{self.t('code_fragments')}\n\n"
+            out += self.tx(
+                "A continuación se muestran fragmentos reales del proyecto que cuentan con docstrings correctamente implementados:\n\n",
+                "Below are real project fragments that have correctly implemented docstrings:\n\n",
+            )
             for fn in documented[:4]:
                 snippet = fn.get('code_snippet', '')
                 if snippet:
@@ -833,25 +1071,33 @@ python app.py  # o npm run dev
                     out += f"```python\ndef {fn['name']}({params_str}):\n    \"\"\"\n    {fn['docstring']}\n    \"\"\"\n    ...\n```\n\n"
 
         if undocumented:
-            out += "\n#### Funciones que Requieren Documentación\n\n"
+            out += f"\n{self.t('need_docs')}\n\n"
             undoc_rows = []
             for fn in undocumented[:10]:
                 params_str = ", ".join(fn.get("params", [])) or "—"
                 undoc_rows.append([f"`{fn['name']}`", f"`{params_str}`", f"`{fn.get('file', '?')}`"])
-            out += self._render_markdown_table(['Función', 'Parámetros', 'Archivo'], undoc_rows)
+            out += self._render_markdown_table(
+                [self.t('function_col'), self.t('params_col'), self.t('file_col')], undoc_rows
+            )
             if len(undocumented) > 10:
-                out += f"\n_... y {len(undocumented) - 10} funciones más sin documentar._\n"
+                out += self.tx(
+                    f"\n_... y {len(undocumented) - 10} funciones más sin documentar._\n",
+                    f"\n_... and {len(undocumented) - 10} more undocumented functions._\n",
+                )
             out += "\n"
 
         # 3.4 Planes de Prueba (Testing) — EN TABLA
         test_fns = [f for f in fns if "test" in f["name"].lower() or f["name"].startswith("test_")]
-        out += "### 3.4 Planes de Prueba\n\n"
+        out += f"{self.t('test_plans')}\n\n"
         if test_fns:
-            out += f"Se detectaron **{len(test_fns)} funciones de prueba** en el proyecto:\n\n"
+            out += self.tx(
+                f"Se detectaron **{len(test_fns)} funciones de prueba** en el proyecto:\n\n",
+                f"**{len(test_fns)} test functions** were detected in the project:\n\n",
+            )
             test_rows = []
             for fn in test_fns[:15]:
                 cx = fn.get('complexity', 1)
-                status = '✅ Implementada'
+                status = f'✅ {self.t("implemented")}'
                 test_rows.append([
                     f"`{fn['name']}`",
                     f"`{fn.get('file', '?')}`",
@@ -859,23 +1105,29 @@ python app.py  # o npm run dev
                     status
                 ])
             out += self._render_markdown_table(
-                ['Función de Test', 'Archivo', 'Complejidad', 'Estado'],
+                [self.t('test_function'), self.t('file'), self.t('complexity'), self.t('status')],
                 test_rows
             )
 
             # Mostrar fragmentos de código de tests
             test_with_code = [f for f in test_fns if f.get('code_snippet')][:3]
             if test_with_code:
-                out += "\n#### Fragmentos de Código de Tests\n\n"
-                out += "Estos son fragmentos reales de las pruebas implementadas en el proyecto:\n\n"
+                out += self.tx("\n#### Fragmentos de Código de Tests\n\n", "\n#### Test Code Fragments\n\n")
+                out += self.tx(
+                    "Estos son fragmentos reales de las pruebas implementadas en el proyecto:\n\n",
+                    "These are real fragments of the tests implemented in the project:\n\n",
+                )
                 for fn in test_with_code:
                     explanation = self._generate_code_explanation(fn)
                     out += self._render_code_fragment(
                         fn['name'], fn.get('file', '?'), fn['code_snippet'], explanation
                     )
         else:
-            out += "> ⚠️ No se detectaron pruebas automatizadas en este proyecto.\n\n"
-            out += "Se recomienda implementar los siguientes escenarios de prueba:\n\n"
+            out += f"> ⚠️ {self.t('no_tests')}\n\n"
+            out += self.tx(
+                "Se recomienda implementar los siguientes escenarios de prueba:\n\n",
+                "The following test scenarios are recommended:\n\n",
+            )
 
             # Tabla profesional de escenarios recomendados
             scenario_rows = []
@@ -884,29 +1136,32 @@ python app.py  # o npm run dev
                 path = ep.get('path', '/')
                 scenario_rows.append([
                     f"`{method} {path}`",
-                    f"Respuesta exitosa (200)",
-                    "Integración",
-                    "🔴 Alta"
+                    self.tx("Respuesta exitosa (200)", "Successful response (200)"),
+                    self.tx("Integración", "Integration"),
+                    self.tx("🔴 Alta", "🔴 High"),
                 ])
                 scenario_rows.append([
                     f"`{method} {path}`",
-                    f"Sin autenticación (401)",
-                    "Seguridad",
-                    "🔴 Alta"
+                    self.tx("Sin autenticación (401)", "Without authentication (401)"),
+                    self.tx("Seguridad", "Security"),
+                    self.tx("🔴 Alta", "🔴 High"),
                 ])
                 if method in ('POST', 'PUT', 'PATCH'):
                     scenario_rows.append([
                         f"`{method} {path}`",
-                        f"Datos inválidos (400)",
-                        "Validación",
-                        "🟡 Media"
+                        self.tx("Datos inválidos (400)", "Invalid data (400)"),
+                        self.tx("Validación", "Validation"),
+                        self.tx("🟡 Media", "🟡 Medium"),
                     ])
             out += self._render_markdown_table(
-                ['Endpoint', 'Escenario', 'Tipo', 'Prioridad'],
+                ['Endpoint', self.tx('Escenario', 'Scenario'), self.tx('Tipo', 'Type'), self.tx('Prioridad', 'Priority')],
                 scenario_rows
             )
 
-            out += "\n**Ejemplo de implementación recomendada:**\n\n"
+            out += self.tx(
+                "\n**Ejemplo de implementación recomendada:**\n\n",
+                "\n**Recommended implementation example:**\n\n",
+            )
             out += "```python\nimport pytest\n\nclass TestEndpoints:\n    def test_get_returns_200(self, client):\n        response = client.get('/api/endpoint')\n        assert response.status_code == 200\n\n    def test_post_creates_resource(self, client):\n        data = {'name': 'test'}\n        response = client.post('/api/endpoint', json=data)\n        assert response.status_code == 201\n\n    def test_unauthorized_returns_401(self, client):\n        response = client.get('/api/protected')\n        assert response.status_code == 401\n```\n\n"
 
         return out
@@ -916,7 +1171,7 @@ python app.py  # o npm run dev
         docs = []
         for c in self.r.get("classes", []):
             # Usar descripción de IA si está disponible, sino usar docstring
-            description = c.get("ai_description") or c.get("docstring") or f"Clase {c['name']}"
+            description = c.get("ai_description") or c.get("docstring") or self.tx(f"Clase {c['name']}", f"Class {c['name']}")
             docs.append({
                 "name":        c["name"],
                 "file":        c["file"],
@@ -931,18 +1186,27 @@ python app.py  # o npm run dev
     def _classes_section(self) -> str:
         classes = self.r.get("classes", [])
         if not classes:
-            return "## 4. Clases\n\nNo se detectaron clases en este proyecto.\n"
+            return self.tx(
+                "## 4. Clases\n\nNo se detectaron clases en este proyecto.\n",
+                "## 4. Classes\n\nNo classes were detected in this project.\n",
+            )
 
-        out = f"## 4. Documentación de Clases y Módulos\n\n"
-        out += f"El proyecto contiene **{len(classes)} clases** distribuidas en los siguientes módulos.\n\n"
+        out = self.tx(
+            "## 4. Documentación de Clases y Módulos\n\n",
+            "## 4. Class and Module Documentation\n\n",
+        )
+        out += self.tx(
+            f"El proyecto contiene **{len(classes)} clases** distribuidas en los siguientes módulos.\n\n",
+            f"The project contains **{len(classes)} classes** distributed across the following modules.\n\n",
+        )
 
         # TABLA RESUMEN de todas las clases/módulos
-        out += "### 4.1 Tabla Resumen de Módulos\n\n"
+        out += self.tx("### 4.1 Tabla Resumen de Módulos\n\n", "### 4.1 Module Summary Table\n\n")
         cls_rows = []
         for c in classes:
             methods_count = len(c.get('methods', []))
             bases = ', '.join(c.get('bases', [])) or 'object'
-            doc_status = '✅ Sí' if c.get('docstring') else '❌ No'
+            doc_status = f'✅ {self.tx("Sí", "Yes")}' if c.get('docstring') else f'❌ {self.tx("No", "No")}'
             cls_rows.append([
                 f"**`{c['name']}`**",
                 f"`{c['file']}`",
@@ -952,12 +1216,12 @@ python app.py  # o npm run dev
                 doc_status
             ])
         out += self._render_markdown_table(
-            ['Clase', 'Archivo', 'Línea', 'Herencia', 'Métodos', 'Documentada'],
+            [self.tx('Clase', 'Class'), self.t('file'), self.tx('Línea', 'Line'), self.tx('Herencia', 'Inheritance'), self.t('method'), self.t('documented')],
             cls_rows
         )
 
         # Detalle de cada clase con fragmento de código
-        out += "\n### 4.2 Detalle de Clases\n\n"
+        out += self.tx("\n### 4.2 Detalle de Clases\n\n", "\n### 4.2 Class Details\n\n")
         for c in classes:
             out += f"#### `{c['name']}`\n\n"
             # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
@@ -969,20 +1233,30 @@ python app.py  # o npm run dev
                 method_rows = []
                 for m in c["methods"][:20]:
                     method_rows.append([f"`{m}()`"])
-                out += self._render_markdown_table(['Métodos disponibles'], method_rows)
+                out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
 
             # Fragmento de código de la clase
             snippet = c.get('code_snippet', '')
             if snippet:
                 explanation_parts = []
                 if ai_desc:
-                    explanation_parts.append(f"<strong>Descripción:</strong> {ai_desc}")
+                    explanation_parts.append(f"<strong>{self.t('description')}:</strong> {ai_desc}")
                 bases = ', '.join(c.get('bases', []))
                 if bases:
-                    explanation_parts.append(f"<strong>Herencia:</strong> Extiende de <code>{bases}</code>.")
+                    label = self.tx('Herencia', 'Inheritance')
+                    text = self.tx(f"Extiende de <code>{bases}</code>.", f"Extends <code>{bases}</code>.")
+                    explanation_parts.append(f"<strong>{label}:</strong> {text}")
                 methods_count = len(c.get('methods', []))
-                explanation_parts.append(f"<strong>Estructura:</strong> Contiene {methods_count} método(s) detectado(s).")
-                explanation = ' '.join(explanation_parts) if explanation_parts else f"Clase <code>{c['name']}</code> del proyecto."
+                label = self.tx('Estructura', 'Structure')
+                text = self.tx(
+                    f"Contiene {methods_count} método(s) detectado(s).",
+                    f"Contains {methods_count} detected method(s).",
+                )
+                explanation_parts.append(f"<strong>{label}:</strong> {text}")
+                explanation = ' '.join(explanation_parts) if explanation_parts else self.tx(
+                    f"Clase <code>{c['name']}</code> del proyecto.",
+                    f"Class <code>{c['name']}</code> in the project.",
+                )
                 out += self._render_code_fragment(
                     c['name'], c.get('file', '?'), snippet, explanation,
                     self.r.get('primary_language', 'python').lower()
@@ -994,9 +1268,9 @@ python app.py  # o npm run dev
     def _function_docs(self) -> list:
         docs = []
         for fn in self.r.get("functions", []):
-            params_doc = [{"name": p, "type": "any", "description": f"Parámetro {p}"}
+            params_doc = [{"name": p, "type": "any", "description": self.tx(f"Parámetro {p}", f"Parameter {p}")}
                           for p in fn.get("params", [])]
-            description = fn.get("ai_description") or fn.get("docstring") or f"Función {fn['name']}"
+            description = fn.get("ai_description") or fn.get("docstring") or self.tx(f"Función {fn['name']}", f"Function {fn['name']}")
             docs.append({
                 "name":        fn["name"],
                 "file":        fn["file"],
@@ -1006,24 +1280,30 @@ python app.py  # o npm run dev
                 "is_async":    fn.get("is_async", False),
                 "complexity":  fn.get("complexity", 1),
                 "lines_of_code": self._count_function_loc(fn),
-                "returns":     {"type": "any", "description": "Valor de retorno"},
+                "returns":     {"type": "any", "description": self.tx("Valor de retorno", "Return value")},
             })
         return docs
 
     def _functions_section(self) -> str:
         fns = self.r.get("functions", [])
         if not fns:
-            return "## 5. Funciones\n\nNo se detectaron funciones.\n"
+            return self.tx(
+                "## 5. Funciones\n\nNo se detectaron funciones.\n",
+                "## 5. Functions\n\nNo functions were detected.\n",
+            )
 
         # Agrupar por archivo
         by_file = {}
         for fn in fns:
-            by_file.setdefault(fn.get("file", "desconocido"), []).append(fn)
+            by_file.setdefault(fn.get("file", self.t('unknown')), []).append(fn)
 
-        out = f"## 5. Documentación de Funciones\n\nEl proyecto contiene **{len(fns)} funciones** distribuidas en **{len(by_file)} módulos**.\n\n"
+        out = self.tx(
+            f"## 5. Documentación de Funciones\n\nEl proyecto contiene **{len(fns)} funciones** distribuidas en **{len(by_file)} módulos**.\n\n",
+            f"## 5. Function Documentation\n\nThe project contains **{len(fns)} functions** distributed across **{len(by_file)} modules**.\n\n",
+        )
 
         # TABLA RESUMEN por módulo
-        out += "### 5.1 Resumen por Módulo\n\n"
+        out += self.tx("### 5.1 Resumen por Módulo\n\n", "### 5.1 Module Summary\n\n")
         module_rows = []
         for fname, funcs in by_file.items():
             avg_cx = round(sum(f.get('complexity', 1) for f in funcs) / max(len(funcs), 1), 1)
@@ -1038,14 +1318,15 @@ python app.py  # o npm run dev
                 str(async_count) if async_count else '—',
             ])
         out += self._render_markdown_table(
-            ['Módulo', 'Funciones', 'Complejidad Prom.', 'Documentadas', 'Async'],
+            [self.tx('Módulo', 'Module'), self.t('functions'), self.tx('Complejidad Prom.', 'Avg. complexity'), self.t('documented'), 'Async'],
             module_rows
         )
 
         # Detalle por módulo con tabla de funciones
-        out += "\n### 5.2 Detalle por Módulo\n\n"
+        out += self.tx("\n### 5.2 Detalle por Módulo\n\n", "\n### 5.2 Module Details\n\n")
+        module_word = self.tx('Módulo', 'Module')
         for fname, funcs in by_file.items():
-            out += f"#### Módulo: `{fname}`\n\n"
+            out += f"#### {module_word}: `{fname}`\n\n"
 
             # Tabla de funciones del módulo (incluye líneas de código de cada función)
             fn_rows = []
@@ -1065,7 +1346,7 @@ python app.py  # o npm run dev
                     doc_tag
                 ])
             out += self._render_markdown_table(
-                ['Función', 'Parámetros', 'Líneas de código', 'Complejidad', 'Doc'],
+                [self.t('function_col'), self.t('params_col'), self.tx('Líneas de código', 'Lines of code'), self.t('complexity'), self.tx('Doc', 'Docs')],
                 fn_rows
             )
 
@@ -1095,18 +1376,27 @@ python app.py  # o npm run dev
             kw in c["name"].lower() for kw in ["model", "schema", "entity", "dto", "dao"]
         )]
 
-        out = "## 6. Modelos de Datos\n\n"
+        out = self.tx("## 6. Modelos de Datos\n\n", "## 6. Data Models\n\n")
         if model_classes:
-            out += f"Se detectaron **{len(model_classes)} modelos de datos**:\n\n"
+            out += self.tx(
+                f"Se detectaron **{len(model_classes)} modelos de datos**:\n\n",
+                f"**{len(model_classes)} data models** were detected:\n\n",
+            )
             for m in model_classes:
                 out += f"### `{m['name']}`\n"
-                out += f"- Archivo: `{m['file']}`\n"
-                out += f"- Hereda de: {', '.join(m.get('bases', [])) or 'object'}\n"
-                out += f"- Métodos: {', '.join(m.get('methods', [])[:10])}\n\n"
+                out += f"- {self.tx('Archivo', 'File')}: `{m['file']}`\n"
+                out += f"- {self.tx('Hereda de', 'Inherits from')}: {', '.join(m.get('bases', [])) or 'object'}\n"
+                out += f"- {self.t('method')}: {', '.join(m.get('methods', [])[:10])}\n\n"
         else:
-            out += "No se detectaron clases con nombres de modelo explícitos.\n\n"
-            out += "### Esquema General Inferido\n\n"
-            out += "Basado en el análisis del código, las entidades principales son:\n\n"
+            out += self.tx(
+                "No se detectaron clases con nombres de modelo explícitos.\n\n",
+                "No classes with explicit model names were detected.\n\n",
+            )
+            out += self.tx("### Esquema General Inferido\n\n", "### Inferred General Schema\n\n")
+            out += self.tx(
+                "Basado en el análisis del código, las entidades principales son:\n\n",
+                "Based on the code analysis, the main entities are:\n\n",
+            )
             # Inferir entidades de los nombres de funciones/clases
             fns = self.r.get("functions", [])
             entities = set()
@@ -1121,7 +1411,10 @@ python app.py  # o npm run dev
                 for e in list(entities)[:10]:
                     out += f"- **{e}**\n"
             else:
-                out += "- No se pudieron inferir entidades del código fuente.\n"
+                out += self.tx(
+                    "- No se pudieron inferir entidades del código fuente.\n",
+                    "- No entities could be inferred from the source code.\n",
+                )
 
         return out + "\n"
 
@@ -1161,7 +1454,7 @@ python app.py  # o npm run dev
         # Generar diagrama PlantUML estrella
         puml = "@startuml\n"
         puml += "skinparam backgroundColor #FEFEFE\n"
-        puml += "title Diagrama Estrella de Data Warehouse\n\n"
+        puml += f"title {self.tx('Diagrama Estrella de Data Warehouse', 'Data Warehouse Star Schema')}\n\n"
 
         # Tabla de hechos
         if fact_table:
@@ -1194,7 +1487,7 @@ python app.py  # o npm run dev
         if diagram_path:
             return (
                 f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{diagram_path}\" alt=\"Diagrama Estrella de Data Warehouse\" "
+                f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama Estrella de Data Warehouse', 'Data Warehouse Star Schema')}\" "
                 f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
                 f"</div>\n"
             )
@@ -1216,7 +1509,7 @@ python app.py  # o npm run dev
         # Generar diagrama PlantUML copo de nieve
         puml = "@startuml\n"
         puml += "skinparam backgroundColor #FEFEFE\n"
-        puml += "title Diagrama Copo de Nieve de Data Warehouse\n\n"
+        puml += f"title {self.tx('Diagrama Copo de Nieve de Data Warehouse', 'Data Warehouse Snowflake Schema')}\n\n"
 
         # Tabla central (hechos)
         central = model_classes[0]
@@ -1255,7 +1548,7 @@ python app.py  # o npm run dev
         if diagram_path:
             return (
                 f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{diagram_path}\" alt=\"Diagrama Copo de Nieve de Data Warehouse\" "
+                f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama Copo de Nieve de Data Warehouse', 'Data Warehouse Snowflake Schema')}\" "
                 f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
                 f"</div>\n"
             )
@@ -1272,54 +1565,74 @@ python app.py  # o npm run dev
         - Reporte de limpieza de datos
         - Diagrama del pipeline ETL
         """
-        out = "## 9. Análisis de Datos del Proyecto\n\n"
+        out = self.tx("## 9. Análisis de Datos del Proyecto\n\n", "## 9. Project Data Analysis\n\n")
 
         # 9.1 Tipos y fuentes de datos detectados
         data_types = self.r.get("data_types", {"structured": [], "semi_structured": [], "unstructured": []})
         structured = data_types.get("structured", [])
         semi_structured = data_types.get("semi_structured", [])
         unstructured = data_types.get("unstructured", [])
+        files_word = self.tx("archivos", "files")
+        more_word = self.tx("más", "more")
 
-        out += "### 9.1 Tipos y Fuentes de Datos Detectados\n\n"
-        out += f"**Datos Estructurados:** {len(structured)} archivos\n"
+        out += self.tx("### 9.1 Tipos y Fuentes de Datos Detectados\n\n", "### 9.1 Detected Data Types and Sources\n\n")
+        out += self.tx(
+            f"**Datos Estructurados:** {len(structured)} archivos\n",
+            f"**Structured data:** {len(structured)} files\n",
+        )
         if structured:
             for file in structured[:10]:
                 out += f"- `{file}`\n"
             if len(structured) > 10:
-                out += f"- ... y {len(structured) - 10} más\n"
+                out += f"- ... {len(structured) - 10} {more_word}\n"
 
-        out += f"\n**Datos Semi-estructurados:** {len(semi_structured)} archivos\n"
+        out += self.tx(
+            f"\n**Datos Semi-estructurados:** {len(semi_structured)} archivos\n",
+            f"\n**Semi-structured data:** {len(semi_structured)} files\n",
+        )
         if semi_structured:
             for file in semi_structured[:10]:
                 out += f"- `{file}`\n"
             if len(semi_structured) > 10:
-                out += f"- ... y {len(semi_structured) - 10} más\n"
+                out += f"- ... {len(semi_structured) - 10} {more_word}\n"
 
-        out += f"\n**Datos No Estructurados:** {len(unstructured)} archivos\n"
+        out += self.tx(
+            f"\n**Datos No Estructurados:** {len(unstructured)} archivos\n",
+            f"\n**Unstructured data:** {len(unstructured)} files\n",
+        )
         if unstructured:
             for file in unstructured[:10]:
                 out += f"- `{file}`\n"
             if len(unstructured) > 10:
-                out += f"- ... y {len(unstructured) - 10} más\n"
+                out += f"- ... {len(unstructured) - 10} {more_word}\n"
 
         # 9.2 Esquema de Data Warehouse inferido
-        out += "\n### 9.2 Esquema de Data Warehouse Inferido\n\n"
+        out += self.tx("\n### 9.2 Esquema de Data Warehouse Inferido\n\n", "\n### 9.2 Inferred Data Warehouse Schema\n\n")
         star_schema = self._generate_star_schema()
         snowflake_schema = self._generate_snowflake_schema()
 
         if star_schema:
-            out += "**Diagrama Estrella (Star Schema):**\n\n"
+            out += self.tx("**Diagrama Estrella (Star Schema):**\n\n", "**Star Schema Diagram:**\n\n")
             out += star_schema
-            out += "\nEl esquema estrella es adecuado para consultas analíticas rápidas, con una tabla de hechos central conectada a tablas de dimensión.\n\n"
+            out += self.tx(
+                "\nEl esquema estrella es adecuado para consultas analíticas rápidas, con una tabla de hechos central conectada a tablas de dimensión.\n\n",
+                "\nThe star schema is suitable for fast analytical queries, with a central fact table connected to dimension tables.\n\n",
+            )
         elif snowflake_schema:
-            out += "**Diagrama Copo de Nieve (Snowflake Schema):**\n\n"
+            out += self.tx("**Diagrama Copo de Nieve (Snowflake Schema):**\n\n", "**Snowflake Schema Diagram:**\n\n")
             out += snowflake_schema
-            out += "\nEl esquema copo de nieve normaliza las dimensiones para reducir redundancia, a costa de consultas más complejas.\n\n"
+            out += self.tx(
+                "\nEl esquema copo de nieve normaliza las dimensiones para reducir redundancia, a costa de consultas más complejas.\n\n",
+                "\nThe snowflake schema normalizes dimensions to reduce redundancy, at the cost of more complex queries.\n\n",
+            )
         else:
-            out += "No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.\n\n"
+            out += self.tx(
+                "No se detectaron suficientes modelos de datos para generar un esquema de Data Warehouse.\n\n",
+                "Not enough data models were detected to generate a data warehouse schema.\n\n",
+            )
 
-        # 9.3 Reporte de limpieza de datos
-        out += "### 9.3 Reporte de Calidad de Datos\n\n"
+        # 9.3 Reporte de calidad de datos
+        out += self.tx("### 9.3 Reporte de Calidad de Datos\n\n", "### 9.3 Data Quality Report\n\n")
 
         # Aplicar limpieza de datos al análisis
         from services.data_cleaner import DataCleaner
@@ -1328,36 +1641,57 @@ python app.py  # o npm run dev
         # Detectar problemas en el código
         code_issues = cleaner.clean_code_issues(self.r)
 
-        out += "**Problemas Detectados en el Código:**\n\n"
+        out += self.tx("**Problemas Detectados en el Código:**\n\n", "**Issues Detected in the Code:**\n\n")
+        in_word = self.tx("en", "in")
+        more_word = self.tx("más", "more")
 
         if code_issues.get("missing_docstrings"):
-            out += f"- **Funciones sin documentar:** {len(code_issues['missing_docstrings'])}\n"
+            out += self.tx(
+                f"- **Funciones sin documentar:** {len(code_issues['missing_docstrings'])}\n",
+                f"- **Undocumented functions:** {len(code_issues['missing_docstrings'])}\n",
+            )
             for issue in code_issues["missing_docstrings"][:5]:
-                out += f"  - `{issue['name']}` en `{issue['file']}`\n"
+                out += f"  - `{issue['name']}` {in_word} `{issue['file']}`\n"
             if len(code_issues["missing_docstrings"]) > 5:
-                out += f"  - ... y {len(code_issues['missing_docstrings']) - 5} más\n"
+                out += f"  - ... {len(code_issues['missing_docstrings']) - 5} {more_word}\n"
 
         if code_issues.get("high_complexity"):
-            out += f"\n- **Funciones de alta complejidad:** {len(code_issues['high_complexity'])}\n"
+            out += self.tx(
+                f"\n- **Funciones de alta complejidad:** {len(code_issues['high_complexity'])}\n",
+                f"\n- **High-complexity functions:** {len(code_issues['high_complexity'])}\n",
+            )
             for issue in code_issues["high_complexity"][:5]:
-                out += f"  - `{issue['name']}` en `{issue['file']}` (complejidad: {issue['complexity']})\n"
+                complexity_label = self.tx("complejidad", "complexity")
+                out += f"  - `{issue['name']}` {in_word} `{issue['file']}` ({complexity_label}: {issue['complexity']})\n"
             if len(code_issues["high_complexity"]) > 5:
-                out += f"  - ... y {len(code_issues['high_complexity']) - 5} más\n"
+                out += f"  - ... {len(code_issues['high_complexity']) - 5} {more_word}\n"
 
         if code_issues.get("naming_conventions"):
-            out += f"\n- **Problemas de naming conventions:** {len(code_issues['naming_conventions'])}\n"
+            out += self.tx(
+                f"\n- **Problemas de naming conventions:** {len(code_issues['naming_conventions'])}\n",
+                f"\n- **Naming convention issues:** {len(code_issues['naming_conventions'])}\n",
+            )
             for issue in code_issues["naming_conventions"][:5]:
                 out += f"  - `{issue['name']}`: {issue['message']}\n"
 
         # 9.4 Minería de datos aplicada al código
-        out += "\n### 9.4 Minería de Datos Aplicada al Código\n\n"
-        out += "_Análisis automático realizado sobre las funciones y clases extraídas del proyecto._\n\n"
+        out += self.tx(
+            "\n### 9.4 Minería de Datos Aplicada al Código\n\n",
+            "\n### 9.4 Data Mining Applied to the Code\n\n",
+        )
+        out += self.tx(
+            "_Análisis automático realizado sobre las funciones y clases extraídas del proyecto._\n\n",
+            "_Automatic analysis performed on the functions and classes extracted from the project._\n\n",
+        )
 
         fns_mining  = self.r.get("functions", [])
         cls_mining  = self.r.get("classes", [])
 
         # ── A) Funciones de alta complejidad ──────────────────────────────────
-        out += "#### A) Funciones de Alta Complejidad Ciclomática\n\n"
+        out += self.tx(
+            "#### A) Funciones de Alta Complejidad Ciclomática\n\n",
+            "#### A) Functions with High Cyclomatic Complexity\n\n",
+        )
         high_cx = sorted(
             [f for f in fns_mining if f.get("complexity", 1) > 5],
             key=lambda f: f.get("complexity", 1),
@@ -1366,53 +1700,84 @@ python app.py  # o npm run dev
         medium_cx = [f for f in fns_mining if 3 < f.get("complexity", 1) <= 5]
         low_cx    = [f for f in fns_mining if f.get("complexity", 1) <= 3]
 
-        out += f"| Nivel | Umbral | Cantidad | Descripción |\n"
-        out += f"|---|---|---|---|\n"
-        out += f"| 🔴 Alta | > 5 | {len(high_cx)} | Requieren refactorización urgente |\n"
-        out += f"| 🟡 Media | 4–5 | {len(medium_cx)} | Candidatas a simplificación |\n"
-        out += f"| 🟢 Baja | ≤ 3 | {len(low_cx)} | Complejidad aceptable |\n\n"
+        out += f"| {self.tx('Nivel', 'Level')} | {self.tx('Umbral', 'Threshold')} | {self.tx('Cantidad', 'Count')} | {self.t('description')} |\n"
+        out += "|---|---|---|---|\n"
+        out += f"| 🔴 {self.tx('Alta', 'High')} | > 5 | {len(high_cx)} | {self.tx('Requieren refactorización urgente', 'Require urgent refactoring')} |\n"
+        out += f"| 🟡 {self.tx('Media', 'Medium')} | 4–5 | {len(medium_cx)} | {self.tx('Candidatas a simplificación', 'Candidates for simplification')} |\n"
+        out += f"| 🟢 {self.tx('Baja', 'Low')} | ≤ 3 | {len(low_cx)} | {self.tx('Complejidad aceptable', 'Acceptable complexity')} |\n\n"
 
         if high_cx:
-            out += "**Funciones de alta complejidad — detalle y recomendaciones:**\n\n"
+            out += self.tx(
+                "**Funciones de alta complejidad — detalle y recomendaciones:**\n\n",
+                "**High-complexity functions — details and recommendations:**\n\n",
+            )
             for fn in high_cx[:15]:
                 cx    = fn.get("complexity", 1)
                 name  = fn.get("name", "?")
                 file  = fn.get("file", "?")
                 line  = fn.get("line", "?")
                 async_tag = " `[async]`" if fn.get("is_async") else ""
-                doc_tag   = " `[sin docstring]`" if not fn.get("docstring") else ""
+                doc_tag   = f" `[{self.tx('sin docstring', 'no docstring')}]`" if not fn.get("docstring") else ""
                 out += f"- **`{name}`**{async_tag}{doc_tag}\n"
-                out += f"  - 📁 Archivo: `{file}` — línea {line}\n"
-                out += f"  - 📊 Complejidad ciclomática: **{cx}**\n"
+                out += f"  - 📁 {self.t('file')}: `{file}` — {self.tx('línea', 'line')} {line}\n"
+                out += f"  - 📊 {self.tx('Complejidad ciclomática', 'Cyclomatic complexity')}: **{cx}**\n"
+                suggestion = self.tx("Sugerencia", "Suggestion")
                 if cx > 15:
-                    out += f"  - 💡 Sugerencia: Complejidad crítica ({cx}). Divide esta función en al menos {cx // 5} funciones más pequeñas con responsabilidad única. Cada rama lógica (if/for/while) debería ser su propio método.\n"
+                    out += self.tx(
+                        f"  - 💡 {suggestion}: Complejidad crítica ({cx}). Divide esta función en al menos {cx // 5} funciones más pequeñas con responsabilidad única. Cada rama lógica (if/for/while) debería ser su propio método.\n",
+                        f"  - 💡 {suggestion}: Critical complexity ({cx}). Split this function into at least {cx // 5} smaller functions with a single responsibility. Each logical branch (if/for/while) should be its own method.\n",
+                    )
                 elif cx > 10:
-                    out += f"  - 💡 Sugerencia: Complejidad alta ({cx}). Extrae las ramas condicionales a funciones auxiliares privadas y considera el patrón de «guardas tempranas» (early return) para reducir el anidamiento.\n"
+                    out += self.tx(
+                        f"  - 💡 {suggestion}: Complejidad alta ({cx}). Extrae las ramas condicionales a funciones auxiliares privadas y considera el patrón de «guardas tempranas» (early return) para reducir el anidamiento.\n",
+                        f"  - 💡 {suggestion}: High complexity ({cx}). Extract conditional branches into private helper functions and consider the early-return guard pattern to reduce nesting.\n",
+                    )
                 else:
-                    out += f"  - 💡 Sugerencia: Complejidad moderada-alta ({cx}). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.\n"
+                    out += self.tx(
+                        f"  - 💡 {suggestion}: Complejidad moderada-alta ({cx}). Revisa si alguno de los bloques if/for puede extraerse a una función con nombre descriptivo.\n",
+                        f"  - 💡 {suggestion}: Moderate-to-high complexity ({cx}). Check whether any if/for block can be extracted into a descriptively named function.\n",
+                    )
                 out += "\n"
         else:
-            out += "> ✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.\n\n"
+            out += self.tx(
+                "> ✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.\n\n",
+                "> ✅ No functions with high cyclomatic complexity were detected. The code maintains a good level of simplicity.\n\n",
+            )
 
         # ── B) Funciones sin documentar ────────────────────────────────────────
-        out += "#### B) Funciones Sin Documentación\n\n"
+        out += self.tx("#### B) Funciones Sin Documentación\n\n", "#### B) Undocumented Functions\n\n")
         undoc = [f for f in fns_mining if not f.get("docstring")]
         doc   = [f for f in fns_mining if f.get("docstring")]
         doc_pct = round(len(doc) / max(len(fns_mining), 1) * 100)
 
-        out += f"**{len(undoc)} de {len(fns_mining)} funciones** carecen de docstring ({100 - doc_pct}%).\n\n"
+        out += self.tx(
+            f"**{len(undoc)} de {len(fns_mining)} funciones** carecen de docstring ({100 - doc_pct}%).\n\n",
+            f"**{len(undoc)} of {len(fns_mining)} functions** lack a docstring ({100 - doc_pct}%).\n\n",
+        )
         if undoc:
-            out += "| Función | Archivo | Línea | Complejidad |\n"
+            out += f"| {self.t('function_col')} | {self.t('file')} | {self.tx('Línea', 'Line')} | {self.t('complexity')} |\n"
             out += "|---|---|---|---|\n"
             for fn in undoc[:20]:
                 out += f"| `{fn.get('name','?')}` | `{fn.get('file','?')}` | {fn.get('line','?')} | {fn.get('complexity',1)} |\n"
             if len(undoc) > 20:
-                out += f"\n_... y {len(undoc) - 20} funciones más sin documentar._\n"
-            out += "\n💡 **Sugerencia:** Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.\n\n"
+                out += self.tx(
+                    f"\n_... y {len(undoc) - 20} funciones más sin documentar._\n",
+                    f"\n_... and {len(undoc) - 20} more undocumented functions._\n",
+                )
+            out += self.tx(
+                "\n💡 **Sugerencia:** Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.\n\n",
+                "\n💡 **Suggestion:** Add docstrings to all public functions. Prioritize the most complex ones first, as they are the hardest to understand without documentation.\n\n",
+            )
 
         # ── C) Detección de funciones similares (posibles duplicados) ──────────
-        out += "#### C) Detección de Funciones con Nombres Similares (Posibles Duplicados)\n\n"
-        out += "_Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse._\n\n"
+        out += self.tx(
+            "#### C) Detección de Funciones con Nombres Similares (Posibles Duplicados)\n\n",
+            "#### C) Detection of Similarly Named Functions (Possible Duplicates)\n\n",
+        )
+        out += self.tx(
+            "_Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse._\n\n",
+            "_Function names are compared across files to detect duplicated or unifiable logic._\n\n",
+        )
 
         # Agrupar funciones por nombre base (quitar prefijos comunes)
         from collections import defaultdict
@@ -1451,10 +1816,15 @@ python app.py  # o npm run dev
         duplicates_found.sort(key=lambda x: len(x[2]), reverse=True)
 
         if duplicates_found:
-            out += f"Se detectaron **{len(duplicates_found)} grupos de funciones con nombres similares** repartidas en distintos archivos:\n\n"
+            out += self.tx(
+                f"Se detectaron **{len(duplicates_found)} grupos de funciones con nombres similares** repartidas en distintos archivos:\n\n",
+                f"**{len(duplicates_found)} groups of similarly named functions** were detected across different files:\n\n",
+            )
             for suffix, group, files_in_group in duplicates_found[:20]:
-                out += f"**Patrón: `*_{suffix}` / `{suffix}_*`** — aparece en {len(files_in_group)} archivos distintos\n\n"
-                out += "| Función | Archivo | Línea | Complejidad |\n"
+                appears_in = self.tx("aparece en", "appears in")
+                distinct_files = self.tx("archivos distintos", "different files")
+                out += f"**{self.tx('Patrón', 'Pattern')}: `*_{suffix}` / `{suffix}_*`** — {appears_in} {len(files_in_group)} {distinct_files}\n\n"
+                out += f"| {self.t('function_col')} | {self.t('file')} | {self.tx('Línea', 'Line')} | {self.t('complexity')} |\n"
                 out += "|---|---|---|---|\n"
                 for fn in group:
                     out += f"| `{fn.get('name','?')}` | `{fn.get('file','?')}` | {fn.get('line','?')} | {fn.get('complexity',1)} |\n"
@@ -1462,34 +1832,56 @@ python app.py  # o npm run dev
                 # Generar sugerencia específica con los nombres reales
                 fn_names = [f"`{fn.get('name','?')}`" for fn in group]
                 fn_files = list({fn.get('file','?') for fn in group})
+                suggestion = self.tx("Sugerencia", "Suggestion")
                 if len(fn_names) == 2:
-                    out += f"\n💡 **Sugerencia:** Las funciones {fn_names[0]} y {fn_names[1]} realizan operaciones similares (`{suffix}`) en módulos distintos. "
-                    out += f"Considera crear una función compartida en un módulo utilitario (por ejemplo `utils/{suffix}.py` o `helpers/common.py`) "
-                    out += f"que reciba el contexto como parámetro, y llamarla desde ambos archivos ({', '.join([f'`{f}`' for f in fn_files])}).\n\n"
+                    out += self.tx(
+                        f"\n💡 **{suggestion}:** Las funciones {fn_names[0]} y {fn_names[1]} realizan operaciones similares (`{suffix}`) en módulos distintos. ",
+                        f"\n💡 **{suggestion}:** Functions {fn_names[0]} and {fn_names[1]} perform similar operations (`{suffix}`) in different modules. ",
+                    )
+                    out += self.tx(
+                        f"Considera crear una función compartida en un módulo utilitario (por ejemplo `utils/{suffix}.py` o `helpers/common.py`) ",
+                        f"Consider creating a shared function in a utility module (for example `utils/{suffix}.py` or `helpers/common.py`) ",
+                    )
+                    out += self.tx(
+                        f"que reciba el contexto como parámetro, y llamarla desde ambos archivos ({', '.join([f'`{f}`' for f in fn_files])}).\n\n",
+                        f"that receives the context as a parameter and call it from both files ({', '.join([f'`{f}`' for f in fn_files])}).\n\n",
+                    )
                 else:
-                    out += f"\n💡 **Sugerencia:** Las {len(fn_names)} funciones {', '.join(fn_names[:4])}{'...' if len(fn_names) > 4 else ''} comparten el patrón `{suffix}` en distintos módulos. "
-                    out += f"Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.\n\n"
+                    out += self.tx(
+                        f"\n💡 **{suggestion}:** Las {len(fn_names)} funciones {', '.join(fn_names[:4])}{'...' if len(fn_names) > 4 else ''} comparten el patrón `{suffix}` en distintos módulos. ",
+                        f"\n💡 **{suggestion}:** The {len(fn_names)} functions {', '.join(fn_names[:4])}{'...' if len(fn_names) > 4 else ''} share the `{suffix}` pattern across different modules. ",
+                    )
+                    out += self.tx(
+                        "Esto sugiere lógica duplicada. Extrae la lógica común a un servicio o función base y haz que cada módulo la llame con sus parámetros propios.\n\n",
+                        "This suggests duplicated logic. Extract the common logic into a shared service or base function and have each module call it with its own parameters.\n\n",
+                    )
                 out += "---\n\n"
         else:
-            out += "> ✅ No se detectaron funciones con nombres similares en archivos distintos.\n\n"
+            out += self.tx(
+                "> ✅ No se detectaron funciones con nombres similares en archivos distintos.\n\n",
+                "> ✅ No similarly named functions were detected across different files.\n\n",
+            )
 
         # ── D) Clustering por archivo (módulos sobrecargados) ──────────────────
-        out += "#### D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones\n\n"
+        out += self.tx(
+            "#### D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones\n\n",
+            "#### D) Module Analysis — Files with the Highest Concentration of Functions\n\n",
+        )
         file_fn_count = defaultdict(list)
         for fn in fns_mining:
             file_fn_count[fn.get("file", "?")].append(fn)
 
         sorted_files = sorted(file_fn_count.items(), key=lambda x: len(x[1]), reverse=True)
-        out += "| Archivo | Funciones | Complejidad Promedio | Documentadas | Estado |\n"
+        out += f"| {self.t('file')} | {self.t('functions')} | {self.tx('Complejidad Promedio', 'Average Complexity')} | {self.t('documented')} | {self.t('status')} |\n"
         out += "|---|---|---|---|---|\n"
         for fname, funcs in sorted_files[:15]:
             avg_cx   = round(sum(f.get("complexity", 1) for f in funcs) / max(len(funcs), 1), 1)
             doc_cnt  = sum(1 for f in funcs if f.get("docstring"))
             doc_pct_f = round(doc_cnt / max(len(funcs), 1) * 100)
             if len(funcs) > 20 or avg_cx > 8:
-                status = "🔴 Sobrecargado"
+                status = f"🔴 {self.tx('Sobrecargado', 'Overloaded')}"
             elif len(funcs) > 10 or avg_cx > 5:
-                status = "🟡 Revisar"
+                status = f"🟡 {self.tx('Revisar', 'Review')}"
             else:
                 status = "🟢 OK"
             out += f"| `{fname}` | {len(funcs)} | {avg_cx} | {doc_pct_f}% | {status} |\n"
@@ -1497,8 +1889,14 @@ python app.py  # o npm run dev
         out += "\n"
         for fname, funcs in sorted_files[:5]:
             if len(funcs) > 10:
-                out += f"💡 **`{fname}`** tiene {len(funcs)} funciones. "
-                out += f"Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).\n"
+                out += self.tx(
+                    f"💡 **`{fname}`** tiene {len(funcs)} funciones. ",
+                    f"💡 **`{fname}`** has {len(funcs)} functions. ",
+                )
+                out += self.tx(
+                    "Considera dividirlo en submódulos más específicos siguiendo el principio de responsabilidad única (SRP).\n",
+                    "Consider splitting it into more specific submodules following the single responsibility principle (SRP).\n",
+                )
         out += "\n"
 
         # ── E) Patrones de código detectados (mining_results externo si existe) ─
@@ -1506,21 +1904,28 @@ python app.py  # o npm run dev
         if mining_results:
             frequent_patterns = mining_results.get("frequent_patterns", [])
             if frequent_patterns:
-                out += "#### E) Patrones Frecuentes Adicionales (Análisis IA)\n\n"
+                out += self.tx(
+                    "#### E) Patrones Frecuentes Adicionales (Análisis IA)\n\n",
+                    "#### E) Additional Frequent Patterns (AI Analysis)\n\n",
+                )
                 for pattern in frequent_patterns:
-                    out += f"- **{pattern.get('pattern', 'N/A')}**: {pattern.get('frequency', 0)} ocurrencias"
+                    occurrences = self.tx("ocurrencias", "occurrences")
+                    out += f"- **{pattern.get('pattern', 'N/A')}**: {pattern.get('frequency', 0)} {occurrences}"
                     if pattern.get('file'):
                         out += f" — 📁 `{pattern['file']}`"
                         if pattern.get('line'):
-                            out += f" línea {pattern['line']}"
+                            out += f" {self.tx('línea', 'line')} {pattern['line']}"
                     out += "\n"
                     if pattern.get('examples'):
-                        out += f"  - Ejemplos: {pattern['examples']}\n"
+                        out += f"  - {self.tx('Ejemplos', 'Examples')}: {pattern['examples']}\n"
                 out += "\n"
 
         # 9.5 Diagrama del Pipeline ETL
-        out += "### 9.5 Pipeline ETL Utilizado\n\n"
-        out += "El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):\n\n"
+        out += self.tx("### 9.5 Pipeline ETL Utilizado\n\n", "### 9.5 ETL Pipeline Used\n\n")
+        out += self.tx(
+            "El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):\n\n",
+            "The documentation generation process follows an ETL pipeline (Extract, Transform, Load):\n\n",
+        )
 
         pipeline_cls = ETLPipeline
         if pipeline_cls is None:
@@ -1533,15 +1938,24 @@ python app.py  # o npm run dev
         if etl_image:
             out += (
                 f"\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{etl_image}\" alt=\"Diagrama del Pipeline ETL\" "
+                f"<img src=\"{etl_image}\" alt=\"{self.tx('Diagrama del Pipeline ETL', 'ETL Pipeline Diagram')}\" "
                 f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
                 f"</div>\n"
             )
 
-        out += "\n**Fases del Pipeline:**\n\n"
-        out += "- **Extract:** Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales\n"
-        out += "- **Transform:** Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones\n"
-        out += "- **Load:** Generación de documentación en HTML, PDF o almacenamiento en MongoDB\n\n"
+        out += self.tx("\n**Fases del Pipeline:**\n\n", "\n**Pipeline Stages:**\n\n")
+        out += self.tx(
+            "- **Extract:** Extracción de código desde repositorios GitHub, archivos ZIP o directorios locales\n",
+            "- **Extract:** Code extraction from GitHub repositories, ZIP files or local directories\n",
+        )
+        out += self.tx(
+            "- **Transform:** Análisis del código, limpieza de datos, enriquecimiento con IA y minería de patrones\n",
+            "- **Transform:** Code analysis, data cleaning, AI enrichment and pattern mining\n",
+        )
+        out += self.tx(
+            "- **Load:** Generación de documentación en HTML, PDF o almacenamiento en MongoDB\n\n",
+            "- **Load:** Documentation generation in HTML/PDF or storage in MongoDB\n\n",
+        )
 
         return out
 
@@ -1557,7 +1971,7 @@ python app.py  # o npm run dev
             "Go":         "go mod download",
             "Ruby":       "bundle install",
             "PHP":        "composer install",
-        }.get(lang, "# instalar dependencias")
+        }.get(lang, "# install dependencies" if self.lang == 'en' else "# instalar dependencias")
 
         run_cmd = {
             "Python":     "python app.py",
@@ -1565,16 +1979,100 @@ python app.py  # o npm run dev
             "TypeScript": "npm run build && npm start",
             "Java":       "mvn spring-boot:run",
             "Go":         "go run main.go",
-        }.get(lang, "# ejecutar proyecto")
+        }.get(lang, "# run project" if self.lang == 'en' else "# ejecutar proyecto")
 
-        return f"""## 7. Guía de Despliegue y Mantenimiento
+        if self.lang == 'en':
+            return f"""## 5. Deployment and Maintenance Guide
 
-### 7.1 Requisitos del Sistema
+### 5.1 System Requirements
+
+- **Primary language**: {lang}
+- **Detected files**: {self.r.get('total_files', 0)}
+
+### 5.2 Local Installation
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd <project-name>
+
+# 2. Install dependencies
+{install_cmd}
+
+# 3. Configure environment variables
+cp .env.example .env
+# Edit .env with your values
+
+# 4. Run the project
+{run_cmd}
+```
+
+### 5.3 Docker Deployment
+
+```dockerfile
+FROM {self._get_docker_base(lang)}
+
+WORKDIR /app
+COPY . .
+RUN {install_cmd}
+EXPOSE 8000
+CMD ["{self._get_docker_cmd(lang)}"]
+```
+
+```bash
+# Build image
+docker build -t my-project .
+
+# Run container
+docker run -p 8000:8000 my-project
+```
+
+### 5.4 Recommended Environment Variables
+
+```env
+# General
+APP_ENV=production
+SECRET_KEY=secure-secret-key
+DEBUG=False
+
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=my_database
+DB_USER=user
+DB_PASSWORD=password
+
+# API
+API_VERSION=v1
+ALLOWED_HOSTS=*
+```
+
+### 5.5 Deployment Checklist
+
+- [ ] Environment variables configured
+- [ ] Database migrated
+- [ ] Tests executed and passing
+- [ ] Logs configured
+- [ ] HTTPS enabled in production
+- [ ] Backups scheduled
+- [ ] Monitoring configured
+
+### 5.6 Changelog
+
+**Version 1.0.0** — {datetime.utcnow().strftime('%Y-%m-%d')}
+- Initial version analyzed by AutoDocs AI
+- Technical documentation generated automatically
+- Code quality analysis completed
+
+"""
+        return f"""## 5. Guía de Despliegue y Mantenimiento
+
+### 5.1 Requisitos del Sistema
 
 - **Lenguaje principal**: {lang}
 - **Archivos detectados**: {self.r.get('total_files', 0)}
 
-### 7.2 Instalación Local
+### 5.2 Instalación Local
 
 ```bash
 # 1. Clonar el repositorio
@@ -1592,7 +2090,7 @@ cp .env.example .env
 {run_cmd}
 ```
 
-### 7.3 Despliegue con Docker
+### 5.3 Despliegue con Docker
 
 ```dockerfile
 FROM {self._get_docker_base(lang)}
@@ -1612,7 +2110,7 @@ docker build -t mi-proyecto .
 docker run -p 8000:8000 mi-proyecto
 ```
 
-### 7.4 Variables de Entorno Recomendadas
+### 5.4 Variables de Entorno Recomendadas
 
 ```env
 # General
@@ -1632,7 +2130,7 @@ API_VERSION=v1
 ALLOWED_HOSTS=*
 ```
 
-### 7.5 Checklist de Despliegue
+### 5.5 Checklist de Despliegue
 
 - [ ] Variables de entorno configuradas
 - [ ] Base de datos migrada
@@ -1642,7 +2140,7 @@ ALLOWED_HOSTS=*
 - [ ] Backups programados
 - [ ] Monitoreo configurado
 
-### 7.6 Registro de Cambios (Changelog)
+### 5.6 Registro de Cambios (Changelog)
 
 **Versión 1.0.0** — {datetime.utcnow().strftime('%Y-%m-%d')}
 - Versión inicial analizada por AutoDocs AI
@@ -1676,61 +2174,79 @@ ALLOWED_HOSTS=*
 
         # Etiqueta de calidad con color (sin emojis)
         if score >= 80:
-            quality_text, quality_color = "Excelente", "#16a34a"
+            quality_text, quality_color = (self.t('excellent'), "#16a34a")
         elif score >= 60:
-            quality_text, quality_color = "Bueno", "#d97706"
+            quality_text, quality_color = (('Good' if self.lang == 'en' else 'Bueno'), "#d97706")
         else:
-            quality_text, quality_color = "Necesita mejoras", "#dc2626"
+            quality_text, quality_color = (('Needs improvement' if self.lang == 'en' else 'Necesita mejoras'), "#dc2626")
 
         recommendations = []
         if doc_pct < 50:
-            recommendations.append(f"- Agregar docstrings a las {len(fns) - documented_fns} funciones sin documentar")
+            recommendations.append(
+                f"- Add docstrings to the {len(fns) - documented_fns} undocumented functions" if self.lang == 'en'
+                else f"- Agregar docstrings a las {len(fns) - documented_fns} funciones sin documentar"
+            )
         if high_cx_fns:
             names = ", ".join(f"`{f['name']}`" for f in high_cx_fns[:5])
-            recommendations.append(f"- Refactorizar funciones con alta complejidad: {names}")
+            recommendations.append(
+                f"- Refactor high-complexity functions: {names}" if self.lang == 'en'
+                else f"- Refactorizar funciones con alta complejidad: {names}"
+            )
         if issues:
-            recommendations.append(f"- Resolver {len(issues)} errores de análisis detectados")
+            recommendations.append(
+                f"- Resolve {len(issues)} detected analysis errors" if self.lang == 'en'
+                else f"- Resolver {len(issues)} errores de análisis detectados"
+            )
         if not recommendations:
-            recommendations.append("- El código tiene buena calidad general. ¡Mantén las buenas prácticas!")
+            recommendations.append(
+                "- The code has good overall quality. Keep up the good practices!" if self.lang == 'en'
+                else "- El código tiene buena calidad general. ¡Mantén las buenas prácticas!"
+            )
 
-        return f"""## 8. Reporte de Calidad del Código
+        trend = ("↑ Increasing" if cx.get('avg', 1) > 5 else "→ Stable" if cx.get('avg', 1) > 2 else "↓ Low") if self.lang == 'en' else ("↑ Aumentando" if cx.get('avg', 1) > 5 else "→ Estable" if cx.get('avg', 1) > 2 else "↓ Baja")
+        no_high = "No functions with complexity > 10. [OK]" if self.lang == 'en' else "No hay funciones con complejidad > 10. [OK]"
+        no_issues = "No issues detected. [OK]" if self.lang == 'en' else "Sin errores detectados. [OK]"
+        in_word = 'in' if self.lang == 'en' else 'en'
+        complexity_word = 'complexity' if self.lang == 'en' else 'complejidad'
 
-### 8.1 Análisis de Métricas
+        return f"""## 6. {('Code Quality Report' if self.lang == 'en' else 'Reporte de Calidad del Código')}
 
-**Score de Calidad:** {score}/100 — **{quality_text}**
-{self._color_bar_html(quality_color)}
+### 6.1 {('Metrics Analysis' if self.lang == 'en' else 'Análisis de Métricas')}
 
-**Distribución de Documentación:**
-- Funciones documentadas: {documented_fns}/{len(fns)} ({doc_pct}%)
-- Clases documentadas: {documented_cls}/{len(cls)}
+**{('Quality Score' if self.lang == 'en' else 'Score de Calidad')}:** {score}/100 — **{quality_text}**
+{self._color_bar_html(quality_color, alt=('Quality level' if self.lang == 'en' else 'Nivel de calidad'))}
 
-**Análisis de Complejidad:**
-- Complejidad promedio: {round(cx.get('avg', 1), 2)}
-- Complejidad máxima: {cx.get('max', 0)}
-- Funciones con alta complejidad (>10): {len(high_cx_fns)}
+**{('Documentation Coverage' if self.lang == 'en' else 'Distribución de Documentación')}:**
+- {('Documented functions' if self.lang == 'en' else 'Funciones documentadas')}: {documented_fns}/{len(fns)} ({doc_pct}%)
+- {('Documented classes' if self.lang == 'en' else 'Clases documentadas')}: {documented_cls}/{len(cls)}
 
-**Tendencia de Complejidad por Archivo:**
+**{('Complexity Analysis' if self.lang == 'en' else 'Análisis de Complejidad')}:**
+- {('Average complexity' if self.lang == 'en' else 'Complejidad promedio')}: {round(cx.get('avg', 1), 2)}
+- {('Maximum complexity' if self.lang == 'en' else 'Complejidad máxima')}: {cx.get('max', 0)}
+- {('High-complexity functions (>10)' if self.lang == 'en' else 'Funciones con alta complejidad (>10)')}: {len(high_cx_fns)}
+
+**{('Complexity Trend by File' if self.lang == 'en' else 'Tendencia de Complejidad por Archivo')}:**
 ```text
-[Gráfico de regresión lineal mostrando la tendencia de complejidad]
-Eje X: Archivos ordenados por complejidad promedio
-Eje Y: Score de complejidad
-Tendencia: {"↑ Aumentando" if cx.get('avg', 1) > 5 else "→ Estable" if cx.get('avg', 1) > 2 else "↓ Baja"}
+[{'Linear regression chart showing complexity trend' if self.lang == 'en' else 'Gráfico de regresión lineal mostrando la tendencia de complejidad'}]
+{'X-axis: Files ordered by average complexity' if self.lang == 'en' else 'Eje X: Archivos ordenados por complejidad promedio'}
+{'Y-axis: Complexity score' if self.lang == 'en' else 'Eje Y: Score de complejidad'}
+{'Trend' if self.lang == 'en' else 'Tendencia'}: {trend}
 ```
 
-### 8.2 Funciones con Alta Complejidad Ciclomática
+### 6.2 {('High Cyclomatic Complexity Functions' if self.lang == 'en' else 'Funciones con Alta Complejidad Ciclomática')}
 
-{"No hay funciones con complejidad > 10. [OK]" if not high_cx_fns else chr(10).join(
-    f"- `{f['name']}` en `{f['file']}` — complejidad: **{f.get('complexity')}**"
+{no_high if not high_cx_fns else chr(10).join(
+    f"- `{f['name']}` {in_word} `{f['file']}` — {complexity_word}: **{f.get('complexity')}**"
     for f in high_cx_fns[:10]
 )}
 
-### 8.3 Recomendaciones
+### 6.3 {('Recommendations' if self.lang == 'en' else 'Recomendaciones')}
 
 {chr(10).join(recommendations)}
 
-### 8.4 Errores de Análisis
+### 6.4 {('Analysis Issues' if self.lang == 'en' else 'Errores de Análisis')}
 
-{"Sin errores detectados. [OK]" if not issues else chr(10).join(
+{no_issues if not issues else chr(10).join(
     f"- `{i.get('file', '?')}`: {i.get('error', '?')}"
     for i in issues[:10]
 )}
@@ -1739,6 +2255,11 @@ Tendencia: {"↑ Aumentando" if cx.get('avg', 1) > 5 else "→ Estable" if cx.ge
     # ─── MARKDOWN COMPLETO ────────────────────────────────────────────────────
     def _full_markdown(self) -> str:
         separator = "\n\n---\n\n"
+        end_text = (
+            f"\n\n---\n*AutoDocs AI · End of technical document · Analysis status: {self.now}*\n"
+            if self.lang == 'en' else
+            f"\n\n---\n*AutoDocs AI · Fin del documento técnico · Estado del análisis: {self.now}*\n"
+        )
         return (
             self._readme()         + separator +
             self._architecture()   + separator +
@@ -1749,5 +2270,5 @@ Tendencia: {"↑ Aumentando" if cx.get('avg', 1) > 5 else "→ Estable" if cx.ge
             self._deployment()     + separator +
             self._quality_report() + separator +
             self._data_analysis_section() +
-            f"\n\n---\n*AutoDocs AI · Fin del documento técnico · Estado del análisis: {self.now}*\n"
+            end_text
         )

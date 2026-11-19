@@ -7,11 +7,17 @@ import uuid
 import random
 import string
 import re
+import secrets
 import smtplib
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+try:
+    from routes.github_oauth import _start_oauth
+except Exception:
+    _start_oauth = None
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -83,6 +89,16 @@ def update_me():
         update['name'] = data.get('name')
     if data.get('password'):
         update['password'] = generate_password_hash(data.get('password'))
+    # Idioma preferido de la app/cuenta (para UI y documentación generada)
+    lang = data.get('language') or data.get('locale') or data.get('preferred_language')
+    if isinstance(lang, str) and lang.strip():
+        lang = lang.strip().lower()
+        if lang.startswith('en'):
+            lang = 'en'
+        elif lang.startswith('es'):
+            lang = 'es'
+        update['language'] = lang
+        update['preferred_language'] = lang
 
     if not update:
         return jsonify({"error": "No changes provided"}), 400
@@ -94,6 +110,65 @@ def update_me():
             k: v for k, v in updated_user["github"].items() if k != "access_token"
         }
     return jsonify({"message": "Profile updated", "user": updated_user}), 200
+
+
+# ============================================================
+# LOGIN CON CUENTA DE GITHUB YA VINCULADA (flujo móvil/web con canje de código)
+# ============================================================
+
+@auth_bp.route('/github/login-url', methods=['POST'])
+def github_login_url():
+    if _start_oauth is None:
+        return jsonify({"error": "GitHub OAuth no disponible"}), 500
+    body = request.get_json(silent=True) or {}
+    client = body.get('client') or 'mobile'
+    try:
+        _state, url = _start_oauth(user_id=None, client=client, purpose='login')
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": f"No se pudo iniciar con GitHub: {e}"}), 500
+    return jsonify({"url": url}), 200
+
+
+@auth_bp.route('/github/login', methods=['POST'])
+def github_login_exchange():
+    body = request.get_json(silent=True) or {}
+    code = body.get('code')
+    if not isinstance(code, str) or not code.strip():
+        return jsonify({"error": "Código requerido"}), 400
+
+    db = get_db()
+    record = db.github_login_codes.find_one_and_delete({"_id": code.strip()})
+    if not record:
+        return jsonify({"error": "Código inválido o expirado"}), 400
+
+    expires_at = record.get('expires_at')
+    try:
+        if expires_at and datetime.utcnow() > datetime.fromisoformat(expires_at):
+            return jsonify({"error": "Código expirado"}), 400
+    except Exception:
+        pass
+
+    user_id = record.get('user_id')
+    user = db.users.find_one({"_id": user_id}, {"password": 0}) if user_id else None
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    token = create_access_token(identity=user['_id'])
+    user_payload = {
+        "id": user['_id'],
+        "name": user.get('name'),
+        "email": user.get('email'),
+        "role": user.get('role', 'user'),
+        "plan": user.get('plan', 'free'),
+        "language": user.get('language') or user.get('preferred_language') or 'es',
+    }
+    if isinstance(user.get('github'), dict):
+        user_payload['github'] = {
+            k: v for k, v in user['github'].items() if k != 'access_token'
+        }
+    return jsonify({"token": token, "user": user_payload}), 200
 
 def generate_reset_code():
     return ''.join(random.choices(string.digits, k=6))

@@ -28,6 +28,9 @@
     <script>
         if (!sessionStorage.getItem('token')) window.location.replace('/');
     </script>
+
+    <!-- Preferencia de idioma compartida (UI + documentos generados) -->
+    <script src="/static/web_language.js"></script>
     
     <!-- Título de la página que aparece en la pestaña del navegador -->
     <title>Dashboard — AutoDocs AI</title>
@@ -1794,7 +1797,8 @@ CUERPO PRINCIPAL DE LA PÁGINA
         function authHeaders() {
             return { 
                 'Authorization': 'Bearer ' + token, 
-                'Content-Type': 'application/json' 
+                'Content-Type': 'application/json',
+                'Accept-Language': window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
             };
         }
 
@@ -2449,6 +2453,7 @@ window.addEventListener('load', () => {
             fd.append('name', name);
             fd.append('description', desc);
             fd.append('github_url', github);
+            fd.append('doc_language', window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es');
             if (selectedFile) fd.append('file', selectedFile);
 
             // Validar que hay archivo o URL
@@ -2465,7 +2470,10 @@ window.addEventListener('load', () => {
                 // Enviar petición al backend
                 const res = await fetch('/api/projects/', {
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token },
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept-Language': window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
+                    },
                     body: fd
                 });
                 const data = await res.json();
@@ -2478,9 +2486,12 @@ window.addEventListener('load', () => {
                     modal.classList.remove('hidden');
                     
                     // Iniciar análisis del proyecto
-                    await fetch('/api/analysis/' + data.id + '/start', { 
-                        method: 'POST', 
-                        headers: authHeaders() 
+                    await fetch('/api/analysis/' + data.id + '/start', {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({
+                            doc_language: window.AutoDocsLanguage ? window.AutoDocsLanguage.get() : 'es'
+                        })
                     });
                     
                     modal.classList.add('hidden');

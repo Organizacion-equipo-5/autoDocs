@@ -83,6 +83,10 @@ def create_project():
     name = request.form.get('name', 'Unnamed Project')
     description = request.form.get('description', '')
     github_url = request.form.get('github_url', '')
+    doc_language = (request.form.get('doc_language') or request.form.get('language') or request.form.get('lang') or
+                    request.args.get('doc_language') or request.args.get('language') or request.args.get('lang') or
+                    user.get('language') or user.get('preferred_language') or 'es')
+    doc_language = 'en' if str(doc_language).lower().startswith('en') else 'es'
 
     # Check for duplicate project name globally (all users)
     existing_project = db.projects.find_one({"name": name})
@@ -131,6 +135,7 @@ def create_project():
         "file_path": project_path,
         "status": "error" if error_message else "pending",
         "language": "unknown",
+        "doc_language": doc_language,
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
         "stats": {
