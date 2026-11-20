@@ -7,6 +7,7 @@ import base64
 import mimetypes
 import subprocess
 import os
+import urllib.request
 
 EXPORT_BASE = Path('./exports')
 
@@ -369,6 +370,27 @@ class DocumentExporter:
             pos = end
         out.append(html_body[pos:])
         return ''.join(out)
+
+    def _wrap_diagram_sections(self, html_body: str) -> str:
+        """Agrupa cada diagrama con su título y descripción para WeasyPrint."""
+        pattern = re.compile(
+            r'(<h3\b[^>]*>(?:.*?<span[^>]*>.*?</span>\s*)?.*?(?:Diagrama|Diagram).*?</h3>)'
+            r'(.*?)(?=<h[123]\b[^>]*>|<hr\b[^>]*>|$)',
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+
+        def wrap(match):
+            heading = match.group(1)
+            content = match.group(2)
+            if re.search(r'<img\b', content, flags=re.IGNORECASE):
+                return (
+                    '<div class="diagram-section">'
+                    f'{heading}{content}'
+                    '</div>'
+                )
+            return match.group(0)
+
+        return pattern.sub(wrap, html_body)
 
     def _to_html_legacy(self) -> str:
         md = self.to_markdown()
@@ -901,7 +923,20 @@ class DocumentExporter:
         def image_replacer(match):
             before, src, after = match.group(1), match.group(2), match.group(3)
             resolved_src = src
-            if not src.startswith(('http://', 'https://', 'data:')):
+            if src.startswith(('http://', 'https://')):
+                try:
+                    request = urllib.request.Request(
+                        src,
+                        headers={'User-Agent': 'Mozilla/5.0 AutoDocs/1.0'},
+                    )
+                    with urllib.request.urlopen(request, timeout=15) as response:
+                        image_bytes = response.read()
+                        content_type = response.headers.get_content_type()
+                    mime_type = content_type if content_type.startswith('image/') else 'image/png'
+                    resolved_src = f'data:{mime_type};base64,{base64.b64encode(image_bytes).decode("ascii")}'
+                except Exception:
+                    pass
+            elif not src.startswith('data:'):
                 try:
                     image_path = Path(src)
                     if not image_path.is_absolute():
@@ -922,6 +957,7 @@ class DocumentExporter:
             html_body,
             flags=re.IGNORECASE,
         )
+        html_body = self._wrap_diagram_sections(html_body)
 
         score = self.results.get('quality_score', 0)
         score_color = '#10b981' if score >= 70 else '#f59e0b' if score >= 40 else '#ef4444'

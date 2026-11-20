@@ -253,7 +253,7 @@
     <div class="cover-spacer"></div>
     <div class="cover-meta">
       <div><strong>Proyecto</strong>Proyecto</div>
-      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 01:22</div>
+      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 08:56</div>
       <div><strong>Lenguaje principal</strong>Python</div>
       <div><strong>Evaluación</strong><span class="cover-score">Score de Calidad: 71/100 · Aceptable</span></div>
       <div><strong>Alcance analizado</strong>16 archivos · 21 funciones</div>
@@ -271,7 +271,7 @@
   <main class="content">
     <h1 id="sec1">Documentación del Proyecto</h1>
 <blockquote>
-<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 07:21 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
+<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 14:55 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
 </blockquote>
 <h2 id="sec2">1.1 Resumen Ejecutivo</h2>
 <p>El análisis del proyecto determinó que <strong>Python</strong> es el lenguaje predominante.
@@ -486,19 +486,19 @@ componentes, datos, despliegue y mantenibilidad.</p>
 </ul>
 <h3 id="sec14">2.8 Observaciones Complementarias de Arquitectura (Insights de Arquitectura)</h3>
 <p><strong>1. Patrones arquitectónicos probables</strong><br />
-- Con 5 endpoints y 5 clases, el proyecto se ajusta a un <strong>monolito ligero</strong> o a un <strong>micro‑servicio</strong> autosuficiente.<br />
-- La estructura típica de <strong>MVC</strong> es posible si las clases separan modelo‑vista‑controlador; de lo contrario, parece más orientado a <strong>API‑First</strong> (controlador + servicios).  </p>
+- Con 5 endpoints y una única base de código, lo más probable es que sea un <strong>monolito</strong> o una <strong>API sencilla</strong> (Flask/FastAPI).<br />
+- La presencia de 5 clases sugiere un intento de aplicar <strong>MVC/MTV</strong> (controladores, modelos y vistas) o <strong>Domain‑Driven Design</strong> a pequeña escala.  </p>
 <p><strong>2. Buenas prácticas detectadas</strong><br />
-- Uso exclusivo de Python indica coherencia de lenguaje y facilita la mantenibilidad.<br />
-- Número moderado de funciones (16) sugiere que el código está <strong>fragmentado en unidades reutilizables</strong>.<br />
-- La existencia de 5 endpoints muestra que la capa de exposición está claramente delimitada.  </p>
+- Uso exclusivo de Python evita mezclas de lenguajes y simplifica la gestión de dependencias.<br />
+- Número moderado de funciones (21) y clases (5) indica <strong>cohesión</strong> y <strong>baja complejidad</strong> en cada módulo.<br />
+- La existencia de endpoints bien definidos muestra una <strong>interfaz de comunicación clara</strong>.  </p>
 <p><strong>3. Áreas de mejora sugeridas</strong><br />
-- <strong>Documentación</strong>: añadir docstrings y OpenAPI/Swagger para describir los endpoints.<br />
-- <strong>Separación de responsabilidades</strong>: si las clases mezclan lógica de negocio y acceso a datos, extraer servicios y repositorios.<br />
-- <strong>Gestión de dependencias</strong>: usar <code>requirements.txt</code> o <code>poetry</code> y versionar paquetes.<br />
-- <strong>Pruebas unitarias</strong>: incluir tests para cada función/clase (objetivo &gt;80 % cobertura).  </p>
+- <strong>Separación de responsabilidades</strong>: agrupar lógica de negocio en servicios y mantener los controladores ligeros.<br />
+- Añadir <strong>capas de abstracción</strong> (repositorios, DTOs) para evitar acoplamiento directo a la base de datos o a terceros.<br />
+- Implementar <strong>validación y serialización</strong> centralizada (p. ej., Pydantic, Marshmallow).<br />
+- Incluir <strong>tests unitarios</strong> y de integración; la métrica actual no lo revela.  </p>
 <p><strong>4. Complejidad del proyecto</strong><br />
-- Bajo‑medio: 21 funciones y 5 clases indican un <strong>acoplamiento bajo</strong> y <strong>cohesión moderada</strong>. La complejidad ciclom</p>
+- Con solo</p>
 <hr />
 <h2 id="sec15">3. Documentación Técnica de Código</h2>
 <h3 id="sec16">3.1 Guía de Configuración del Entorno de Desarrollo</h3>
@@ -568,13 +568,13 @@ python app.py  # o npm run dev
 <h4>Módulo: <code>routes/auth.py</code></h4>
 <h5><code>POST /register</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
-Este punto de la aplicación sirve para crear una cuenta nueva de usuario. Es como el formulario que rellenamos cuando queremos registrarnos en una página web o en una aplicación móvil.</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
+El endpoint <code>POST /register</code> es la puerta de entrada que permite a una persona crear una cuenta nueva en la aplicación. Es como el formulario de “Regístrate” que encuentras en muchos sitios web o apps, donde ingresas tus datos para poder usar el servicio.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint</strong><br />
-Cuando alguien envía sus datos al endpoint <strong>POST /register</strong>, el servidor recibe esa información, verifica que sea válida (por ejemplo, que el correo no exista ya y que la contraseña cumpla con los requisitos) y, si todo está correcto, guarda al nuevo usuario en la base de datos. En resumen, “crea” la cuenta del nuevo usuario.</p>
-<p><strong>3. Qué información necesita para funcionar</strong><br />
-Para poder registrar a una persona, el endpoint espera recibir, normalmente, los siguientes datos en el cuerpo de la petición (en formato JSON):</p>
+<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
+Cuando alguien envía sus datos al endpoint, el servidor los recibe, verifica que estén correctos (por ejemplo, que el email tenga el formato adecuado y que la contraseña sea suficientemente segura) y, si todo está bien, guarda esa información en la base de datos creando un nuevo usuario. Después, devuelve una respuesta indicando que el registro fue exitoso (y, en algunos casos, puede incluir un token de acceso para que el usuario pueda iniciar sesión inmediatamente).</p>
+<p><strong>3. Qué información necesita para funcionar (datos que debe enviar el cliente)</strong><br />
+Para poder crear la cuenta, el cliente (la aplicación o la página web) debe enviar, normalmente, un <strong>cuerpo</strong> en formato JSON con los siguientes campos:</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -585,24 +585,9 @@ Para poder registrar a una persona, el endpoint espera recibir, normalmente, los
 </thead>
 <tbody>
 <tr>
-<td><strong>email</strong></td>
-<td>La dirección de correo electrónico del usuario</td>
-<td>Sirve para identificarlo y para enviarle mensajes.</td>
-</tr>
-<tr>
-<td><strong>password</strong></td>
-<td>La contraseña que el usuario elige</td>
-<td>Es la clave secreta que usará para entrar después.</td>
-</tr>
-<tr>
-<td><strong>name</strong> (opcional)</td>
-<td>El nombre o apodo del usuario</td>
-<td>Para mostrarlo en la aplicación.</td>
-</tr>
-<tr>
-<td><strong>other fields</strong> (dependiendo del proyecto)</td>
-<td>Por</td>
-<td></td>
+<td><code>username</code></td>
+<td>Nombre de usuario que la persona elige</td>
+<td>Puede ser un apodo o</td>
 </tr>
 </tbody>
 </table>
@@ -667,15 +652,18 @@ Para poder registrar a una persona, el endpoint espera recibir, normalmente, los
 <h4>Módulo: <code>controllers/UserController.py</code></h4>
 <h5><code>GET /me</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
-El endpoint <strong>GET /me</strong> sirve para que la aplicación pueda decirte quién eres cuando ya has iniciado sesión. Es como cuando abres una aplicación y la misma te muestra tu nombre, tu foto o tus datos personales sin que tengas que escribirlos otra vez.</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
+Este endpoint sirve para que la aplicación le muestre a la persona que está usando la aplicación información sobre <strong>ella misma</strong>. Es como decir “muéstrame mis datos” y que el sistema le responda con los datos que le pertenecen.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
-- Cuando la aplicación recibe una petición a <strong>/me</strong>, busca la información del usuario que está conectado en ese momento.<br />
-- Esa información la toma de la sesión o del token que el usuario envió con la solicitud (algo que la aplicación usa para reconocerlo).<br />
-- Luego empaqueta esos datos en un formato que pueda entender cualquier otro programa (normalmente JSON) y los devuelve al cliente que los pidió.</p>
+<p><strong>2. Qué hace este endpoint</strong><br />
+Cuando la aplicación (por ejemplo, la app móvil o la página web) llama a <code>GET /me</code>, el servidor busca quién es el usuario que está haciendo la petición y le devuelve sus datos personales básicos (nombre, correo, foto de perfil, etc.). En otras palabras, el endpoint <strong>consulta</strong> la identidad del usuario y <strong>devuelve</strong> su propio registro.</p>
 <p><strong>3. Qué información necesita para funcionar</strong><br />
-- <strong>Identificación del usuario activo:</strong> la solicitud debe incluir alguna señal que demuestre quién está haciendo la petición. En la práctica, esto suele ser una “cookie” o un “token” (una cadena de texto) que</p>
+Para poder saber a quién pertenece la petición, el endpoint necesita que la solicitud venga acompañada de <strong>un token de autenticación</strong> (una especie de “llave” que identifica al usuario). Esa llave normalmente se envía en la cabecera <code>Authorization</code> de la petición HTTP. No se necesita enviar ningún dato adicional en el cuerpo de la petición.</p>
+<p><strong>4. Qué resultado devuelve</strong><br />
+Si todo está correcto, el servidor responde con un <strong>objeto JSON</strong> que contiene los datos del usuario, por ejemplo:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: 42,
+</code></pre>
 <table class="report-table">
 <thead>
 <tr>
@@ -734,31 +722,35 @@ El endpoint <strong>GET /me</strong> sirve para que la aplicación pueda decir
 <h5><code>POST /register</code></h5>
 <blockquote>
 <p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
-Este punto de la aplicación sirve para crear una cuenta nueva de usuario. Es como el formulario de “¡Regístrate!” que ves en una página web o en una app cuando quieres tener tu propio perfil.</p>
+Este <code>/register</code> es la puerta de entrada que permite a una persona crear una cuenta nueva en la aplicación. Es como el formulario de “Regístrate” que encuentras en muchos sitios web o apps: sirve para que el usuario indique quién es y pueda iniciar sesión después.</p>
 </blockquote>
 <p><strong>2. Qué hace este endpoint</strong><br />
-Cuando alguien envía sus datos (nombre, correo, contraseña, etc.) al servidor, este endpoint verifica que la información esté completa y sea válida, guarda esos datos en la base de datos y genera una cuenta única para esa persona. En otras palabras, transforma la información que el usuario escribe en un registro que la aplicación puede reconocer y usar después.</p>
+Cuando alguien envía sus datos al endpoint, el programa verifica que la información sea válida (por ejemplo, que el correo tenga el formato correcto y que la contraseña tenga la longitud mínima) y, si todo está bien, guarda esos datos en la base de datos de usuarios. En otras palabras, crea un registro nuevo que representa a esa persona dentro del sistema.</p>
 <p><strong>3. Qué información necesita para funcionar</strong><br />
-Para poder registrar a una persona, el endpoint espera recibir, generalmente, los siguientes datos en el cuerpo de la solicitud:</p>
+El endpoint espera recibir, normalmente dentro del cuerpo de la petición, los siguientes datos:</p>
 <table class="report-table">
 <thead>
 <tr>
-<th>Dato solicitado</th>
+<th>Campo</th>
 <th>Qué representa</th>
+<th>Qué se espera</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>nombre</strong> o <strong>usuario</strong></td>
-<td>El nombre con el que la persona será identificada.</td>
+<td><strong>email</strong></td>
+<td>La dirección de correo electrónico del usuario</td>
+<td>Un texto con el formato <code>nombre@dominio.com</code></td>
 </tr>
 <tr>
-<td><strong>correo electrónico</strong></td>
-<td>Dirección de email, que sirve para contactar al usuario y, a veces, para confirmar que la cuenta es suya.</td>
+<td><strong>password</strong></td>
+<td>La clave secreta que usará para entrar</td>
+<td>Un texto (la contraseña) con al menos cierta longitud y complejidad</td>
 </tr>
 <tr>
-<td><strong>contraseña</strong></td>
-<td>Un texto secreto que solo el usuario conoce y que le permite entrar a su</td>
+<td><strong>name</strong> (opcional en algunos proyectos)</td>
+<td>El nombre de la persona</td>
+<td>Un texto</td>
 </tr>
 </tbody>
 </table>
@@ -823,14 +815,18 @@ Para poder registrar a una persona, el endpoint espera recibir, generalmente, lo
 <h5><code>GET /register/&lt;int:id&gt;</code></h5>
 <blockquote>
 <p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
-Este recurso permite “consultar” la información de una persona que ya está registrada en el sistema. Es como abrir un archivo y leer los datos que contiene, pero a través de internet.</p>
+Este recurso del API permite obtener información sobre una inscripción o registro concreto que ya está guardado en el sistema. Es como preguntar “¿qué datos hay del registro número X?” y recibir la respuesta.</p>
 </blockquote>
 <p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
-Cuando alguien solicita la dirección <code>/register/&lt;id&gt;</code> con el número de identificación que le corresponde (por ejemplo <code>/register/42</code>), el servidor busca en su base de datos la persona que tiene ese número y le devuelve los datos que tiene guardados (nombre, correo, fecha de alta, etc.). Si no encuentra a nadie con ese número, responde que no existe.</p>
+Cuando se le llama, el servidor busca en la base de datos el registro cuyo número de identificación coincide con el número que se incluye en la URL. Si lo encuentra, devuelve los datos de ese registro; si no lo encuentra, avisa que ese registro no existe.</p>
 <p><strong>3. Qué información necesita para funcionar (entrada)</strong><br />
-Solo se necesita un dato: el <strong>número de identificación</strong> (un entero) que se coloca en la URL después de <code>/register/</code>. No se envían formularios ni archivos, basta con escribir la dirección correcta en el navegador o en la herramienta que haga la petición.</p>
+Solo necesita un dato: el <strong>identificador numérico</strong> del registro que se quiere consultar. Ese número se escribe directamente en la dirección de la petición, por ejemplo:</p>
+<pre><code>GET /register/27
+</code></pre>
+<p>En este caso “27” es el ID del registro que queremos ver. No se envían otros datos ni cuerpo de mensaje.</p>
 <p><strong>4. Qué resultado devuelve (salida)</strong><br />
-- <strong>Si la persona existe:</strong> devuelve un pequeño paquete de datos en formato JSON (una lista de pares “clave‑valor”) que contiene la información que el sistema</p>
+- <strong>Si el registro existe:</strong> devuelve una respuesta en formato JSON (un texto estructurado) que contiene los campos del registro, como nombre, fecha, estado, etc.<br />
+- **Si el registro no existe</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -887,21 +883,22 @@ Solo se necesita un dato: el <strong>número de identificación</strong> (un ent
 </table>
 <h5><code>POST /login</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
-Este recurso sirve para que un usuario pueda <strong>entrar</strong> a la aplicación. Es como la puerta de entrada: cuando alguien escribe su nombre de usuario y su contraseña, el sistema verifica que esos datos sean correctos y, si lo son, le permite pasar al interior y usar las funciones de la aplicación.</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
+Este punto de la aplicación sirve para que un usuario pueda <strong>entrar</strong> a la página o a la app. Es el “puerto de entrada” que verifica que quien quiere usar el sitio es quien dice ser.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
-Al recibir la petición, el programa:</p>
-<ol>
-<li>Toma los datos que el usuario envía (usuario y contraseña).  </li>
-<li>Busca en la base de datos si esos datos coinciden con una cuenta registrada.  </li>
-<li>Si la combinación es correcta, genera un “token” (una pequeña llave digital) que identifica al usuario durante su sesión.  </li>
-<li>Devuelve esa llave al cliente para que la guarde y la envíe en las próximas solicitudes, de modo que el servidor sepa que quien habla es el mismo usuario autenticado.</li>
-</ol>
-<p>En caso de que los datos no sean válidos, responde diciendo que el inicio de sesión ha fallado.</p>
-<p><strong>3. Qué información necesita para funcionar (entrada)</strong><br />
-El endpoint espera recibir, dentro del cuerpo de la petición <strong>POST</strong>, un objeto con dos campos:</p>
-<p>| Campo |</p>
+<p><strong>2. Qué hace este endpoint</strong><br />
+Cuando alguien envía sus datos (normalmente su nombre de usuario y su contraseña), el servidor los compara con los que tiene guardados.<br />
+- Si coinciden, el servidor le da una “llave” (un token) que le permite moverse por el resto del sitio sin volver a iniciar sesión cada vez.<br />
+- Si no coinciden, el servidor le dice que los datos son incorrectos y no permite el acceso.</p>
+<p><strong>3. Qué información necesita para funcionar</strong><br />
+Para poder trabajar, necesita recibir <strong>dos datos básicos</strong>:<br />
+- <strong>Usuario</strong> (puede ser el correo electrónico o el nombre que elija).<br />
+- <strong>Contraseña</strong> (el secreto que sólo el usuario conoce).  </p>
+<p>Estos datos se envían en un mensaje sencillo (un JSON) como:</p>
+<pre><code class="language-json">{
+  &quot;usuario&quot;: &quot;juan@example.com&quot;,
+  &quot;contraseña&quot;: &quot;Mi
+</code></pre>
 <table class="report-table">
 <thead>
 <tr>
@@ -1262,24 +1259,21 @@ responses:
 
 #### `UserRepository`
 
-> **Descripción:** **Descripción sencilla de la clase `UserRepository`**
+> **Descripción:** **1. Propósito de la clase (explicado sin jerga técnica)**  
+`UserRepository` es la “caja de herramientas” que se encarga de guardar y buscar la información de los usuarios dentro del programa. Cada vez que el sistema necesita crear un nuevo usuario, encontrar a uno que ya exista o comprobar si un correo electrónico está registrado, recurre a esta clase para hacerlo.
 
----
+**2. Qué representa en el sistema (analogía del mundo real)**  
+Imagina una oficina de registro civil donde se anotan los datos de todas las personas que se inscriben. Allí puedes:
 
-### 1. Propósito de la clase (en palabras muy simples)
+* **Agregar** a una persona nueva (cuando se casa o nace).  
+* **Buscar** a una persona por su número de identificación.  
+* **Consultar** a una persona por su nombre de usuario o por su correo electrónico.  
 
-`UserRepository` es como una **caja de herramientas que se encarga de guardar y buscar información de los usuarios** de la aplicación. Su trabajo principal es asegurarse de que los datos de cada persona (nombre, correo, etc.) estén guardados de forma segura y que podamos encontrarlos rápidamente cuando los necesitemos.
+`UserRepository` funciona como esa oficina, pero dentro del programa: mantiene una lista ordenada (normalmente en una base de datos) de todos los usuarios y permite consultar o añadir datos cuando se le pide.
 
----
+**3. Qué puede hacer esta clase (funcionalidades principales)**  
 
-### 2. Qué representa esta clase en el sistema (analogía del mundo real)
-
-Imagina que la aplicación es una oficina y los usuarios son los empleados. `UserRepository` sería el **archivero de la oficina**:
-
-- **Guarda** los expedientes de los empleados (cuando los creamos o los actualizamos).  
-- **Busca** el expediente cuando alguien necesita saber quién es un empleado, por su número de identificación, su nombre de usuario o su correo electrónico.  
-
-Al igual que el archivero
+| Método | Qué
 
 | Métodos disponibles |
 | --- |
@@ -1295,31 +1289,29 @@ Al igual que el archivero
 
 #### `Config`
 
-> **Descripción:** **Descripción sencilla de la clase `Config`**
+> **Descripción:** **Clase : Config**  
+*Archivo: entorno/config.py*  
 
 ---
 
-### 1. Propósito de la clase (en palabras muy simples)
+### 1. Propósito de la clase (en palabras muy simples)
 
-`Config` es como una **caja de herramientas que guarda todas las instrucciones y datos importantes** que necesita el programa para saber cómo debe comportarse. Cuando el programa se inicia, abre esa caja, lee lo que hay dentro y actúa de acuerdo a esas indicaciones.
-
----
-
-### 2. Qué representa esta clase en el sistema (una analogía del mundo real)
-
-Imagina que tienes una **casa** y, antes de mudarte, preparas un **manual de convivencia** donde apuntas cosas como:
-
-- La temperatura ideal del termostato.  
-- Si la luz del salón debe estar encendida siempre o solo por la noche.  
-- Qué usuarios pueden entrar por la puerta principal.
-
-Ese manual es exactamente lo que hace la clase `Config`: es el **“manual de operación”** del programa. En lugar de estar en papel, está guardado dentro del código y el programa lo consulta cada vez que necesita saber cómo debe funcionar.
+`Config` es como el **cuadro de mando** de la aplicación.  
+Su tarea principal es **guardar y entregar los valores que hacen que el programa sepa cómo debe comportarse**: por ejemplo, dónde encontrar los archivos, qué idioma usar, o si está en modo de pruebas o en modo “real”.
 
 ---
 
-### 3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)
+### 2. Qué representa esta clase en el sistema (una analogía)
 
--
+Imagina que tienes una **casa**. En la casa hay un **tablero de interruptores** donde se controla la luz, la calefacción, la música, etc. Cada interruptor corresponde a una opción que puedes encender o apagar según lo necesites.  
+
+`Config` es ese **tablero de interruptores** pero para el software. Cada “interruptor” (una variable de configuración) le dice al programa cosas como:
+
+- **Dirección del servidor** al que debe conectarse.  
+- **Nivel de registro** (si queremos ver solo errores o también información detallada).  
+- **Ruta de los archivos temporales** donde guarda datos mientras trabaja.  
+
+Así,
 
 
 </div>
@@ -1329,18 +1321,27 @@ Ese manual es exactamente lo que hace la clase `Config`: es el **“manual de op
 
 #### `User`
 
-> **Descripción:** **1. Propósito de la clase (en palabras muy simples)**  
-La clase **User** sirve para guardar y manejar la información de una persona que se registra en la aplicación. Cada vez que alguien crea una cuenta, se crea un objeto *User* que contiene sus datos y le permite iniciar sesión de forma segura.
+> **Descripción:** **Clase : User**  
+*(archivo `models/user.py`, hereda de `db.Model`)*  
 
-**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
-Imagina una hoja de papel en la oficina donde guardas el expediente de cada empleado. En esa hoja anotas su nombre, su dirección de correo, y un código secreto que solo él conoce (la contraseña). La clase *User* es esa hoja digital: es el “expediente” de cada usuario dentro del programa.
+---
 
-**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
+## 1. Propósito de la clase  
+La clase **User** sirve para guardar y manejar la información de las personas que pueden entrar a la aplicación. Cada vez que un usuario se registra o inicia sesión, la aplicación utiliza un objeto de esta clase para saber quién es, cuál es su contraseña y otros datos básicos.
 
-| Acción | Qué hace realmente la clase | Explicación sencilla |
-|--------|----------------------------|----------------------|
-| **set_password** | Guarda la contraseña de forma segura. | Cuando el usuario elige una clave, la clase la transforma en un “código encriptado” que nadie puede leer directamente, y lo almacena. |
-| **check_password** | Verifica si la clave que el usuario
+---
+
+## 2. Qué representa en el sistema (una analogía)  
+Imagina que la aplicación es una oficina y que cada persona que la visita tiene una credencial con su nombre y una clave secreta.  
+**User** sería la “tarjeta de identificación” de esa persona: contiene su nombre, su correo, su foto (si la hubiera) y, de forma segura, la clave que le permite abrir la puerta de la oficina.
+
+---
+
+## 3. Qué puede hacer esta clase (funcionalidades principales)  
+
+| Acción | Qué hace realmente la clase (explicado en palabras simples) |
+|--------|--------------------------------------------------------------|
+| **`set_password`** | Cuando el usuario elige una contraseña, este método la transforma en un código muy difícil de adivinar y la guarda. Así, aunque
 
 | Métodos disponibles |
 | --- |
@@ -1355,24 +1356,24 @@ Imagina una hoja de papel en la oficina donde guardas el expediente de cada empl
 
 #### `authService`
 
-> **Descripción:** **1. Propósito de la clase (en lenguaje muy simple)**  
-`authService` es el “guardia de acceso” de la aplicación. Su trabajo principal es decidir quién puede entrar, crear nuevas cuentas y reconocer a los usuarios que ya están registrados.
+> **Descripción:** **1. Propósito de la clase (en palabras muy simples)**  
+`authService` es como el “portero” de una página o aplicación. Su trabajo principal es decidir quién puede entrar, quién puede crear una cuenta nueva y quién puede iniciar sesión para usar el sitio.
 
-**2. Qué representa esta clase en el sistema (analógica con el mundo real)**  
+**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
 Imagina una oficina con una recepción. En la recepción hay una persona que:
 
-- **Registra** a los visitantes que nunca han venido antes, dándoles una credencial.  
-- **Busca** a un visitante en la lista de invitados cuando alguien lo llama.  
-- **Comprueba** la identidad de quien quiere entrar, verificando que su credencial sea válida.
+- **Registra a los nuevos visitantes** (les da una credencial o identificación).  
+- **Busca información de un visitante ya registrado** (para saber quién es y qué permisos tiene).  
+- **Permite que un visitante entre** verificando su identificación (por ejemplo, mirando su carnet).
 
-`authService` actúa exactamente como esa recepcionista, pero dentro del programa.
+`authService` hace exactamente eso, pero dentro del software: gestiona la “identidad” de los usuarios.
 
 **3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
 
-| Método | Qué hace (explicado sin jerga) |
-|--------|--------------------------------|
-| **`register`** | Crea una nueva cuenta para una persona que aún no tiene acceso. Es como llenar un formulario de registro y darle una tarjeta de identificación. |
-| **`find_by
+| Método | Qué hace en la práctica |
+|--------|--------------------------|
+| **register** | Crea una nueva cuenta para una persona que nunca antes había usado la aplicación. Es como darle una nueva credencial al visitante. |
+| **find_by_id** | Busca y muestra los datos de un usuario ya existente usando su número de
 
 | Métodos disponibles |
 | --- |
@@ -1387,24 +1388,19 @@ Imagina una oficina con una recepción. En la recepción hay una persona que:
 
 #### `AwsSecretManager`
 
-> **Descripción:** **Descripción sencilla de la clase `AwsSecretManager`**
+> **Descripción:** **Descripción sencilla de la clase `AwsSecretManager`**
 
 ---
 
-### 1. Propósito de la clase (en palabras de un no‑programador)
+### 1. Propósito de la clase (en lenguaje simple)
+`AwsSecretManager` es una “caja” que permite al programa obtener información confidencial que está guardada de forma segura en la nube de Amazon. En lugar de escribir esas contraseñas o claves dentro del código (donde cualquiera podría verlas), la clase se encarga de ir a buscarlas al lugar seguro y entregárselas al programa cuando las necesita.
 
-Imagina que tienes una caja fuerte donde guardas información muy importante: contraseñas, claves de acceso a servicios, datos que no deben quedar a la vista de cualquiera. `AwsSecretManager` es la “llave” que permite abrir esa caja fuerte que está alojada en la nube de Amazon (AWS) y recuperar, de forma segura, los datos que allí se guardan.
+### 2. Qué representa esta clase en el sistema (analogía del mundo real)
+Imagina que tienes una caja fuerte en un banco donde guardas tus documentos importantes: contraseñas, claves de acceso, certificados, etc.  
+`AwsSecretManager` es como el portero del banco que, con la identificación correcta, abre la caja fuerte, saca el documento que le pides y te lo entrega. Tú nunca ves la caja fuerte ni la combinación; solo recibes el papel que necesitas.
 
-En resumen, su objetivo es **ir a la caja fuerte de Amazon, abrirla y sacarle la información confidencial que la aplicación necesita**.
-
----
-
-### 2. Qué representa esta clase en el sistema (analogía)
-
-| Mundo real | Mundo del programa |
-|------------|-------------------|
-| **Caja fuerte (bóveda) de un banco** que guarda documentos secretos. | **Servicio “AWS Secrets Manager”** que guarda contraseñas y claves. |
-| **Una llave maestra** que solo las personas autorizadas pueden usar para abrirla. | **La clase `AwsSecretManager`**, que sabe cómo comunicarse con la bóveda y tiene permiso para leer lo que está dentro. |
+### 3. Qué puede hacer esta clase (funcionalidades principales)
+1. **Inicializarse** – Cuando se crea una instancia de `AwsSecretManager`, se prepara
 
 | Métodos disponibles |
 | --- |
@@ -2252,18 +2248,27 @@ responses:
 
 #### `User`
 
-> **Descripción:** **1. Propósito de la clase (en palabras muy simples)**  
-La clase **User** sirve para guardar y manejar la información de una persona que se registra en la aplicación. Cada vez que alguien crea una cuenta, se crea un objeto *User* que contiene sus datos y le permite iniciar sesión de forma segura.
+> **Descripción:** **Clase : User**  
+*(archivo `models/user.py`, hereda de `db.Model`)*  
 
-**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
-Imagina una hoja de papel en la oficina donde guardas el expediente de cada empleado. En esa hoja anotas su nombre, su dirección de correo, y un código secreto que solo él conoce (la contraseña). La clase *User* es esa hoja digital: es el “expediente” de cada usuario dentro del programa.
+---
 
-**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
+## 1. Propósito de la clase  
+La clase **User** sirve para guardar y manejar la información de las personas que pueden entrar a la aplicación. Cada vez que un usuario se registra o inicia sesión, la aplicación utiliza un objeto de esta clase para saber quién es, cuál es su contraseña y otros datos básicos.
 
-| Acción | Qué hace realmente la clase | Explicación sencilla |
-|--------|----------------------------|----------------------|
-| **set_password** | Guarda la contraseña de forma segura. | Cuando el usuario elige una clave, la clase la transforma en un “código encriptado” que nadie puede leer directamente, y lo almacena. |
-| **check_password** | Verifica si la clave que el usuario
+---
+
+## 2. Qué representa en el sistema (una analogía)  
+Imagina que la aplicación es una oficina y que cada persona que la visita tiene una credencial con su nombre y una clave secreta.  
+**User** sería la “tarjeta de identificación” de esa persona: contiene su nombre, su correo, su foto (si la hubiera) y, de forma segura, la clave que le permite abrir la puerta de la oficina.
+
+---
+
+## 3. Qué puede hacer esta clase (funcionalidades principales)  
+
+| Acción | Qué hace realmente la clase (explicado en palabras simples) |
+|--------|--------------------------------------------------------------|
+| **`set_password`** | Cuando el usuario elige una contraseña, este método la transforma en un código muy difícil de adivinar y la guarda. Así, aunque
 
 | Propiedad | Valor |
 | --- | --- |
@@ -2668,7 +2673,7 @@ Tendencia: ↓ Baja
 </tr>
 </tbody>
 </table>
-<p>💡 <strong>Sugerencia:</strong> Las funciones <code>create_cognito_user</code> y <code>create_cognito_user</code> realizan operaciones similares (<code>cognito_user</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/cognito_user.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>auth/cognito_service.py</code>, <code>routes/auth.py</code>).</p>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>create_cognito_user</code> y <code>create_cognito_user</code> realizan operaciones similares (<code>cognito_user</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/cognito_user.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>routes/auth.py</code>, <code>auth/cognito_service.py</code>).</p>
 <hr />
 <p><strong>Patrón: <code>*_login</code> / <code>login_*</code></strong> — aparece en 2 archivos distintos</p>
 <table class="report-table">
@@ -2792,9 +2797,9 @@ Tendencia: ↓ Baja
 <li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
 </ul>
 <hr />
-<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 07:21 UTC</em></p>
+<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 14:55 UTC</em></p>
     <div class="document-control">
-      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 01:22. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de calidad: 71/100.
+      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 08:56. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de calidad: 71/100.
     </div>
   </main>
 </body>

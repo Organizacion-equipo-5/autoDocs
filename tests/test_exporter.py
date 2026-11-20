@@ -200,6 +200,19 @@ class TestToHtml:
             assert "Mi Proyecto Demo" in html
             assert "<p>Contenido</p>" in html
 
+    def test_html_agrupa_diagrama_titulo_imagen_y_descripcion(self, exporter):
+        markdown_html = (
+            '<h3 id="sec1">2.4 Diagrama de Infraestructura</h3>'
+            '<p><img src="data:image/png;base64,AAAA" alt="Infraestructura"></p>'
+            '<p>Descripción del diagrama de infraestructura.</p>'
+            '<h3 id="sec2">2.5 Diagrama de Casos de Uso</h3>'
+            '<p>Texto siguiente.</p>'
+        )
+        with patch.object(exporter, "_render_markdown_with_node", return_value=markdown_html):
+            html = exporter.to_html()
+            assert '<div class="diagram-section"><h3 id="sec1">2.4 Diagrama de Infraestructura</h3>' in html
+            assert "Descripción del diagrama de infraestructura." in html
+
     def test_html_incluye_score(self, exporter):
         with patch.object(exporter, "_render_markdown_with_node", return_value="<p>x</p>"):
             html = exporter.to_html()

@@ -789,13 +789,31 @@ cli --> routes
 
 {infra_diagram}
 
+{self.tx(
+    "La infraestructura muestra la interacción entre el cliente, las rutas de la API, la lógica de negocio, los datos y los servicios externos.",
+    "The infrastructure view shows interactions between the client, API routes, business logic, data stores, and external services."
+)}
+
 ### {self.t('usecase_diagram')}
 
 {use_case_diagram}
 
+{self.tx(
+    "El diagrama de casos de uso relaciona al usuario con las operaciones expuestas por los endpoints detectados.",
+    "The use case diagram relates users to the operations exposed by the detected endpoints."
+) if eps else self.t('no_endpoints')}
+
 ### {self.t('class_diagram')}
 
 {class_diagram}
+
+{self.tx(
+    "El diagrama resume las clases detectadas, sus métodos principales y las relaciones estructurales disponibles.",
+    "The diagram summarizes detected classes, their main methods, and the structural relationships available."
+) if cls else self.tx(
+    "No se detectaron clases suficientes para generar este diagrama.",
+    "Not enough classes were detected to generate this diagram."
+)}
 
 ### {self.t('patterns')}
 
