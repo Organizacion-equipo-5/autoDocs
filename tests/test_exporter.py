@@ -517,6 +517,29 @@ class TestPdfWithReportlab:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestIntegration:
+    def test_weasyprint_con_librerias_nativas_de_msys2(self, tmp_path):
+        import os
+
+        if os.name != 'nt':
+            pytest.skip("La inicialización de DLL nativas solo aplica en Windows")
+
+        native_bin = Path("C:/msys64/ucrt64/bin")
+        if not any(native_bin.glob("*pango*.dll")):
+            pytest.skip("No hay Pango instalado en MSYS2 UCRT64")
+
+        from services.exporter import _configure_native_libraries
+
+        _configure_native_libraries()
+        try:
+            from weasyprint import HTML
+        except ImportError:
+            pytest.skip("WeasyPrint no está instalado")
+
+        output_path = tmp_path / "weasyprint-smoke.pdf"
+        HTML(string="<html><body><h1>WeasyPrint</h1></body></html>").write_pdf(str(output_path))
+
+        assert output_path.read_bytes().startswith(b"%PDF")
+
     def test_flujo_completo_a_html(self, exporter):
         with patch.object(exporter, "_render_markdown_with_node", return_value="<p>HTML</p>"):
             html = exporter.to_html()

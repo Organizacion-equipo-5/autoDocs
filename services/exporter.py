@@ -140,11 +140,12 @@ _LEAD_RE  = re.compile(
 )
 _EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
 _NATIVE_DLL_HANDLES = []
+_NATIVE_DLL_DIRECTORIES = set()
 
 
 def _configure_native_libraries():
     """Hace visibles a Python las DLL requeridas por WeasyPrint (Pango, GLib, Cairo, etc.) en Windows."""
-    global _NATIVE_DLL_HANDLES
+    global _NATIVE_DLL_HANDLES, _NATIVE_DLL_DIRECTORIES
     if os.name != 'nt':
         return
 
@@ -167,28 +168,44 @@ def _configure_native_libraries():
     # 4. Variables de entorno personalizadas si están definidas
     custom_dir = os.environ.get('WEASYPRINT_DLL_DIRECTORIES') or os.environ.get('GTK_BASEPATH')
     if custom_dir:
+        custom_dirs = []
         for d in custom_dir.split(os.pathsep):
             if d.strip():
-                candidate_dirs.insert(0, Path(d.strip()))
+                custom_path = Path(d.strip())
+                custom_dirs.extend([custom_path, custom_path / 'bin'])
+        candidate_dirs = custom_dirs + candidate_dirs
 
     registered_paths = set()
+    pango_found = False
     for candidate in candidate_dirs:
-        try:
-            if candidate.exists() and candidate.is_dir():
-                # Verificar si contiene DLLs de Pango
-                has_pango = any(candidate.glob('*pango*.dll'))
-                if has_pango:
-                    candidate_str = str(candidate.resolve())
-                    if candidate_str.lower() not in registered_paths:
-                        registered_paths.add(candidate_str.lower())
-                        if hasattr(os, 'add_dll_directory'):
-                            try:
-                                handle = os.add_dll_directory(candidate_str)
-                                _NATIVE_DLL_HANDLES.append(handle)
-                            except Exception:
-                                pass
-        except Exception:
+        if not candidate.exists() or not candidate.is_dir():
             continue
+        if not any(candidate.glob('*pango*.dll')):
+            continue
+
+        pango_found = True
+        candidate_str = str(candidate.resolve())
+        normalized_path = os.path.normcase(candidate_str)
+        if normalized_path in registered_paths:
+            continue
+        registered_paths.add(normalized_path)
+
+        if normalized_path not in _NATIVE_DLL_DIRECTORIES and hasattr(os, 'add_dll_directory'):
+            try:
+                handle = os.add_dll_directory(candidate_str)
+            except OSError as error:
+                raise RuntimeError(
+                    f"No se pudo registrar el directorio de DLL de WeasyPrint: {candidate_str}"
+                ) from error
+            _NATIVE_DLL_HANDLES.append(handle)
+            _NATIVE_DLL_DIRECTORIES.add(normalized_path)
+
+    if not pango_found:
+        raise RuntimeError(
+            "No se encontraron DLL de Pango para WeasyPrint. En Windows instala "
+            "Pango con MSYS2 UCRT64 y configura WEASYPRINT_DLL_DIRECTORIES "
+            "con la ruta C:\\msys64\\ucrt64\\bin."
+        )
 
     # Generar un fonts.conf limpio y aislado para evitar los avisos de sintaxis en conf.d de MSYS2 (xsi:nil, etc.)
     try:

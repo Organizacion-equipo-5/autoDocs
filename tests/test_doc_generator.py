@@ -407,6 +407,15 @@ class TestGenerate:
         assert isinstance(result["readme"], str)
         assert isinstance(result["architecture"], str)
 
+    def test_reutiliza_diagramas_al_ensamblar_markdown(self, minimal_results):
+        gen = DocGenerator(minimal_results)
+        with patch.object(gen, "_architecture", wraps=gen._architecture) as architecture:
+            with patch.object(gen, "_data_models", wraps=gen._data_models) as data_models:
+                gen.generate()
+
+        assert architecture.call_count == 1
+        assert data_models.call_count == 1
+
     def test_full_markdown_no_vacio(self, full_results):
         gen = DocGenerator(full_results)
         result = gen.generate()

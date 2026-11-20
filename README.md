@@ -556,7 +556,7 @@ El reporte de calidad más reciente está en [`QA_REPORT/`](QA_REPORT/). Allí s
 
 - **IA opcional.** Sin `GROQ_API_KEY` y sin Ollama, la generación de documentación sigue funcionando con plantillas, pero se omite el enriquecimiento con lenguaje natural.
 - **Diagramas.** PlantUML puede generar los diagramas con el servidor público o con Kroki. Para un entorno sin red se necesita el JAR local y Java instalado.
-- **PDF en Windows.** WeasyPrint requiere las DLL de Pango/GTK. Si no están disponibles, el exportador intenta ReportLab como respaldo.
+- **PDF en Windows.** Para generar PDF con WeasyPrint instala MSYS2 y ejecuta `C:\msys64\usr\bin\pacman.exe -S --needed mingw-w64-ucrt-x86_64-pango mingw-w64-ucrt-x86_64-cairo mingw-w64-ucrt-x86_64-gdk-pixbuf`. El exportador busca las DLL en `C:\msys64\ucrt64\bin`; si MSYS2 está en otra ruta, configura `WEASYPRINT_DLL_DIRECTORIES` con el directorio `bin` correspondiente. Sin estas DLL, se usa ReportLab como respaldo.
 - **Pagos.** El módulo de pagos está integrado con PayPal y con una actualización de plan validada en el backend; no procesa cobros reales en el entorno de desarrollo.
 - **Docker Compose.** El `docker-compose.yml` actual apunta el build a `./backend`, mientras que el `Dockerfile` está en la raíz. Ajusta el contexto a `build: .` o usa el comando `docker build` de este README.
 - **Credenciales.** `config.py` y `.env.example` contienen valores de ejemplo. Cámbialos y no publiques claves reales en el repositorio.

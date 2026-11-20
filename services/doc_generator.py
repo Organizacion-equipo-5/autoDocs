@@ -523,17 +523,37 @@ class DocGenerator:
         )
 
     def generate(self) -> dict:
+        readme = self._readme()
+        architecture = self._architecture()
+        api_docs = self._api_docs()
+        class_docs = self._class_docs()
+        function_docs = self._function_docs()
+        data_models = self._data_models()
+        deployment = self._deployment()
+        quality_report = self._quality_report()
+        full_markdown = self._full_markdown({
+            "readme": readme,
+            "architecture": architecture,
+            "api_section": self._api_section(),
+            "classes_section": self._classes_section(),
+            "functions_section": self._functions_section(),
+            "data_models": data_models,
+            "deployment": deployment,
+            "quality_report": quality_report,
+            "data_analysis": self._data_analysis_section(),
+        })
+
         return {
             "generated_at": self.now,
-            "readme":         self._readme(),
-            "architecture":   self._architecture(),
-            "api_docs":       self._api_docs(),
-            "class_docs":     self._class_docs(),
-            "function_docs":  self._function_docs(),
-            "data_models":    self._data_models(),
-            "deployment":     self._deployment(),
-            "quality_report": self._quality_report(),
-            "full_markdown":  self._full_markdown(),
+            "readme": readme,
+            "architecture": architecture,
+            "api_docs": api_docs,
+            "class_docs": class_docs,
+            "function_docs": function_docs,
+            "data_models": data_models,
+            "deployment": deployment,
+            "quality_report": quality_report,
+            "full_markdown": full_markdown,
         }
 
     # ─── 1. README ────────────────────────────────────────────────────────────
@@ -2385,7 +2405,20 @@ ALLOWED_HOSTS=*
 """
 
     # ─── MARKDOWN COMPLETO ────────────────────────────────────────────────────
-    def _full_markdown(self) -> str:
+    def _full_markdown(self, sections=None) -> str:
+        if sections is None:
+            sections = {
+                "readme": self._readme(),
+                "architecture": self._architecture(),
+                "api_section": self._api_section(),
+                "classes_section": self._classes_section(),
+                "functions_section": self._functions_section(),
+                "data_models": self._data_models(),
+                "deployment": self._deployment(),
+                "quality_report": self._quality_report(),
+                "data_analysis": self._data_analysis_section(),
+            }
+
         separator = "\n\n---\n\n"
         end_text = (
             f"\n\n---\n*AutoDocs AI · End of technical document · Analysis status: {self.now}*\n"
@@ -2393,14 +2426,14 @@ ALLOWED_HOSTS=*
             f"\n\n---\n*AutoDocs AI · Fin del documento técnico · Estado del análisis: {self.now}*\n"
         )
         return (
-            self._readme()         + separator +
-            self._architecture()   + separator +
-            self._api_section()    + separator +
-            self._classes_section()+ separator +
-            self._functions_section()+ separator +
-            self._data_models()    + separator +
-            self._deployment()     + separator +
-            self._quality_report() + separator +
-            self._data_analysis_section() +
+            sections["readme"] + separator +
+            sections["architecture"] + separator +
+            sections["api_section"] + separator +
+            sections["classes_section"] + separator +
+            sections["functions_section"] + separator +
+            sections["data_models"] + separator +
+            sections["deployment"] + separator +
+            sections["quality_report"] + separator +
+            sections["data_analysis"] +
             end_text
         )

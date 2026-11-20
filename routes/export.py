@@ -207,10 +207,12 @@ def export_pdf(project_id):
                 results_to_use = filter_results_by_selection(results_to_use, selected)
             if isinstance(results_to_use, dict):
                 results_to_use['doc_language'] = lang
+            _logger.info("Iniciando generación del documento para exportación PDF.")
             try:
                 documentation = DocGenerator(results_to_use, lang=lang).generate()
             except TypeError:
                 documentation = DocGenerator(results_to_use).generate()
+            _logger.info("Documentación generada; iniciando la conversión a PDF.")
             db.analysis_results.update_one({"project_id": project_id}, {"$set": {"documentation": documentation}})
             try:
                 exporter = DocumentExporter(project, {"results": results_to_use, "documentation": documentation}, lang=lang)
