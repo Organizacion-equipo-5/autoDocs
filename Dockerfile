@@ -2,10 +2,11 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# System deps for weasyprint (PDF generation), git, and PlantUML (requires Java)
+# System deps for weasyprint (PDF generation), git, graphviz (PlantUML), and Java (PlantUML)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
     libcairo2 libgdk-pixbuf-2.0-0 libffi-dev \
+    graphviz \
     git \
     wget \
     nodejs \

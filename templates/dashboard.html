@@ -2408,9 +2408,15 @@ CUERPO PRINCIPAL DE LA PÁGINA
                             </div>
                         </div>
                         <!-- Mensaje de error visible en la tarjeta (si aplica) -->
-                        ${p.status === 'error' && errorMsg ? `
-                        <div class="mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500 truncate" title="${errorMsg}">
-                            ${errorMsg}
+                        ${p.status === 'error' ? `
+                        <div class="mb-3 flex flex-col gap-2">
+                            ${errorMsg ? `<div class="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500 truncate" title="${errorMsg}">${errorMsg}</div>` : ''}
+                            <button onclick="event.stopPropagation(); reAnalyzeProject('${p._id}')"
+                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                                       bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors self-start">
+                                <span class="material-symbols-outlined text-sm">refresh</span>
+                                Volver a analizar
+                            </button>
                         </div>
                         ` : ''}
                         <!-- Barra de calidad (solo para proyectos completados) -->
@@ -2677,6 +2683,27 @@ window.addEventListener('load', () => {
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Crear y analizar <span class="material-symbols-outlined text-lg">arrow_forward</span>';
+            }
+        }
+
+        // ============================================================
+        // RE-ANALIZAR PROYECTO DESDE DASHBOARD
+        // ============================================================
+
+        async function reAnalyzeProject(projectId) {
+            try {
+                const res = await fetch(`/api/analysis/${projectId}/start`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
+                });
+                if (res.ok) {
+                    await loadProjects();   // refresca el badge a "Analizando"
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.error || 'No se pudo iniciar el análisis.');
+                }
+            } catch (e) {
+                alert('Error de conexión: ' + e.message);
             }
         }
 

@@ -62,11 +62,21 @@ class ProjectAnalyzer:
     }
 
     IGNORE_DIRS = {
-        '.git', '__pycache__', 'node_modules', '.venv', 'venv',
-        'env', 'dist', 'build', '.idea', '.vscode', 'migrations',
-        '.next', '.nuxt', 'coverage', '.pytest_cache', '.mypy_cache',
-        'target', 'vendor', 'bower_components', '.gitlab', '.github',
+        # Version control / IDE
+        '.git', '.github', '.gitlab', '.idea', '.vscode',
+        # Python
+        '__pycache__', '.venv', 'venv', 'env', '.pytest_cache', '.mypy_cache',
+        # JS / TS
+        'node_modules', 'bower_components', '.next', '.nuxt',
+        # Build output
+        'dist', 'build', 'target', 'coverage', 'vendor',
+        # DB migrations
+        'migrations',
+        # Test dirs
         'tests', 'test', 'spec', '__tests__', 'cypress', 'e2e',
+        # Binary/generated asset dirs (not source code)
+        'media', 'images', 'fonts',
+        'tmp', 'temp', '.cache',
     }
 
     # Ignorar archivos grandes y archivos de prueba (valores desde config)
@@ -75,6 +85,17 @@ class ProjectAnalyzer:
     IGNORE_FILE_PATTERNS = {
         'test', 'spec', 'mock', 'fixture', '__pycache__',
         '.min.js', '.min.css', 'bundle.js', 'webpack',
+    }
+
+    # Extensiones binarias/generadas que nunca deben analizarse como código
+    IGNORE_EXTENSIONS = {
+        '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.svg', '.webp',
+        '.pdf', '.zip', '.tar', '.gz', '.tgz', '.rar', '.7z',
+        '.exe', '.dll', '.so', '.dylib', '.bin', '.wasm',
+        '.pyc', '.pyo', '.pyd', '.class', '.o', '.obj',
+        '.db', '.sqlite', '.sqlite3',
+        '.lock',  # package-lock.json is handled by name, but *.lock files skip
+        '.puml',  # PlantUML source files in exports/
     }
 
     def __init__(self, project_path: str):
@@ -177,6 +198,10 @@ class ProjectAnalyzer:
 
                 full_path = Path(root) / fname
                 ext = Path(fname).suffix.lower()
+
+                # Ignorar extensiones binarias/generadas
+                if ext in self.IGNORE_EXTENSIONS:
+                    continue
 
                 # Ignorar archivos de prueba y minificados
                 fname_lower = fname.lower()

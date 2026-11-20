@@ -9,7 +9,6 @@ from typing import Optional, Dict, List, Tuple
 import numpy as np
 import sys
 
-print(f"[DEBUG plan_recommender] Módulo cargado/recargado - {datetime.now()}")
 
 # Número máximo de clusters (k) a evaluar
 K_MAX = 5

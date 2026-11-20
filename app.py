@@ -3,10 +3,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import Config
-from routes.payments import payments_bp
-from routes.plan_recommendation import plan_recommendation_bp
-from services.db import init_db_indexes
-from routes.github_oauth import github_oauth_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -25,8 +22,12 @@ def create_app():
     from routes.insights import insights_bp
     from routes.github_integration import github_bp
     from routes.chat import chat_bp
-    app.register_blueprint(github_oauth_bp, url_prefix='/api/github')
+    from routes.payments import payments_bp
+    from routes.plan_recommendation import plan_recommendation_bp
+    from routes.github_oauth import github_oauth_bp
+    from services.db import init_db_indexes
 
+    app.register_blueprint(github_oauth_bp, url_prefix='/api/github')
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(projects_bp, url_prefix='/api/projects')
@@ -57,8 +58,9 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() in ('1', 'true', 'yes')
     app.run(
-        debug=True,
+        debug=debug,
         use_reloader=False,
         host="0.0.0.0",
         port=5000

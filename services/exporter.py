@@ -8,6 +8,7 @@ import mimetypes
 import subprocess
 import os
 import urllib.request
+import concurrent.futures
 
 EXPORT_BASE = Path('./exports')
 
@@ -141,6 +142,70 @@ _LEAD_RE  = re.compile(
 _EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
 _NATIVE_DLL_HANDLES = []
 _NATIVE_DLL_DIRECTORIES = set()
+_WEASYPRINT_CHECKED = False   # se evalúa una sola vez por proceso
+_WEASYPRINT_OK = False        # resultado de la comprobación
+
+
+def _weasyprint_available() -> bool:
+    """
+    Comprueba de forma segura (sin crashear el proceso) si WeasyPrint
+    puede importarse y tiene las dependencias nativas necesarias.
+    El resultado se cachea para no repetir la comprobación.
+    En Windows, verifica la existencia de DLLs de Pango antes de intentar
+    el import, ya que un import fallido puede matar el proceso con un
+    error nativo de C en lugar de levantar una excepción Python normal.
+    """
+    global _WEASYPRINT_CHECKED, _WEASYPRINT_OK
+    if _WEASYPRINT_CHECKED:
+        return _WEASYPRINT_OK
+
+    _WEASYPRINT_CHECKED = True
+
+    # En Windows: comprobamos si las DLLs de Pango existen ANTES de importar.
+    # Rutas candidatas idénticas a las de _configure_native_libraries().
+    if os.name == 'nt':
+        project_root = Path(__file__).resolve().parents[1]
+        candidate_dirs = [
+            Path('C:/msys64/ucrt64/bin'),
+            Path('C:/msys64/mingw64/bin'),
+            Path('C:/msys64/clang64/bin'),
+            project_root / '.native' / 'msys64' / 'ucrt64' / 'bin',
+            project_root / '.native' / 'msys64' / 'mingw64' / 'bin',
+            project_root / '.native' / 'bin',
+            Path('C:/Program Files/GTK3-Runtime Win64/bin'),
+            Path('C:/Program Files (x86)/GTK3-Runtime Win64/bin'),
+        ]
+        custom = os.environ.get('WEASYPRINT_DLL_DIRECTORIES') or os.environ.get('GTK_BASEPATH')
+        if custom:
+            for d in custom.split(os.pathsep):
+                if d.strip():
+                    candidate_dirs.insert(0, Path(d.strip()))
+
+        pango_found = any(
+            d.exists() and d.is_dir() and any(d.glob('*pango*.dll'))
+            for d in candidate_dirs
+        )
+        if not pango_found:
+            print("[PDF] WeasyPrint no disponible en Windows: DLLs de Pango no encontradas. Usando ReportLab.")
+            _WEASYPRINT_OK = False
+            return False
+
+    # Verificamos el import en un subproceso aislado — si WeasyPrint crashea
+    # el proceso, solo muere el subproceso y Flask sigue funcionando.
+    import subprocess
+    import sys
+    try:
+        result = subprocess.run(
+            [sys.executable, '-c', 'import weasyprint; print("ok")'],
+            capture_output=True, text=True, timeout=15,
+        )
+        _WEASYPRINT_OK = (result.returncode == 0 and 'ok' in result.stdout)
+    except Exception:
+        _WEASYPRINT_OK = False
+
+    if not _WEASYPRINT_OK:
+        print("[PDF] WeasyPrint no disponible — usando ReportLab.")
+    return _WEASYPRINT_OK
 
 
 def _configure_native_libraries():
@@ -182,11 +247,13 @@ def _configure_native_libraries():
             break
 
     if pango_dll_dir is None:
-        raise RuntimeError(
-            "No se encontraron DLL de Pango para WeasyPrint. En Windows instala "
-            "Pango con MSYS2 UCRT64 y configura WEASYPRINT_DLL_DIRECTORIES "
-            "con la ruta C:\\msys64\\ucrt64\\bin."
+        print(
+            "[WeasyPrint] Advertencia: no se encontraron DLL de Pango. "
+            "En Windows instala Pango con MSYS2 UCRT64 y configura "
+            "WEASYPRINT_DLL_DIRECTORIES=C:\\msys64\\ucrt64\\bin. "
+            "Se usará ReportLab como generador de PDF alternativo."
         )
+        return
 
     candidate_str = str(pango_dll_dir)
     normalized_path = os.path.normcase(candidate_str)
@@ -202,12 +269,10 @@ def _configure_native_libraries():
     if normalized_path not in _NATIVE_DLL_DIRECTORIES and hasattr(os, 'add_dll_directory'):
         try:
             handle = os.add_dll_directory(candidate_str)
+            _NATIVE_DLL_HANDLES.append(handle)
+            _NATIVE_DLL_DIRECTORIES.add(normalized_path)
         except OSError as error:
-            raise RuntimeError(
-                f"No se pudo registrar el directorio de DLL de WeasyPrint: {candidate_str}"
-            ) from error
-        _NATIVE_DLL_HANDLES.append(handle)
-        _NATIVE_DLL_DIRECTORIES.add(normalized_path)
+            print(f"[WeasyPrint] No se pudo registrar directorio de DLL: {candidate_str} — {error}")
 
     # Generar un fonts.conf limpio y aislado para evitar los avisos de sintaxis en conf.d de MSYS2 (xsi:nil, etc.)
     try:
@@ -389,6 +454,31 @@ class DocumentExporter:
             pos = end
         out.append(html_body[pos:])
         return ''.join(out)
+
+    def _wrap_table_titles(self, html_body: str) -> str:
+        """
+        Wraps each heading immediately followed by a narrow table in a
+        break-inside:avoid div so the title never ends up orphaned on its own
+        page without the table.
+        Wide (landscape) tables are already handled by _wrap_wide_tables.
+        """
+        # Match: heading tag + optional paragraph + non-landscape table
+        _HEADING_TABLE_RE = re.compile(
+            r'(<h[1-6]\b[^>]*>(?:(?!</h[1-6]>).)*</h[1-6]>)'
+            r'(\s*(?:<p\b[^>]*>(?:(?!</p>).)*</p>\s*)?)'
+            r'(<table\b(?![^>]*table-landscape)[^>]*>.*?</table>)',
+            re.DOTALL | re.IGNORECASE,
+        )
+
+        def wrap(m):
+            # Only wrap if the table is not already inside a landscape div
+            return (
+                '<div style="break-inside:avoid;page-break-inside:avoid;">'
+                f'{m.group(1)}{m.group(2)}{m.group(3)}'
+                '</div>'
+            )
+
+        return _HEADING_TABLE_RE.sub(wrap, html_body)
 
     def _wrap_diagram_sections(self, html_body: str) -> str:
         """Agrupa cada diagrama con su título y descripción para WeasyPrint."""
@@ -938,24 +1028,46 @@ class DocumentExporter:
             toc_html = f'<p class="toc-empty">{_html.escape(self.t("no_sections_analysis"))}</p>'
 
         html_body = self._wrap_wide_tables(html_body)
+        html_body = self._wrap_table_titles(html_body)
+
+        # Collect all remote image URLs first so we can fetch them in parallel
+        _remote_cache: dict[str, str] = {}
+
+        def _fetch_remote_src(src: str) -> tuple[str, str]:
+            """Fetch a remote image and return (original_src, data_uri)."""
+            try:
+                req = urllib.request.Request(
+                    src,
+                    headers={'User-Agent': 'Mozilla/5.0 AutoDocs/1.0'},
+                )
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    image_bytes = response.read()
+                    content_type = response.headers.get_content_type()
+                mime_type = content_type if content_type.startswith('image/') else 'image/png'
+                return src, f'data:{mime_type};base64,{base64.b64encode(image_bytes).decode("ascii")}'
+            except Exception:
+                return src, src
+
+        remote_srcs = list({
+            m.group(1) for m in re.finditer(
+                r'<img\s+[^>]*?src=["\']([^"\']+)["\'][^>]*>',
+                html_body, flags=re.IGNORECASE,
+            )
+            if m.group(1).startswith(('http://', 'https://'))
+        })
+        if remote_srcs:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+                for orig, resolved in pool.map(_fetch_remote_src, remote_srcs):
+                    _remote_cache[orig] = resolved
 
         def image_replacer(match):
             before, src, after = match.group(1), match.group(2), match.group(3)
-            resolved_src = src
             if src.startswith(('http://', 'https://')):
-                try:
-                    request = urllib.request.Request(
-                        src,
-                        headers={'User-Agent': 'Mozilla/5.0 AutoDocs/1.0'},
-                    )
-                    with urllib.request.urlopen(request, timeout=15) as response:
-                        image_bytes = response.read()
-                        content_type = response.headers.get_content_type()
-                    mime_type = content_type if content_type.startswith('image/') else 'image/png'
-                    resolved_src = f'data:{mime_type};base64,{base64.b64encode(image_bytes).decode("ascii")}'
-                except Exception:
-                    pass
-            elif not src.startswith('data:'):
+                resolved_src = _remote_cache.get(src, src)
+            elif src.startswith('data:'):
+                resolved_src = src
+            else:
+                resolved_src = src
                 try:
                     image_path = Path(src)
                     if not image_path.is_absolute():
@@ -1216,6 +1328,8 @@ class DocumentExporter:
     font-size: 8.25pt;
     line-height: 1.35;
     margin: 4mm 0 6mm;
+    break-before: avoid;
+    page-break-before: avoid;
   }}
   thead {{ display: table-header-group; }}
   th {{ background: var(--navy); color: #fff; font-weight: 700; padding: 2.4mm 2.7mm; text-align: left; vertical-align: top; }}
@@ -1308,20 +1422,20 @@ class DocumentExporter:
 
         html_path.write_text(html_content, encoding='utf-8')
 
-        # 1st attempt: WeasyPrint
-        try:
-            _configure_native_libraries()
-            from weasyprint import HTML
-            HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
-            if output_path.exists() and output_path.stat().st_size > 1000 and self._is_valid_pdf(output_path):
-                print(f"[PDF] WeasyPrint generado exitosamente: {output_path.stat().st_size} bytes")
-                return str(output_path)
-            else:
-                print(f"[PDF] WeasyPrint generó archivo inválido o muy pequeño")
+        # 1st attempt: WeasyPrint (solo si las dependencias nativas están disponibles)
+        if _weasyprint_available():
+            try:
+                from weasyprint import HTML
+                HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
+                if output_path.exists() and output_path.stat().st_size > 1000 and self._is_valid_pdf(output_path):
+                    print(f"[PDF] WeasyPrint generado exitosamente: {output_path.stat().st_size} bytes")
+                    return str(output_path)
+                else:
+                    print(f"[PDF] WeasyPrint generó archivo inválido o muy pequeño")
+                    output_path.unlink(missing_ok=True)
+            except Exception as e:
+                print(f"[PDF] Error en WeasyPrint: {str(e)}")
                 output_path.unlink(missing_ok=True)
-        except Exception as e:
-            print(f"[PDF] Error en WeasyPrint: {str(e)}")
-            output_path.unlink(missing_ok=True)
 
         # 2nd attempt: ReportLab
         try:

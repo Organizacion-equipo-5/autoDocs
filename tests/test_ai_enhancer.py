@@ -8,6 +8,7 @@ Ejecutar con: python -m pytest tests/test_ai_enhancer.py -v
 import json
 import os
 import pytest
+import requests
 from unittest.mock import patch, MagicMock, mock_open
 
 # Aseguramos que el módulo se importe con sys.path correcto (lo hace conftest.py)
@@ -255,28 +256,43 @@ class TestCallAI:
         assert result is None
 
     @patch("services.ai_enhancer.requests.post")
-    def test_excepcion_de_conexion_rota_key(self, mock_post, enhancer_with_multiple_keys):
-        resp_ok = _mock_groq_response("OK con key2", status_code=200)
-        # Primera llamada lanza excepción, segunda devuelve OK
-        mock_post.side_effect = [Exception("Timeout"), resp_ok]
+    def test_error_de_conexion_no_reintenta_otros_modelos(self, mock_post, enhancer_with_multiple_keys):
+        mock_post.side_effect = requests.Timeout("Timeout")
         result = enhancer_with_multiple_keys._call_ai("sys", "usr")
-        assert result == "OK con key2"
+        assert result is None
+        assert mock_post.call_count == 1
+        assert enhancer_with_multiple_keys._groq_unavailable is True
 
     @patch("services.ai_enhancer.requests.post")
     def test_todas_las_keys_fallan(self, mock_post, enhancer_with_multiple_keys):
-        mock_post.side_effect = Exception("Network error")
+        mock_post.side_effect = requests.ConnectionError("Network error")
         result = enhancer_with_multiple_keys._call_ai("sys", "usr")
         assert result is None
-        enh = enhancer_with_multiple_keys
-        # Cada key prueba todos los modelos candidatos de Groq
-        assert mock_post.call_count == len(enh.api_keys) * len(enh.GROQ_CANDIDATE_MODELS)
+        assert mock_post.call_count == 1
 
     @patch("services.ai_enhancer.requests.post")
     def test_respuesta_vacia_devuelve_none(self, mock_post, enhancer_with_keys):
         mock_post.return_value = _mock_groq_response("")
         result = enhancer_with_keys._call_ai("sys", "usr")
-        # Como no hay contenido, retorna None tras intentar todas las keys
         assert result is None
+        assert mock_post.call_count == 1
+
+    @patch("services.ai_enhancer.requests.post")
+    def test_http_500_no_prueba_todos_los_modelos(self, mock_post, enhancer_with_keys):
+        mock_post.return_value = _mock_groq_response("Server Error", status_code=500)
+
+        assert enhancer_with_keys._call_ai("sys", "usr") is None
+        assert mock_post.call_count == 1
+
+    @patch("services.ai_enhancer.requests.post")
+    def test_http_404_prueba_modelo_alternativo(self, mock_post, enhancer_with_keys):
+        mock_post.side_effect = [
+            _mock_groq_response("Not Found", status_code=404),
+            _mock_groq_response("OK con alternativa"),
+        ]
+
+        assert enhancer_with_keys._call_ai("sys", "usr") == "OK con alternativa"
+        assert mock_post.call_count == 2
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -301,7 +317,7 @@ class TestEnhanceFunctionDescription:
 
     @patch("services.ai_enhancer.requests.post")
     def test_ia_falla_devuelve_docstring(self, mock_post, enhancer_with_keys, sample_function):
-        mock_post.side_effect = Exception("API caída")
+        mock_post.side_effect = requests.ConnectionError("API caída")
         result = enhancer_with_keys.enhance_function_description(sample_function)
         assert result == "Calcula el total"
 
@@ -410,6 +426,19 @@ class TestEnhanceDocumentation:
         assert mock_post.call_count == 4
         assert sample_analysis_results["ai_output_language"] == "en"
 
+    @patch("services.ai_enhancer.requests.post")
+    def test_timeout_termina_con_respaldo_sin_repetir_modelos(
+        self, mock_post, enhancer_with_keys, sample_analysis_results
+    ):
+        mock_post.side_effect = requests.Timeout("Groq timeout")
+
+        result = enhancer_with_keys.enhance_documentation(sample_analysis_results)
+
+        assert mock_post.call_count == 1
+        assert enhancer_with_keys._groq_unavailable is True
+        assert result["ai_documentation_enhanced"] is True
+        assert result["functions"][0]["ai_description"]
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Tests: enhance_database_analysis
@@ -440,7 +469,7 @@ class TestEnhanceDatabaseAnalysis:
 
     @patch("services.ai_enhancer.requests.post")
     def test_ia_falla(self, mock_post, enhancer_with_keys):
-        mock_post.side_effect = Exception("Error")
+        mock_post.side_effect = requests.ConnectionError("Error")
         metadata = {
             "tables": [],
             "data_sources": {"structured": [], "semi_structured": [], "unstructured": []},

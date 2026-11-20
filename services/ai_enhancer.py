@@ -31,6 +31,7 @@ class AIEnhancer:
         "llama-3.1-8b-instant",
     ]
     DOCUMENTATION_VERSION = 2
+    GROQ_TIMEOUT = (5, 20)
 
     def __init__(self):
         # Soporte para múltiples API keys de Groq
@@ -45,6 +46,7 @@ class AIEnhancer:
 
         self.current_key_index = 0
         self.working_groq_model = None
+        self._groq_unavailable = False
         self.API_URL = "https://api.groq.com/openai/v1/chat/completions"
         # Ollama desactivado
         self._ollama_model = None
@@ -67,8 +69,8 @@ class AIEnhancer:
         return bool(self.api_keys) or bool(self._check_ollama())
 
     def _call_groq(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
-        """Intenta llamar a la API de Groq probando modelos compatibles y rotando keys."""
-        if not self.api_keys:
+        """Llama a Groq con fallbacks limitados a errores específicos de modelo o clave."""
+        if not self.api_keys or self._groq_unavailable:
             return None
 
         models_to_try = (
@@ -101,34 +103,76 @@ class AIEnhancer:
                     })
                 else:
                     payload["max_tokens"] = max_tokens
+
+                print(f"[AI] Enviando solicitud a Groq ({model_name})...", flush=True)
                 try:
-                    response = requests.post(self.API_URL, json=payload, headers=headers, timeout=25)
-                    if response.status_code == 200:
+                    response = requests.post(
+                        self.API_URL,
+                        json=payload,
+                        headers=headers,
+                        timeout=self.GROQ_TIMEOUT,
+                    )
+                except requests.RequestException as error:
+                    self._groq_unavailable = True
+                    print(
+                        f"[AI] No se pudo conectar con Groq ({model_name}): {error}. "
+                        "Se continúa con documentación de respaldo.",
+                        flush=True,
+                    )
+                    return None
+
+                if response.status_code == 200:
+                    try:
                         result = response.json()
-                        content = (
-                            result.get("choices", [{}])[0]
-                            .get("message", {})
-                            .get("content", "")
-                            .strip()
-                        )
-                        if content:
-                            self.working_groq_model = model_name
-                            print(f"[AI] Llamada exitosa con Groq ({model_name})")
-                            return content
-                    elif response.status_code == 429:
-                        print(f"[AI] Groq rate-limit (429) en {model_name}, probando modelo alternativo...")
-                        continue
-                    elif response.status_code in [401, 403]:
-                        print(f"[AI] Groq API key inválida o expirada #{attempt + 1}")
-                        break
-                    elif response.status_code == 404:
-                        continue
-                    else:
-                        print(f"[AI] Groq HTTP {response.status_code} ({model_name}): {response.text[:120]}")
-                except Exception as e:
-                    print(f"[AI] Error llamando a Groq ({model_name}): {e}")
+                    except ValueError as error:
+                        self._groq_unavailable = True
+                        print(f"[AI] Groq devolvió una respuesta JSON inválida: {error}", flush=True)
+                        return None
+                    if not isinstance(result, dict):
+                        self._groq_unavailable = True
+                        print("[AI] Groq devolvió una respuesta con formato inesperado.", flush=True)
+                        return None
+                    choices = result.get("choices")
+                    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+                        self._groq_unavailable = True
+                        print("[AI] Groq no incluyó una respuesta de chat utilizable.", flush=True)
+                        return None
+                    message = choices[0].get("message")
+                    if not isinstance(message, dict):
+                        self._groq_unavailable = True
+                        print("[AI] Groq devolvió un mensaje con formato inesperado.", flush=True)
+                        return None
+                    content = (
+                        message.get("content", "")
+                    )
+                    content = content.strip() if isinstance(content, str) else ""
+                    if content:
+                        self.working_groq_model = model_name
+                        print(f"[AI] Llamada exitosa con Groq ({model_name})", flush=True)
+                        return content
+                    self._groq_unavailable = True
+                    print(f"[AI] Groq devolvió contenido vacío con {model_name}.", flush=True)
+                    return None
+                if response.status_code == 429:
+                    print(f"[AI] Groq rate-limit (429) en {model_name}; probando modelo alternativo.", flush=True)
+                    continue
+                if response.status_code in [401, 403]:
+                    print(f"[AI] Groq API key inválida o expirada #{attempt + 1}", flush=True)
+                    break
+                if response.status_code in [400, 404]:
+                    print(f"[AI] Modelo Groq no compatible ({response.status_code}): {model_name}", flush=True)
                     continue
 
+                self._groq_unavailable = True
+                print(
+                    f"[AI] Groq HTTP {response.status_code} ({model_name}): {response.text[:120]}. "
+                    "Se detienen los reintentos para continuar con documentación de respaldo.",
+                    flush=True,
+                )
+                return None
+
+        self._groq_unavailable = True
+        print("[AI] No hay modelos de Groq disponibles para esta ejecución.", flush=True)
         return None
 
     def _call_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
@@ -286,7 +330,7 @@ class AIEnhancer:
             )
             if not response:
                 print("[AI] No se recibieron descripciones para un lote de documentación.")
-                continue
+                break
             batch_results = self._parse_documentation_batch(response)
             if batch_results is None:
                 print("[AI] La respuesta por lotes no contiene JSON válido; se usarán descripciones de respaldo.")
@@ -662,7 +706,13 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         results['ai_output_language'] = lang
         results['ai_documentation_version'] = self.DOCUMENTATION_VERSION
 
-        print("[AI] Documentación mejorada exitosamente con Groq")
+        if self._groq_unavailable:
+            print(
+                "[AI] Groq no respondió; se completó el análisis con descripciones de respaldo.",
+                flush=True,
+            )
+        else:
+            print("[AI] Documentación mejorada exitosamente con Groq", flush=True)
         return results
 
     def enhance_database_analysis(self, raw_sql: str, metadata: dict,
