@@ -1119,6 +1119,7 @@ class DocumentExporter:
         total_endpoints = len(self.results.get('endpoints', []))
         page_word = self.t('page')
         of_word = self.t('of')
+        css_project_name = safe_project_name.replace('\\', '\\\\').replace('"', '\\"')
 
         return f"""<!DOCTYPE html>
 <html lang="{self.lang}">
@@ -1152,7 +1153,7 @@ class DocumentExporter:
       letter-spacing: .08em;
     }}
     @top-right {{
-      content: "{safe_project_name}";
+      content: "{css_project_name}";
       color: #52657a;
       font-family: "Arial", sans-serif;
       font-size: 7.5pt;
@@ -1328,8 +1329,6 @@ class DocumentExporter:
     font-size: 8.25pt;
     line-height: 1.35;
     margin: 4mm 0 6mm;
-    break-before: avoid;
-    page-break-before: avoid;
   }}
   thead {{ display: table-header-group; }}
   th {{ background: var(--navy); color: #fff; font-weight: 700; padding: 2.4mm 2.7mm; text-align: left; vertical-align: top; }}
@@ -1350,6 +1349,23 @@ class DocumentExporter:
   }}
   .table-landscape {{ page: landscape; }}
   .table-landscape table {{ break-inside: auto; }}
+  .diagram-section {{ margin: 6mm 0; break-inside: avoid; page-break-inside: avoid; }}
+  .diagram-section h3 {{ break-after: avoid; page-break-after: avoid; }}
+  .diagram-section img {{ margin-top: 2mm; }}
+  .code-fragment {{
+    margin: 4mm 0 5mm;
+    padding: 3.5mm 4mm;
+    background: var(--panel);
+    border: .25mm solid var(--rule);
+    border-left: 1.1mm solid var(--blue);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }}
+  .code-fragment-header {{ margin-bottom: 2mm; }}
+  .frag-title {{ font-family: "Arial", sans-serif; font-weight: 700; color: var(--navy); }}
+  .frag-file {{ font-family: "Consolas", "Courier New", monospace; font-size: 8pt; color: var(--muted); }}
+  .code-explanation {{ margin-top: 2.5mm; font-size: 9.5pt; color: #334155; line-height: 1.45; }}
+  .code-explanation strong {{ color: var(--navy); }}
   .document-control {{
     margin-top: 12mm;
     border-top: .6mm solid var(--navy);
@@ -1369,38 +1385,37 @@ class DocumentExporter:
 </head>
 <body>
   <section class="cover">
-    <div class="cover-kicker">{_html.escape(self.t('tech_doc_kicker'))}</div>
+    <div class="cover-kicker">{self.t('tech_doc_kicker')}</div>
     <h1>{safe_project_name}</h1>
-    <p class="cover-subtitle">{_html.escape(self.t('tech_doc_sub2'))}</p>
+    <p class="cover-subtitle">{self.t('tech_doc_sub2')}</p>
     <div class="cover-rule"></div>
-    <p class="cover-purpose">{_html.escape(self.t('cover_purpose'))}</p>
+    <p class="cover-purpose">{self.t('cover_purpose')}</p>
     <div class="cover-spacer"></div>
     <div class="cover-meta">
-      <div><strong>{_html.escape(self.t('project'))}</strong>{safe_project_name}</div>
-      <div><strong>{_html.escape(self.t('issue_date'))}</strong>{generated_at}</div>
-      <div><strong>{_html.escape(self.t('primary_language'))}</strong>{primary_lang}</div>
-      <div><strong>{_html.escape(self.t('evaluation'))}</strong><span class="cover-score">{_html.escape(self.t('score_of_quality'))}: {score}/100 · {_html.escape(score_label)}</span></div>
-      <div><strong>{_html.escape(self.t('scope'))}</strong>{total_files} {_html.escape(self.t('files').lower())} · {total_functions} {_html.escape(self.t('functions').lower())}</div>
-      <div><strong>{_html.escape(self.t('elements'))}</strong>{total_classes} {_html.escape(self.t('classes').lower())} · {total_endpoints} {_html.escape(self.t('endpoints').lower())}</div>
+      <div><strong>{self.t('project')}</strong>{safe_project_name}</div>
+      <div><strong>{self.t('issue_date')}</strong>{generated_at}</div>
+      <div><strong>{self.t('primary_language')}</strong>{primary_lang}</div>
+      <div><strong>{self.t('evaluation')}</strong><span class="cover-score">{self.t('score_of_quality')}: {score}/100 · {score_label}</span></div>
+      <div><strong>{self.t('scope')}</strong>{total_files} {self.t('files').lower()} · {total_functions} {self.t('functions').lower()}</div>
+      <div><strong>{self.t('elements')}</strong>{total_classes} {self.t('classes').lower()} · {total_endpoints} {self.t('endpoints').lower()}</div>
     </div>
-    <div class="cover-footer">{_html.escape(self.t('technical_edition'))}</div>
+    <div class="cover-footer">{self.t('technical_edition')}</div>
   </section>
 
   <section class="toc">
-    <h1 class="toc-title">{_html.escape(self.t('toc_general'))}</h1>
-    <p class="toc-intro">{_html.escape(self.t('toc_intro'))}</p>
+    <h1 class="toc-title">{self.t('toc_general')}</h1>
+    <p class="toc-intro">{self.t('toc_intro')}</p>
     {toc_html}
   </section>
 
   <main class="content">
     {html_body}
     <div class="document-control">
-      <strong>{_html.escape(self.t('doc_control'))}</strong> {_html.escape(self.t('project'))}: {safe_project_name}. {_html.escape(self.t('issue_date'))}: {generated_at}. {_html.escape(self.t('scope'))}: {total_files} {_html.escape(self.t('files').lower())}, {total_functions} {_html.escape(self.t('functions').lower())}, {total_classes} {_html.escape(self.t('classes').lower())} {_html.escape('and' if self.lang == 'en' else 'y')} {total_endpoints} {_html.escape(self.t('endpoints').lower())}. {_html.escape(self.t('quality_score'))}: {score}/100.
+      <strong>{self.t('doc_control')}</strong> {self.t('project')}: {safe_project_name}. {self.t('issue_date')}: {generated_at}. {self.t('scope')}: {total_files} {self.t('files').lower()}, {total_functions} {self.t('functions').lower()}, {total_classes} {self.t('classes').lower()} y {total_endpoints} {self.t('endpoints').lower()}. {self.t('score_of_quality')}: {score}/100.
     </div>
   </main>
 </body>
 </html>"""
-
     def _is_valid_pdf(self, path: Path) -> bool:
         try:
             with path.open('rb') as f:

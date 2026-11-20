@@ -206,8 +206,6 @@
     font-size: 8.25pt;
     line-height: 1.35;
     margin: 4mm 0 6mm;
-    break-before: avoid;
-    page-break-before: avoid;
   }
   thead { display: table-header-group; }
   th { background: var(--navy); color: #fff; font-weight: 700; padding: 2.4mm 2.7mm; text-align: left; vertical-align: top; }
@@ -228,6 +226,23 @@
   }
   .table-landscape { page: landscape; }
   .table-landscape table { break-inside: auto; }
+  .diagram-section { margin: 6mm 0; break-inside: avoid; page-break-inside: avoid; }
+  .diagram-section h3 { break-after: avoid; page-break-after: avoid; }
+  .diagram-section img { margin-top: 2mm; }
+  .code-fragment {
+    margin: 4mm 0 5mm;
+    padding: 3.5mm 4mm;
+    background: var(--panel);
+    border: .25mm solid var(--rule);
+    border-left: 1.1mm solid var(--blue);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .code-fragment-header { margin-bottom: 2mm; }
+  .frag-title { font-family: "Arial", sans-serif; font-weight: 700; color: var(--navy); }
+  .frag-file { font-family: "Consolas", "Courier New", monospace; font-size: 8pt; color: var(--muted); }
+  .code-explanation { margin-top: 2.5mm; font-size: 9.5pt; color: #334155; line-height: 1.45; }
+  .code-explanation strong { color: var(--navy); }
   .document-control {
     margin-top: 12mm;
     border-top: .6mm solid var(--navy);
@@ -255,7 +270,7 @@
     <div class="cover-spacer"></div>
     <div class="cover-meta">
       <div><strong>Proyecto</strong>Proyecto</div>
-      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 14:25</div>
+      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 15:59</div>
       <div><strong>Lenguaje principal</strong>Python</div>
       <div><strong>Evaluación</strong><span class="cover-score">Score de Calidad: 71/100 · Aceptable</span></div>
       <div><strong>Alcance analizado</strong>16 archivos · 21 funciones</div>
@@ -273,7 +288,7 @@
   <main class="content">
     <h1 id="sec1">Documentación del Proyecto</h1>
 <blockquote>
-<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 20:25 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
+<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 21:59 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
 </blockquote>
 <h2 id="sec2">1.1 Resumen Ejecutivo</h2>
 <p>El análisis del proyecto determinó que <strong>Python</strong> es el lenguaje predominante.
@@ -2686,9 +2701,9 @@ Tendencia: ↓ Baja
 <li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
 </ul>
 <hr />
-<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 20:25 UTC</em></p>
+<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 21:59 UTC</em></p>
     <div class="document-control">
-      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 14:25. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de calidad: 71/100.
+      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 15:59. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de Calidad: 71/100.
     </div>
   </main>
 </body>
