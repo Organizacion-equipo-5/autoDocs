@@ -86,8 +86,11 @@ def sample_analysis_results():
             {"name": "delete_user", "complexity": 12, "docstring": "doc"},
         ],
         "classes": [
-            {"name": "UserController"},
+            {"name": "UserController", "methods": ["get_user", "create_user"]},
             {"name": "UserService"},
+        ],
+        "models": [
+            {"name": "User", "file": "models.py", "fields": ["id", "name"], "methods": ["save", "delete"]},
         ],
         "endpoints": [
             {"method": "GET", "path": "/users"},
@@ -110,6 +113,27 @@ def _mock_groq_response(content: str, status_code: int = 200):
     }
     mock_resp.text = content
     return mock_resp
+
+
+def _mock_documentation_batch(*args, **kwargs):
+    """Devuelve JSON estructurado para los lotes y texto para insights."""
+    prompt = kwargs["json"]["messages"][1]["content"]
+    marker = "Registros:\n"
+    if marker not in prompt:
+        return _mock_groq_response("Insights de arquitectura")
+
+    encoded_records = prompt.split(marker, 1)[1].split("\n\n", 1)[0]
+    records = json.loads(encoded_records)
+    items = {}
+    for record in records:
+        item = {"description": f"Descripción de {record['name']}"}
+        if record.get("methods"):
+            item["methods"] = {
+                method: f"Descripción del método {method}"
+                for method in record["methods"]
+            }
+        items[record["id"]] = item
+    return _mock_groq_response(json.dumps({"items": items}, ensure_ascii=False))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -350,37 +374,41 @@ class TestEnhanceDocumentation:
 
     @patch("services.ai_enhancer.requests.post")
     def test_con_ia_agrega_descripciones(self, mock_post, enhancer_with_keys, sample_analysis_results):
-        mock_post.return_value = _mock_groq_response("Mejorado por IA")
+        mock_post.side_effect = _mock_documentation_batch
         result = enhancer_with_keys.enhance_documentation(sample_analysis_results)
 
-        # Debe agregar ai_description a funciones (máx 5), clases (máx 3), endpoints (máx 3)
-        for f in result["functions"][:5]:
-            assert "ai_description" in f
-            assert f["ai_description"] == "Mejorado por IA"
-
-        for c in result["classes"][:3]:
-            assert "ai_description" in c
-
-        for e in result["endpoints"][:3]:
-            assert "ai_description" in e
-
-        # Debe agregar insights de arquitectura
+        assert all(f["ai_description"].startswith("Descripción de") for f in result["functions"])
+        assert all(c["ai_description"].startswith("Descripción de") for c in result["classes"])
+        assert all(e["ai_description"].startswith("Descripción de") for e in result["endpoints"])
+        assert result["models"][0]["ai_description"] == "Descripción de User"
+        assert result["classes"][0]["method_descriptions"]["get_user"] == "Descripción del método get_user"
+        assert result["models"][0]["method_descriptions"]["save"] == "Descripción del método save"
         assert "ai_architecture_insights" in result
 
     @patch("services.ai_enhancer.requests.post")
     def test_con_ia_limita_cantidad_llamadas(self, mock_post, enhancer_with_keys, sample_analysis_results):
-        mock_post.return_value = _mock_groq_response("OK")
+        mock_post.side_effect = _mock_documentation_batch
         enhancer_with_keys.enhance_documentation(sample_analysis_results)
-        # 3 funciones (menos de 5) + 2 clases (menos de 3) + 2 endpoints (menos de 3) + 1 arquitectura = 8
-        assert mock_post.call_count == 8
+        # Un lote para todos los elementos de ejemplo y una llamada para insights.
+        assert mock_post.call_count == 2
 
     @patch("services.ai_enhancer.requests.post")
     def test_no_repite_enriquecimiento_en_el_mismo_idioma(self, mock_post, enhancer_with_keys, sample_analysis_results):
-        mock_post.return_value = _mock_groq_response("OK")
+        mock_post.side_effect = _mock_documentation_batch
         enhancer_with_keys.enhance_documentation(sample_analysis_results, output_language="es")
         enhancer_with_keys.enhance_documentation(sample_analysis_results, output_language="es")
 
-        assert mock_post.call_count == 8
+        assert mock_post.call_count == 2
+        assert sample_analysis_results["ai_documentation_version"] == AIEnhancer.DOCUMENTATION_VERSION
+
+    @patch("services.ai_enhancer.requests.post")
+    def test_cambia_idioma_y_regenera_descripciones(self, mock_post, enhancer_with_keys, sample_analysis_results):
+        mock_post.side_effect = _mock_documentation_batch
+        enhancer_with_keys.enhance_documentation(sample_analysis_results, output_language="es")
+        enhancer_with_keys.enhance_documentation(sample_analysis_results, output_language="en")
+
+        assert mock_post.call_count == 4
+        assert sample_analysis_results["ai_output_language"] == "en"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -253,7 +253,7 @@
     <div class="cover-spacer"></div>
     <div class="cover-meta">
       <div><strong>Proyecto</strong>Proyecto</div>
-      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 09:21</div>
+      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 10:19</div>
       <div><strong>Lenguaje principal</strong>Python</div>
       <div><strong>Evaluación</strong><span class="cover-score">Score de Calidad: 71/100 · Aceptable</span></div>
       <div><strong>Alcance analizado</strong>16 archivos · 21 funciones</div>
@@ -271,7 +271,7 @@
   <main class="content">
     <h1 id="sec1">Documentación del Proyecto</h1>
 <blockquote>
-<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 15:21 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
+<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 16:19 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
 </blockquote>
 <h2 id="sec2">1.1 Resumen Ejecutivo</h2>
 <p>El análisis del proyecto determinó que <strong>Python</strong> es el lenguaje predominante.
@@ -489,20 +489,20 @@ componentes, datos, despliegue y mantenibilidad.</p>
 </ul>
 <h3 id="sec14">2.8 Observaciones Complementarias de Arquitectura (Insights de Arquitectura)</h3>
 <p><strong>1. Patrones arquitectónicos probables</strong><br />
-- <em>Monolito ligero</em> con un único proyecto Python (probable Flask/FastAPI).<br />
-- Tendencia a <em>MVC</em> implícito: funciones ≈ controladores, clases ≈ modelos/servicios, endpoints ≈ vistas.  </p>
+- Con 5 endpoints y 5 clases, lo más típico es un <strong>monolito ligero</strong> (Flask/FastAPI) que sigue una variante de <strong>MVC</strong> (rutas → controladores → modelos).<br />
+- Si cada endpoint representa un dominio de negocio aislado, podría evolucionar a <strong>microservicio</strong> independiente.</p>
 <p><strong>2. Buenas prácticas detectadas</strong><br />
-- Uso de clases (5) sugiere encapsulación de lógica de negocio.<br />
-- Número reducido de funciones y endpoints indica un alcance bien delimitado.<br />
-- Separación básica entre capa de presentación (endpoints) y lógica interna.  </p>
+- Uso de funciones pequeñas (16) sugiere <strong>responsabilidad única</strong>.<br />
+- Separación clara entre clases (probable modelo o capa de servicios) y funciones de lógica.<br />
+- Presencia de endpoints indica que la aplicación está expuesta a través de una API REST, lo cual facilita la integración.</p>
 <p><strong>3. Áreas de mejora sugeridas</strong><br />
-- <strong>Modularidad:</strong> crear paquetes por dominio (e.g., <code>users</code>, <code>orders</code>).<br />
-- <strong>Tipado estático:</strong> añadir anotaciones y usar <em>mypy</em> para evitar errores en tiempo de ejecución.<br />
-- <strong>Pruebas unitarias:</strong> cubrir al menos 80 % del código con <em>pytest</em>.<br />
-- <strong>Manejo de errores y logging estructurado</strong> (p.ej., <em>structlog</em>).<br />
-- <strong>Validación de entrada</strong> (pydantic o marshmallow).  </p>
+- <strong>Modularidad:</strong> agrupar rutas, servicios y modelos en paquetes separados.<br />
+- <strong>Validación y manejo de errores:</strong> integrar esquemas (p. ej. Pydantic) y middleware de excepción.<br />
+- <strong>Pruebas automatizadas:</strong> añadir unit‑tests y tests de integración (&gt;80 % cobertura).<br />
+- <strong>Documentación:</strong> generar OpenAPI/Swagger y docstrings consistentes.<br />
+- <strong>Logging estructurado</strong> y métricas para observabilidad.</p>
 <p><strong>4. Complejidad del proyecto</strong><br />
-- Baja‑</p>
+B</p>
 <hr />
 <h2 id="sec15">3. Documentación Técnica de Código</h2>
 <h3 id="sec16">3.1 Guía de Configuración del Entorno de Desarrollo</h3>
@@ -572,40 +572,8 @@ python app.py  # o npm run dev
 <h4>Módulo: <code>routes/auth.py</code></h4>
 <h5><code>POST /register</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
-Este punto de la aplicación sirve para crear una nueva cuenta de usuario. En otras palabras, permite que una persona se registre en la página o la aplicación, de modo que después pueda iniciar sesión y usar los servicios que ofrece.</p>
+<p><strong>Descripción:</strong> Recurso "/register" que permite crear una cuenta de usuario.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint</strong><br />
-Cuando alguien envía sus datos de registro (como nombre, correo y contraseña) a la ruta <strong>/register</strong>, el servidor revisa que la información sea válida y que el correo no esté ya registrado. Si todo está bien, guarda esos datos en la base de datos y “crea” la cuenta del nuevo usuario.</p>
-<p><strong>3. Qué información necesita para funcionar</strong><br />
-Para que el registro sea exitoso se le deben enviar al servidor los siguientes datos, normalmente en formato JSON:</p>
-<table class="report-table">
-<thead>
-<tr>
-<th>Campo</th>
-<th>Qué significa</th>
-<th>Ejemplo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>name</strong></td>
-<td>El nombre o alias de la persona</td>
-<td><code>"Ana Gómez"</code></td>
-</tr>
-<tr>
-<td><strong>email</strong></td>
-<td>Dirección de correo electrónico (debe ser única)</td>
-<td><code>"ana@example.com"</code></td>
-</tr>
-<tr>
-<td><strong>password</strong></td>
-<td>Una contraseña segura que la persona elige</td>
-<td><code>"M1cR0s3gur0!"</code></td>
-</tr>
-</tbody>
-</table>
-<p>Estos tres valores son los mínimos; el código podría aceptar otros campos</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -614,6 +582,10 @@ Para que el registro sea exitoso se le deben enviar al servidor los siguientes d
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>Significado del método</td>
+<td>Crea un recurso o procesa los datos enviados.</td>
+</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -667,14 +639,8 @@ Para que el registro sea exitoso se le deben enviar al servidor los siguientes d
 <h4>Módulo: <code>controllers/UserController.py</code></h4>
 <h5><code>GET /me</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
-El endpoint <strong><code>GET /me</code></strong> sirve para que la aplicación le devuelva al usuario la información básica que tiene guardada sobre él mismo, como su nombre, su correo electrónico u otros datos de identificación. Es como pedirle a la aplicación “¿quién soy yo dentro del sistema?”.</p>
+<p><strong>Descripción:</strong> Recurso "/me" que devuelve la información del usuario autenticado.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
-Cuando alguien llama a esa URL, el código ubicado en el archivo <strong><code>controllers/UserController.py</code></strong> (dentro del proyecto Flask) busca la información del usuario que está “logueado” (es decir, que ya inició sesión) y la envía de vuelta al cliente que hizo la petición. En otras palabras, toma los datos del usuario desde la base de datos y los muestra.</p>
-<p><strong>3. Qué información necesita para funcionar</strong><br />
-Para poder responder, el endpoint necesita saber <strong>quién es el usuario que está haciendo la petición</strong>.<br />
-- Normalmente eso se indica mediante un <strong>token</strong> (una pequeña pieza de texto) que el cliente envía en la cabecera de la solicitud (por ejemplo, `Authorization:</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -683,6 +649,10 @@ Para poder responder, el endpoint necesita saber <strong>quién es el usuario qu
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>Significado del método</td>
+<td>Consulta o recupera el recurso solicitado sin modificarlo.</td>
+</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -732,29 +702,8 @@ Para poder responder, el endpoint necesita saber <strong>quién es el usuario qu
 <h4>Módulo: <code>controllers/AuthController.py</code></h4>
 <h5><code>POST /register</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
-Este punto de la aplicación permite que una persona se “registre” o cree una cuenta nueva en el sistema. Es como cuando te apuntas a un sitio web o a una aplicación y necesitas dar algunos datos para que el sitio te reconozca y guarde tu información.</p>
+<p><strong>Descripción:</strong> Recurso "/register" manejado por AuthController para registrar usuarios.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
-Cuando alguien envía sus datos al endpoint mediante una petición <strong>POST</strong> a la ruta <strong>/register</strong>, el programa revisa que la información esté completa y sea válida, la guarda en la base de datos y crea una nueva cuenta para esa persona. Si todo está correcto, el usuario queda registrado y listo para usar el resto de la aplicación.</p>
-<p><strong>3. Qué información necesita para funcionar (datos de entrada)</strong><br />
-Para poder registrar a una persona, el endpoint espera recibir, típicamente, los siguientes datos en formato JSON (un “paquete” de información estructurada):</p>
-<table class="report-table">
-<thead>
-<tr>
-<th>Campo</th>
-<th>Qué significa</th>
-<th>Por qué se necesita</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>username</strong> (o nombre de usuario)</td>
-<td>Un identificador único que la</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <table class="report-table">
 <thead>
 <tr>
@@ -763,6 +712,10 @@ Para poder registrar a una persona, el endpoint espera recibir, típicamente, lo
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>Significado del método</td>
+<td>Crea un recurso o procesa los datos enviados.</td>
+</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -815,19 +768,8 @@ Para poder registrar a una persona, el endpoint espera recibir, típicamente, lo
 </table>
 <h5><code>GET /register/&lt;int:id&gt;</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
-Este recurso permite consultar los datos de una persona que ya está registrada en el sistema. Es como preguntar “¿qué información tengo guardada de la persona con el número X?” y recibir la respuesta.</p>
+<p><strong>Descripción:</strong> Recurso "/register/<int:id>" que permite obtener los datos de registro de un usuario específico.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
-Cuando se le llama, el servidor busca en la base de datos el registro cuyo identificador coincide con el número que se le envía en la URL y devuelve esa información. Si el número no corresponde a ningún registro, avisa que no se encontró nada.</p>
-<p><strong>3. Qué información necesita para funcionar</strong><br />
-Solo necesita un dato: <strong>el número de identificación</strong> (un entero) que se coloca en la dirección de la petición.<br />
-Ejemplo de la URL completa:  </p>
-<pre><code>GET  https://mi‑sitio.com/register/27
-</code></pre>
-<p>En este caso “27” es el número que identifica al registro que queremos consultar.</p>
-<p><strong>4. Qué resultado devuelve</strong><br />
-- <strong>Si el registro existe:</strong> devuelve una respuesta en formato JSON (un texto estructurado) con los datos del usuario, por ejemplo nombre, correo,</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -836,6 +778,10 @@ Ejemplo de la URL completa:  </p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>Significado del método</td>
+<td>Consulta o recupera el recurso solicitado sin modificarlo.</td>
+</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -884,31 +830,8 @@ Ejemplo de la URL completa:  </p>
 </table>
 <h5><code>POST /login</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
-Este endpoint sirve para <strong>identificar a un usuario</strong> que quiere entrar a la aplicación. Es como la “puerta de entrada” que comprueba que la persona que dice ser “Juan Pérez” realmente es Juan antes de permitirle usar el sitio.</p>
+<p><strong>Descripción:</strong> Recurso "/login" que autentica a un usuario y devuelve un token de acceso.</p>
 </blockquote>
-<p><strong>2. Qué hace este endpoint</strong><br />
-Cuando se llama, recibe los datos de inicio de sesión (normalmente el nombre de usuario y la contraseña) y los compara con la información que ya está guardada en la base de datos.<br />
-- Si los datos coinciden, el servidor le devuelve una “llave” (un token) que le permitirá acceder a las demás partes de la aplicación sin volver a escribir su usuario y contraseña en cada página.<br />
-- Si los datos no coinciden, le avisa que el acceso está denegado y le pide que vuelva a intentarlo.</p>
-<p><strong>3. Qué información necesita para funcionar</strong><br />
-Para que el endpoint pueda trabajar, debe recibir un <strong>paquete pequeño de datos</strong> (un JSON) con dos campos:  </p>
-<table class="report-table">
-<thead>
-<tr>
-<th>Campo</th>
-<th>Qué representa</th>
-<th>Ejemplo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>username</code> (o <code>email</code>)</td>
-<td>El nombre o correo con el que el usuario se registró</td>
-<td>`"</td>
-</tr>
-</tbody>
-</table>
 <table class="report-table">
 <thead>
 <tr>
@@ -917,6 +840,10 @@ Para que el endpoint pueda trabajar, debe recibir un <strong>paquete pequeño de
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>Significado del método</td>
+<td>Crea un recurso o procesa los datos enviados.</td>
+</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -1269,26 +1196,14 @@ responses:
 
 #### `UserRepository`
 
-> **Descripción:** **1. Propósito de la clase (en palabras muy simples)**  
-`UserRepository` es como el “archivista” de un edificio: se encarga de guardar, buscar y recuperar la información de las personas que usan la aplicación. Cada vez que la aplicación necesita crear un nuevo registro de usuario o encontrar a un usuario ya existente, recurre a esta clase.
+> **Descripción:** Repositorio que encapsula el acceso a la persistencia de usuarios.
 
-**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
-Imagina una biblioteca municipal. En la biblioteca hay un catálogo donde se anotan los datos de todos los lectores: su nombre, número de identificación, dirección de correo, etc. El catálogo no es el lector en sí, sino la herramienta que permite al personal de la biblioteca consultar y actualizar la información.  
-`UserRepository` cumple ese mismo papel dentro del software: es el “catálogo” (o archivo) de usuarios.
-
-**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
-
-| Método | Qué hace (explicado sin jerga) |
-|--------|--------------------------------|
-| **`create`** | Añade una nueva ficha de usuario al archivo, como si se inscribiera a una persona nueva en la biblioteca. |
-| **`find_user_by_id`**
-
-| Métodos disponibles |
-| --- |
-| `create()` |
-| `find_user_by_id()` |
-| `find_by_user()` |
-| `find_by_email()` |
+| Método | Descripción |
+| --- | --- |
+| `create()` | Crea y persiste una nueva instancia de User con los datos recibidos. |
+| `find_user_by_id()` | Recupera un usuario a partir de su identificador único. |
+| `find_by_user()` | Busca un usuario por su nombre de usuario (username). |
+| `find_by_email()` | Busca un usuario por su dirección de correo electrónico. |
 
 </div>
 
@@ -1297,15 +1212,7 @@ Imagina una biblioteca municipal. En la biblioteca hay un catálogo donde se ano
 
 #### `Config`
 
-> **Descripción:** **1. Propósito de la clase (explicado sin jerga)**  
-La clase **`Config`** es como una hoja de instrucciones que le dice al programa cómo debe comportarse en diferentes situaciones. Sirve para guardar y leer valores que el programa necesita para funcionar, como “dónde está la base de datos”, “qué idioma se debe usar” o “qué nivel de detalle mostrar”. En vez de escribir esos datos en cada parte del código, la clase los concentra en un solo lugar.
-
-**2. Qué representa esta clase en el sistema (analógica)**  
-Imagínate que la aplicación es una fábrica y cada trabajador necesita saber la dirección del almacén, el horario de trabajo y el tipo de material que debe usar. La clase `Config` sería el **tablero de anuncios** de la fábrica: allí están escritos todos esos datos importantes para que cualquier trabajador (cualquier parte del programa) pueda consultarlos cuando lo necesite.
-
-**3. Qué puede hacer esta clase (funcionalidades principales)**  
-- **Almacenar valores**: guarda información como rutas de archivos, credenciales, opciones de depuración, etc.  
-- **Leer esos valores**: cualquier parte del programa puede preguntar a `Config` “¿cuál es la ruta del archivo de
+> **Descripción:** Clase de configuración del entorno de la aplicación.
 
 
 </div>
@@ -1315,25 +1222,13 @@ Imagínate que la aplicación es una fábrica y cada trabajador necesita saber l
 
 #### `User`
 
-> **Descripción:** **1. Propósito de la clase (en palabras simples)**  
-La clase **User** es como una “tarjeta de identificación” que guarda la información básica de cada persona que usa la aplicación. Sirve para registrar quién es cada usuario y para proteger su contraseña.
+> **Descripción:** Modelo que representa a un usuario en la base de datos (hereda de db.Model).
 
-**2. Qué representa esta clase en el sistema (una analogía del día a día)**  
-Imagina que la aplicación es un edificio de oficinas y cada persona que entra necesita una credencial de acceso.  
-- **User** sería la credencial (el carnet) que lleva el nombre de la persona, su correo electrónico y, de forma segura, la clave que le permite entrar.  
-- Cada vez que alguien quiere entrar, el guardia (el programa) verifica que la clave escrita en la credencial coincida con la que el usuario ingresó.
-
-**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
-
-| Acción | Qué hace realmente | Explicación fácil |
-|--------|-------------------|-------------------|
-| **set_password** | Guarda la contraseña de forma segura | Cuando el usuario elige una clave, la clase la “cifra” (la transforma en un código ilegible) antes de guardarla, de modo que nadie pueda leer
-
-| Métodos disponibles |
-| --- |
-| `set_password()` |
-| `check_password()` |
-| `to_dict()` |
+| Método | Descripción |
+| --- | --- |
+| `set_password()` | Genera y asigna el hash de la contraseña al atributo password del usuario. |
+| `check_password()` | Comprueba si la contraseña proporcionada coincide con el hash almacenado; devuelve bool. |
+| `to_dict()` | Devuelve un diccionario con los campos públicos del usuario: id, username y email. |
 
 </div>
 
@@ -1342,27 +1237,13 @@ Imagina que la aplicación es un edificio de oficinas y cada persona que entra n
 
 #### `authService`
 
-> **Descripción:** **1. Propósito de la clase (en palabras simples)**  
-`authService` es la “puerta de entrada” del sistema. Su trabajo es decidir quién puede entrar, quién puede crear una cuenta nueva y quién puede iniciar sesión para usar la aplicación. En otras palabras, se encarga de manejar todo lo relacionado con la identificación de los usuarios.
+> **Descripción:** Servicio de autenticación que gestiona el registro y el inicio de sesión de usuarios.
 
-**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
-Imagínate un club deportivo con una recepción.  
-- Cuando alguien quiere ser miembro, va a la recepción, entrega sus datos y recibe una credencial.  
-- Cuando ya es miembro y llega al club, muestra su credencial y la recepcionista verifica que sea válida antes de dejarle pasar.  
-
-`authService` actúa como esa recepción digital: registra nuevos miembros, busca la información de un miembro cuando es necesario y verifica que la persona que intenta entrar sea quien dice ser.
-
-**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
-
-| Método | Qué hace (explicado sin jerga) |
-|--------|--------------------------------|
-| **register** | Crea una nueva cuenta para una persona que aún no está registrada. Es como inscribir a un nuevo socio en el club.
-
-| Métodos disponibles |
-| --- |
-| `register()` |
-| `find_by_id()` |
-| `login()` |
+| Método | Descripción |
+| --- | --- |
+| `register()` | Crea un nuevo usuario a partir de los datos recibidos y lo persiste en la base de datos. |
+| `find_by_id()` | Busca y devuelve un usuario dado su identificador único. |
+| `login()` | Verifica credenciales y genera un token de autenticación para el usuario. |
 
 </div>
 
@@ -1371,29 +1252,12 @@ Imagínate un club deportivo con una recepción.
 
 #### `AwsSecretManager`
 
-> **Descripción:** **Clase: AwsSecretManager**  
-*Archivo: settings/key.py*  
+> **Descripción:** Clase que encapsula el acceso a AWS Secrets Manager para obtener secretos configurados.
 
----
-
-### 1. Propósito de la clase (en palabras muy sencillas)
-
-Imagina que la aplicación necesita guardar información muy delicada, como la contraseña de una base de datos o la clave para acceder a un servicio externo. Esa información no debe estar escrita a la vista en los archivos del proyecto, porque cualquiera que tenga acceso al código podría verla.  
-
-**AwsSecretManager** es la “caja fuerte” que la aplicación usa para ir a buscar esos datos confidenciales cuando los necesita, sin que estén expuestos en el código.
-
----
-
-### 2. Qué representa esta clase en el sistema (una analogía)
-
-Piensa en un banco que tiene una caja de seguridad donde guardas tus documentos importantes. Tú tienes una llave (o un código) para abrirla y recuperar lo que necesitas, pero el banco nunca te muestra el contenido de la caja a menos que tú lo pidas.  
-
-En la aplicación, **AwsSecretManager** es esa caja de seguridad digital. El “banco” en este caso es el **AWS Secret Manager**, un servicio en la nube de Amazon que guarda secretos. La clase actúa como el portero
-
-| Métodos disponibles |
-| --- |
-| `__init__()` |
-| `get_secret()` |
+| Método | Descripción |
+| --- | --- |
+| `__init__()` | Inicializa la instancia con la configuración necesaria para conectar con AWS Secrets Manager. |
+| `get_secret()` | Recupera y devuelve el valor de un secreto especificado por su nombre. |
 
 </div>
 
@@ -1507,6 +1371,10 @@ En la aplicación, **AwsSecretManager** es esa caja de seguridad digital. El “
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>create_app</code></strong>: Crea y configura la aplicación Flask, cargando la configuración, inicializando la base de datos, migraciones, Swagger y JWT.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1563,6 +1431,11 @@ En la aplicación, **AwsSecretManager** es esa caja de seguridad digital. El “
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>create_cognito_user</code></strong>: Registra un nuevo usuario en AWS Cognito usando el correo electrónico y la contraseña proporcionados.</li>
+<li><strong><code>register</code></strong>: Endpoint que recibe una solicitud JSON para registrar un usuario en Cognito y devuelve el resultado del proceso.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1683,6 +1556,13 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>create</code></strong>: Crea un registro de usuario en la base de datos, asigna su contraseña encriptada y persiste el objeto.</li>
+<li><strong><code>find_user_by_id</code></strong>: Obtiene un usuario a partir de su identificador primario.</li>
+<li><strong><code>find_by_user</code></strong>: Busca el primer usuario que coincida con el nombre de usuario especificado.</li>
+<li><strong><code>find_by_email</code></strong>: Busca el primer usuario que tenga el correo electrónico indicado.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1753,6 +1633,10 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>me</code></strong>: Endpoint que devuelve los datos del usuario autenticado a partir del JWT.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1808,6 +1692,12 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>register</code></strong>: Controlador que registra un nuevo usuario en el sistema mediante authService después de validar la carga JSON.</li>
+<li><strong><code>get_user_by_id</code></strong>: Endpoint que recupera un usuario por su id y devuelve sus datos o un error 404 si no existe.</li>
+<li><strong><code>login</code></strong>: Endpoint de inicio de sesión que valida credenciales y delega la autenticación a authService.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1906,6 +1796,10 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>home</code></strong>: Ruta simple que devuelve un saludo estático.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1955,6 +1849,12 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>set_password</code></strong>: Asigna la contraseña al usuario generando su hash con pbkdf2_sha256.</li>
+<li><strong><code>check_password</code></strong>: Verifica que la contraseña proporcionada coincide con el hash almacenado; devuelve True o False.</li>
+<li><strong><code>to_dict</code></strong>: Convierte la instancia de User en un diccionario con los campos id, username y email.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2035,6 +1935,12 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>register</code></strong>: Registra un nuevo usuario creando la entidad mediante UserRepository.create y devuelve el objeto User creado.</li>
+<li><strong><code>find_by_id</code></strong>: Busca y devuelve un usuario a partir de su identificador usando UserRepository.find_user_by_id.</li>
+<li><strong><code>login</code></strong>: Autentica a un usuario: busca por nombre, verifica la contraseña y, si es válida, genera un token JWT con claims del nombre de usuario. Devuelve el token o None si falla.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2118,6 +2024,11 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>__init__</code></strong>: Constructor que inicializa un cliente de AWS Secrets Manager mediante boto3.</li>
+<li><strong><code>get_secret</code></strong>: Obtiene un secreto de AWS Secrets Manager por su nombre y devuelve su contenido como objeto JSON; muestra un mensaje de error en caso de excepción.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2175,6 +2086,10 @@ responses:
 </tr>
 </tbody>
 </table>
+<p><strong>Descripción de cada función:</strong></p>
+<ul>
+<li><strong><code>create_cognito_user</code></strong>: Crea un usuario en Amazon Cognito y le asigna la contraseña especificada, suprimendo el mensaje de bienvenida.</li>
+</ul>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2236,19 +2151,7 @@ responses:
 
 #### `User`
 
-> **Descripción:** **1. Propósito de la clase (en palabras simples)**  
-La clase **User** es como una “tarjeta de identificación” que guarda la información básica de cada persona que usa la aplicación. Sirve para registrar quién es cada usuario y para proteger su contraseña.
-
-**2. Qué representa esta clase en el sistema (una analogía del día a día)**  
-Imagina que la aplicación es un edificio de oficinas y cada persona que entra necesita una credencial de acceso.  
-- **User** sería la credencial (el carnet) que lleva el nombre de la persona, su correo electrónico y, de forma segura, la clave que le permite entrar.  
-- Cada vez que alguien quiere entrar, el guardia (el programa) verifica que la clave escrita en la credencial coincida con la que el usuario ingresó.
-
-**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
-
-| Acción | Qué hace realmente | Explicación fácil |
-|--------|-------------------|-------------------|
-| **set_password** | Guarda la contraseña de forma segura | Cuando el usuario elige una clave, la clase la “cifra” (la transforma en un código ilegible) antes de guardarla, de modo que nadie pueda leer
+> **Descripción:** Modelo que representa a un usuario en la base de datos (hereda de db.Model).
 
 | Propiedad | Valor |
 | --- | --- |
@@ -2258,11 +2161,11 @@ Imagina que la aplicación es un edificio de oficinas y cada persona que entra n
 
 **Métodos del Modelo:**
 
-| Métodos disponibles |
-| --- |
-| `set_password()` |
-| `check_password()` |
-| `to_dict()` |
+| Método | Descripción |
+| --- | --- |
+| `set_password()` | Genera y asigna el hash de la contraseña al atributo password del usuario. |
+| `check_password()` | Comprueba si la contraseña proporcionada coincide con el hash almacenado; devuelve bool. |
+| `to_dict()` | Devuelve un diccionario con los campos públicos del usuario: id, username y email. |
 
 </div>
 
@@ -2653,7 +2556,7 @@ Tendencia: ↓ Baja
 </tr>
 </tbody>
 </table>
-<p>💡 <strong>Sugerencia:</strong> Las funciones <code>create_cognito_user</code> y <code>create_cognito_user</code> realizan operaciones similares (<code>cognito_user</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/cognito_user.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>auth/cognito_service.py</code>, <code>routes/auth.py</code>).</p>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>create_cognito_user</code> y <code>create_cognito_user</code> realizan operaciones similares (<code>cognito_user</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/cognito_user.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>routes/auth.py</code>, <code>auth/cognito_service.py</code>).</p>
 <hr />
 <p><strong>Patrón: <code>*_login</code> / <code>login_*</code></strong> — aparece en 2 archivos distintos</p>
 <table class="report-table">
@@ -2777,9 +2680,9 @@ Tendencia: ↓ Baja
 <li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
 </ul>
 <hr />
-<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 15:21 UTC</em></p>
+<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 16:19 UTC</em></p>
     <div class="document-control">
-      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 09:21. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de calidad: 71/100.
+      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 10:19. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de calidad: 71/100.
     </div>
   </main>
 </body>

@@ -175,37 +175,39 @@ def _configure_native_libraries():
                 custom_dirs.extend([custom_path, custom_path / 'bin'])
         candidate_dirs = custom_dirs + candidate_dirs
 
-    registered_paths = set()
-    pango_found = False
+    pango_dll_dir = None
     for candidate in candidate_dirs:
-        if not candidate.exists() or not candidate.is_dir():
-            continue
-        if not any(candidate.glob('*pango*.dll')):
-            continue
+        if candidate.exists() and candidate.is_dir() and any(candidate.glob('*pango*.dll')):
+            pango_dll_dir = candidate.resolve()
+            break
 
-        pango_found = True
-        candidate_str = str(candidate.resolve())
-        normalized_path = os.path.normcase(candidate_str)
-        if normalized_path in registered_paths:
-            continue
-        registered_paths.add(normalized_path)
-
-        if normalized_path not in _NATIVE_DLL_DIRECTORIES and hasattr(os, 'add_dll_directory'):
-            try:
-                handle = os.add_dll_directory(candidate_str)
-            except OSError as error:
-                raise RuntimeError(
-                    f"No se pudo registrar el directorio de DLL de WeasyPrint: {candidate_str}"
-                ) from error
-            _NATIVE_DLL_HANDLES.append(handle)
-            _NATIVE_DLL_DIRECTORIES.add(normalized_path)
-
-    if not pango_found:
+    if pango_dll_dir is None:
         raise RuntimeError(
             "No se encontraron DLL de Pango para WeasyPrint. En Windows instala "
             "Pango con MSYS2 UCRT64 y configura WEASYPRINT_DLL_DIRECTORIES "
             "con la ruta C:\\msys64\\ucrt64\\bin."
         )
+
+    candidate_str = str(pango_dll_dir)
+    normalized_path = os.path.normcase(candidate_str)
+    current_path = os.environ.get('PATH', '')
+    path_entries = {
+        os.path.normcase(os.path.abspath(entry.strip('"')))
+        for entry in current_path.split(os.pathsep)
+        if entry
+    }
+    if normalized_path not in path_entries:
+        os.environ['PATH'] = candidate_str + os.pathsep + current_path
+
+    if normalized_path not in _NATIVE_DLL_DIRECTORIES and hasattr(os, 'add_dll_directory'):
+        try:
+            handle = os.add_dll_directory(candidate_str)
+        except OSError as error:
+            raise RuntimeError(
+                f"No se pudo registrar el directorio de DLL de WeasyPrint: {candidate_str}"
+            ) from error
+        _NATIVE_DLL_HANDLES.append(handle)
+        _NATIVE_DLL_DIRECTORIES.add(normalized_path)
 
     # Generar un fonts.conf limpio y aislado para evitar los avisos de sintaxis en conf.d de MSYS2 (xsi:nil, etc.)
     try:

@@ -183,6 +183,7 @@ class DocGenerator:
             already_enhanced = bool(
                 self.r.get('ai_documentation_enhanced')
                 and (self.r.get('ai_output_language') == self.lang or not self.r.get('ai_output_language'))
+                and self.r.get('ai_documentation_version') == AIEnhancer.DOCUMENTATION_VERSION
             )
             if self.ai_enhancer.is_available() and not already_enhanced:
                 # Pasar intención de idioma a la mejora si es posible
@@ -204,6 +205,69 @@ class DocGenerator:
     def tx(self, spanish, english):
         """Texto inline con dos variantes; mantiene el diseño y cambia solo el idioma."""
         return english if self.lang == 'en' else spanish
+
+    def _method_description(self, owner: dict, method) -> str:
+        method_name = str(method.get('name', '') if isinstance(method, dict) else method)
+        stored = owner.get('method_descriptions', {}).get(method_name)
+        if stored:
+            return stored
+
+        owner_file = owner.get('file')
+        for function in self.r.get('functions', []):
+            if function.get('name') == method_name and (
+                not owner_file or not function.get('file') or function.get('file') == owner_file
+            ):
+                description = function.get('ai_description') or function.get('docstring')
+                if description:
+                    return description
+
+        normalized = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', method_name)
+        normalized = normalized.replace('_', ' ').strip().lower()
+        words = normalized.split()
+        name = ' '.join(words) or method_name
+        if self.lang == 'en':
+            if words and words[0] in ('get', 'find', 'fetch', 'list', 'read', 'load'):
+                return f"Retrieves or lists {name[len(words[0]):].strip() or 'the related data'}."
+            if words and words[0] in ('create', 'add', 'insert', 'register'):
+                return f"Creates or registers {name[len(words[0]):].strip() or 'the related item'}."
+            if words and words[0] in ('update', 'edit', 'set', 'patch'):
+                return f"Updates {name[len(words[0]):].strip() or 'the related item'}."
+            if words and words[0] in ('delete', 'remove', 'destroy'):
+                return f"Removes {name[len(words[0]):].strip() or 'the related item'}."
+            return f"Performs the {name} operation for this {owner.get('name', 'component')}."
+
+        if words and words[0] in ('get', 'find', 'fetch', 'list', 'read', 'load'):
+            return f"Consulta o recupera {name[len(words[0]):].strip() or 'los datos relacionados'}."
+        if words and words[0] in ('create', 'add', 'insert', 'register'):
+            return f"Crea o registra {name[len(words[0]):].strip() or 'el elemento relacionado'}."
+        if words and words[0] in ('update', 'edit', 'set', 'patch'):
+            return f"Actualiza {name[len(words[0]):].strip() or 'el elemento relacionado'}."
+        if words and words[0] in ('delete', 'remove', 'destroy'):
+            return f"Elimina {name[len(words[0]):].strip() or 'el elemento relacionado'}."
+        return f"Realiza la operación «{name}» de {owner.get('name', 'este componente')}."
+
+    def _http_method_description(self, method: str, path: str) -> str:
+        method = str(method).upper()
+        path_lower = str(path).lower()
+        if self.lang == 'en':
+            if method == 'GET' and any(term in path_lower for term in ('export', 'download', '/pdf')):
+                return "Generates or downloads the requested document or resource."
+            return {
+                'GET': "Reads or retrieves the requested resource without changing it.",
+                'POST': "Creates a resource or processes the submitted data.",
+                'PUT': "Replaces or fully updates the target resource.",
+                'PATCH': "Partially updates the target resource.",
+                'DELETE': "Removes the target resource.",
+            }.get(method, "Executes the operation defined by this endpoint.")
+        if method == 'GET' and any(term in path_lower for term in ('export', 'download', '/pdf')):
+            return "Genera o descarga el documento o recurso solicitado."
+        return {
+            'GET': "Consulta o recupera el recurso solicitado sin modificarlo.",
+            'POST': "Crea un recurso o procesa los datos enviados.",
+            'PUT': "Reemplaza o actualiza completamente el recurso.",
+            'PATCH': "Actualiza parcialmente el recurso.",
+            'DELETE': "Elimina el recurso indicado.",
+        }.get(method, "Ejecuta la operación definida por este endpoint.")
 
     @staticmethod
     def _sanitize_ai_markdown(text: str) -> str:
@@ -1110,6 +1174,7 @@ python app.py  # or npm run dev
 
                 # Tabla de detalle del endpoint
                 detail_rows = [
+                    [self.tx('Significado del método', 'HTTP method purpose'), self._http_method_description(method, ep.get('path', '/'))],
                     ['Framework', ep.get('framework', self.t('unknown'))],
                     [self.t('file'), f"`{ep.get('file')}`"],
                 ]
@@ -1339,8 +1404,11 @@ python app.py  # or npm run dev
             if c.get("methods"):
                 method_rows = []
                 for m in c["methods"][:20]:
-                    method_rows.append([f"`{m}()`"])
-                out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
+                    method_rows.append([f"`{m}()`", self._method_description(c, m)])
+                out += self._render_markdown_table(
+                    [self.tx('Método', 'Method'), self.t('description')],
+                    method_rows
+                )
 
             # Cerrar bloque anti-salto
             out += '\n</div>\n\n---\n\n'
@@ -1431,6 +1499,14 @@ python app.py  # or npm run dev
                 [self.t('function_col'), self.t('params_col'), self.tx('Líneas en la función', 'Function lines'), self.t('complexity'), self.tx('Doc', 'Docs')],
                 fn_rows
             )
+            out += f"\n**{self.tx('Descripción de cada función', 'Description of each function')}:**\n\n"
+            for fn in funcs:
+                description = self._sanitize_ai_markdown(
+                    fn.get('ai_description') or fn.get('description') or fn.get('docstring')
+                    or self.tx(f"Función {fn['name']}", f"Function {fn['name']}")
+                )
+                out += f"- **`{fn['name']}`**: {description}\n"
+            out += "\n"
 
             # Fragmentos de código relevantes (máximo 3 por módulo)
             important_fns = sorted(funcs, key=lambda f: f.get('complexity', 1), reverse=True)
@@ -1557,9 +1633,15 @@ python app.py  # or npm run dev
 
                 # Métodos del modelo si existen
                 if m.get("methods"):
-                    method_rows = [[f"`{met}()`"] for met in m["methods"][:15]]
+                    method_rows = [
+                        [f"`{met}()`", self._method_description(m, met)]
+                        for met in m["methods"][:15]
+                    ]
                     out += f"\n**{self.tx('Métodos del Modelo', 'Model Methods')}:**\n\n"
-                    out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
+                    out += self._render_markdown_table(
+                        [self.tx('Método', 'Method'), self.t('description')],
+                        method_rows
+                    )
 
                 # Cerrar bloque anti-salto de página
                 out += '\n</div>\n\n---\n\n'

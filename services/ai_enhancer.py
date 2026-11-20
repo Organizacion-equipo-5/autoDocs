@@ -30,6 +30,7 @@ class AIEnhancer:
         "llama-3.3-70b-versatile",
         "llama-3.1-8b-instant",
     ]
+    DOCUMENTATION_VERSION = 2
 
     def __init__(self):
         # Soporte para múltiples API keys de Groq
@@ -175,6 +176,141 @@ class AIEnhancer:
             prompt
             + "\n\nImportante: escribe TODA la respuesta en español natural."
         )
+
+    @staticmethod
+    def _parse_documentation_batch(response: str) -> Optional[dict]:
+        """Lee el JSON de una respuesta por lotes, incluso si viene entre fences."""
+        text = response.strip()
+        if text.startswith("```"):
+            text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.IGNORECASE)
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            if not match:
+                return None
+            try:
+                parsed = json.loads(match.group(0))
+            except json.JSONDecodeError:
+                return None
+        if not isinstance(parsed, dict):
+            return None
+        items = parsed.get("items", parsed)
+        return items if isinstance(items, dict) else None
+
+    def _enhance_documentation_batch(self, results: dict, lang: str) -> None:
+        """Enriquece funciones, clases, modelos y endpoints con pocas llamadas."""
+        records = []
+        targets = {}
+        collections = (
+            ("function", results.get("functions", [])),
+            ("class", results.get("classes", [])),
+            ("model", results.get("models", [])),
+            ("endpoint", results.get("endpoints", [])),
+        )
+        for kind, entities in collections:
+            for index, entity in enumerate(entities):
+                if not isinstance(entity, dict):
+                    continue
+                methods = entity.get("methods") or []
+                method_descriptions = entity.get("method_descriptions")
+                if not isinstance(method_descriptions, dict):
+                    method_descriptions = {}
+                needs_method_descriptions = (
+                    kind in ("class", "model")
+                    and any(
+                        str(method.get("name", "") if isinstance(method, dict) else method)
+                        not in method_descriptions
+                        for method in methods
+                    )
+                )
+                if entity.get("ai_description") and not needs_method_descriptions:
+                    continue
+                record_id = f"{kind}_{index}"
+                record = {
+                    "id": record_id,
+                    "type": kind,
+                    "name": entity.get("name") or entity.get("path", ""),
+                    "file": entity.get("file", ""),
+                    "docstring": entity.get("docstring", ""),
+                    "description": entity.get("description", ""),
+                }
+                if kind == "function":
+                    record.update({
+                        "parameters": entity.get("params", []),
+                        "code": str(entity.get("code_snippet", ""))[:700],
+                    })
+                elif kind in ("class", "model"):
+                    record.update({
+                        "bases": entity.get("bases", []),
+                        "fields": entity.get("fields", []),
+                        "methods": entity.get("methods", []),
+                    })
+                else:
+                    record.update({
+                        "method": entity.get("method", "GET"),
+                        "path": entity.get("path", "/"),
+                        "framework": entity.get("framework", ""),
+                        "handler": entity.get("handler") or entity.get("function", ""),
+                    })
+                records.append(record)
+                targets[record_id] = (kind, entity)
+
+        if not records:
+            return
+
+        system_prompt = self._localize_system(
+            "Eres especialista en documentación de software. Describe con precisión usando solo la evidencia recibida; no inventes contratos, campos ni comportamientos. "
+            "Devuelve exclusivamente JSON válido con la forma "
+            '{"items":{"id":{"description":"...","methods":{"nombre":"..."}}}}. '
+            "Las descripciones deben ser concretas, claras y breves. En métodos de clase/modelo, describe cada método listado.",
+            lang,
+        )
+        for start in range(0, len(records), 12):
+            batch = records[start:start + 12]
+            prompt = (
+                "Documenta todos los registros siguientes. En endpoints explica la función concreta "
+                "del recurso y el significado de su método HTTP: GET consulta/recupera, POST crea o "
+                "procesa, PUT reemplaza/actualiza, PATCH actualiza parcialmente y DELETE elimina. "
+                "En funciones explica propósito, entradas y resultado a partir del código/docstring. "
+                "En clases y modelos explica qué representan y devuelve también una descripción breve "
+                "para cada método listado. Escribe todas las descripciones en el idioma solicitado.\n"
+                "Responde solo con el objeto JSON indicado en las instrucciones del sistema.\n"
+                "Registros:\n"
+                + json.dumps(batch, ensure_ascii=False, default=str)
+            )
+            response = self._call_ai(
+                system_prompt,
+                self._localize_prompt(prompt, lang),
+                max_tokens=min(2200, max(700, len(batch) * 130)),
+            )
+            if not response:
+                print("[AI] No se recibieron descripciones para un lote de documentación.")
+                continue
+            batch_results = self._parse_documentation_batch(response)
+            if batch_results is None:
+                print("[AI] La respuesta por lotes no contiene JSON válido; se usarán descripciones de respaldo.")
+                continue
+
+            for record in batch:
+                kind, entity = targets[record["id"]]
+                description_data = batch_results.get(record["id"])
+                if not isinstance(description_data, dict):
+                    continue
+                description = description_data.get("description")
+                if isinstance(description, str) and description.strip() and not entity.get("ai_description"):
+                    entity["ai_description"] = description.strip()
+                methods = description_data.get("methods")
+                if kind in ("class", "model") and isinstance(methods, dict):
+                    saved_methods = entity.get("method_descriptions")
+                    if not isinstance(saved_methods, dict):
+                        saved_methods = {}
+                        entity["method_descriptions"] = saved_methods
+                    saved_methods.update({
+                        str(name): value.strip()
+                        for name, value in methods.items()
+                        if isinstance(value, str) and value.strip()
+                    })
 
     def enhance_function_description(self, function: dict, context: str = "",
                                       output_language: str = "es") -> str:
@@ -466,6 +602,7 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         if (
             results.get('ai_documentation_enhanced')
             and results.get('ai_output_language') == lang
+            and results.get('ai_documentation_version') == self.DOCUMENTATION_VERSION
         ):
             return results
 
@@ -474,57 +611,48 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
                   "Agrega GROQ_API_KEY en tu archivo .env para habilitar la mejora con IA.")
             return results
 
+        if results.get('ai_documentation_enhanced') and (
+            results.get('ai_output_language') != lang
+            or results.get('ai_documentation_version') != self.DOCUMENTATION_VERSION
+        ):
+            for collection_name in ('functions', 'classes', 'models', 'endpoints'):
+                for entity in results.get(collection_name, []):
+                    if isinstance(entity, dict):
+                        entity.pop('ai_description', None)
+                        entity.pop('method_descriptions', None)
+            results.pop('ai_architecture_insights', None)
+
         results['ai_output_language'] = lang
         print(f"[AI] Mejorando documentación con Groq en {lang}...")
-
-        # Contexto del proyecto
-        context = (
-            f"Project in {results.get('primary_language', 'unknown')} "
-            f"with {len(results.get('functions', []))} functions"
-            if lang == 'en' else
-            f"Proyecto en {results.get('primary_language', 'desconocido')} "
-            f"con {len(results.get('functions', []))} funciones"
-        )
-
-        # Mejorar funciones (limitar a 5 para reducir consumo de tokens)
-        for func in results.get('functions', [])[:5]:
-            func['ai_description'] = self.enhance_function_description(
-                func, context, output_language=lang
-            )
-
-        # Mejorar clases (limitar a 5)
-        for cls in results.get('classes', [])[:5]:
-            cls['ai_description'] = self.enhance_class_description(
-                cls, context, output_language=lang
-            )
-
-        # Mejorar modelos (limitar a 5)
-        for model in results.get('models', [])[:5]:
-            model['ai_description'] = self.enhance_model_description(
-                model, context, output_language=lang
-            )
-
-        # Mejorar endpoints (limitar a 5)
-        for ep in results.get('endpoints', [])[:5]:
-            ep['ai_description'] = self.enhance_endpoint_description(
-                ep, context, output_language=lang
-            )
+        self._enhance_documentation_batch(results, lang)
 
         # Asegurar que todos los elementos restantes tengan ai_description coherente
+        for func in results.get('functions', []):
+            if not func.get('ai_description'):
+                func['ai_description'] = func.get('description') or func.get('docstring') or (
+                    f"Function {func.get('name', 'unknown')}" if lang == 'en'
+                    else f"Función {func.get('name', 'desconocida')}"
+                )
+
         for m in results.get('models', []):
             if not m.get('ai_description'):
                 m['ai_description'] = m.get('description') or m.get('docstring') or (
-                    f"Domain model representing {m['name']} entity." if lang == 'en'
-                    else f"Modelo de datos que define la entidad {m['name']}."
+                    f"Domain model representing {m.get('name', 'unknown')} entity." if lang == 'en'
+                    else f"Modelo de datos que define la entidad {m.get('name', 'desconocida')}."
                 )
 
         for ep in results.get('endpoints', []):
             if not ep.get('ai_description'):
-                ep['ai_description'] = ep.get('description') or f"Endpoint {ep.get('method')} {ep.get('path')}"
+                ep['ai_description'] = ep.get('description') or ep.get('docstring') or (
+                    f"Endpoint {ep.get('method')} {ep.get('path')}"
+                )
 
         for cls in results.get('classes', []):
             if not cls.get('ai_description'):
-                cls['ai_description'] = cls.get('description') or cls.get('docstring') or f"Clase {cls.get('name')}"
+                cls['ai_description'] = cls.get('description') or cls.get('docstring') or (
+                    f"Class {cls.get('name', 'unknown')}" if lang == 'en'
+                    else f"Clase {cls.get('name', 'desconocida')}"
+                )
 
         # Generar insights de arquitectura
         results['ai_architecture_insights'] = self.generate_architecture_insights(
@@ -532,6 +660,7 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         )
         results['ai_documentation_enhanced'] = True
         results['ai_output_language'] = lang
+        results['ai_documentation_version'] = self.DOCUMENTATION_VERSION
 
         print("[AI] Documentación mejorada exitosamente con Groq")
         return results

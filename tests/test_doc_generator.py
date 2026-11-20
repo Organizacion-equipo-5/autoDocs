@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from services.doc_generator import DocGenerator
+from services.ai_enhancer import AIEnhancer
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -193,6 +194,7 @@ class TestInit:
         minimal_results.update({
             "ai_documentation_enhanced": True,
             "ai_output_language": "es",
+            "ai_documentation_version": AIEnhancer.DOCUMENTATION_VERSION,
         })
         gen = DocGenerator(minimal_results, lang="es")
         gen.ai_enhancer.enhance_documentation.assert_not_called()
@@ -567,6 +569,23 @@ class TestApiSection:
         assert "GET" in section
         assert "POST" in section
         assert "/api/users" in section
+        assert "Consulta o recupera" in section
+        assert "Crea un recurso" in section
+
+    def test_documenta_significado_de_todos_los_metodos_http(self, minimal_results):
+        minimal_results["endpoints"] = [
+            {"method": method, "path": "/api/resource"}
+            for method in ("GET", "POST", "PUT", "PATCH", "DELETE")
+        ]
+        section = DocGenerator(minimal_results)._api_section()
+        for description in (
+            "Consulta o recupera",
+            "Crea un recurso",
+            "Reemplaza o actualiza completamente",
+            "Actualiza parcialmente",
+            "Elimina el recurso",
+        ):
+            assert description in section
 
     def test_incluye_setup(self, full_results):
         gen = DocGenerator(full_results)
@@ -633,6 +652,7 @@ class TestClassesSection:
         section = gen._classes_section()
         assert "UserModel" in section
         assert "bad_name" in section
+        assert "Elimina el elemento relacionado" in section
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -677,10 +697,12 @@ class TestFunctionsSection:
         assert "No se detectaron funciones" in section
 
     def test_con_funciones(self, full_results):
+        full_results["functions"][0]["ai_description"] = "Obtiene el usuario solicitado"
         gen = DocGenerator(full_results)
         section = gen._functions_section()
         assert "get_user" in section
         assert "create_user" in section
+        assert "Obtiene el usuario solicitado" in section
 
     def test_marca_funciones_async(self, full_results):
         gen = DocGenerator(full_results)
