@@ -692,11 +692,11 @@
         #upload-zone {
             border: 2px dashed rgba(148, 163, 184, 0.4);
             background: rgba(248, 250, 252, 0.5);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 16px;
+            padding: 1.75rem 1.5rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
         }
 
         /* 
@@ -706,6 +706,17 @@
         #upload-zone:hover {
             border-color: #38bdf8;
             background: rgba(56, 189, 248, 0.05);
+            transform: translateY(-1px);
+        }
+
+        #upload-zone:focus-visible {
+            outline: 3px solid rgba(56, 189, 248, 0.28);
+            outline-offset: 3px;
+        }
+
+        #upload-zone.is-dragging {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
         }
 
         /* 
@@ -719,6 +730,80 @@
         html.dark #upload-zone:hover {
             border-color: #38bdf8;
             background: rgba(56, 189, 248, 0.08);
+        }
+
+        html.dark #upload-zone.is-dragging {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.14);
+        }
+
+        #uploadModal > .glass {
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+        }
+
+        #uploadModal .upload-modal-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 0.35rem;
+            padding-right: 2.5rem;
+        }
+
+        #uploadModal .upload-modal-icon {
+            display: flex;
+            width: 2.75rem;
+            height: 2.75rem;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 0.9rem;
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+        }
+
+        #uploadModal .upload-modal-close {
+            display: flex;
+            width: 2.25rem;
+            height: 2.25rem;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 0.75rem;
+            background: rgba(148, 163, 184, 0.08);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        #uploadModal .upload-field-label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        #uploadModal .upload-github-section {
+            padding: 0.9rem;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 1rem;
+            background: rgba(148, 163, 184, 0.04);
+        }
+
+        #uploadModal #file-name {
+            overflow-wrap: anywhere;
+        }
+
+        #modal-submit-btn:disabled {
+            cursor: wait;
+            opacity: 0.7;
+            transform: none;
+        }
+
+        @media (max-width: 640px) {
+            #uploadModal > .glass {
+                max-height: calc(100vh - 1rem);
+            }
         }
 
         /* 
@@ -1138,113 +1223,113 @@ CUERPO PRINCIPAL DE LA PÁGINA
             w-full max-w-md: Ancho máximo de 448px.
             modal-anim: Animación de entrada.
         -->
-        <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+        <div class="glass p-6 sm:p-8 rounded-3xl w-full max-w-4xl modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
             <!-- 
                 Botón para cerrar el modal.
                 absolute top-4 right-4: Posición fija en la esquina superior derecha.
                 hover:text-primary: Cambia a azul al pasar el mouse.
             -->
-            <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <button type="button" aria-label="Cerrar" onclick="closeUploadModal()" class="upload-modal-close absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">&times;</button>
             
-            <h3 class="text-2xl font-bold text-on-surface mb-1">Nuevo Proyecto</h3>
-            <p class="text-on-surface-variant/60 text-sm mb-6" style="color: #BFBDBD;">Sube tu proyecto o clona desde GitHub</p>
-
-            <!-- Campo: Nombre del proyecto -->
-            <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Nombre del proyecto</label>
-                <input type="text" id="proj-name" class="modal-input" placeholder="Mi Proyecto" />
+            <div class="upload-modal-heading">
+                <span class="upload-modal-icon material-symbols-outlined text-2xl">add_box</span>
+                <div>
+                    <h3 class="text-2xl font-bold text-on-surface">Nuevo Proyecto</h3>
+                    <p class="text-on-surface-variant/70 text-sm">Sube tu proyecto o clona desde GitHub</p>
+                </div>
             </div>
+            <div class="h-px bg-outline-variant/20 my-5"></div>
 
-            <!-- Campo: Descripción (opcional) -->
-            <div class="mb-4">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Descripción <span class="opacity-50">(opcional)</span></label>
-                <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripción" />
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <!-- Campo: Nombre del proyecto -->
+                    <div class="mb-4">
+                        <label for="proj-name" class="upload-field-label text-xs uppercase tracking-widest font-bold text-on-surface-variant">Nombre del proyecto</label>
+                        <input type="text" id="proj-name" class="modal-input" placeholder="Mi Proyecto" />
+                    </div>
 
-            <!-- 
-                Zona de drag & drop para subir archivos.
-                onclick: Abre el selector de archivos.
-                ondragover, ondragleave, ondrop: Maneja el drag & drop.
-            -->
-            <div id="upload-zone" onclick="document.getElementById('file-input').click()"
-                ondragover="event.preventDefault();this.style.borderColor='#38bdf8'"
-                ondragleave="event.preventDefault();this.style.borderColor=''"
-                ondrop="event.preventDefault();onFileSelect({target:{files:event.dataTransfer.files}})">
-                <!-- 
-                    Input oculto para seleccionar archivos.
-                    accept: Tipos de archivo permitidos.
-                    onchange: Llama a onFileSelect cuando se selecciona un archivo.
-                -->
-                <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
-                <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
-                <p class="text-sm text-on-surface-variant/60">
-                    <strong class="text-primary" style="color: #BFBDBD;">Haz clic</strong> o arrastra tu archivo
-                </p>
-                <p class="text-xs mt-1 text-on-surface-variant/40" style="color: #BFBDBD;">
-                    ZIP, TAR.GZ, .py, .js — máx. 50 MB
-                </p>
-            </div>
-            
-            <!-- Mostrar nombre del archivo seleccionado -->
-            <div id="file-name" class="hidden mt-3 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
+                    <!-- Campo: Descripción (opcional) -->
+                    <div class="mb-4">
+                        <label for="proj-desc" class="upload-field-label text-xs uppercase tracking-widest font-bold text-on-surface-variant">Descripción <span class="opacity-50">(opcional)</span></label>
+                        <input type="text" id="proj-desc" class="modal-input" placeholder="Breve descripción" />
+                    </div>
 
-            <!-- Separador "o" -->
-            <div class="flex items-center gap-3 my-4">
-                <div class="flex-1 h-px bg-outline-variant/20"></div>
-                <span class="text-xs uppercase tracking-widest text-on-surface-variant/40">o</span>
-                <div class="flex-1 h-px bg-outline-variant/20"></div>
-            </div>
-            <!-- Conectar GitHub / elegir repositorio -->
-<div class="mb-4">
-    <div id="gh-disconnected" class="hidden">
-        <button type="button" onclick="connectGithub()"
-            class="w-full py-2.5 flex items-center justify-center gap-2 border border-outline-variant/30 rounded-xl font-semibold text-on-surface hover:bg-primary/5 transition-all">
-            <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            Conectar con GitHub
-        </button>
-    </div>
-    <div id="gh-connected" class="hidden">
-        <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
-            Tus repositorios (@<span id="gh-login"></span>)
-        </label>
-        <select id="gh-repo-select" class="modal-input" onchange="onGithubRepoSelect(this)">
-            <option value="">Selecciona un repositorio…</option>
-        </select>
-        <div class="mt-3">
-            <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
-                Organizaciones
-            </label>
-            <div id="gh-org-list" class="text-sm text-on-surface-variant/70">
-                Cargando organizaciones…
-            </div>
-        </div>
-        <div id="gh-permission-warning" class="hidden mt-2 text-xs text-amber-600">
-            GitHub aún no confirmó el permiso para leer organizaciones. Si al reautorizar vuelve directamente
-            sin mostrar una pantalla de autorización, abre los permisos de GitHub, revoca AutoDocs y vuelve
-            aquí para conectarlo otra vez.
-        </div>
-        <a href="https://github.com/settings/connections/applications"
-            target="_blank" rel="noopener noreferrer"
-            class="hidden mt-1 text-xs text-primary underline"
-            id="gh-permission-settings">
-            Abrir permisos de aplicaciones en GitHub
-        </a>
-        <button type="button" onclick="connectGithub()"
-            class="w-full mt-2 py-2 border border-primary/30 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5">
-            Reautorizar acceso a organizaciones
-        </button>
-        <button type="button" onclick="disconnectGithub()"
-            class="text-xs text-primary hover:text-primary/80 mt-1">Desconectar GitHub</button>
-    </div>
-</div>
+                    <!-- Zona de arrastrar o seleccionar un archivo -->
+                    <div id="upload-zone" role="button" tabindex="0" aria-label="Seleccionar o arrastrar un archivo de proyecto"
+                        onclick="document.getElementById('file-input').click()"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('file-input').click()}"
+                        ondragover="event.preventDefault();this.classList.add('is-dragging')"
+                        ondragleave="event.preventDefault();this.classList.remove('is-dragging')"
+                        ondrop="event.preventDefault();this.classList.remove('is-dragging');onFileSelect({target:{files:event.dataTransfer.files}})">
+                        <input type="file" id="file-input" style="display:none" accept=".zip,.tar,.gz,.py,.js" onchange="onFileSelect(event)" />
+                        <span class="material-symbols-outlined text-4xl block mb-2 text-primary">cloud_upload</span>
+                        <p class="text-sm text-on-surface-variant/80">
+                            <strong class="text-primary">Haz clic</strong> o arrastra tu archivo
+                        </p>
+                        <p class="text-xs mt-1 text-on-surface-variant/60">
+                            ZIP, TAR.GZ, .py, .js — máx. 50 MB
+                        </p>
+                    </div>
+                    <div id="file-name" class="hidden mt-3 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg text-sm text-primary"></div>
+                </div>
 
-            <!-- Campo: URL de GitHub -->
-            <div class="mb-6">
-                <label class="block text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">
-                    <span class="material-symbols-outlined text-sm align-middle mr-1">code</span>
-                    URL de GitHub
-                </label>
-                <input type="url" id="proj-github" class="modal-input" placeholder="https://github.com/usuario/repositorio" />
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="flex-1 h-px bg-outline-variant/20"></div>
+                        <span class="text-xs uppercase tracking-widest text-on-surface-variant/50">o usa GitHub</span>
+                        <div class="flex-1 h-px bg-outline-variant/20"></div>
+                    </div>
+                    <div class="mb-4 upload-github-section">
+                        <div id="gh-disconnected" class="hidden">
+                            <button type="button" onclick="connectGithub()"
+                                class="w-full py-2.5 flex items-center justify-center gap-2 border border-outline-variant/30 rounded-xl font-semibold text-on-surface hover:border-primary/40 hover:bg-primary/5 transition-all">
+                                <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                                Conectar con GitHub
+                            </button>
+                        </div>
+                        <div id="gh-connected" class="hidden">
+                            <label for="gh-repo-select" class="upload-field-label text-xs uppercase tracking-widest font-bold text-on-surface-variant">
+                                Tus repositorios (@<span id="gh-login"></span>)
+                            </label>
+                            <select id="gh-repo-select" class="modal-input" onchange="onGithubRepoSelect(this)">
+                                <option value="">Selecciona un repositorio…</option>
+                            </select>
+                            <div class="mt-3">
+                                <label class="upload-field-label text-xs uppercase tracking-widest font-bold text-on-surface-variant">
+                                    Organizaciones
+                                </label>
+                                <div id="gh-org-list" class="text-sm text-on-surface-variant/70">
+                                    Cargando organizaciones…
+                                </div>
+                            </div>
+                            <div id="gh-permission-warning" class="hidden mt-2 text-xs text-amber-600">
+                                GitHub aún no confirmó el permiso para leer organizaciones. Si al reautorizar vuelve directamente
+                                sin mostrar una pantalla de autorización, abre los permisos de GitHub, revoca AutoDocs y vuelve
+                                aquí para conectarlo otra vez.
+                            </div>
+                            <a href="https://github.com/settings/connections/applications"
+                                target="_blank" rel="noopener noreferrer"
+                                class="hidden mt-1 text-xs text-primary underline"
+                                id="gh-permission-settings">
+                                Abrir permisos de aplicaciones en GitHub
+                            </a>
+                            <button type="button" onclick="connectGithub()"
+                                class="w-full mt-2 py-2 border border-primary/30 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5">
+                                Reautorizar acceso a organizaciones
+                            </button>
+                            <button type="button" onclick="disconnectGithub()"
+                                class="text-xs text-primary hover:text-primary/80 mt-1">Desconectar GitHub</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="proj-github" class="upload-field-label text-xs uppercase tracking-widest font-bold text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm align-middle mr-1">code</span>
+                            URL de GitHub
+                        </label>
+                        <input type="url" id="proj-github" class="modal-input" placeholder="https://github.com/usuario/repositorio" />
+                    </div>
+                </div>
             </div>
 
             <!-- 
@@ -1533,7 +1618,35 @@ CUERPO PRINCIPAL DE LA PÁGINA
                     </div>
                 </section>
 
-                <!-- 3. SECCIÓN NOTIFICACIONES -->
+                <!-- 3. SECCIÓN IDIOMA -->
+                <section>
+                    <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">language</span>
+                        Idioma
+                    </h4>
+                    <p class="text-sm text-on-surface-variant/60 mb-4">
+                        Elige el idioma de la interfaz y de los documentos generados.
+                    </p>
+                    <div class="flex flex-wrap gap-3" role="group" aria-label="Idioma">
+                        <button type="button"
+                                id="config-language-es"
+                                class="px-4 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface hover:border-primary/50 hover:text-primary transition-all"
+                                onclick="setDashboardLanguage('es')">
+                            <span class="material-symbols-outlined text-base align-middle mr-1">translate</span>
+                            Español
+                        </button>
+                        <button type="button"
+                                id="config-language-en"
+                                class="px-4 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface hover:border-primary/50 hover:text-primary transition-all"
+                                onclick="setDashboardLanguage('en')">
+                            <span class="material-symbols-outlined text-base align-middle mr-1">language</span>
+                            English
+                        </button>
+                    </div>
+                    <p id="config-language-status" class="text-xs text-on-surface-variant/60 mt-3"></p>
+                </section>
+
+                <!-- 4. SECCIÓN NOTIFICACIONES -->
                 <section>
                     <h4 class="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">notifications</span>
@@ -1879,6 +1992,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
         function openConfigModal() {
             document.getElementById('configModal').classList.remove('hidden');
             document.getElementById('configModal').classList.add('flex');
+            updateDashboardLanguageSelection();
             loadConfigData();
         }
 
@@ -1888,6 +2002,50 @@ CUERPO PRINCIPAL DE LA PÁGINA
         function closeConfigModal() {
             document.getElementById('configModal').classList.add('hidden');
             document.getElementById('configModal').classList.remove('flex');
+        }
+
+        function updateDashboardLanguageSelection() {
+            const activeLanguage = window.AutoDocsLanguage
+                ? window.AutoDocsLanguage.get()
+                : 'es';
+
+            ['es', 'en'].forEach((language) => {
+                const button = document.getElementById('config-language-' + language);
+                if (!button) return;
+                const active = language === activeLanguage;
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+                button.classList.toggle('border-primary', active);
+                button.classList.toggle('bg-primary/10', active);
+                button.classList.toggle('text-primary', active);
+            });
+        }
+
+        async function setDashboardLanguage(language) {
+            const normalized = window.AutoDocsLanguage
+                ? window.AutoDocsLanguage.normalize(language)
+                : (language === 'en' ? 'en' : 'es');
+            if (!normalized) return;
+
+            window.AutoDocsLanguage.set(normalized);
+            updateDashboardLanguageSelection();
+
+            const status = document.getElementById('config-language-status');
+            if (status) {
+                status.textContent = window.AutoDocsLanguage.t('settings.languageSaved');
+            }
+
+            try {
+                const response = await fetch('/api/auth/me', {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ language: normalized })
+                });
+                if (!response.ok) throw new Error('language update failed');
+            } catch (error) {
+                if (status) {
+                    status.textContent = window.AutoDocsLanguage.t('settings.languageError');
+                }
+            }
         }
 
         /**
@@ -1904,6 +2062,13 @@ CUERPO PRINCIPAL DE LA PÁGINA
                     document.getElementById('config-username').value = user.name || '';
                     document.getElementById('config-email').value = user.email || '';
                     document.getElementById('config-bio').value = user.bio || '';
+                    const serverLanguage = window.AutoDocsLanguage
+                        ? window.AutoDocsLanguage.normalize(user.language || user.preferred_language || user.locale)
+                        : null;
+                    if (serverLanguage) {
+                        window.AutoDocsLanguage.set(serverLanguage);
+                    }
+                    updateDashboardLanguageSelection();
                 }
 
                 // Cargar plan del usuario

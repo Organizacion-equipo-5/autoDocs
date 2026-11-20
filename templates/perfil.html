@@ -246,6 +246,12 @@
             font-weight: 700;
         }
 
+        #profileAvatarImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         /* ============================================================
         BADGES DE INFORMACIÓN
         ============================================================ */
@@ -578,8 +584,12 @@
                                 mb-4: Margen inferior.
                                 ring-4: Anillo alrededor.
                             -->
-                            <div id="avatarContainer" class="w-28 h-28 rounded-full avatar-initials flex items-center justify-center text-3xl font-bold shadow-xl mb-4 ring-4" style="ring-color:rgba(56,189,248,0.25)">
+                            <div id="avatarContainer" class="w-28 h-28 rounded-full avatar-initials overflow-hidden flex items-center justify-center text-3xl font-bold shadow-xl mb-4 ring-4" style="ring-color:rgba(56,189,248,0.25)">
                                 <span id="avatarInitials">--</span>
+                                <img id="profileAvatarImage"
+                                     class="hidden rounded-full"
+                                     alt="Foto de perfil de GitHub"
+                                     referrerpolicy="no-referrer" />
                             </div>
                             
                             <!-- Nombre del usuario -->
@@ -1130,9 +1140,35 @@
          * @param {string} name - Nombre del usuario.
          * @param {string} email - Email del usuario.
          */
-        function updateProfileUI(name, email) {
-            var displayNameElem    = document.getElementById('displayName');
+        function updateProfileUI(name, email, github) {
+            var displayNameElem = document.getElementById('displayName');
             var avatarInitialsElem = document.getElementById('avatarInitials');
+            var avatarImageElem = document.getElementById('profileAvatarImage');
+            var avatarContainerElem = document.getElementById('avatarContainer');
+
+            var avatarUrl = github && typeof github.avatar_url === 'string'
+                ? github.avatar_url.trim()
+                : '';
+
+            if (avatarUrl) {
+                avatarImageElem.onerror = function () {
+                    avatarImageElem.classList.add('hidden');
+                    avatarInitialsElem.classList.remove('hidden');
+                    avatarContainerElem.classList.add('avatar-initials');
+                };
+                avatarImageElem.onload = function () {
+                    avatarImageElem.classList.remove('hidden');
+                    avatarInitialsElem.classList.add('hidden');
+                    avatarContainerElem.classList.remove('avatar-initials');
+                };
+                avatarImageElem.src = avatarUrl;
+            } else {
+                avatarImageElem.removeAttribute('src');
+                avatarImageElem.classList.add('hidden');
+                avatarInitialsElem.classList.remove('hidden');
+                avatarContainerElem.classList.add('avatar-initials');
+            }
+
             if (name) {
                 // Mostrar nombre completo
                 displayNameElem.textContent = name;
@@ -1179,7 +1215,7 @@
                 // Actualizar campos del formulario
                 document.getElementById('profileName').value  = user.name  || '';
                 document.getElementById('profileEmail').value = user.email || '';
-                updateProfileUI(user.name, user.email);
+                updateProfileUI(user.name, user.email, user.github);
 
                 // 2. Cargar plan actual y proyectos
                 var planRes = await fetch('/api/payments/my-plan', { headers: authHeaders() });
@@ -1322,7 +1358,11 @@
                 var payload = await res.json();
                 var updatedUser = payload.user || payload;
                 if (updatedUser.name) document.getElementById('profileName').value = updatedUser.name;
-                updateProfileUI(updatedUser.name, document.getElementById('profileEmail').value);
+                updateProfileUI(
+                    updatedUser.name,
+                    document.getElementById('profileEmail').value,
+                    updatedUser.github
+                );
                 
                 // Mostrar mensaje de éxito
                 successEl.classList.remove('hidden');

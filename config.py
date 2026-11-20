@@ -3,6 +3,9 @@ from datetime import timedelta
 
 
 class Config:
+    SEND_FILE_MAX_AGE_DEFAULT = 0
+    TEMPLATES_AUTO_RELOAD = True
+
     SECRET_KEY = os.environ.get(
         'SECRET_KEY',
         'autodocs-secret-key-change-in-production'
