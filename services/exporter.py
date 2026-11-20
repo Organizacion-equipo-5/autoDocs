@@ -138,21 +138,89 @@ _LEAD_RE  = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 _EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
-_NATIVE_DLL_HANDLE = None
+_NATIVE_DLL_HANDLES = []
 
 
 def _configure_native_libraries():
-    """Hace visibles a Python las DLL locales requeridas por WeasyPrint en Windows."""
-    global _NATIVE_DLL_HANDLE
-    native_bin = Path(__file__).resolve().parents[1] / '.native' / 'msys64' / 'ucrt64' / 'bin'
-    if os.name != 'nt' or not native_bin.exists():
+    """Hace visibles a Python las DLL requeridas por WeasyPrint (Pango, GLib, Cairo, etc.) en Windows."""
+    global _NATIVE_DLL_HANDLES
+    if os.name != 'nt':
         return
-    os.environ['PATH'] = f"{native_bin}{os.pathsep}{os.environ.get('PATH', '')}"
-    if hasattr(os, 'add_dll_directory') and _NATIVE_DLL_HANDLE is None:
-        _NATIVE_DLL_HANDLE = os.add_dll_directory(str(native_bin))
 
+    # Buscar directorios que contengan las DLLs de Pango/Cairo/GLib
+    project_root = Path(__file__).resolve().parents[1]
+    candidate_dirs = [
+        # 1. MSYS2 en el sistema local
+        Path('C:/msys64/ucrt64/bin'),
+        Path('C:/msys64/mingw64/bin'),
+        Path('C:/msys64/clang64/bin'),
+        # 2. Bundle local .native dentro del proyecto
+        project_root / '.native' / 'msys64' / 'ucrt64' / 'bin',
+        project_root / '.native' / 'msys64' / 'mingw64' / 'bin',
+        project_root / '.native' / 'bin',
+        # 3. Instaladores estándar de GTK3 para Windows
+        Path('C:/Program Files/GTK3-Runtime Win64/bin'),
+        Path('C:/Program Files (x86)/GTK3-Runtime Win64/bin'),
+    ]
 
-_configure_native_libraries()
+    # 4. Variables de entorno personalizadas si están definidas
+    custom_dir = os.environ.get('WEASYPRINT_DLL_DIRECTORIES') or os.environ.get('GTK_BASEPATH')
+    if custom_dir:
+        for d in custom_dir.split(os.pathsep):
+            if d.strip():
+                candidate_dirs.insert(0, Path(d.strip()))
+
+    registered_paths = set()
+    for candidate in candidate_dirs:
+        try:
+            if candidate.exists() and candidate.is_dir():
+                # Verificar si contiene DLLs de Pango
+                has_pango = any(candidate.glob('*pango*.dll'))
+                if has_pango:
+                    candidate_str = str(candidate.resolve())
+                    if candidate_str.lower() not in registered_paths:
+                        registered_paths.add(candidate_str.lower())
+                        if hasattr(os, 'add_dll_directory'):
+                            try:
+                                handle = os.add_dll_directory(candidate_str)
+                                _NATIVE_DLL_HANDLES.append(handle)
+                            except Exception:
+                                pass
+        except Exception:
+            continue
+
+    # Generar un fonts.conf limpio y aislado para evitar los avisos de sintaxis en conf.d de MSYS2 (xsi:nil, etc.)
+    try:
+        import tempfile
+        fonts_cache_dir = Path(tempfile.gettempdir()) / 'autodocs_fc_cache'
+        fonts_cache_dir.mkdir(parents=True, exist_ok=True)
+        clean_conf_path = Path(tempfile.gettempdir()) / 'autodocs_fonts.conf'
+
+        font_dirs = ['C:\\Windows\\Fonts', 'C:\\Windows\\System32\\Fonts']
+        for cand in candidate_dirs:
+            try:
+                msys_share_fonts = cand.parent / 'share' / 'fonts'
+                if msys_share_fonts.exists():
+                    font_dirs.append(str(msys_share_fonts.resolve()))
+            except Exception:
+                pass
+
+        dirs_xml = '\n'.join(f'    <dir>{d}</dir>' for d in font_dirs if Path(d).exists())
+        clean_xml = f"""<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+<fontconfig>
+{dirs_xml}
+    <cachedir>{fonts_cache_dir}</cachedir>
+    <config>
+        <rescan><int>3600</int></rescan>
+    </config>
+</fontconfig>
+"""
+        clean_conf_path.write_text(clean_xml, encoding='utf-8')
+        os.environ['FONTCONFIG_FILE'] = str(clean_conf_path.resolve())
+        os.environ['FONTCONFIG_PATH'] = str(clean_conf_path.parent.resolve())
+    except Exception:
+        pass
 
 
 class DocumentExporter:
@@ -218,6 +286,28 @@ class DocumentExporter:
         if result.returncode != 0:
             raise RuntimeError(f"Node markdown conversion failed: {result.stderr.strip()}")
         return result.stdout
+
+    @staticmethod
+    def _parse_code_fragment(markup: str) -> tuple[str, str, str, str]:
+        title_match = re.search(r'<div class="frag-title">(.*?)</div>', markup, re.DOTALL)
+        file_match = re.search(r'<div class="frag-file">(.*?)</div>', markup, re.DOTALL)
+        code_match = re.search(r'<pre><code>(.*?)</code></pre>', markup, re.DOTALL)
+        explanation_match = re.search(
+            r'<div class="code-explanation">(.*?)</div>', markup, re.DOTALL
+        )
+
+        title = _html.unescape(title_match.group(1).strip()) if title_match else ''
+        file_path = _html.unescape(file_match.group(1).strip()) if file_match else ''
+        code = _html.unescape(code_match.group(1)) if code_match else ''
+        explanation = explanation_match.group(1) if explanation_match else ''
+        explanation = re.sub(r'<br\s*/?>', ' ', explanation, flags=re.IGNORECASE)
+        explanation = re.sub(r'<strong[^>]*>', '**', explanation, flags=re.IGNORECASE)
+        explanation = re.sub(r'</strong>', '**', explanation, flags=re.IGNORECASE)
+        explanation = re.sub(r'<code[^>]*>', '`', explanation, flags=re.IGNORECASE)
+        explanation = re.sub(r'</code>', '`', explanation, flags=re.IGNORECASE)
+        explanation = re.sub(r'<[^>]+>', '', explanation)
+        explanation = _html.unescape(explanation).strip()
+        return title, file_path, code, explanation
 
     # ─────────────────────────────────────────────────────────────────────────
     # Tablas anchas → página horizontal (solo esa página)
@@ -1490,7 +1580,21 @@ class DocumentExporter:
             return text
 
         def safe_para(text, style):
+            stripped = text.strip()
+            if not stripped or re.match(r'^</?(?:div|span)[^>]*>$', stripped, re.IGNORECASE):
+                return
+            links = []
+            def _stash_link(m):
+                idx_link = len(links)
+                lbl = m.group(1).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                url = m.group(2).replace('&', '&amp;')
+                links.append(f'<font color="#0284c7"><u><a href="{url}">{lbl}</a></u></font>')
+                return f"___RPT_LINK_{idx_link}___"
+
+            text = re.sub(r'\[([^\]]+)\]\((https?://[^\)]+)\)', _stash_link, text)
             text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            for i, lk in enumerate(links):
+                text = text.replace(f"___RPT_LINK_{i}___", lk)
             text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
             text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
             text = re.sub(r'`([^`]+)`',
@@ -1703,6 +1807,112 @@ class DocumentExporter:
                 idx += 1
                 continue
 
+            if re.match(r'\s*<div class="code-fragment">', line):
+                fragment_lines = []
+                div_depth = 0
+                while idx < len(lines):
+                    fragment_line = lines[idx]
+                    fragment_lines.append(fragment_line)
+                    div_depth += len(re.findall(r'<div(?=[\s>])', fragment_line))
+                    div_depth -= fragment_line.count('</div>')
+                    idx += 1
+                    if div_depth == 0:
+                        break
+
+                title, file_path, snippet, explanation = self._parse_code_fragment(
+                    '\n'.join(fragment_lines)
+                )
+                if title:
+                    story.append(Paragraph(_esc(title), styles['h4']))
+                if file_path:
+                    story.append(Paragraph(_esc(file_path), styles['location']))
+                if snippet:
+                    code_markup = _esc(snippet).replace('\n', '<br/>').replace(' ', '&nbsp;')
+                    story.append(Paragraph(code_markup, styles['code']))
+                    story.append(Spacer(1, 0.2 * cm))
+                if explanation:
+                    safe_para(explanation, styles['body'])
+                story.append(Spacer(1, 0.3 * cm))
+                state['exit'] = None
+                continue
+
+            # Bloques anti-salto de página (p.ej. Modelo + tablas juntos)
+            if re.match(r'\s*<div[^>]*page-break-inside:\s*avoid', line, re.IGNORECASE):
+                block_lines = []
+                idx += 1
+                div_depth = 1
+                while idx < len(lines):
+                    b_line = lines[idx]
+                    if re.search(r'<div(?=[\s>])', b_line, re.IGNORECASE):
+                        div_depth += len(re.findall(r'<div(?=[\s>])', b_line, re.IGNORECASE))
+                    if '</div>' in b_line.lower():
+                        div_depth -= b_line.lower().count('</div>')
+                    if div_depth <= 0:
+                        idx += 1
+                        break
+                    block_lines.append(b_line)
+                    idx += 1
+
+                block_flowables = []
+                b_idx = 0
+                while b_idx < len(block_lines):
+                    bl = block_lines[b_idx].strip()
+                    if not bl or re.match(r'^</?(?:div|span)[^>]*>$', bl, re.IGNORECASE):
+                        b_idx += 1
+                        continue
+                    if bl.startswith('#### '):
+                        b_text = bl[5:].strip()
+                        b_text = b_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        b_text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', b_text)
+                        b_text = re.sub(r'`([^`]+)`', r'<font name="Courier-Bold" color="#0369a1" size="10">\1</font>', b_text)
+                        try:
+                            bp = Paragraph(b_text, styles['h4'])
+                        except Exception:
+                            bp = Paragraph(re.sub(r'<[^>]+>', '', b_text), styles['h4'])
+                        bp.keepWithNext = True
+                        block_flowables.append(bp)
+                        block_flowables.append(Spacer(1, 0.15*cm))
+                    elif bl.startswith('> '):
+                        q_text = bl[2:].strip()
+                        q_text = q_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        q_text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', q_text)
+                        q_text = re.sub(r'`([^`]+)`', r'<font name="Courier-Bold" color="#0369a1" size="10">\1</font>', q_text)
+                        try:
+                            block_flowables.append(Paragraph(q_text, styles['quote']))
+                        except Exception:
+                            block_flowables.append(Paragraph(re.sub(r'<[^>]+>', '', q_text), styles['quote']))
+                        block_flowables.append(Spacer(1, 0.2*cm))
+                    elif bl.startswith('**') and bl.endswith(':**'):
+                        t_lbl = bl.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        t_lbl = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', t_lbl)
+                        block_flowables.append(Paragraph(t_lbl, styles['body']))
+                        block_flowables.append(Spacer(1, 0.1*cm))
+                    else:
+                        tb_res = parse_table(block_lines, b_idx)
+                        if tb_res:
+                            tb_data, tb_consumed = tb_res
+                            tbl = build_report_table(tb_data, portrait_w)
+                            block_flowables.append(tbl)
+                            block_flowables.append(Spacer(1, 0.25*cm))
+                            b_idx += tb_consumed
+                            continue
+                        elif bl:
+                            p_txt = bl.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                            p_txt = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', p_txt)
+                            p_txt = re.sub(r'`([^`]+)`', r'<font name="Courier-Bold" color="#0369a1" size="10">\1</font>', p_txt)
+                            block_flowables.append(Paragraph(p_txt, styles['body']))
+                            block_flowables.append(Spacer(1, 0.15*cm))
+                    b_idx += 1
+
+                if block_flowables:
+                    story.append(KeepTogether(block_flowables))
+                continue
+
+            # Saltar etiquetas div/span sueltas
+            if re.match(r'^\s*</?(?:div|span)[^>]*>\s*$', line, re.IGNORECASE):
+                idx += 1
+                continue
+
             table_result = parse_table(lines, idx)
             if table_result:
                 table_data, consumed = table_result
@@ -1731,6 +1941,21 @@ class DocumentExporter:
                     anchor = f'sec{heading_anchor_counter[0]}'
                     heading_para = Paragraph(f'<a name="{anchor}"/>{title_clean}', styles['h3'])
                     group = [heading_para, Spacer(1, 0.2*cm)] + img_flowables
+
+                    # Incluir enlace interactivo de PlantText si existe en las siguientes líneas
+                    link_look = look + 1
+                    while link_look < len(lines) and lines[link_look].strip() == '':
+                        link_look += 1
+                    if link_look < len(lines) and ('planttext.com' in lines[link_look] or '🔗' in lines[link_look]):
+                        link_line = lines[link_look].strip()
+                        link_match = re.search(r'\[([^\]]+)\]\((https?://[^\)]+)\)', link_line)
+                        if link_match:
+                            lbl = link_match.group(1).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                            url = link_match.group(2).replace('&', '&amp;')
+                            link_para = Paragraph(f'<font color="#0284c7"><u><a href="{url}">{lbl}</a></u></font>', styles['body'])
+                            group.append(link_para)
+                            look = link_look
+
                     story.append(KeepTogether(group))
                     idx = look + 1
                     state['exit'] = None

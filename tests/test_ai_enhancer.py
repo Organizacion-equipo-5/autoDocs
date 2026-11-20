@@ -186,6 +186,21 @@ class TestCallAI:
         assert result == "Respuesta de prueba"
         assert mock_post.called
 
+    @patch("services.ai_enhancer.requests.post")
+    def test_gpt_oss_usa_parametros_del_playground(self, mock_post, enhancer_with_keys):
+        mock_post.return_value = _mock_groq_response("Descripción lista")
+
+        result = enhancer_with_keys._call_ai("system", "user", max_tokens=500)
+
+        assert result == "Descripción lista"
+        payload = mock_post.call_args.kwargs["json"]
+        assert payload["model"] == "openai/gpt-oss-120b"
+        assert payload["max_completion_tokens"] == 500
+        assert payload["reasoning_effort"] == "medium"
+        assert payload["temperature"] == 1
+        assert payload["top_p"] == 1
+        assert "max_tokens" not in payload
+
     def test_sin_api_keys_devuelve_none(self, enhancer_without_keys):
         result = enhancer_without_keys._call_ai("system", "user")
         assert result is None
@@ -357,6 +372,14 @@ class TestEnhanceDocumentation:
         mock_post.return_value = _mock_groq_response("OK")
         enhancer_with_keys.enhance_documentation(sample_analysis_results)
         # 3 funciones (menos de 5) + 2 clases (menos de 3) + 2 endpoints (menos de 3) + 1 arquitectura = 8
+        assert mock_post.call_count == 8
+
+    @patch("services.ai_enhancer.requests.post")
+    def test_no_repite_enriquecimiento_en_el_mismo_idioma(self, mock_post, enhancer_with_keys, sample_analysis_results):
+        mock_post.return_value = _mock_groq_response("OK")
+        enhancer_with_keys.enhance_documentation(sample_analysis_results, output_language="es")
+        enhancer_with_keys.enhance_documentation(sample_analysis_results, output_language="es")
+
         assert mock_post.call_count == 8
 
 

@@ -9,8 +9,11 @@ import os
 import re
 import traceback
 import json
+import logging
+from pathlib import Path
 
 export_bp = Blueprint('export', __name__)
+_logger = logging.getLogger(__name__)
 
 
 def _build_export_filename(project_name: str, ext: str) -> str:
@@ -58,6 +61,10 @@ def filter_results_by_selection(results, selected):
     # Filter classes
     if 'classes' in selected_data and selected_data['classes']:
         filtered['classes'] = [results['classes'][i] for i in selected_data['classes'] if i < len(results.get('classes', []))]
+    
+    # Filter models
+    if 'models' in selected_data and selected_data['models']:
+        filtered['models'] = [results['models'][i] for i in selected_data['models'] if i < len(results.get('models', []))]
     
     # Filter structure
     if 'structure' in selected_data and selected_data['structure']:
@@ -120,6 +127,42 @@ def _resolve_saved_lang(db, user_id, project_id, result=None):
             return lang
     return 'es'
 
+
+def _populate_file_line_counts(results, project):
+    """Completa LOC de análisis antiguos usando solo archivos dentro del proyecto."""
+    project_path = project.get('file_path')
+    if not project_path:
+        return
+    try:
+        root = Path(project_path).resolve()
+    except OSError as error:
+        _logger.warning("No se pudo resolver la ruta del proyecto para contar líneas: %s", error)
+        return
+    if not root.is_dir():
+        return
+
+    for item in results.get('structure', []):
+        if not isinstance(item, dict):
+            continue
+        current_count = item.get('line_count')
+        if type(current_count) is int and current_count >= 0:
+            continue
+        relative_path = item.get('path')
+        if not isinstance(relative_path, str) or not relative_path:
+            continue
+        try:
+            file_path = (root / relative_path).resolve()
+            file_path.relative_to(root)
+            if not file_path.is_file():
+                continue
+            with file_path.open('r', encoding='utf-8', errors='ignore') as source_file:
+                item['line_count'] = sum(1 for _ in source_file)
+        except ValueError:
+            _logger.warning("Se omitió una ruta de archivo fuera del proyecto al contar líneas.")
+        except OSError as error:
+            _logger.warning("No se pudieron contar líneas de un archivo del proyecto: %s", error)
+
+
 def get_identity_flexible():
     """Acepta JWT del header Authorization O del query param ?token="""
     try:
@@ -158,6 +201,7 @@ def export_pdf(project_id):
     try:
         results_to_use = result.get('results')
         if results_to_use:
+            _populate_file_line_counts(results_to_use, project)
             # Filter results based on selection
             if selected:
                 results_to_use = filter_results_by_selection(results_to_use, selected)
@@ -241,6 +285,7 @@ def export_html(project_id):
 
     results_to_use = result.get('results')
     if results_to_use:
+        _populate_file_line_counts(results_to_use, project)
         # Filter results based on selection
         if selected:
             results_to_use = filter_results_by_selection(results_to_use, selected)
@@ -294,6 +339,7 @@ def export_markdown(project_id):
 
     results_to_use = result.get('results')
     if results_to_use:
+        _populate_file_line_counts(results_to_use, project)
         # Filter results based on selection
         if selected:
             results_to_use = filter_results_by_selection(results_to_use, selected)

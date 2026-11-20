@@ -175,6 +175,28 @@ class TestInit:
             instance.enhance_documentation.assert_called_once()
             assert gen.r.get("ai_added") is True
 
+    def test_activa_ia_con_clave_sin_bandera_explicita(self, minimal_results, monkeypatch):
+        monkeypatch.delenv("ENABLE_AI_ANALYSIS", raising=False)
+        with patch("services.doc_generator.AIEnhancer") as MockAI:
+            instance = MagicMock()
+            instance.is_available.return_value = True
+            instance.enhance_documentation.return_value = {**minimal_results, "ai_added": True}
+            MockAI.return_value = instance
+
+            gen = DocGenerator(minimal_results)
+
+            instance.enhance_documentation.assert_called_once()
+            assert gen.r.get("ai_added") is True
+
+    def test_no_repite_enriquecimiento_ya_hecho_en_el_mismo_idioma(self, minimal_results, monkeypatch):
+        monkeypatch.setenv("ENABLE_AI_ANALYSIS", "true")
+        minimal_results.update({
+            "ai_documentation_enhanced": True,
+            "ai_output_language": "es",
+        })
+        gen = DocGenerator(minimal_results, lang="es")
+        gen.ai_enhancer.enhance_documentation.assert_not_called()
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Tests: _render_markdown_table
@@ -257,6 +279,23 @@ class TestPlantumlEncode:
         r1 = gen._plantuml_encode("texto A")
         r2 = gen._plantuml_encode("texto B")
         assert r1 != r2
+
+
+class TestPlantTextServer:
+    def test_intenta_planttext_primero(self, minimal_results, tmp_path):
+        gen = DocGenerator(minimal_results)
+        response = MagicMock()
+        response.status = 200
+        response.read.return_value = b"\x89PNG\r\n\x1a\n" + b"x" * 500
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+
+        with patch("services.doc_generator.urllib.request.urlopen", return_value=response) as urlopen, \
+             patch.object(gen, "_is_valid_image", return_value=True):
+            output = gen._fetch_plantuml_image("@startuml\nA -> B\n@enduml", tmp_path / "diagram")
+
+        assert output == tmp_path / "diagram.png"
+        assert "https://www.planttext.com/plantuml/png/" in urlopen.call_args.args[0].full_url
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -419,6 +458,17 @@ class TestArchitecture:
         gen = DocGenerator(minimal_results)
         arch = gen._architecture()
         assert isinstance(arch, str)
+
+    def test_incluye_lineas_por_archivo_y_total(self, minimal_results):
+        minimal_results["structure"] = [
+            {"path": "src/main.py", "name": "main.py", "line_count": 12},
+            {"path": "src/utils.py", "name": "utils.py", "line_count": 8},
+        ]
+        arch = DocGenerator(minimal_results)._architecture()
+
+        assert "| `src/main.py` | 12 |" in arch
+        assert "| `src/utils.py` | 8 |" in arch
+        assert "Total de líneas de archivos contadas:** 20 (2/2 archivos)" in arch
 
     def test_menciona_insights_ia_si_no_hay(self, minimal_results):
         gen = DocGenerator(minimal_results)

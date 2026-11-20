@@ -116,8 +116,9 @@ class ProjectAnalyzer:
         self.results = {
             "total_files": 0, "primary_language": "unknown",
             "languages": {}, "structure": [], "functions": [],
-            "classes": [], "endpoints": [], "imports": [],
-            "quality_score": 0, "complexity": {}, "issues": []
+            "classes": [], "models": [], "endpoints": [], "imports": [],
+            "quality_score": 0, "complexity": {}, "issues": [],
+            "project_path": str(self.project_path)
         }
 
     def analyze(self) -> dict:
@@ -154,6 +155,7 @@ class ProjectAnalyzer:
         - extensión
         - lenguaje inferido
         - tamaño
+        - líneas físicas de código
 
         Solo guarda un máximo de 300 archivos para no cargar demasiado la respuesta.
         Ignora archivos grandes (> 500KB) y archivos de prueba.
@@ -194,6 +196,16 @@ class ProjectAnalyzer:
                 if not lang and full_path.exists():
                     lang = self._guess_language_by_shebang(full_path)
 
+                try:
+                    with full_path.open('r', encoding='utf-8', errors='ignore') as source_file:
+                        line_count = sum(1 for _ in source_file)
+                except Exception as error:
+                    print(f"[Analyzer] No se pudieron contar líneas en {full_path}: {error}")
+                    try:
+                        line_count = len(full_path.read_bytes().split(b'\n'))
+                    except Exception:
+                        line_count = 0
+
                 if lang:
                     lang_count[lang] += 1
                     total += 1
@@ -201,6 +213,7 @@ class ProjectAnalyzer:
                 structure.append({
                     "path": str(rel_root / fname), "name": fname, "type": "file",
                     "language": lang or "other", "size": size, "extension": ext,
+                    "line_count": line_count,
                 })
                 files_processed += 1
 
@@ -300,21 +313,200 @@ class ProjectAnalyzer:
         except Exception:
             return ""
 
+    @staticmethod
+    def _generate_endpoint_description(method: str, path: str, handler: str = "", docstring: str = "", lang: str = "es") -> str:
+        """Genera una descripción clara y contextual para un endpoint HTTP."""
+        if docstring and docstring.strip():
+            first_line = docstring.strip().split('\n---')[0].split('\n\n')[0].strip()
+            clean = re.sub(r'^(tags|parameters|responses|summary):.*$', '', first_line, flags=re.MULTILINE | re.IGNORECASE).strip()
+            if clean:
+                return clean
+
+        m = (method or 'GET').upper()
+        p = path or '/'
+        p_lower = p.lower()
+        h_lower = (handler or '').lower()
+        is_en = str(lang).lower().startswith('en')
+
+        if any(k in p_lower or k in h_lower for k in ['login', 'signin', 'auth']):
+            return "User authentication endpoint: validates credentials and returns session token." if is_en else "Endpoint de autenticación: verifica credenciales de acceso y emite token de sesión."
+        if any(k in p_lower or k in h_lower for k in ['logout', 'signout']):
+            return "Session termination endpoint: invalidates current user authentication." if is_en else "Endpoint de cierre de sesión: invalida la autenticación actual del usuario."
+        if any(k in p_lower or k in h_lower for k in ['register', 'signup']):
+            return "User registration endpoint: creates new user accounts in the platform." if is_en else "Endpoint de registro: procesa la creación de nuevas cuentas de usuario."
+        if any(k in p_lower or k in h_lower for k in ['profile', 'me']):
+            if m == 'GET':
+                return "Profile retrieval endpoint: returns authenticated user profile details." if is_en else "Endpoint de perfil: consulta la información y detalles del usuario autenticado."
+            return "Profile update endpoint: modifies authenticated user account details." if is_en else "Endpoint de actualización de perfil: modifica datos de la cuenta del usuario."
+        if any(k in p_lower or k in h_lower for k in ['export', 'download', 'pdf', 'csv', 'report']):
+            return f"Export endpoint: generates downloadable documents or data for {p}." if is_en else f"Endpoint de exportación: genera y descarga reportes o documentos para {p}."
+
+        segments = [s for s in p.strip('/').split('/') if s and not s.startswith(('<', '{', ':', '['))]
+        resource = segments[-1].replace('_', ' ').replace('-', ' ') if segments else 'recurso'
+        resource_en = segments[-1].replace('_', ' ').replace('-', ' ') if segments else 'resource'
+        has_id = any(s.startswith(('<', '{', ':', '[')) for s in p.strip('/').split('/'))
+
+        if m == 'GET':
+            if has_id:
+                return f"Retrieves details of a specific {resource_en} by identifier." if is_en else f"Obtiene los detalles del recurso {resource} especificado por su identificador."
+            return f"Retrieves the list or collection of {resource_en} resources." if is_en else f"Consulta y devuelve la lista de elementos de {resource}."
+        elif m == 'POST':
+            return f"Creates or registers a new {resource_en} resource." if is_en else f"Crea o registra un nuevo recurso de tipo {resource}."
+        elif m == 'PUT':
+            return f"Updates or completely replaces the specified {resource_en} resource." if is_en else f"Actualiza o reemplaza completamente el recurso {resource} especificado."
+        elif m == 'PATCH':
+            return f"Partially updates specific attributes of the {resource_en} resource." if is_en else f"Aplica cambios parciales a los atributos del recurso {resource}."
+        elif m == 'DELETE':
+            return f"Deletes or permanently removes the specified {resource_en} resource." if is_en else f"Elimina de forma permanente el recurso {resource} especificado."
+        elif m == 'OPTIONS':
+            return f"Inspects permitted HTTP communication options for {p}." if is_en else f"Consulta las opciones HTTP permitidas para la ruta {p}."
+        elif m == 'HEAD':
+            return f"Retrieves HTTP response headers without body for {p}." if is_en else f"Obtiene las cabeceras HTTP de respuesta sin cuerpo para {p}."
+
+        return f"Endpoint {m} {p}"
+
+    @staticmethod
+    def _generate_class_description(name: str, bases: list, methods: list, fields: list = None, docstring: str = "", is_model: bool = False, lang: str = "es") -> str:
+        """Genera una descripción contextual para una clase del proyecto."""
+        if docstring and docstring.strip():
+            clean = docstring.strip().split('\n\n')[0].strip()
+            if clean:
+                return clean
+        is_en = str(lang).lower().startswith('en')
+        n_lower = name.lower()
+        if is_model:
+            f_count = len(fields) if fields else 0
+            if is_en:
+                return f"Data model representing the {name} domain entity with {f_count} persistent field(s)."
+            return f"Modelo de datos que representa la entidad {name} con {f_count} campo(s) persistente(s) en la base de datos."
+        if any(k in n_lower for k in ['controller', 'view', 'handler']):
+            if is_en:
+                return f"Controller class managing incoming requests and orchestration for {name}."
+            return f"Clase controladora encargada de gestionar peticiones y orquestar respuestas para {name}."
+        if any(k in n_lower for k in ['service', 'manager']):
+            if is_en:
+                return f"Service layer class encapsulating business logic and workflows for {name}."
+            return f"Capa de servicio que encapsula la lógica de negocio y flujos de trabajo de {name}."
+        if any(k in n_lower for k in ['repository', 'dao']):
+            if is_en:
+                return f"Data access class handling database queries and storage for {name}."
+            return f"Clase de acceso a datos que gestiona consultas y persistencia para {name}."
+
+        m_count = len(methods) if methods else 0
+        if is_en:
+            return f"Class {name} defining state and behavior with {m_count} method(s)."
+        return f"Clase {name} que encapsula estructura de datos y comportamiento con {m_count} método(s)."
+
+    @staticmethod
+    def _generate_model_description(name: str, bases: list, fields: list, methods: list, docstring: str = "", lang: str = "es") -> str:
+        """Genera una descripción técnica para un modelo de datos o entidad."""
+        if docstring and docstring.strip():
+            clean = docstring.strip().split('\n\n')[0].strip()
+            if clean:
+                return clean
+        is_en = str(lang).lower().startswith('en')
+        field_names = [f.get('name') for f in (fields or []) if isinstance(f, dict) and f.get('name')]
+        f_summary = f" ({', '.join(field_names[:4])})" if field_names else ""
+        if is_en:
+            return f"Domain data model representing the {name} entity{f_summary}, handling persistent data schema and business rules."
+        return f"Modelo de datos de dominio que define la entidad {name}{f_summary}, gestionando la estructura de persistencia y reglas de negocio asociadas."
+
+    def _parse_python_route_decorator(self, dec, filepath: str, handler: str, docstring: str, lineno: int):
+        """Analiza un decorador AST de ruta en Python y devuelve los endpoints detectados."""
+        try:
+            if not isinstance(dec, ast.Call):
+                return None
+
+            func_attr = ""
+            if isinstance(dec.func, ast.Attribute):
+                func_attr = dec.func.attr.lower()
+            elif isinstance(dec.func, ast.Name):
+                func_attr = dec.func.id.lower()
+
+            methods = []
+            path = "/"
+            framework = "Flask"
+            http_verbs = {'get', 'post', 'put', 'delete', 'patch', 'options', 'head'}
+
+            if func_attr in http_verbs:
+                methods = [func_attr.upper()]
+                framework = "Flask/FastAPI"
+                if dec.args:
+                    if isinstance(dec.args[0], ast.Constant):
+                        path = str(dec.args[0].value)
+                    elif hasattr(ast, 'Str') and isinstance(dec.args[0], ast.Str):
+                        path = str(dec.args[0].s)
+            elif func_attr == 'route':
+                framework = "Flask"
+                if dec.args:
+                    if isinstance(dec.args[0], ast.Constant):
+                        path = str(dec.args[0].value)
+                    elif hasattr(ast, 'Str') and isinstance(dec.args[0], ast.Str):
+                        path = str(dec.args[0].s)
+
+                for kw in dec.keywords:
+                    if kw.arg in ('rule', 'path') and isinstance(kw.value, ast.Constant):
+                        path = str(kw.value.value)
+                    elif kw.arg == 'methods':
+                        if isinstance(kw.value, (ast.List, ast.Tuple, ast.Set)):
+                            for elt in kw.value.elts:
+                                if isinstance(elt, ast.Constant):
+                                    methods.append(str(elt.value).upper())
+                                elif hasattr(ast, 'Str') and isinstance(elt, ast.Str):
+                                    methods.append(str(elt.s).upper())
+
+                if not methods:
+                    methods = ['GET']
+
+            if not methods:
+                return None
+
+            clean_doc = docstring.strip().split('\n---')[0].split('\n\n')[0].strip() if docstring else ""
+            endpoints = []
+            for m in methods:
+                desc = self._generate_endpoint_description(m, path, handler, clean_doc)
+                endpoints.append({
+                    "method": m,
+                    "path": path,
+                    "file": filepath,
+                    "framework": framework,
+                    "handler": handler,
+                    "line": lineno,
+                    "docstring": clean_doc,
+                    "description": desc,
+                })
+            return endpoints
+        except Exception:
+            return None
+
     def _analyze_python_file(self, filepath: Path):
         try:
             source = filepath.read_text(encoding='utf-8', errors='ignore')
             tree = ast.parse(source)
             rel = str(filepath.relative_to(self.project_path))
+            detected_endpoints = []
+
             for node in ast.walk(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    fn_doc = ast.get_docstring(node) or ""
                     self.results["functions"].append({
                         "name": node.name, "file": rel, "line": node.lineno,
+                        "end_line": getattr(node, 'end_lineno', node.lineno),
                         "params": [a.arg for a in node.args.args],
-                        "docstring": ast.get_docstring(node) or "",
+                        "docstring": fn_doc,
                         "is_async": isinstance(node, ast.AsyncFunctionDef),
                         "complexity": self._estimate_complexity(node),
                         "code_snippet": self._extract_code_snippet(source, node),
                     })
+
+                    # Detect endpoints directly on function decorators
+                    for dec in node.decorator_list:
+                        eps = self._parse_python_route_decorator(dec, rel, node.name, fn_doc, node.lineno)
+                        if eps:
+                            for ep in eps:
+                                self.results["endpoints"].append(ep)
+                                detected_endpoints.append((ep["method"], ep["path"]))
+
                 elif isinstance(node, ast.ClassDef):
                     bases = []
                     for b in node.bases:
@@ -322,40 +514,117 @@ class ProjectAnalyzer:
                             bases.append(ast.unparse(b) if hasattr(ast, 'unparse') else str(b))
                         except Exception:
                             pass
-                    self.results["classes"].append({
+
+                    # Extract class fields / column attributes
+                    fields = []
+                    for item in node.body:
+                        if isinstance(item, ast.Assign):
+                            for target in item.targets:
+                                if isinstance(target, ast.Name):
+                                    field_type = ""
+                                    if isinstance(item.value, ast.Call):
+                                        try:
+                                            field_type = ast.unparse(item.value.func) if hasattr(ast, 'unparse') else ""
+                                        except Exception:
+                                            field_type = "Call"
+                                    elif isinstance(item.value, ast.Constant):
+                                        field_type = type(item.value.value).__name__
+                                    fields.append({"name": target.id, "type": field_type or "Attribute"})
+                        elif isinstance(item, ast.AnnAssign):
+                            if isinstance(item.target, ast.Name):
+                                try:
+                                    field_type = ast.unparse(item.annotation) if hasattr(ast, 'unparse') else "Any"
+                                except Exception:
+                                    field_type = "Any"
+                                fields.append({"name": item.target.id, "type": field_type})
+
+                    cls_methods = [n.name for n in ast.walk(node)
+                                   if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+                    cls_doc = ast.get_docstring(node) or ""
+
+                    # Detect whether this class represents a Data Model
+                    is_model = (
+                        any(kw in node.name.lower() for kw in ["model", "schema", "entity", "dto", "dao", "table"])
+                        or any(kw in rel.lower() for kw in ["model", "schema", "entity", "dto", "dao"])
+                        or any(any(m_kw in b.lower() for m_kw in ["model", "base", "document", "sqlmodel", "entity"]) for b in bases)
+                        or any("column" in f.get("type", "").lower() or "field" in f.get("type", "").lower() for f in fields)
+                    )
+
+                    cls_desc = self._generate_class_description(node.name, bases, cls_methods, fields, cls_doc, is_model)
+
+                    class_data = {
                         "name": node.name, "file": rel, "line": node.lineno,
-                        "methods": [n.name for n in ast.walk(node)
-                                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))],
-                        "bases": bases, "docstring": ast.get_docstring(node) or "",
+                        "end_line": getattr(node, 'end_lineno', node.lineno),
+                        "methods": cls_methods,
+                        "bases": bases,
+                        "fields": fields,
+                        "is_model": is_model,
+                        "docstring": cls_doc,
+                        "description": cls_desc,
                         "code_snippet": self._extract_code_snippet(source, node),
-                    })
-            self._detect_python_endpoints(source, rel)
+                    }
+                    self.results["classes"].append(class_data)
+
+                    if is_model:
+                        model_desc = self._generate_model_description(node.name, bases, fields, cls_methods, cls_doc)
+                        model_data = dict(class_data)
+                        model_data["description"] = model_desc
+                        self.results["models"].append(model_data)
+
+            # Fallback regex search for routes not detected via AST
+            self._detect_python_endpoints(source, rel, exclude=detected_endpoints)
         except Exception as e:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
-    def _detect_python_endpoints(self, source, filepath):
+    def _detect_python_endpoints(self, source, filepath, exclude=None):
         """
         Detecta endpoints en archivos Python usando patrones habituales de frameworks.
-
-        Soporta Flask/FastAPI, rutas con `methods=` y decoradores de Django.
+        Soporta Flask/FastAPI, rutas con methods= y decoradores de Django.
         """
-        patterns = [
-            (r'@(?:\w+)\.(get|post|put|delete|patch|options|head)\(\s*["\']([^"\']+)["\']', 'Flask/FastAPI'),
-            (r'@(?:\w+)\.route\(\s*["\']([^"\']+)["\'].*?methods\s*=\s*\[([^\]]+)\]', 'Flask'),
-            (r'path\(\s*["\']([^"\']*)["\']', 'Django'),
-        ]
-        for pattern, framework in patterns:
-            for m in re.finditer(pattern, source, re.IGNORECASE | re.DOTALL):
-                g = m.groups()
-                if len(g) == 2:
-                    a, b = g
-                    if re.search(r'["\']', str(b)):
-                        for method in re.findall(r'["\'](\w+)["\']', b):
-                            self.results["endpoints"].append({"method": method.upper(), "path": a, "file": filepath, "framework": framework})
-                    else:
-                        self.results["endpoints"].append({"method": b.upper(), "path": a, "file": filepath, "framework": framework})
-                elif len(g) == 1:
-                    self.results["endpoints"].append({"method": "GET", "path": g[0], "file": filepath, "framework": framework})
+        exclude_set = set(exclude or [])
+        # Pattern 1: @app.get('/path'), @router.post('/path')
+        p1 = r'@(?:\w+)\.(get|post|put|delete|patch|options|head)\(\s*["\']([^"\']+)["\']'
+        for m in re.finditer(p1, source, re.IGNORECASE):
+            method = m.group(1).upper()
+            path = m.group(2)
+            if (method, path) not in exclude_set:
+                exclude_set.add((method, path))
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({
+                    "method": method, "path": path, "file": filepath,
+                    "framework": "Flask/FastAPI", "description": desc
+                })
+
+        # Pattern 2: @app.route('/path', methods=['GET', 'POST'])
+        p2 = r'@(?:\w+)\.route\(\s*["\']([^"\']+)["\'](?:[^)]*?methods\s*=\s*\[([^\]]+)\])?'
+        for m in re.finditer(p2, source, re.IGNORECASE | re.DOTALL):
+            path = m.group(1)
+            methods_raw = m.group(2)
+            if methods_raw:
+                methods = [meth.strip().strip("'\"").upper() for meth in re.findall(r'["\'](\w+)["\']', methods_raw)]
+            else:
+                methods = ['GET']
+            for method in methods:
+                if (method, path) not in exclude_set:
+                    exclude_set.add((method, path))
+                    desc = self._generate_endpoint_description(method, path)
+                    self.results["endpoints"].append({
+                        "method": method, "path": path, "file": filepath,
+                        "framework": "Flask", "description": desc
+                    })
+
+        # Pattern 3: Django path('path/', view)
+        p3 = r'path\(\s*["\']([^"\']*)["\']'
+        for m in re.finditer(p3, source):
+            path = m.group(1)
+            method = 'GET'
+            if (method, path) not in exclude_set:
+                exclude_set.add((method, path))
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({
+                    "method": method, "path": path, "file": filepath,
+                    "framework": "Django", "description": desc
+                })
 
     # ── JS / TS ───────────────────────────────────────────────────────
     def _analyze_js_ts_file(self, filepath: Path):
@@ -364,9 +633,15 @@ class ProjectAnalyzer:
             rel = str(filepath.relative_to(self.project_path))
             # Routes
             for m in re.finditer(r'(?:app|router)\.(get|post|put|delete|patch|options)\(\s*["`\']([^"`\']+)["`\']', source, re.I):
-                self.results["endpoints"].append({"method": m.group(1).upper(), "path": m.group(2), "file": rel, "framework": "Express.js"})
+                method = m.group(1).upper()
+                path = m.group(2)
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "Express.js", "description": desc})
             for m in re.finditer(r'@(Get|Post|Put|Delete|Patch)\(\s*["`\']?([^"`\'\)]*)["`\']?\)', source):
-                self.results["endpoints"].append({"method": m.group(1).upper(), "path": m.group(2) or '/', "file": rel, "framework": "NestJS"})
+                method = m.group(1).upper()
+                path = m.group(2) or '/'
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "NestJS", "description": desc})
             # Functions
             for pattern in [
                 r'(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)',
@@ -378,9 +653,24 @@ class ProjectAnalyzer:
                     if name and len(name) > 1:
                         params = [p.strip().split(':')[0].strip() for p in params_str.split(',') if p.strip()]
                         self.results["functions"].append({"name": name, "file": rel, "params": params, "docstring": "", "is_async": 'async' in m.group(0), "complexity": 1})
-            # Classes
+            # Classes & Models
             for m in re.finditer(r'class\s+(\w+)(?:\s+extends\s+(\w+))?', source):
-                self.results["classes"].append({"name": m.group(1), "file": rel, "line": 0, "methods": [], "bases": [m.group(2)] if m.group(2) else [], "docstring": ""})
+                name = m.group(1)
+                base = m.group(2) or ""
+                bases = [base] if base else []
+                is_model = (
+                    any(kw in name.lower() for kw in ["model", "schema", "entity", "dto", "dao"])
+                    or any(kw in rel.lower() for kw in ["model", "schema", "entity", "dto", "dao"])
+                    or any(kw in base.lower() for kw in ["model", "schema", "entity"])
+                )
+                desc = self._generate_class_description(name, bases, [], is_model=is_model)
+                class_info = {"name": name, "file": rel, "line": 0, "methods": [], "bases": bases, "docstring": "", "description": desc, "is_model": is_model}
+                self.results["classes"].append(class_info)
+                if is_model:
+                    m_desc = self._generate_model_description(name, bases, [], [], "")
+                    m_info = dict(class_info)
+                    m_info["description"] = m_desc
+                    self.results["models"].append(m_info)
         except Exception as e:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
@@ -391,13 +681,26 @@ class ProjectAnalyzer:
             rel = str(filepath.relative_to(self.project_path))
             method_map = {'GetMapping': 'GET', 'PostMapping': 'POST', 'PutMapping': 'PUT', 'DeleteMapping': 'DELETE', 'PatchMapping': 'PATCH', 'RequestMapping': 'GET'}
             for m in re.finditer(r'@(GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping|RequestMapping)\(?["\']?([^"\')\n]*)["\']?\)?', source):
-                self.results["endpoints"].append({"method": method_map.get(m.group(1), 'GET'), "path": m.group(2).strip() or '/', "file": rel, "framework": "Spring"})
+                method = method_map.get(m.group(1), 'GET')
+                path = m.group(2).strip() or '/'
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "Spring", "description": desc})
             for m in re.finditer(r'(?:public|private|protected)\s+(?:static\s+)?(?:\w+(?:<[^>]+>)?)\s+(\w+)\s*\(([^)]*)\)', source):
                 name, ps = m.groups()
                 if name not in ('if', 'for', 'while', 'switch', 'return', 'class'):
                     self.results["functions"].append({"name": name, "file": rel, "params": [p.strip().split()[-1] for p in ps.split(',') if p.strip()], "docstring": "", "is_async": False, "complexity": 1})
             for m in re.finditer(r'(?:public\s+)?(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+(\w+))?', source):
-                self.results["classes"].append({"name": m.group(1), "file": rel, "line": 0, "methods": [], "bases": [m.group(2)] if m.group(2) else [], "docstring": ""})
+                name = m.group(1)
+                bases = [m.group(2)] if m.group(2) else []
+                is_model = any(kw in name.lower() for kw in ["model", "entity", "dto"]) or "model" in rel.lower() or "@Entity" in source
+                desc = self._generate_class_description(name, bases, [], is_model=is_model)
+                class_info = {"name": name, "file": rel, "line": 0, "methods": [], "bases": bases, "docstring": "", "description": desc, "is_model": is_model}
+                self.results["classes"].append(class_info)
+                if is_model:
+                    m_desc = self._generate_model_description(name, bases, [], [], "")
+                    m_info = dict(class_info)
+                    m_info["description"] = m_desc
+                    self.results["models"].append(m_info)
         except Exception as e:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
@@ -407,12 +710,25 @@ class ProjectAnalyzer:
             source = filepath.read_text(encoding='utf-8', errors='ignore')
             rel = str(filepath.relative_to(self.project_path))
             for m in re.finditer(r'Route::(get|post|put|delete|patch|any)\s*\(\s*["\']([^"\']+)["\']', source, re.I):
-                self.results["endpoints"].append({"method": m.group(1).upper(), "path": m.group(2), "file": rel, "framework": "Laravel"})
+                method = m.group(1).upper()
+                path = m.group(2)
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "Laravel", "description": desc})
             for m in re.finditer(r'(?:public\s+|private\s+|protected\s+)?(?:static\s+)?function\s+(\w+)\s*\(([^)]*)\)', source):
                 name, ps = m.groups()
                 self.results["functions"].append({"name": name, "file": rel, "params": [p.strip().lstrip('$') for p in ps.split(',') if p.strip()], "docstring": "", "is_async": False, "complexity": 1})
             for m in re.finditer(r'class\s+(\w+)(?:\s+extends\s+(\w+))?', source):
-                self.results["classes"].append({"name": m.group(1), "file": rel, "line": 0, "methods": [], "bases": [m.group(2)] if m.group(2) else [], "docstring": ""})
+                name = m.group(1)
+                bases = [m.group(2)] if m.group(2) else []
+                is_model = any(kw in name.lower() for kw in ["model", "entity", "dto"]) or "model" in rel.lower() or any("model" in b.lower() for b in bases)
+                desc = self._generate_class_description(name, bases, [], is_model=is_model)
+                class_info = {"name": name, "file": rel, "line": 0, "methods": [], "bases": bases, "docstring": "", "description": desc, "is_model": is_model}
+                self.results["classes"].append(class_info)
+                if is_model:
+                    m_desc = self._generate_model_description(name, bases, [], [], "")
+                    m_info = dict(class_info)
+                    m_info["description"] = m_desc
+                    self.results["models"].append(m_info)
         except Exception as e:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
@@ -422,12 +738,25 @@ class ProjectAnalyzer:
             source = filepath.read_text(encoding='utf-8', errors='ignore')
             rel = str(filepath.relative_to(self.project_path))
             for m in re.finditer(r'(get|post|put|delete|patch)\s+["\']([^"\']+)["\']', source, re.I):
-                self.results["endpoints"].append({"method": m.group(1).upper(), "path": m.group(2), "file": rel, "framework": "Rails/Sinatra"})
+                method = m.group(1).upper()
+                path = m.group(2)
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "Rails/Sinatra", "description": desc})
             for m in re.finditer(r'def\s+(\w+)(?:\(([^)]*)\))?', source):
                 name, ps = m.group(1), m.group(2) or ''
                 self.results["functions"].append({"name": name, "file": rel, "params": [p.strip() for p in ps.split(',') if p.strip()], "docstring": "", "is_async": False, "complexity": 1})
             for m in re.finditer(r'class\s+(\w+)(?:\s*<\s*(\w+))?', source):
-                self.results["classes"].append({"name": m.group(1), "file": rel, "line": 0, "methods": [], "bases": [m.group(2)] if m.group(2) else [], "docstring": ""})
+                name = m.group(1)
+                bases = [m.group(2)] if m.group(2) else []
+                is_model = any(kw in name.lower() for kw in ["model", "entity", "dto"]) or "model" in rel.lower() or any("record" in b.lower() for b in bases)
+                desc = self._generate_class_description(name, bases, [], is_model=is_model)
+                class_info = {"name": name, "file": rel, "line": 0, "methods": [], "bases": bases, "docstring": "", "description": desc, "is_model": is_model}
+                self.results["classes"].append(class_info)
+                if is_model:
+                    m_desc = self._generate_model_description(name, bases, [], [], "")
+                    m_info = dict(class_info)
+                    m_info["description"] = m_desc
+                    self.results["models"].append(m_info)
         except Exception as e:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
@@ -438,12 +767,23 @@ class ProjectAnalyzer:
             rel = str(filepath.relative_to(self.project_path))
             for m in re.finditer(r'(?:r|router|e|app|mux)\.(GET|POST|PUT|DELETE|PATCH|HandleFunc|Handle)\(\s*["`]([^"`]+)["`]', source, re.I):
                 method = m.group(1).upper().replace('HANDLEFUNC', 'GET').replace('HANDLE', 'GET')
-                self.results["endpoints"].append({"method": method, "path": m.group(2), "file": rel, "framework": "Go HTTP (Gin/Echo/Fiber)"})
+                path = m.group(2)
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "Go HTTP (Gin/Echo/Fiber)", "description": desc})
             for m in re.finditer(r'func\s+(?:\(\w+\s+\*?\w+\)\s+)?(\w+)\s*\(([^)]*)\)', source):
                 name, ps = m.groups()
                 self.results["functions"].append({"name": name, "file": rel, "params": [p.strip().split()[-1] for p in ps.split(',') if p.strip()], "docstring": "", "is_async": False, "complexity": 1})
             for m in re.finditer(r'type\s+(\w+)\s+struct\s*\{', source):
-                self.results["classes"].append({"name": m.group(1), "file": rel, "line": 0, "methods": [], "bases": [], "docstring": ""})
+                name = m.group(1)
+                is_model = any(kw in name.lower() for kw in ["model", "entity", "dto"]) or "model" in rel.lower()
+                desc = self._generate_class_description(name, [], [], is_model=is_model)
+                class_info = {"name": name, "file": rel, "line": 0, "methods": [], "bases": [], "docstring": "", "description": desc, "is_model": is_model}
+                self.results["classes"].append(class_info)
+                if is_model:
+                    m_desc = self._generate_model_description(name, [], [], [], "")
+                    m_info = dict(class_info)
+                    m_info["description"] = m_desc
+                    self.results["models"].append(m_info)
         except Exception as e:
             self.results["issues"].append({"file": str(filepath), "error": str(e)})
 
@@ -454,7 +794,10 @@ class ProjectAnalyzer:
             rel = str(filepath.relative_to(self.project_path))
             mm = {'HttpGet': 'GET', 'HttpPost': 'POST', 'HttpPut': 'PUT', 'HttpDelete': 'DELETE', 'HttpPatch': 'PATCH', 'Route': 'GET'}
             for m in re.finditer(r'\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch|Route)(?:\(["\']([^"\']*)["\'])?\]', source):
-                self.results["endpoints"].append({"method": mm.get(m.group(1), 'GET'), "path": m.group(2) or '/', "file": rel, "framework": "ASP.NET Core"})
+                method = mm.get(m.group(1), 'GET')
+                path = m.group(2) or '/'
+                desc = self._generate_endpoint_description(method, path)
+                self.results["endpoints"].append({"method": method, "path": path, "file": rel, "framework": "ASP.NET Core", "description": desc})
             for m in re.finditer(r'(?:public|private|protected|internal)\s+(?:async\s+)?(?:static\s+)?(?:[\w<>\[\]]+)\s+(\w+)\s*\(([^)]*)\)', source):
                 name, ps = m.groups()
                 self.results["functions"].append({"name": name, "file": rel, "params": [p.strip().split()[-1] for p in ps.split(',') if p.strip()], "docstring": "", "is_async": 'async' in m.group(0), "complexity": 1})

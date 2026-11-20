@@ -28,9 +28,21 @@ class ETLPipeline:
     """
 
     def __init__(self):
-        self.data_cleaner = DataCleaner()
-        self.ai_enhancer = AIEnhancer()
+        self._data_cleaner = None
+        self._ai_enhancer = None
         self.pipeline_log = []
+
+    @property
+    def data_cleaner(self):
+        if self._data_cleaner is None:
+            self._data_cleaner = DataCleaner()
+        return self._data_cleaner
+
+    @property
+    def ai_enhancer(self):
+        if self._ai_enhancer is None:
+            self._ai_enhancer = AIEnhancer()
+        return self._ai_enhancer
 
     def log(self, stage: str, message: str):
         """Registra un evento en el log del pipeline."""

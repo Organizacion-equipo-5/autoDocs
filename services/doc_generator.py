@@ -61,11 +61,11 @@ DOC_I18N = {
         'endpoint_catalog': '### 3.2 Catálogo de Endpoints de API',
         'doc_status': '### 3.3 Estado de Comentarios y Docstrings',
         'test_plans': '### 3.4 Planes de Prueba',
-        'data_models_title': '## 4. Modelos de Datos',
-        'deployment_title': '## 5. Guía de Despliegue',
-        'quality_title': '## 6. Reporte de Calidad',
-        'classes_title': '## 7. Documentación de Clases',
-        'functions_title': '## 8. Documentación de Funciones',
+        'classes_title': '## 4. Documentación de Clases y Módulos',
+        'functions_title': '## 5. Documentación de Funciones',
+        'data_models_title': '## 6. Modelos de Datos',
+        'deployment_title': '## 7. Guía de Despliegue',
+        'quality_title': '## 8. Reporte de Calidad',
         'method': 'Método', 'path': 'Ruta', 'file': 'Archivo', 'framework': 'Framework',
         'property': 'Propiedad', 'code_col': 'Código', 'description': 'Descripción', 'status': 'Estado',
         'success_op': 'Operación exitosa', 'bad_request': 'Solicitud incorrecta', 'unauthorized': 'No autorizado',
@@ -131,11 +131,11 @@ DOC_I18N = {
         'endpoint_catalog': '### 3.2 API Endpoint Catalog',
         'doc_status': '### 3.3 Comments and Docstrings Status',
         'test_plans': '### 3.4 Test Plans',
-        'data_models_title': '## 4. Data Models',
-        'deployment_title': '## 5. Deployment Guide',
-        'quality_title': '## 6. Quality Report',
-        'classes_title': '## 7. Class Documentation',
-        'functions_title': '## 8. Function Documentation',
+        'classes_title': '## 4. Class and Module Documentation',
+        'functions_title': '## 5. Function Documentation',
+        'data_models_title': '## 6. Data Models',
+        'deployment_title': '## 7. Deployment Guide',
+        'quality_title': '## 8. Quality Report',
         'method': 'Method', 'path': 'Path', 'file': 'File', 'framework': 'Framework',
         'property': 'Property', 'code_col': 'Code', 'description': 'Description', 'status': 'Status',
         'success_op': 'Successful operation', 'bad_request': 'Bad request', 'unauthorized': 'Unauthorized',
@@ -176,11 +176,15 @@ class DocGenerator:
         raw_lang = str(raw_lang).lower()
         self.lang = 'en' if raw_lang.startswith('en') else 'es'
 
-        # IA opcional: solo activar si está configurado
-        use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
+        # La clave de Groq debe estar configurada; ENABLE_AI_ANALYSIS permite desactivarla.
+        use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'true').lower() == 'true'
         if use_ai:
             self.ai_enhancer = AIEnhancer()
-            if self.ai_enhancer.is_available():
+            already_enhanced = bool(
+                self.r.get('ai_documentation_enhanced')
+                and (self.r.get('ai_output_language') == self.lang or not self.r.get('ai_output_language'))
+            )
+            if self.ai_enhancer.is_available() and not already_enhanced:
                 # Pasar intención de idioma a la mejora si es posible
                 try:
                     self.r = self.ai_enhancer.enhance_documentation(self.r, output_language=self.lang)
@@ -328,8 +332,9 @@ class DocGenerator:
         return res
 
     def _fetch_plantuml_image(self, plantuml_code: str, output_file: Path) -> Path | None:
-        # 1. Intentar primero con plantuml.com oficial (muy rápido y confiable)
+        # PlantText es el renderizador solicitado; PlantUML oficial y Kroki quedan como respaldo.
         default_servers = [
+            'https://www.planttext.com/plantuml',
             'https://www.plantuml.com/plantuml',
         ]
         server_url = os.environ.get('PLANTUML_SERVER_URL')
@@ -487,10 +492,35 @@ class DocGenerator:
                 return self._image_to_data_uri(remote_image)
 
             temp_file.unlink(missing_ok=True)
-            return ""
+            encoded = self._plantuml_encode(plantuml_code)
+            return f"https://www.planttext.com/plantuml/png/{encoded}"
         except Exception as e:
             print(f"[PlantUML Error] {e}")
-            return ""
+            try:
+                encoded = self._plantuml_encode(plantuml_code)
+                return f"https://www.planttext.com/plantuml/png/{encoded}"
+            except Exception:
+                return ""
+
+    def _render_diagram_block(self, title: str, plantuml_code: str) -> str:
+        """
+        Genera el bloque HTML de un diagrama integrado con PlantText:
+        1. Muestra la imagen generada (data URI o URL directa de PlantText).
+        2. Añade un botón/enlace interactivo para abrir y editar el diagrama en https://www.planttext.com/.
+        3. Mantiene intacto el diseño y estilo existente.
+        """
+        diagram_src = self._generate_plantuml_diagram(plantuml_code)
+        encoded = self._plantuml_encode(plantuml_code)
+        if not diagram_src:
+            diagram_src = f"https://www.planttext.com/plantuml/png/{encoded}"
+
+        editor_url = f"https://www.planttext.com/?text={encoded}"
+        editor_label = self.tx("Abrir y editar diagrama en PlantText", "Open and edit diagram in PlantText")
+
+        return (
+            f'\n\n<img src="{diagram_src}" alt="{title}">\n\n'
+            f'[🔗 {editor_label}]({editor_url})\n\n'
+        )
 
     def generate(self) -> dict:
         return {
@@ -635,6 +665,7 @@ componentes, datos, despliegue y mantenibilidad."""
             files_label = self.tx("archivos", "files")
             dir_section += f"- **`{d}/`** — {len(items)} {files_label} [{ext_str}]\n"
 
+        file_lines = self._file_lines_section()
         files_word = self.tx('archivos', 'files')
         lang_dist = "\n".join(
             f"- {l}: {c} {files_word} ({round(c/max(sum(langs.values()),1)*100)}%)"
@@ -660,14 +691,7 @@ componentes, datos, despliegue y mantenibilidad."""
         # Generar diagrama de casos de uso
         use_case_diagram = ""
         if eps:
-            diagram_path = self._generate_plantuml_diagram(use_cases_puml)
-            if diagram_path:
-                use_case_diagram = (
-                    f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                    f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama de Casos de Uso', 'Use Case Diagram')}\" "
-                    f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
-                    f"</div>\n"
-                )
+            use_case_diagram = self._render_diagram_block(self.tx('Diagrama de Casos de Uso', 'Use Case Diagram'), use_cases_puml)
 
         # Diagrama de infraestructura en PlantUML
         infra_puml = f"""@startuml
@@ -694,15 +718,7 @@ cli --> routes
 @enduml"""
         
         # Generar diagrama de infraestructura
-        infra_diagram = ""
-        diagram_path = self._generate_plantuml_diagram(infra_puml)
-        if diagram_path:
-            infra_diagram = (
-                f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama de Infraestructura', 'Infrastructure Diagram')}\" "
-                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
-                f"</div>\n"
-            )
+        infra_diagram = self._render_diagram_block(self.tx('Diagrama de Infraestructura', 'Infrastructure Diagram'), infra_puml)
 
         # Diagrama de clases en PlantUML
         class_puml = "@startuml\n"
@@ -744,14 +760,7 @@ cli --> routes
         # Generar diagrama de clases
         class_diagram = ""
         if cls:
-            diagram_path = self._generate_plantuml_diagram(class_puml)
-            if diagram_path:
-                class_diagram = (
-                    f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                    f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama de Clases', 'Class Diagram')}\" "
-                    f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
-                    f"</div>\n"
-                )
+            class_diagram = self._render_diagram_block(self.tx('Diagrama de Clases', 'Class Diagram'), class_puml)
             class_diagram += basic_class_warning
 
         root_name = 'project' if self.lang == 'en' else 'proyecto'
@@ -765,6 +774,8 @@ cli --> routes
 {root_name}/
 {chr(10).join(f'├── {d}/' for d in list(dirs.keys())[:15])}
 ```
+
+{file_lines}
 
 ### {self.t('layer_dist')}
 
@@ -794,6 +805,54 @@ cli --> routes
 
 {ai_insights if ai_insights else self.t('no_insights')}
 """
+
+    def _file_lines_section(self) -> str:
+        rows = []
+        total_lines = 0
+        counted_files = 0
+        project_path = self.r.get("project_path")
+        for item in self.r.get("structure", []):
+            path = item.get("path") or item.get("name")
+            if not path:
+                continue
+            line_count = item.get("line_count")
+            if not (type(line_count) is int and line_count >= 0):
+                # Intentar leer desde el disco si está disponible el proyecto
+                if project_path:
+                    try:
+                        p = Path(project_path) / path
+                        if p.is_file():
+                            line_count = len(p.read_bytes().split(b'\n'))
+                            item["line_count"] = line_count
+                    except Exception:
+                        pass
+                if not (type(line_count) is int and line_count >= 0):
+                    try:
+                        p = Path(path)
+                        if p.is_file():
+                            line_count = len(p.read_bytes().split(b'\n'))
+                            item["line_count"] = line_count
+                    except Exception:
+                        pass
+
+            if type(line_count) is int and line_count >= 0:
+                total_lines += line_count
+                counted_files += 1
+                line_count_text = str(line_count)
+            else:
+                line_count_text = "—"
+            rows.append([f"`{path}`", line_count_text])
+
+        title = self.tx("2.1.1 Líneas por archivo analizado", "2.1.1 Lines per analyzed file")
+        if not rows:
+            return f"### {title}\n\n{self.tx('No hay archivos analizados para mostrar.', 'There are no analyzed files to display.')}\n"
+
+        table = self._render_markdown_table(
+            [self.t('file'), self.tx('Líneas de código', 'Lines of code')],
+            rows,
+        )
+        total_label = self.tx('Total de líneas de archivos contadas', 'Total analyzed file lines')
+        return f"### {title}\n\n{table}\n**{total_label}:** {total_lines} ({counted_files}/{len(rows)} {self.tx('archivos', 'files')})\n"
 
     def _detect_patterns(self) -> str:
         eps   = self.r.get("endpoints", [])
@@ -1007,9 +1066,9 @@ python app.py  # or npm run dev
                 method = ep.get('method', 'GET')
                 out += f"##### `{method} {ep.get('path')}`\n\n"
                 # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
-                ai_desc = self._sanitize_ai_markdown(ep.get("ai_description"))
+                ai_desc = self._sanitize_ai_markdown(ep.get("ai_description") or ep.get("description") or ep.get("docstring") or f"Endpoint {method} {ep.get('path')}")
                 if ai_desc:
-                    out += f"> {ai_desc}\n\n"
+                    out += f"> **{self.t('description')}:** {ai_desc}\n\n"
 
                 # Tabla de detalle del endpoint
                 detail_rows = [
@@ -1068,7 +1127,8 @@ python app.py  # or npm run dev
                     )
                 else:
                     params_str = ", ".join(fn.get("params", []))
-                    out += f"```python\ndef {fn['name']}({params_str}):\n    \"\"\"\n    {fn['docstring']}\n    \"\"\"\n    ...\n```\n\n"
+                    docstring = fn.get('docstring', '')
+                    out += f"- **`{fn['name']}({params_str})`** — {docstring}\n"
 
         if undocumented:
             out += f"\n{self.t('need_docs')}\n\n"
@@ -1162,7 +1222,14 @@ python app.py  # or npm run dev
                 "\n**Ejemplo de implementación recomendada:**\n\n",
                 "\n**Recommended implementation example:**\n\n",
             )
-            out += "```python\nimport pytest\n\nclass TestEndpoints:\n    def test_get_returns_200(self, client):\n        response = client.get('/api/endpoint')\n        assert response.status_code == 200\n\n    def test_post_creates_resource(self, client):\n        data = {'name': 'test'}\n        response = client.post('/api/endpoint', json=data)\n        assert response.status_code == 201\n\n    def test_unauthorized_returns_401(self, client):\n        response = client.get('/api/protected')\n        assert response.status_code == 401\n```\n\n"
+            out += self.tx(
+                "Se recomienda crear una clase `TestEndpoints` con métodos de prueba para cada endpoint: "
+                "verificar respuestas exitosas (200), creación de recursos (201), y acceso no autorizado (401). "
+                "Utilizar un cliente de prueba (`client`) con `pytest` para ejecutar las pruebas de forma automatizada.\n\n",
+                "It is recommended to create a `TestEndpoints` class with test methods for each endpoint: "
+                "verify successful responses (200), resource creation (201), and unauthorized access (401). "
+                "Use a test client (`client`) with `pytest` to run the tests automatically.\n\n",
+            )
 
         return out
 
@@ -1220,14 +1287,16 @@ python app.py  # or npm run dev
             cls_rows
         )
 
-        # Detalle de cada clase con fragmento de código
+        # Detalle de cada clase (clase + tablas juntos para evitar saltos de página)
         out += self.tx("\n### 4.2 Detalle de Clases\n\n", "\n### 4.2 Class Details\n\n")
         for c in classes:
+            # Abrir bloque anti-salto de página
+            out += '<div style="page-break-inside: avoid; break-inside: avoid;">\n\n'
             out += f"#### `{c['name']}`\n\n"
             # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
-            ai_desc = self._sanitize_ai_markdown(c.get("ai_description") or c.get("docstring"))
+            ai_desc = self._sanitize_ai_markdown(c.get("ai_description") or c.get("description") or c.get("docstring") or self.tx(f"Clase {c['name']}", f"Class {c['name']}"))
             if ai_desc:
-                out += f"> {ai_desc}\n\n"
+                out += f"> **{self.t('description')}:** {ai_desc}\n\n"
 
             if c.get("methods"):
                 method_rows = []
@@ -1235,33 +1304,8 @@ python app.py  # or npm run dev
                     method_rows.append([f"`{m}()`"])
                 out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
 
-            # Fragmento de código de la clase
-            snippet = c.get('code_snippet', '')
-            if snippet:
-                explanation_parts = []
-                if ai_desc:
-                    explanation_parts.append(f"<strong>{self.t('description')}:</strong> {ai_desc}")
-                bases = ', '.join(c.get('bases', []))
-                if bases:
-                    label = self.tx('Herencia', 'Inheritance')
-                    text = self.tx(f"Extiende de <code>{bases}</code>.", f"Extends <code>{bases}</code>.")
-                    explanation_parts.append(f"<strong>{label}:</strong> {text}")
-                methods_count = len(c.get('methods', []))
-                label = self.tx('Estructura', 'Structure')
-                text = self.tx(
-                    f"Contiene {methods_count} método(s) detectado(s).",
-                    f"Contains {methods_count} detected method(s).",
-                )
-                explanation_parts.append(f"<strong>{label}:</strong> {text}")
-                explanation = ' '.join(explanation_parts) if explanation_parts else self.tx(
-                    f"Clase <code>{c['name']}</code> del proyecto.",
-                    f"Class <code>{c['name']}</code> in the project.",
-                )
-                out += self._render_code_fragment(
-                    c['name'], c.get('file', '?'), snippet, explanation,
-                    self.r.get('primary_language', 'python').lower()
-                )
-            out += "\n---\n\n"
+            # Cerrar bloque anti-salto
+            out += '\n</div>\n\n---\n\n'
         return out
 
     # ─── 5. FUNCIONES ─────────────────────────────────────────────────────────
@@ -1346,7 +1390,7 @@ python app.py  # or npm run dev
                     doc_tag
                 ])
             out += self._render_markdown_table(
-                [self.t('function_col'), self.t('params_col'), self.tx('Líneas de código', 'Lines of code'), self.t('complexity'), self.tx('Doc', 'Docs')],
+                [self.t('function_col'), self.t('params_col'), self.tx('Líneas en la función', 'Function lines'), self.t('complexity'), self.tx('Doc', 'Docs')],
                 fn_rows
             )
 
@@ -1371,22 +1415,116 @@ python app.py  # or npm run dev
 
     # ─── 6. MODELOS DE DATOS ──────────────────────────────────────────────────
     def _data_models(self) -> str:
+        # 1. Obtener modelos desde self.r.get("models") y self.r.get("classes")
+        models_list = list(self.r.get("models") or [])
         classes = self.r.get("classes", [])
-        model_classes = [c for c in classes if any(
-            kw in c["name"].lower() for kw in ["model", "schema", "entity", "dto", "dao"]
-        )]
+        
+        # Combinar clases marcadas como modelo o que coincidan con nombres de modelo
+        existing_keys = {(m.get("name"), m.get("file")) for m in models_list}
+        for c in classes:
+            key = (c.get("name"), c.get("file"))
+            if key not in existing_keys:
+                is_model = c.get("is_model") or any(
+                    kw in c["name"].lower() for kw in ["model", "schema", "entity", "dto", "dao"]
+                ) or any("model" in str(b).lower() or "base" in str(b).lower() for b in c.get("bases", []))
+                if is_model:
+                    models_list.append(c)
+                    existing_keys.add(key)
 
         out = self.tx("## 6. Modelos de Datos\n\n", "## 6. Data Models\n\n")
-        if model_classes:
+
+        if models_list:
             out += self.tx(
-                f"Se detectaron **{len(model_classes)} modelos de datos**:\n\n",
-                f"**{len(model_classes)} data models** were detected:\n\n",
+                f"Se detectaron **{len(models_list)} modelos de datos**:\n\n",
+                f"**{len(models_list)} data models** were detected:\n\n",
             )
-            for m in model_classes:
-                out += f"### `{m['name']}`\n"
-                out += f"- {self.tx('Archivo', 'File')}: `{m['file']}`\n"
-                out += f"- {self.tx('Hereda de', 'Inherits from')}: {', '.join(m.get('bases', [])) or 'object'}\n"
-                out += f"- {self.t('method')}: {', '.join(m.get('methods', [])[:10])}\n\n"
+
+            # Diagrama PlantUML de modelos
+            models_puml = "@startuml\n"
+            models_puml += "skinparam classAttributeIconSize 0\n"
+            models_puml += "skinparam backgroundColor #FFFFFF\n"
+            models_puml += "hide circle\n"
+            for idx, m in enumerate(models_list[:12], start=1):
+                safe_alias = f"model_{idx}"
+                models_puml += f'class "{m.get("name", "Model")}" as {safe_alias} <<Entity>> {{\n'
+                fields = m.get("fields", [])
+                for fld in fields[:8]:
+                    clean_fld = re.sub(r'[^a-zA-Z0-9_]', '', str(fld))
+                    if clean_fld:
+                        models_puml += f'  +{clean_fld}\n'
+                methods = m.get("methods", [])
+                if methods:
+                    models_puml += '  --\n'
+                    for met in methods[:4]:
+                        clean_met = re.sub(r'[^a-zA-Z0-9_]', '', str(met))
+                        if clean_met:
+                            models_puml += f'  +{clean_met}()\n'
+                models_puml += '}\n'
+            models_puml += "@enduml"
+
+            models_diagram = self._render_diagram_block(
+                self.tx("Diagrama de Modelos de Datos", "Data Models Diagram"),
+                models_puml
+            )
+            out += models_diagram
+
+            # Tabla resumen de modelos
+            out += self.tx("### 6.1 Tabla Resumen de Modelos\n\n", "### 6.1 Models Summary Table\n\n")
+            model_rows = []
+            for m in models_list:
+                fields_str = ', '.join(f"`{f}`" for f in m.get("fields", [])[:5]) or "—"
+                if len(m.get("fields", [])) > 5:
+                    fields_str += f" ({len(m.get('fields', [])) - 5} {self.tx('más', 'more')})"
+                methods_str = ', '.join(f"`{met}()`" for met in m.get("methods", [])[:3]) or "—"
+                bases = ', '.join(m.get("bases", [])) or "object"
+                model_rows.append([
+                    f"**`{m['name']}`**",
+                    f"`{m.get('file', '?')}`",
+                    str(m.get('line', '—')),
+                    bases,
+                    fields_str,
+                    methods_str,
+                ])
+            out += self._render_markdown_table(
+                [self.tx('Modelo', 'Model'), self.t('file'), self.tx('Línea', 'Line'), self.tx('Herencia', 'Inheritance'), self.tx('Campos', 'Fields'), self.t('method')],
+                model_rows
+            )
+
+            # Detalle de cada modelo (modelo + tablas juntos para evitar saltos de página)
+            out += self.tx("\n### 6.2 Detalle de Modelos\n\n", "\n### 6.2 Model Details\n\n")
+            for m in models_list:
+                # Abrir bloque que evita salto de página entre modelo y su tabla
+                out += '<div style="page-break-inside: avoid; break-inside: avoid;">\n\n'
+                out += f"#### `{m['name']}`\n\n"
+                desc = self._sanitize_ai_markdown(m.get("ai_description") or m.get("description") or m.get("docstring") or self.tx(f"Modelo {m['name']}", f"Model {m['name']}"))
+                if desc:
+                    out += f"> **{self.t('description')}:** {desc}\n\n"
+
+                detail_rows = [
+                    [self.t('file'), f"`{m.get('file', '?')}`"],
+                    [self.tx('Línea', 'Line'), str(m.get('line', '—'))],
+                    [self.tx('Hereda de', 'Inherits from'), f"`{', '.join(m.get('bases', [])) or 'object'}`"],
+                ]
+                out += self._render_markdown_table([self.t('property'), self.t('value')], detail_rows)
+
+                # Tabla de campos si existen
+                if m.get("fields"):
+                    fld_rows = []
+                    for fld in m["fields"]:
+                        fld_name = fld if isinstance(fld, str) else fld.get("name", str(fld))
+                        fld_type = fld.get("type", "Column") if isinstance(fld, dict) else "Attribute"
+                        fld_rows.append([f"`{fld_name}`", f"`{fld_type}`"])
+                    out += f"\n**{self.tx('Atributos / Columnas del Modelo', 'Model Attributes / Columns')}:**\n\n"
+                    out += self._render_markdown_table([self.tx('Campo', 'Field'), self.tx('Tipo', 'Type')], fld_rows)
+
+                # Métodos del modelo si existen
+                if m.get("methods"):
+                    method_rows = [[f"`{met}()`"] for met in m["methods"][:15]]
+                    out += f"\n**{self.tx('Métodos del Modelo', 'Model Methods')}:**\n\n"
+                    out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
+
+                # Cerrar bloque anti-salto de página
+                out += '\n</div>\n\n---\n\n'
         else:
             out += self.tx(
                 "No se detectaron clases con nombres de modelo explícitos.\n\n",
@@ -1483,16 +1621,7 @@ python app.py  # or npm run dev
         puml += "@enduml"
 
         # Generar imagen
-        diagram_path = self._generate_plantuml_diagram(puml)
-        if diagram_path:
-            return (
-                f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama Estrella de Data Warehouse', 'Data Warehouse Star Schema')}\" "
-                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
-                f"</div>\n"
-            )
-
-        return ""
+        return self._render_diagram_block(self.tx('Diagrama Estrella de Data Warehouse', 'Data Warehouse Star Schema'), puml)
 
     def _generate_snowflake_schema(self) -> str:
         """
@@ -1544,16 +1673,7 @@ python app.py  # or npm run dev
         puml += "@enduml"
 
         # Generar imagen
-        diagram_path = self._generate_plantuml_diagram(puml)
-        if diagram_path:
-            return (
-                f"\n\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{diagram_path}\" alt=\"{self.tx('Diagrama Copo de Nieve de Data Warehouse', 'Data Warehouse Snowflake Schema')}\" "
-                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
-                f"</div>\n"
-            )
-
-        return ""
+        return self._render_diagram_block(self.tx('Diagrama Copo de Nieve de Data Warehouse', 'Data Warehouse Snowflake Schema'), puml)
 
     def _data_analysis_section(self) -> str:
         """
@@ -1934,14 +2054,8 @@ python app.py  # or npm run dev
         etl_diagram = pipeline.get_pipeline_diagram()
 
         # Generar imagen del diagrama ETL
-        etl_image = self._generate_plantuml_diagram(etl_diagram)
-        if etl_image:
-            out += (
-                f"\n<div style=\"margin: 1.5rem 0;\">"
-                f"<img src=\"{etl_image}\" alt=\"{self.tx('Diagrama del Pipeline ETL', 'ETL Pipeline Diagram')}\" "
-                f"style=\"max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; display:block;\">"
-                f"</div>\n"
-            )
+        etl_image = self._render_diagram_block(self.tx('Diagrama del Pipeline ETL', 'ETL Pipeline Diagram'), etl_diagram)
+        out += etl_image
 
         out += self.tx("\n**Fases del Pipeline:**\n\n", "\n**Pipeline Stages:**\n\n")
         out += self.tx(
@@ -1982,14 +2096,14 @@ python app.py  # or npm run dev
         }.get(lang, "# run project" if self.lang == 'en' else "# ejecutar proyecto")
 
         if self.lang == 'en':
-            return f"""## 5. Deployment and Maintenance Guide
+            return f"""## 7. Deployment and Maintenance Guide
 
-### 5.1 System Requirements
+### 7.1 System Requirements
 
 - **Primary language**: {lang}
 - **Detected files**: {self.r.get('total_files', 0)}
 
-### 5.2 Local Installation
+### 7.2 Local Installation
 
 ```bash
 # 1. Clone the repository
@@ -2007,7 +2121,7 @@ cp .env.example .env
 {run_cmd}
 ```
 
-### 5.3 Docker Deployment
+### 7.3 Docker Deployment
 
 ```dockerfile
 FROM {self._get_docker_base(lang)}
@@ -2027,7 +2141,7 @@ docker build -t my-project .
 docker run -p 8000:8000 my-project
 ```
 
-### 5.4 Recommended Environment Variables
+### 7.4 Recommended Environment Variables
 
 ```env
 # General
@@ -2047,7 +2161,7 @@ API_VERSION=v1
 ALLOWED_HOSTS=*
 ```
 
-### 5.5 Deployment Checklist
+### 7.5 Deployment Checklist
 
 - [ ] Environment variables configured
 - [ ] Database migrated
@@ -2057,7 +2171,7 @@ ALLOWED_HOSTS=*
 - [ ] Backups scheduled
 - [ ] Monitoring configured
 
-### 5.6 Changelog
+### 7.6 Changelog
 
 **Version 1.0.0** — {datetime.utcnow().strftime('%Y-%m-%d')}
 - Initial version analyzed by AutoDocs AI
@@ -2065,14 +2179,14 @@ ALLOWED_HOSTS=*
 - Code quality analysis completed
 
 """
-        return f"""## 5. Guía de Despliegue y Mantenimiento
+        return f"""## 7. Guía de Despliegue y Mantenimiento
 
-### 5.1 Requisitos del Sistema
+### 7.1 Requisitos del Sistema
 
 - **Lenguaje principal**: {lang}
 - **Archivos detectados**: {self.r.get('total_files', 0)}
 
-### 5.2 Instalación Local
+### 7.2 Instalación Local
 
 ```bash
 # 1. Clonar el repositorio
@@ -2090,7 +2204,7 @@ cp .env.example .env
 {run_cmd}
 ```
 
-### 5.3 Despliegue con Docker
+### 7.3 Despliegue con Docker
 
 ```dockerfile
 FROM {self._get_docker_base(lang)}
@@ -2110,7 +2224,7 @@ docker build -t mi-proyecto .
 docker run -p 8000:8000 mi-proyecto
 ```
 
-### 5.4 Variables de Entorno Recomendadas
+### 7.4 Variables de Entorno Recomendadas
 
 ```env
 # General
@@ -2130,7 +2244,7 @@ API_VERSION=v1
 ALLOWED_HOSTS=*
 ```
 
-### 5.5 Checklist de Despliegue
+### 7.5 Checklist de Despliegue
 
 - [ ] Variables de entorno configuradas
 - [ ] Base de datos migrada
@@ -2140,7 +2254,7 @@ ALLOWED_HOSTS=*
 - [ ] Backups programados
 - [ ] Monitoreo configurado
 
-### 5.6 Registro de Cambios (Changelog)
+### 7.6 Registro de Cambios (Changelog)
 
 **Versión 1.0.0** — {datetime.utcnow().strftime('%Y-%m-%d')}
 - Versión inicial analizada por AutoDocs AI
@@ -2209,9 +2323,9 @@ ALLOWED_HOSTS=*
         in_word = 'in' if self.lang == 'en' else 'en'
         complexity_word = 'complexity' if self.lang == 'en' else 'complejidad'
 
-        return f"""## 6. {('Code Quality Report' if self.lang == 'en' else 'Reporte de Calidad del Código')}
+        return f"""## 8. {('Code Quality Report' if self.lang == 'en' else 'Reporte de Calidad del Código')}
 
-### 6.1 {('Metrics Analysis' if self.lang == 'en' else 'Análisis de Métricas')}
+### 8.1 {('Metrics Analysis' if self.lang == 'en' else 'Análisis de Métricas')}
 
 **{('Quality Score' if self.lang == 'en' else 'Score de Calidad')}:** {score}/100 — **{quality_text}**
 {self._color_bar_html(quality_color, alt=('Quality level' if self.lang == 'en' else 'Nivel de calidad'))}
@@ -2233,18 +2347,18 @@ ALLOWED_HOSTS=*
 {'Trend' if self.lang == 'en' else 'Tendencia'}: {trend}
 ```
 
-### 6.2 {('High Cyclomatic Complexity Functions' if self.lang == 'en' else 'Funciones con Alta Complejidad Ciclomática')}
+### 8.2 {('High Cyclomatic Complexity Functions' if self.lang == 'en' else 'Funciones con Alta Complejidad Ciclomática')}
 
 {no_high if not high_cx_fns else chr(10).join(
     f"- `{f['name']}` {in_word} `{f['file']}` — {complexity_word}: **{f.get('complexity')}**"
     for f in high_cx_fns[:10]
 )}
 
-### 6.3 {('Recommendations' if self.lang == 'en' else 'Recomendaciones')}
+### 8.3 {('Recommendations' if self.lang == 'en' else 'Recomendaciones')}
 
 {chr(10).join(recommendations)}
 
-### 6.4 {('Analysis Issues' if self.lang == 'en' else 'Errores de Análisis')}
+### 8.4 {('Analysis Issues' if self.lang == 'en' else 'Errores de Análisis')}
 
 {no_issues if not issues else chr(10).join(
     f"- `{i.get('file', '?')}`: {i.get('error', '?')}"

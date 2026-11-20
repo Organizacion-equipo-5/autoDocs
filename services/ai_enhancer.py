@@ -24,9 +24,9 @@ class AIEnhancer:
     """
 
     GROQ_CANDIDATE_MODELS = [
-        "qwen/qwen3.8-27b",
         "openai/gpt-oss-120b",
         "openai/gpt-oss-20b",
+        "qwen/qwen3.8-27b",
         "llama-3.3-70b-versatile",
         "llama-3.1-8b-instant",
     ]
@@ -90,9 +90,16 @@ class AIEnhancer:
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
                     ],
-                    "max_tokens": max_tokens,
-                    "temperature": 0.7
+                    "temperature": 1,
+                    "top_p": 1,
                 }
+                if model_name.startswith("openai/gpt-oss-"):
+                    payload.update({
+                        "max_completion_tokens": max_tokens,
+                        "reasoning_effort": "medium",
+                    })
+                else:
+                    payload["max_tokens"] = max_tokens
                 try:
                     response = requests.post(self.API_URL, json=payload, headers=headers, timeout=25)
                     if response.status_code == 200:
@@ -324,6 +331,62 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
 
         return fallback
 
+    def enhance_model_description(self, model: dict, context: str = "",
+                                  output_language: str = "es") -> str:
+        """
+        Genera una descripción mejorada para un modelo de datos usando IA.
+
+        Args:
+            model: Diccionario con información del modelo (nombre, campos, métodos)
+            context: Contexto adicional del proyecto
+            output_language: Idioma de la descripción ('es' o 'en')
+
+        Returns:
+            Descripción mejorada del modelo
+        """
+        lang = self._normalize_output_language(output_language)
+        fallback = model.get('description') or model.get('docstring') or (
+            f"Data model representing the {model['name']} entity." if lang == 'en'
+            else f"Modelo de datos que representa la entidad {model['name']} en el sistema."
+        )
+        if not self.is_available():
+            return fallback
+
+        fields = ', '.join([f.get('name', '') for f in model.get('fields', []) if isinstance(f, dict)] or [])
+        methods = ', '.join(model.get('methods', [])[:10])
+        bases = ', '.join(model.get('bases', []))
+
+        prompt = f"""Analiza este modelo de datos/entidad y genera una descripción clara y técnica:
+
+Nombre del Modelo: {model['name']}
+Hereda de: {bases or 'object'}
+Campos/Atributos: {fields or 'No especificados'}
+Métodos: {methods or 'Ninguno'}
+Archivo: {model.get('file', 'desconocido')}
+Docstring existente: {model.get('docstring', 'ninguna')}
+Contexto del proyecto: {context}
+
+Genera una descripción que incluya:
+1. Qué entidad o concepto de negocio representa este modelo en la base de datos
+2. Cuál es el propósito de sus campos principales
+3. Cómo se utiliza dentro del flujo de la aplicación
+4. Su importancia en el modelo relacional o de dominio
+
+Mantén la descripción concisa, profesional y explicativa (máximo 120 palabras)."""
+
+        result = self._call_ai(
+            self._localize_system(
+                "Eres un arquitecto de software y especialista en modelado de datos. Genera descripciones claras y técnicas sobre entidades y modelos de datos.",
+                lang,
+            ),
+            self._localize_prompt(prompt, lang),
+            max_tokens=300
+        )
+        if result:
+            return result
+
+        return fallback
+
     def generate_architecture_insights(self, analysis_results: dict,
                                         output_language=None) -> str:
         """
@@ -399,13 +462,19 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         )
         results = analysis_results
         results['doc_language'] = lang
-        results['ai_output_language'] = lang
+
+        if (
+            results.get('ai_documentation_enhanced')
+            and results.get('ai_output_language') == lang
+        ):
+            return results
 
         if not self.is_available():
             print("[AI] Groq no configurado, usando documentación básica. "
                   "Agrega GROQ_API_KEY en tu archivo .env para habilitar la mejora con IA.")
             return results
 
+        results['ai_output_language'] = lang
         print(f"[AI] Mejorando documentación con Groq en {lang}...")
 
         # Contexto del proyecto
@@ -423,22 +492,46 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
                 func, context, output_language=lang
             )
 
-        # Mejorar clases (limitar a 3)
-        for cls in results.get('classes', [])[:3]:
+        # Mejorar clases (limitar a 5)
+        for cls in results.get('classes', [])[:5]:
             cls['ai_description'] = self.enhance_class_description(
                 cls, context, output_language=lang
             )
 
-        # Mejorar endpoints (limitar a 3)
-        for ep in results.get('endpoints', [])[:3]:
+        # Mejorar modelos (limitar a 5)
+        for model in results.get('models', [])[:5]:
+            model['ai_description'] = self.enhance_model_description(
+                model, context, output_language=lang
+            )
+
+        # Mejorar endpoints (limitar a 5)
+        for ep in results.get('endpoints', [])[:5]:
             ep['ai_description'] = self.enhance_endpoint_description(
                 ep, context, output_language=lang
             )
+
+        # Asegurar que todos los elementos restantes tengan ai_description coherente
+        for m in results.get('models', []):
+            if not m.get('ai_description'):
+                m['ai_description'] = m.get('description') or m.get('docstring') or (
+                    f"Domain model representing {m['name']} entity." if lang == 'en'
+                    else f"Modelo de datos que define la entidad {m['name']}."
+                )
+
+        for ep in results.get('endpoints', []):
+            if not ep.get('ai_description'):
+                ep['ai_description'] = ep.get('description') or f"Endpoint {ep.get('method')} {ep.get('path')}"
+
+        for cls in results.get('classes', []):
+            if not cls.get('ai_description'):
+                cls['ai_description'] = cls.get('description') or cls.get('docstring') or f"Clase {cls.get('name')}"
 
         # Generar insights de arquitectura
         results['ai_architecture_insights'] = self.generate_architecture_insights(
             results, output_language=lang
         )
+        results['ai_documentation_enhanced'] = True
+        results['ai_output_language'] = lang
 
         print("[AI] Documentación mejorada exitosamente con Groq")
         return results

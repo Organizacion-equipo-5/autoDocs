@@ -369,8 +369,9 @@ python scripts/create_admin.py \
 | `FLASK_DEBUG` | No | `True` o `False`; por defecto `True` en desarrollo |
 | `UPLOAD_FOLDER` | No | Carpeta de proyectos cargados; por defecto `./uploads` |
 | `EXPORT_FOLDER` | No | Carpeta de documentos generados; por defecto `./exports` |
-| `GROQ_API_KEY` | No | Una o varias API keys de Groq separadas por comas |
-| `PLANTUML_SERVER_URL` | No | Servidor PlantUML alternativo |
+| `GROQ_API_KEY` | No | Una o varias API keys de Groq separadas por comas; usa `openai/gpt-oss-120b` por defecto |
+| `ENABLE_AI_ANALYSIS` | No | Activa el enriquecimiento de descripciones con Groq cuando hay una clave configurada; `false` lo desactiva |
+| `PLANTUML_SERVER_URL` | No | Servidor PlantUML alternativo; por defecto se intenta PlantText primero |
 | `PLANTUML_JAR_PATH` | No | Ruta a un `plantuml.jar` local |
 | `PAYPAL_CLIENT_ID` | No | Client ID de PayPal para el botón de pago |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | No | Servidor de correo para recuperar contraseñas |

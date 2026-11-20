@@ -1783,6 +1783,7 @@
                     <button class="tab" onclick="showTab('functions')">Funciones</button>
                     <button class="tab" onclick="showTab('classes')">Clases</button>
                     <button class="tab" onclick="showTab('structure')">Estructura</button>
+                    <button class="tab" onclick="showTab('models')">Modelos</button>
                 </div>
 
                 <!-- ============================================================
@@ -1817,6 +1818,7 @@
                                         <th class="px-6 py-3 w-10">Incluir</th>
                                         <th class="px-6 py-3">Método</th>
                                         <th class="px-6 py-3">Ruta</th>
+                                        <th class="px-6 py-3">Descripción</th>
                                         <th class="px-6 py-3">Framework</th>
                                         <th class="px-6 py-3">Archivo</th>
                                     </tr>
@@ -1895,6 +1897,7 @@
                                     <tr>
                                         <th class="px-6 py-3 w-10">Incluir</th>
                                         <th class="px-6 py-3">Clase</th>
+                                        <th class="px-6 py-3">Descripción</th>
                                         <th class="px-6 py-3">Archivo</th>
                                         <th class="px-6 py-3">Métodos</th>
                                         <th class="px-6 py-3">Bases</th>
@@ -1936,10 +1939,52 @@
                                         <th class="px-6 py-3 w-10">Incluir</th>
                                         <th class="px-6 py-3">Ruta</th>
                                         <th class="px-6 py-3">Lenguaje</th>
+                                        <th class="px-6 py-3">Líneas</th>
                                         <th class="px-6 py-3">Tamaño</th>
                                     </tr>
                                 </thead>
                                 <tbody id="structure-table" class="divide-y divide-outline-variant/10"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                TABLA DE MODELOS DE DATOS
+                ============================================================ -->
+                <div id="tab-models" style="display:none;">
+                    <div class="glass rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
+                        <!-- Cabecera con controles -->
+                        <div class="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <h3 class="font-semibold text-on-surface">Modelos de datos detectados</h3>
+                                <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer">
+                                    <input type="checkbox" id="select-all-models" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" onchange="toggleSelectAll('models')">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-code-md text-on-surface-variant/50" id="model-count" style="color: #BFBDBD;">0 modelos</span>
+                                <button onclick="saveSelections()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">save</span> Guardar cambios
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Tabla de modelos -->
+                        <div class="overflow-x-auto" style="max-height:400px;overflow-y:auto;">
+                            <table class="w-full text-left">
+                                <thead class="bg-primary/10 text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/10 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="px-6 py-3 w-10">Incluir</th>
+                                        <th class="px-6 py-3">Modelo</th>
+                                        <th class="px-6 py-3">Descripción</th>
+                                        <th class="px-6 py-3">Archivo</th>
+                                        <th class="px-6 py-3">Campos</th>
+                                        <th class="px-6 py-3">Métodos</th>
+                                        <th class="px-6 py-3">Herencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="models-table" class="divide-y divide-outline-variant/10"></tbody>
                             </table>
                         </div>
                     </div>
@@ -2164,7 +2209,7 @@
          */
         function applySelections(selections) {
             if (!selections) return;
-            ['endpoints','functions','classes','structure'].forEach(type => {
+            ['endpoints','functions','classes','structure','models'].forEach(type => {
                 const indices = selections[type] || [];
                 document.querySelectorAll(`.item-checkbox[data-type="${type}"]`).forEach(cb => {
                     cb.checked = indices.includes(parseInt(cb.dataset.index));
@@ -2642,15 +2687,17 @@
                                   ep.method==='PUT' ? 'bg-yellow-100 text-yellow-700' :
                                   ep.method==='DELETE' ? 'bg-red-100 text-red-700' :
                                   'bg-purple-100 text-purple-700';
+                    const desc = ep.ai_description || ep.description || ep.docstring || '—';
                     return `<tr class="hover:bg-primary/5 transition-colors">
                         <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="endpoints" data-index="${i}" onchange="updateSelectAll('endpoints')"></td>
                         <td class="px-6 py-3"><span class="px-2 py-0.5 rounded text-xs font-bold uppercase ${mColor}">${ep.method}</span></td>
                         <td class="px-6 py-3 font-code-md text-sm"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${ep.path}</code></td>
+                        <td class="px-6 py-3 text-sm text-on-surface-variant" title="${desc.replace(/"/g,'&quot;')}">${desc.length>80?desc.slice(0,80)+'…':desc}</td>
                         <td class="px-6 py-3 text-sm text-on-surface-variant">${ep.framework||'—'}</td>
                         <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${ep.file}</td>
                     </tr>`;
                 }).join('')
-                : '<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron endpoints</td></tr>';
+                : '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron endpoints</td></tr>';
 
             // ============================================================
             // Funciones
@@ -2687,15 +2734,17 @@
                 const docCell = c.docstring
                     ? '<span class="text-green-600 font-bold">✓</span>'
                     : `<button class="btn-suggest" onclick="openSuggestionModal('${c.name.replace(/'/g,"\\'")}','${c.file.replace(/'/g,"\\'")}','${paramsRaw.replace(/'/g,"\\'")}','class')">💡 Sugerencia</button>`;
+                const desc = c.ai_description || c.description || c.docstring || '—';
                 return `<tr class="hover:bg-primary/5 transition-colors">
                     <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="classes" data-index="${i}" onchange="updateSelectAll('classes')"></td>
                     <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${c.name}</code></td>
+                    <td class="px-6 py-3 text-sm text-on-surface-variant" title="${desc.replace(/"/g,'&quot;')}">${desc.length>70?desc.slice(0,70)+'…':desc}</td>
                     <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${c.file}</td>
                     <td class="px-6 py-3 text-sm text-on-surface-variant">${(c.methods||[]).length}</td>
                     <td class="px-6 py-3 text-sm text-on-surface-variant">${(c.bases||[]).join(', ')||'—'}</td>
                     <td class="px-6 py-3">${docCell}</td>
                 </tr>`;
-            }).join('') || '<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron clases</td></tr>';
+            }).join('') || '<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron clases</td></tr>';
 
             // ============================================================
             // Estructura del proyecto
@@ -2703,14 +2752,44 @@
             const struct = r.structure || [];
             document.getElementById('struct-count').textContent = struct.length + ' archivos';
             document.getElementById('structure-table').innerHTML = struct.slice(0,50).map((f,i)=>{
-                const size = f.size > 1024 ? (f.size/1024).toFixed(1)+'KB' : f.size+'B';
+                const size = f.size > 1024 ? (f.size/1024).toFixed(1)+'KB' : (f.size||0)+'B';
+                const lines = (typeof f.line_count === 'number') ? f.line_count : '—';
                 return `<tr class="hover:bg-primary/5 transition-colors">
                     <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="structure" data-index="${i}" onchange="updateSelectAll('structure')"></td>
                     <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${f.path}</td>
                     <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${f.language}</code></td>
+                    <td class="px-6 py-3 text-sm font-code-md text-on-surface-variant">${lines}</td>
                     <td class="px-6 py-3 text-sm font-code-md text-red-500 dark:text-red-400">${size}</td>
                 </tr>`;
-            }).join('') || '<tr><td colspan="4" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron archivos</td></tr>';
+            }).join('') || '<tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron archivos</td></tr>';
+
+            // ============================================================
+            // Modelos
+            // ============================================================
+            const allModels = (r.models || []).concat(
+                (r.classes || []).filter(c => c.is_model || (c.bases||[]).some(b=>/(model|base|db\.model)/i.test(b)))
+            );
+            // Deduplicar por name+file
+            const seenMk = new Set();
+            const mdls = allModels.filter(m => { const k=m.name+'|'+m.file; if(seenMk.has(k)) return false; seenMk.add(k); return true; });
+            document.getElementById('model-count').textContent = mdls.length + ' modelos';
+            document.getElementById('models-table').innerHTML = mdls.length
+                ? mdls.map((m,i)=>{
+                    const desc = m.ai_description || m.description || m.docstring || '—';
+                    const fields = (m.fields||[]).slice(0,5).join(', ') || '—';
+                    const methods = (m.methods||[]).slice(0,3).join(', ') || '—';
+                    const bases = (m.bases||[]).join(', ') || 'object';
+                    return `<tr class="hover:bg-primary/5 transition-colors">
+                        <td class="px-6 py-3"><input type="checkbox" class="item-checkbox" data-type="models" data-index="${i}" onchange="updateSelectAll('models')"></td>
+                        <td class="px-6 py-3"><code class="bg-primary/5 px-1.5 py-0.5 rounded text-primary">${m.name}</code></td>
+                        <td class="px-6 py-3 text-sm text-on-surface-variant" title="${desc.replace(/"/g,'&quot;')}">${desc.length>70?desc.slice(0,70)+'…':desc}</td>
+                        <td class="px-6 py-3 text-sm font-code-md text-teal-600 dark:text-teal-400">${m.file}</td>
+                        <td class="px-6 py-3 text-sm text-on-surface-variant font-code-md">${fields}</td>
+                        <td class="px-6 py-3 text-sm text-on-surface-variant">${methods}</td>
+                        <td class="px-6 py-3 text-sm text-on-surface-variant">${bases}</td>
+                    </tr>`;
+                }).join('')
+                : '<tr><td colspan="7" class="px-6 py-8 text-center text-on-surface-variant/50">No se detectaron modelos de datos</td></tr>';
 
             // ============================================================
             // Aplicar selecciones guardadas o marcar todos por defecto
@@ -2778,8 +2857,8 @@
          * @returns {Object} - Objeto con arreglos de índices por tipo.
          */
         function getSelectedItems() {
-            const selected = { endpoints:[], functions:[], classes:[], structure:[] };
-            ['endpoints','functions','classes','structure'].forEach(type => {
+            const selected = { endpoints:[], functions:[], classes:[], structure:[], models:[] };
+            ['endpoints','functions','classes','structure','models'].forEach(type => {
                 document.querySelectorAll(`.item-checkbox[data-type="${type}"]:checked`).forEach(cb => {
                     selected[type].push(parseInt(cb.dataset.index));
                 });
@@ -2796,11 +2875,11 @@
          * @param {string} tab - Nombre de la pestaña ('endpoints', 'functions', 'classes', 'structure').
          */
         function showTab(tab) {
-            ['endpoints','functions','classes','structure'].forEach(t => {
+            ['endpoints','functions','classes','structure','models'].forEach(t => {
                 document.getElementById(`tab-${t}`).style.display = t===tab ? 'block' : 'none';
             });
             document.querySelectorAll('.tab').forEach((el,i) => {
-                el.classList.toggle('active', ['endpoints','functions','classes','structure'][i]===tab);
+                el.classList.toggle('active', ['endpoints','functions','classes','structure','models'][i]===tab);
             });
         }
 
@@ -2850,12 +2929,26 @@
         async function downloadPdfWithLanguage(lang, selected) {
             document.getElementById('pdf-loading-modal').classList.add('flex');
             document.getElementById('pdf-loading-modal').classList.remove('hidden');
+            const url = new URL(`/api/export/${encodeURIComponent(projectId)}/pdf`, window.location.origin);
+            url.searchParams.set('lang', lang);
+            url.searchParams.set('selected', JSON.stringify(selected));
             try {
-                // Construir URL con parámetros de selección e idioma explícito
-                const url = `/api/export/${projectId}/pdf?token=${token}&lang=${encodeURIComponent(lang)}&selected=${encodeURIComponent(JSON.stringify(selected))}`;
-                const res = await fetch(url, { headers: headers() });
-                if (!res.ok) throw new Error('Error al generar PDF');
+                const res = await fetch(url.toString(), {
+                    headers: headers(),
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) {
+                    let errorMessage = `Error al generar PDF (HTTP ${res.status})`;
+                    try {
+                        const errorPayload = await res.json();
+                        if (errorPayload.error) errorMessage = errorPayload.error;
+                    } catch (_) {
+                        // Mantener el error HTTP si el servidor no devolvió JSON.
+                    }
+                    throw new Error(errorMessage);
+                }
                 const blob = await res.blob();
+                if (!blob.size) throw new Error('El servidor devolvió un archivo PDF vacío');
                 // Obtener nombre del archivo de la cabecera Content-Disposition o generarlo dinámicamente con nombre y fecha/hora
                 let downloadFilename = '';
                 const disposition = res.headers.get('Content-Disposition');
@@ -2878,10 +2971,10 @@
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = downloadFilename;
-                document.body.appendChild(a); 
-                a.click(); 
+                document.body.appendChild(a);
+                a.click();
                 document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
                 // Mostrar modal de éxito
                 document.getElementById('pdf-loading-modal').classList.remove('flex');
                 document.getElementById('pdf-loading-modal').classList.add('hidden');
@@ -2891,6 +2984,12 @@
                 console.error('Error exportando PDF:', err);
                 document.getElementById('pdf-loading-modal').classList.remove('flex');
                 document.getElementById('pdf-loading-modal').classList.add('hidden');
+                if (err instanceof TypeError && navigator.onLine) {
+                    const directDownloadUrl = new URL(url);
+                    directDownloadUrl.searchParams.set('token', token);
+                    window.location.assign(directDownloadUrl.toString());
+                    return;
+                }
                 alert('Error al generar PDF: ' + (err.message || 'Error desconocido'));
             }
         }

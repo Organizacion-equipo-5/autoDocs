@@ -84,8 +84,8 @@ def run_analysis_async(project_id, project_path, db, source=None, lang=None):
         doc_lang = 'en' if str(doc_lang).lower().startswith('en') else 'es'
         results['doc_language'] = doc_lang
 
-        # Opcional: mejoras con IA (desactivado por defecto para velocidad)
-        use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'false').lower() == 'true'
+        # El enriquecimiento se activa con la clave configurada, salvo desactivación explícita.
+        use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'true').lower() == 'true'
         if use_ai:
             mining_results = {}
             try:
@@ -599,6 +599,8 @@ def download_database_pdf():
         return jsonify({"error": "No analysis data provided"}), 400
 
     try:
+        from services.exporter import _configure_native_libraries
+        _configure_native_libraries()
         from services.doc_generator import DocGenerator
         from io import BytesIO
         from weasyprint import HTML, CSS
@@ -1197,37 +1199,24 @@ def generate_snowflake_plantuml(tables, table_columns, foreign_keys):
 
 
 def generate_er_diagram_image(plantuml_code):
-    """Genera imagen del diagrama E-R usando PlantUML."""
+    """Genera imagen del diagrama E-R usando PlantText y PlantUML."""
     try:
         from services.doc_generator import DocGenerator
-        from pathlib import Path
-        import tempfile
-
         doc_gen = DocGenerator({})
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.puml', delete=False) as f:
-            f.write(plantuml_code)
-            temp_path = Path(f.name)
-
-        try:
-            output_file = temp_path.with_suffix('.png')
-            result_path = doc_gen._fetch_plantuml_image(plantuml_code, output_file)
-            if result_path and result_path.exists():
-                data_uri = doc_gen._image_to_data_uri(result_path)
-                if data_uri:
-                    return f'<img src="{data_uri}" alt="Diagrama E-R" style="max-width:100%;height:auto;" />'
-                result_path.unlink(missing_ok=True)
-        except Exception as e:
-            print(f"[ER Diagram] Error: {e}")
-        finally:
-            temp_path.unlink(missing_ok=True)
-
+        block = doc_gen._render_diagram_block("Diagrama E-R", plantuml_code)
+        if block:
+            return block
+        encoded = doc_gen._plantuml_encode(plantuml_code)
+        img_url = f"https://www.planttext.com/plantuml/png/{encoded}"
+        link_url = f"https://www.planttext.com/?text={encoded}"
         return (
-            f'<pre style="background:#f0f0f0;padding:10px;border-radius:4px;'
-            f'font-size:12px;overflow:auto;">{plantuml_code}</pre>'
+            f'<div class="diagram-container" style="margin: 1.5rem 0;">'
+            f'<img src="{img_url}" alt="Diagrama E-R" style="max-width:100%;height:auto;border:1px solid #cbd5e1;border-radius:8px;" />'
+            f'<div style="margin-top:0.5rem;"><a href="{link_url}" target="_blank" rel="noopener noreferrer" style="color:#0284c7;font-size:0.85rem;text-decoration:none;">🔗 Abrir y editar diagrama en PlantText</a></div>'
+            f'</div>'
         )
     except Exception as e:
-        print(f"[ER Diagram] Fallback error: {e}")
+        print(f"[ER Diagram] Error: {e}")
         return '<p style="color:#999;">No se pudo generar el diagrama E-R.</p>'
 
 

@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 
 from services.exporter import DocumentExporter, EXPORT_BASE
+from services.doc_generator import DocGenerator
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -275,6 +276,74 @@ class TestToHtml:
             html = exporter.to_html()
             # Debe mantener el data URI
             assert data_uri in html
+
+
+class TestCodeFragmentRendering:
+    def test_reportlab_parser_extracts_fragment_without_html_tags(
+        self, sample_project, monkeypatch
+    ):
+        monkeypatch.setenv("ENABLE_AI_ANALYSIS", "false")
+        generator = DocGenerator({
+            "primary_language": "Python",
+            "functions": [],
+            "classes": [],
+            "endpoints": [],
+        })
+        fragment = generator._render_code_fragment(
+            "create_user",
+            "services/users.py",
+            "def create_user():\n    return '<user>'",
+            "<strong>Propósito:</strong> Crea <code>usuarios</code>.",
+        )
+        exporter = DocumentExporter(sample_project, {})
+
+        title, file_path, code, explanation = exporter._parse_code_fragment(fragment)
+
+        assert title == "create_user"
+        assert file_path == "services/users.py"
+        assert code == "def create_user():\n    return '<user>'"
+        assert explanation == "**Propósito:** Crea `usuarios`."
+
+    def test_reportlab_renderiza_el_fragmento_sin_imprimir_etiquetas_html(
+        self, sample_project, tmp_path, monkeypatch
+    ):
+        reportlab = pytest.importorskip("reportlab.platypus")
+        monkeypatch.setenv("ENABLE_AI_ANALYSIS", "false")
+        generator = DocGenerator({
+            "primary_language": "Python",
+            "functions": [],
+            "classes": [],
+            "endpoints": [],
+        })
+        fragment = generator._render_code_fragment(
+            "create_user",
+            "services/users.py",
+            "def create_user():\n    return 42",
+            "<strong>Propósito:</strong> Crea <code>usuarios</code>.",
+        )
+        exporter = DocumentExporter(
+            sample_project,
+            {
+                "results": {},
+                "documentation": {"full_markdown": f"# Reporte\n\n{fragment}"},
+            },
+        )
+        paragraph_texts = []
+        original_paragraph = reportlab.Paragraph
+
+        class TrackingParagraph(original_paragraph):
+            def __init__(self, text, style, *args, **kwargs):
+                paragraph_texts.append(str(text))
+                super().__init__(text, style, *args, **kwargs)
+
+        with patch("reportlab.platypus.Paragraph", new=TrackingParagraph):
+            pdf_path = exporter._pdf_with_reportlab(str(tmp_path / "report.pdf"))
+
+        assert Path(pdf_path).exists()
+        assert any("create_user" in text for text in paragraph_texts)
+        assert any("def&nbsp;create_user" in text for text in paragraph_texts)
+        assert any("Propósito:" in text and "usuarios" in text for text in paragraph_texts)
+        assert not any("code-fragment" in text or "&lt;/div&gt;" in text for text in paragraph_texts)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
