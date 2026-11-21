@@ -223,20 +223,67 @@ class AIEnhancer:
 
     @staticmethod
     def _parse_documentation_batch(response: str) -> Optional[dict]:
-        """Lee el JSON de una respuesta por lotes, incluso si viene entre fences."""
+        """Lee el JSON de una respuesta por lotes, incluso si viene entre fences, con texto adicional o truncado."""
+        if not response or not isinstance(response, str):
+            return None
         text = response.strip()
+
+        # 1. Si viene en un bloque de código Markdown ```json ... ``` en cualquier parte de la respuesta
+        fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL | re.IGNORECASE)
+        if fence_match:
+            candidate = fence_match.group(1).strip()
+            try:
+                parsed = json.loads(candidate)
+                if isinstance(parsed, dict):
+                    items = parsed.get("items", parsed)
+                    if isinstance(items, dict):
+                        return items
+            except Exception:
+                pass
+
         if text.startswith("```"):
-            text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.IGNORECASE)
+            text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.IGNORECASE).strip()
+
         try:
             parsed = json.loads(text)
         except json.JSONDecodeError:
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if not match:
                 return None
+            candidate = match.group(0).strip()
             try:
-                parsed = json.loads(match.group(0))
+                parsed = json.loads(candidate)
             except json.JSONDecodeError:
-                return None
+                # Intento de recuperación si la respuesta fue cortada a mitad por límite de tokens (max_tokens)
+                repaired = candidate
+                if repaired.count('"') % 2 == 1:
+                    repaired += '"'
+                open_braces = repaired.count('{') - repaired.count('}')
+                if open_braces > 0:
+                    repaired += '}' * open_braces
+                try:
+                    parsed = json.loads(repaired)
+                except Exception:
+                    # Extracción individual mediante regex de los elementos que sí se alcanzaron a generar
+                    items_recovered = {}
+                    item_matches = re.finditer(
+                        r'"([^"]+)":\s*\{\s*"description":\s*"([^"]+)"(?:,\s*"methods":\s*(\{[^}]*\}))?',
+                        candidate,
+                    )
+                    for im in item_matches:
+                        item_id = im.group(1)
+                        desc = im.group(2)
+                        methods_dict = {}
+                        if im.group(3):
+                            try:
+                                methods_dict = json.loads(im.group(3))
+                            except Exception:
+                                pass
+                        items_recovered[item_id] = {"description": desc, "methods": methods_dict}
+                    if items_recovered:
+                        return items_recovered
+                    return None
+
         if not isinstance(parsed, dict):
             return None
         items = parsed.get("items", parsed)
@@ -326,7 +373,7 @@ class AIEnhancer:
             response = self._call_ai(
                 system_prompt,
                 self._localize_prompt(prompt, lang),
-                max_tokens=min(2200, max(700, len(batch) * 130)),
+                max_tokens=min(3200, max(800, len(batch) * 220)),
             )
             if not response:
                 print("[AI] No se recibieron descripciones para un lote de documentación.")

@@ -12,6 +12,8 @@ import concurrent.futures
 
 EXPORT_BASE = Path('./exports')
 
+WEASYPRINT_MAX_HTML_BYTES = 1_500_000
+
 EXPORT_I18N = {
     'es': {
         'no_docs': '# Sin documentación generada',
@@ -1447,8 +1449,12 @@ class DocumentExporter:
 
         html_path.write_text(html_content, encoding='utf-8')
 
-        # 1st attempt: WeasyPrint (solo si las dependencias nativas están disponibles)
-        if _weasyprint_available():
+        html_size = len(html_content.encode('utf-8'))
+        use_weasyprint = html_size <= WEASYPRINT_MAX_HTML_BYTES
+
+        # WeasyPrint uses considerably more memory while laying out large documents.
+        # For large HTML payloads, ReportLab is faster and more predictable.
+        if use_weasyprint and _weasyprint_available():
             try:
                 from weasyprint import HTML
                 HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
