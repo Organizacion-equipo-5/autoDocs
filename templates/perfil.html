@@ -877,6 +877,7 @@
                     </div>
                     <p class="text-sm text-variant-70 leading-relaxed" data-i18n="settings.githubDescription">Vincula tu cuenta para analizar repositorios privados y cambiar de rama.</p>
                     <div class="glass rounded-xl p-4 border border-divider mt-5 flex items-center gap-3">
+                        <img id="githubAvatar" class="hidden w-10 h-10 rounded-full flex-shrink-0" alt="" referrerpolicy="no-referrer">
                         <span id="githubStatusIcon" class="material-symbols-outlined text-xl flex-shrink-0" style="color:#94a3b8">link_off</span>
                         <div class="min-w-0">
                             <p id="githubStatusTitle" class="text-sm font-semibold text-on-surface-custom" data-i18n="settings.githubDisconnected">Cuenta no conectada</p>
@@ -1050,9 +1051,20 @@
             var buttonIcon = document.getElementById('githubButtonIcon');
             var buttonLabel = document.getElementById('githubButtonLabel');
 
+            var avatar = document.getElementById('githubAvatar');
+            if (status.connected && status.avatar_url) {
+                avatar.src = status.avatar_url;
+                avatar.alt = status.login || '';
+                avatar.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                avatar.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+
             if (status.connected) {
                 title.textContent = i18n('settings.githubConnected');
-                detail.textContent = status.login || '';
+                detail.textContent = status.login ? '@' + status.login : '';
                 icon.textContent = 'link';
                 icon.style.color = '#10b981';
                 buttonIcon.textContent = 'link_off';
@@ -1130,11 +1142,15 @@
                     body: JSON.stringify({ client: 'web', redirect_to: '/perfil' })
                 });
                 var data = await res.json();
-                if (!res.ok || !data.url) throw new Error(data.error || 'connect url failed');
+                if (!res.ok || !data.url) {
+                    var serverError = new Error(data.error || 'connect url failed');
+                    serverError.fromServer = !!data.error;
+                    throw serverError;
+                }
                 window.location.href = data.url;
             } catch (error) {
-                message.textContent = i18n('settings.githubError');
                 setGithubBusy(false);
+                message.textContent = error.fromServer ? error.message : i18n('settings.githubError');
             }
         }
 

@@ -173,9 +173,24 @@ def github_connect_url():
     body = request.get_json(silent=True) or {}
     client = "mobile" if body.get("client") == "mobile" else None
     redirect_to = _safe_redirect(body.get("redirect_to"))
+    user_id = get_jwt_identity()
+
+    # Una cuenta de la plataforma solo puede tener UNA cuenta de GitHub conectada.
+    # Solo se permite volver a autorizar (reautorizar=True) la misma cuenta.
+    current = (get_db().users.find_one({"_id": user_id}, {"github": 1}) or {}).get("github")
+    if current and current.get("id") and not body.get("reauthorize"):
+        login = current.get("login") or ""
+        return jsonify({
+            "error": (
+                f"Ya tienes la cuenta de GitHub @{login} conectada. "
+                "Desconéctala primero si quieres conectar otra."
+            ),
+            "github_login": login,
+        }), 409
+
     try:
         state, url = _start_oauth(
-            user_id=get_jwt_identity(),
+            user_id=user_id,
             client=client,
             purpose="connect",
             redirect_to=redirect_to,
@@ -276,9 +291,22 @@ def github_callback():
 
     # ---- Modo vincular: usuario ya logueado ----
     if link_mode:
+        # La cuenta de la plataforma ya tiene OTRA cuenta de GitHub conectada
+        me = db.users.find_one({"_id": link_user_id}, {"github": 1}) or {}
+        already = me.get("github") or {}
+        if already.get("id") and already["id"] != gh_user["id"]:
+            return fail(
+                f"Ya tienes la cuenta @{already.get('login', '')} conectada. "
+                "Desconéctala primero para conectar otra.",
+                True,
+            )
+        # Esa cuenta de GitHub ya pertenece a otro usuario de la plataforma
         taken = db.users.find_one({"github.id": gh_user["id"], "_id": {"$ne": link_user_id}})
         if taken:
-            return fail("Esa cuenta de GitHub ya está vinculada a otro usuario", True)
+            return fail(
+                f"La cuenta de GitHub @{gh_user['login']} ya está vinculada a otro usuario de autoDocs.",
+                True,
+            )
         db.users.update_one({"_id": link_user_id}, {"$set": {"github": github_data}})
         if ctx["mobile"]:
             return _mobile_page("GitHub conectado correctamente")
@@ -291,6 +319,13 @@ def github_callback():
     # ---- Modo login: buscar o crear usuario ----
     user = db.users.find_one({"github.id": gh_user["id"]}) or db.users.find_one({"email": email})
     if user:
+        # Encontrado por correo pero ya vinculado a otra cuenta de GitHub: no sobrescribir
+        existing_gh = (user.get("github") or {}).get("id")
+        if existing_gh and existing_gh != gh_user["id"]:
+            return fail(
+                "Tu cuenta de autoDocs ya está vinculada a otra cuenta de GitHub. "
+                "Inicia sesión con esa cuenta o con tu correo."
+            )
         db.users.update_one({"_id": user["_id"]}, {"$set": {"github": github_data}})
     else:
         user = {
@@ -359,8 +394,10 @@ def github_status():
         return jsonify({"connected": False}), 200
     return jsonify({
         "connected": True,
+        "github_id": gh.get("id"),
         "login": gh.get("login"),
         "avatar_url": gh.get("avatar_url"),
+        "connected_at": gh.get("connected_at"),
         "organization_access": "read:org" in (gh.get("scope") or "").replace(",", " ").split(),
     }), 200
 
