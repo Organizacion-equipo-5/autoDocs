@@ -2937,12 +2937,12 @@
         async function downloadPdfWithLanguage(lang, selected) {
             document.getElementById('pdf-loading-modal').classList.add('flex');
             document.getElementById('pdf-loading-modal').classList.remove('hidden');
-            const url = new URL(`/api/export/${encodeURIComponent(projectId)}/pdf`, window.location.origin);
-            url.searchParams.set('lang', lang);
-            url.searchParams.set('selected', JSON.stringify(selected));
+            const url = `/api/export/${encodeURIComponent(projectId)}/pdf?lang=${encodeURIComponent(lang)}`;
             try {
-                const res = await fetch(url.toString(), {
-                    headers: headers(),
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ selected }),
                     credentials: 'same-origin'
                 });
                 if (!res.ok) {
@@ -2950,6 +2950,7 @@
                     try {
                         const errorPayload = await res.json();
                         if (errorPayload.error) errorMessage = errorPayload.error;
+                        if (errorPayload.details) errorMessage += `: ${errorPayload.details}`;
                     } catch (_) {
                         // Mantener el error HTTP si el servidor no devolvió JSON.
                     }

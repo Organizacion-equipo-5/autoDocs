@@ -210,7 +210,7 @@ def get_identity_flexible():
                 pass
     return None
 
-@export_bp.route('/<project_id>/pdf', methods=['GET'])
+@export_bp.route('/<project_id>/pdf', methods=['GET', 'POST'])
 def export_pdf(project_id):
     user_id = get_identity_flexible()
     if not user_id:
@@ -225,8 +225,12 @@ def export_pdf(project_id):
     if not result:
         return jsonify({"error": "Sin resultados de análisis"}), 404
 
-    # Get selected items from query parameter
-    selected = request.args.get('selected')
+    # POST keeps large selections out of the URL; GET remains for backwards compatibility.
+    if request.method == 'POST':
+        payload = request.get_json(silent=True) or {}
+        selected = payload.get('selected')
+    else:
+        selected = request.args.get('selected')
     lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
     try:
