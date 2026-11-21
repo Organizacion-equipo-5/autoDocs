@@ -215,6 +215,187 @@ class DocGenerator:
             text = text.rstrip() + "\n```"
         return text
 
+    # ─── Descripciones largas y claras ────────────────────────────────────────
+    MIN_LONG_DESCRIPTION_WORDS = 60
+
+    @staticmethod
+    def _name_list(items, limit: int = 6, suffix: str = ""):
+        """Devuelve (['`a`', '`b`'], cuántos_más) a partir de nombres o dicts con 'name'."""
+        names = []
+        for it in items or []:
+            name = it.get("name") if isinstance(it, dict) else it
+            if name:
+                names.append(f"`{name}{suffix}`")
+        return names[:limit], max(len(names) - limit, 0)
+
+    def _plain_explanation(self, kind: str, item: dict) -> str:
+        """Explicación larga, en palabras sencillas, armada con los datos del análisis."""
+        name = item.get("name") or item.get("path") or "?"
+        file = item.get("file")
+        line = item.get("line")
+        parts = []
+
+        def where(es_word, en_word):
+            if not file:
+                return ""
+            at = self.tx(f", en la línea {line}", f", at line {line}") if line else ""
+            return self.tx(
+                f"{es_word} `{file}`{at}.",
+                f"{en_word} `{file}`{at}.",
+            )
+
+        if kind in ("model", "class"):
+            if kind == "model":
+                parts.append(self.tx(
+                    f"El modelo **{name}** representa un tipo de información que el sistema necesita guardar y consultar, como si fuera una ficha con varios datos bien ordenados.",
+                    f"The **{name}** model represents a kind of information the system needs to store and look up, like a card with several well-organized pieces of data.",
+                ))
+            else:
+                parts.append(self.tx(
+                    f"La clase **{name}** reúne en un solo lugar datos y acciones que están relacionados entre sí, para que el resto del programa los use sin repetir el mismo trabajo.",
+                    f"The **{name}** class gathers related data and actions in one place so the rest of the program can use them without repeating work.",
+                ))
+            loc = where("Se encuentra en el archivo", "It is located in the file")
+            if loc:
+                parts.append(loc)
+            bases = [b for b in (item.get("bases") or []) if b and b != "object"]
+            if bases:
+                bl = ", ".join(f"`{b}`" for b in bases)
+                parts.append(self.tx(
+                    f"Parte de {bl}, así que ya hereda de ahí varias características y solo añade lo que le es propio.",
+                    f"It builds on {bl}, so it already inherits several features from there and only adds what is specific to it.",
+                ))
+            fields, more_f = self._name_list(item.get("fields"))
+            if fields:
+                n = len(fields) + more_f
+                tail_es = f" y {more_f} más" if more_f else ""
+                tail_en = f" and {more_f} more" if more_f else ""
+                parts.append(self.tx(
+                    f"Guarda {n} {'dato' if n == 1 else 'datos'}: {', '.join(fields)}{tail_es}.",
+                    f"It stores {n} {'field' if n == 1 else 'fields'}: {', '.join(fields)}{tail_en}.",
+                ))
+            methods, more_m = self._name_list(item.get("methods"), limit=5, suffix="()")
+            if methods:
+                m = len(methods) + more_m
+                tail_es = f" y {more_m} más" if more_m else ""
+                tail_en = f" and {more_m} more" if more_m else ""
+                parts.append(self.tx(
+                    f"Además ofrece {m} {'acción' if m == 1 else 'acciones'} que se pueden ejecutar sobre él, por ejemplo {', '.join(methods)}{tail_es}.",
+                    f"It also offers {m} {'action' if m == 1 else 'actions'} that can be run on it, for example {', '.join(methods)}{tail_en}.",
+                ))
+            parts.append(self.tx(
+                f"En palabras simples, sirve para mantener ordenado todo lo relacionado con **{name}**, de modo que cualquier parte de la aplicación pueda consultarlo o actualizarlo de forma segura.",
+                f"In simple terms, it keeps everything related to **{name}** organized so any part of the application can read or update it safely.",
+            ))
+
+        elif kind == "function":
+            parts.append(self.tx(
+                f"La función `{name}` realiza una tarea concreta dentro del sistema, de modo que otras partes del programa puedan pedirla sin conocer cómo funciona por dentro.",
+                f"The `{name}` function performs a specific task inside the system, so other parts of the program can request it without knowing how it works internally.",
+            ))
+            loc = where("Está en el archivo", "It is in the file")
+            if loc:
+                parts.append(loc)
+            params, more_p = self._name_list(item.get("params"))
+            if params:
+                n = len(params) + more_p
+                parts.append(self.tx(
+                    f"Para trabajar necesita recibir {n} {'dato' if n == 1 else 'datos'}: {', '.join(params)}.",
+                    f"To work, it needs to receive {n} {'input' if n == 1 else 'inputs'}: {', '.join(params)}.",
+                ))
+            else:
+                parts.append(self.tx("No necesita recibir datos para trabajar.", "It does not need any input to work."))
+            if item.get("is_async"):
+                parts.append(self.tx(
+                    "Es asíncrona: puede esperar una respuesta sin detener el resto del programa.",
+                    "It is asynchronous: it can wait for a response without stopping the rest of the program.",
+                ))
+            cx = item.get("complexity", 1) or 1
+            if cx > 10:
+                parts.append(self.tx(
+                    f"Tiene muchos caminos de decisión (complejidad {cx}), por lo que conviene revisarla con cuidado antes de modificarla.",
+                    f"It has many decision paths (complexity {cx}), so it should be reviewed carefully before changing it.",
+                ))
+            elif cx > 5:
+                parts.append(self.tx(
+                    f"Tiene un nivel de complejidad moderado ({cx}), con varios caminos de decisión.",
+                    f"It has a moderate level of complexity ({cx}), with several decision paths.",
+                ))
+            else:
+                parts.append(self.tx(
+                    f"Es fácil de seguir (complejidad {cx}) porque tiene pocos caminos de decisión.",
+                    f"It is easy to follow (complexity {cx}) because it has few decision paths.",
+                ))
+
+        elif kind == "endpoint":
+            method = str(item.get("method", "GET")).upper()
+            path = item.get("path", "")
+            verbs = {
+                "GET": ("consulta información sin modificarla", "reads information without changing it"),
+                "POST": ("recibe datos nuevos para crear o procesar algo", "receives new data to create or process something"),
+                "PUT": ("reemplaza información que ya existe", "replaces information that already exists"),
+                "PATCH": ("actualiza una parte de información que ya existe", "updates part of existing information"),
+                "DELETE": ("elimina información", "removes information"),
+            }
+            es_v, en_v = verbs.get(method, ("atiende una solicitud de la aplicación", "handles a request from the application"))
+            parts.append(self.tx(
+                f"El endpoint `{method} {path}` es una puerta de entrada de la API: {es_v}.",
+                f"The `{method} {path}` endpoint is an entry point of the API: it {en_v}.",
+            ))
+            loc = where("Está definido en el archivo", "It is defined in the file")
+            if loc:
+                parts.append(loc)
+            fw = item.get("framework")
+            if fw and fw not in ("desconocido", "unknown", "Desconocido", "Unknown"):
+                parts.append(self.tx(f"Usa el framework {fw}.", f"It uses the {fw} framework."))
+            parts.append(self.tx(
+                "Al terminar responde con un código que indica si todo salió bien (200) o si hubo un problema: datos incorrectos (400), falta de permisos (401), recurso inexistente (404) o error interno (500).",
+                "When it finishes it replies with a code telling whether everything went well (200) or there was a problem: invalid data (400), missing permissions (401), resource not found (404) or internal error (500).",
+            ))
+        return " ".join(p for p in parts if p)
+
+    _PLACEHOLDER_RE = re.compile(
+        r"^(?:(?:modelo|clase|función|funcion|class|function|model|endpoint)\b.{0,60}"
+        r"|modelo de datos que representa.*|data model representing.*)$",
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    @classmethod
+    def _is_placeholder_description(cls, text: str) -> bool:
+        """True para los textos genéricos de relleno («Modelo X», «Clase X», «Endpoint GET /x»…)."""
+        text = (text or "").strip()
+        if not text:
+            return True
+        words = text.split()
+        if text.lower().startswith(("modelo de datos que representa", "data model representing")):
+            return True
+        return len(words) <= 5 and bool(cls._PLACEHOLDER_RE.match(text))
+
+    def _long_description(self, kind: str, item: dict, base: str = "") -> str:
+        """
+        Devuelve una descripción larga y clara. Si ya existe una descripción extensa
+        (por ejemplo la generada por la IA) se respeta; si es corta o es solo un texto
+        de relleno ("Modelo X"), se completa con una explicación en palabras sencillas.
+        """
+        base = (base or "").strip()
+        if len(base.split()) >= self.MIN_LONG_DESCRIPTION_WORDS:
+            return base
+        if self._is_placeholder_description(base):
+            base = ""
+        extra = self._plain_explanation(kind, item)
+        if base and not base.endswith(('.', '!', '?', '`', '```')):
+            base += "."
+        return f"{base}\n\n{extra}".strip() if base and extra else (base or extra)
+
+    def _description_quote(self, text: str) -> str:
+        """Convierte un texto de varios párrafos en un único bloque de cita."""
+        lines = (text or "").strip().splitlines()
+        if not lines:
+            return ""
+        quoted = [f"> **{self.t('description')}:** {lines[0]}"]
+        quoted += [f"> {ln}" if ln.strip() else ">" for ln in lines[1:]]
+        return "\n".join(quoted) + "\n\n"
+
     @staticmethod
     def _color_bar_html(hex_color: str, alt: str = "Nivel de calidad") -> str:
         """
@@ -1104,9 +1285,11 @@ python app.py  # or npm run dev
                 method = ep.get('method', 'GET')
                 out += f"##### `{method} {ep.get('path')}`\n\n"
                 # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
-                ai_desc = self._sanitize_ai_markdown(ep.get("ai_description") or ep.get("description") or ep.get("docstring") or f"Endpoint {method} {ep.get('path')}")
+                ai_desc = self._sanitize_ai_markdown(self._long_description(
+                    'endpoint', ep, ep.get("ai_description") or ep.get("description") or ep.get("docstring")
+                ))
                 if ai_desc:
-                    out += f"> **{self.t('description')}:** {ai_desc}\n\n"
+                    out += self._description_quote(ai_desc)
 
                 # Tabla de detalle del endpoint
                 detail_rows = [
@@ -1126,7 +1309,8 @@ python app.py  # or npm run dev
                     ['`404`', f"❌ {self.t('not_found')}"],
                     ['`500`', f"🔥 {self.t('server_error')}"],
                 ]
-                out += self._render_markdown_table([self.t('code_col'), self.t('description')], resp_rows)
+                # Línea en blanco: sin ella esta tabla se fusiona con la de propiedades
+                out += "\n" + self._render_markdown_table([self.t('code_col'), self.t('description')], resp_rows)
                 out += "---\n\n"
 
         # 3.3 Estado de documentación
@@ -1328,13 +1512,14 @@ python app.py  # or npm run dev
         # Detalle de cada clase (clase + tablas juntos para evitar saltos de página)
         out += self.tx("\n### 4.2 Detalle de Clases\n\n", "\n### 4.2 Class Details\n\n")
         for c in classes:
-            # Abrir bloque anti-salto de página
-            out += '<div style="page-break-inside: avoid; break-inside: avoid;">\n\n'
+            # El exportador mantiene juntos título + descripción + tabla (ver _keep_blocks_together)
             out += f"#### `{c['name']}`\n\n"
             # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
-            ai_desc = self._sanitize_ai_markdown(c.get("ai_description") or c.get("description") or c.get("docstring") or self.tx(f"Clase {c['name']}", f"Class {c['name']}"))
+            ai_desc = self._sanitize_ai_markdown(self._long_description(
+                'class', c, c.get("ai_description") or c.get("description") or c.get("docstring")
+            ))
             if ai_desc:
-                out += f"> **{self.t('description')}:** {ai_desc}\n\n"
+                out += self._description_quote(ai_desc)
 
             if c.get("methods"):
                 method_rows = []
@@ -1342,8 +1527,7 @@ python app.py  # or npm run dev
                     method_rows.append([f"`{m}()`"])
                 out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
 
-            # Cerrar bloque anti-salto
-            out += '\n</div>\n\n---\n\n'
+            out += '\n---\n\n'
         return out
 
     # ─── 5. FUNCIONES ─────────────────────────────────────────────────────────
@@ -1531,12 +1715,13 @@ python app.py  # or npm run dev
             # Detalle de cada modelo (modelo + tablas juntos para evitar saltos de página)
             out += self.tx("\n### 6.2 Detalle de Modelos\n\n", "\n### 6.2 Model Details\n\n")
             for m in models_list:
-                # Abrir bloque que evita salto de página entre modelo y su tabla
-                out += '<div style="page-break-inside: avoid; break-inside: avoid;">\n\n'
+                # El exportador mantiene juntos título + descripción + tabla (ver _keep_blocks_together)
                 out += f"#### `{m['name']}`\n\n"
-                desc = self._sanitize_ai_markdown(m.get("ai_description") or m.get("description") or m.get("docstring") or self.tx(f"Modelo {m['name']}", f"Model {m['name']}"))
+                desc = self._sanitize_ai_markdown(self._long_description(
+                    'model', m, m.get("ai_description") or m.get("description") or m.get("docstring")
+                ))
                 if desc:
-                    out += f"> **{self.t('description')}:** {desc}\n\n"
+                    out += self._description_quote(desc)
 
                 detail_rows = [
                     [self.t('file'), f"`{m.get('file', '?')}`"],
@@ -1561,8 +1746,7 @@ python app.py  # or npm run dev
                     out += f"\n**{self.tx('Métodos del Modelo', 'Model Methods')}:**\n\n"
                     out += self._render_markdown_table([self.tx('Métodos disponibles', 'Available methods')], method_rows)
 
-                # Cerrar bloque anti-salto de página
-                out += '\n</div>\n\n---\n\n'
+                out += '\n---\n\n'
         else:
             out += self.tx(
                 "No se detectaron clases con nombres de modelo explícitos.\n\n",

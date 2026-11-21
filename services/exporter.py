@@ -388,6 +388,100 @@ class DocumentExporter:
         out.append(html_body[pos:])
         return ''.join(out)
 
+    # Piezas de bloque que pueden quedar agrupadas bajo un título de detalle
+    _BLOCK_PIECE_RE = re.compile(
+        r'\s*(<(blockquote|table|p|pre|ul|ol)\b[^>]*>.*?</\2>)',
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    _DETAIL_HEADING_RE = re.compile(r'<h([45])\b[^>]*>.*?</h\1>', flags=re.DOTALL | re.IGNORECASE)
+    _TRAILING_HR_RE = re.compile(r'\s*<hr\s*/?>', flags=re.IGNORECASE)
+    # Hasta cuántas filas de tabla se considera "corto" un bloque para mantenerlo en una sola página
+    _KEEP_WHOLE_MAX_ROWS = 18
+    _KEEP_TABLE_MAX_ROWS = 14
+
+    @staticmethod
+    def _is_label_paragraph(piece_html: str) -> bool:
+        """Párrafo que solo contiene un texto en negrita (p. ej. «Atributos / Columnas del Modelo:»)."""
+        return bool(re.fullmatch(r'<p>\s*<strong>.*?</strong>\s*</p>', piece_html.strip(), flags=re.DOTALL))
+
+    def _keep_blocks_together(self, html_body: str) -> str:
+        """
+        Mantiene en la misma página cada título de detalle (h4/h5: clase, modelo, endpoint…)
+        con su descripción y su tabla, y evita que una etiqueta («Métodos del Modelo:»)
+        quede sola al final de una página con su tabla en la siguiente.
+
+        - Bloque corto (pocas filas en total): todo el bloque se queda junto.
+        - Bloque largo: se quedan juntos título + descripción + primera tabla; el resto
+          fluye con normalidad (las tablas repiten su encabezado en cada página).
+        """
+        out = []
+        pos = 0
+        while True:
+            m = self._DETAIL_HEADING_RE.search(html_body, pos)
+            if not m:
+                out.append(html_body[pos:])
+                break
+            out.append(html_body[pos:m.start()])
+
+            # Piezas consecutivas inmediatamente después del título
+            pieces = []
+            cursor = m.end()
+            while True:
+                pm = self._BLOCK_PIECE_RE.match(html_body, cursor)
+                if not pm:
+                    break
+                piece = pm.group(1)
+                # Las tablas anchas se imprimen en página horizontal: no se agrupan
+                if pm.group(2).lower() == 'table' and len(re.findall(r'<th\b', piece, flags=re.IGNORECASE)) > 4:
+                    break
+                pieces.append((pm.group(2).lower(), piece))
+                cursor = pm.end()
+
+            if not pieces:
+                out.append(m.group(0))
+                pos = m.end()
+                continue
+
+            total_rows = sum(len(re.findall(r'<tr\b', p, flags=re.IGNORECASE)) for _, p in pieces)
+            has_pre = any(tag == 'pre' for tag, _ in pieces)
+
+            if total_rows <= self._KEEP_WHOLE_MAX_ROWS and not has_pre:
+                out.append('<div class="keep-block">' + m.group(0) + ''.join(p for _, p in pieces) + '</div>')
+            else:
+                first_table = next((i for i, (tag, _) in enumerate(pieces) if tag == 'table'), None)
+                head_end = (first_table + 1) if first_table is not None else min(len(pieces), 2)
+                head = pieces[:head_end]
+                out.append('<div class="keep-block">' + m.group(0) + ''.join(p for _, p in head) + '</div>')
+
+                rest = pieces[head_end:]
+                i = 0
+                while i < len(rest):
+                    tag, piece = rest[i]
+                    nxt = rest[i + 1] if i + 1 < len(rest) else None
+                    if self._is_label_paragraph(piece) and nxt and nxt[0] == 'table':
+                        rows = len(re.findall(r'<tr\b', nxt[1], flags=re.IGNORECASE))
+                        if rows <= self._KEEP_TABLE_MAX_ROWS:
+                            out.append('<div class="keep-block">' + piece + nxt[1] + '</div>')
+                        else:
+                            out.append(piece.replace('<p>', '<p class="keep-next">', 1) + nxt[1])
+                        i += 2
+                        continue
+                    out.append(piece)
+                    i += 1
+            # El separador <hr> entre bloques sobra (el título ya se distingue) y, si queda
+            # solo al borde de una página, genera una hoja casi en blanco.
+            hr_match = self._TRAILING_HR_RE.match(html_body, cursor)
+            pos = hr_match.end() if hr_match else cursor
+        return ''.join(out)
+
+    def _group_heading_chain(self, html_body: str) -> str:
+        """Une un título de sección (h1/h2) con su subtítulo inmediato (h3) para que no se separen."""
+        pattern = re.compile(
+            r'(<h[12]\b[^>]*>.*?</h[12]>)\s*(<h3\b[^>]*>.*?</h3>)',
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        return pattern.sub(lambda m: f'<div class="keep-head">{m.group(1)}{m.group(2)}</div>', html_body)
+
     def _wrap_diagram_sections(self, html_body: str) -> str:
         """Agrupa cada diagrama con su título y descripción para WeasyPrint."""
         pattern = re.compile(
@@ -935,7 +1029,11 @@ class DocumentExporter:
         else:
             toc_html = f'<p class="toc-empty">{_html.escape(self.t("no_sections_analysis"))}</p>'
 
+        # Título de detalle + descripción + tabla en la misma página (antes de envolver tablas anchas)
+        html_body = self._keep_blocks_together(html_body)
         html_body = self._wrap_wide_tables(html_body)
+        # Título de sección + subtítulo (p. ej. «3. …» y «3.1 …») en la misma página
+        html_body = self._group_heading_chain(html_body)
 
         def image_replacer(match):
             before, src, after = match.group(1), match.group(2), match.group(3)
@@ -1166,8 +1264,41 @@ class DocumentExporter:
   h1:first-child {{ margin-top: 0; }}
   h2 {{ font-size: 15.5pt; line-height: 1.25; border-bottom: .35mm solid var(--rule); margin: 9mm 0 4mm; padding-bottom: 1.8mm; }}
   h3 {{ color: #244f7f; font-size: 12.4pt; line-height: 1.3; margin: 7mm 0 3mm; }}
-  h4 {{ color: #35516f; font-size: 10.8pt; margin: 5mm 0 2mm; }}
-  h5, h6 {{ color: #465f78; font-size: 10pt; margin: 4mm 0 1.5mm; }}
+  h4 {{
+    color: #1d3f66;
+    font-size: 11.6pt;
+    line-height: 1.3;
+    margin: 6mm 0 2.5mm;
+    padding: 1.2mm 0 1.2mm 3mm;
+    border-left: 1.2mm solid var(--blue);
+    background: #f1f6fb;
+  }}
+  h5 {{
+    color: #35516f;
+    font-size: 10.6pt;
+    margin: 5mm 0 2mm;
+    padding-left: 2.6mm;
+    border-left: .8mm solid #8fb4d8;
+  }}
+  h6 {{ color: #465f78; font-size: 10pt; margin: 4mm 0 1.5mm; }}
+  /* Los nombres de clase/modelo/endpoint van en el mismo estilo del título, no como código pequeño */
+  h3 code, h4 code, h5 code {{
+    font-family: "Arial", sans-serif;
+    font-size: inherit;
+    font-weight: 700;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }}
+  /* Título + descripción + tabla se quedan en la misma página */
+  .keep-block {{ break-inside: avoid; page-break-inside: avoid; margin: 0 0 5mm; }}
+  .keep-block > :last-child {{ margin-bottom: 0; }}
+  /* Título de sección + subtítulo (y lo primero que sigue) se quedan juntos */
+  .keep-head {{ break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; }}
+  .keep-head > h2, .keep-head > h1 {{ margin-bottom: 4mm; }}
+  .keep-next {{ break-after: avoid; page-break-after: avoid; }}
+  blockquote {{ break-after: avoid; page-break-after: avoid; }}
   p {{ margin: 0 0 3.4mm; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }}
   li {{ margin: 1.2mm 0; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }}
   ul, ol {{ margin: 2.5mm 0 4mm; padding-left: 7mm; }}
@@ -1204,6 +1335,8 @@ class DocumentExporter:
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     break-inside: auto;
+    orphans: 4;
+    widows: 4;
   }}
   pre code {{ background: transparent; border: 0; color: #1e293b; padding: 0; }}
   table, .report-table {{
