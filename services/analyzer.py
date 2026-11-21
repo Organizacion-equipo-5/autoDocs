@@ -91,15 +91,13 @@ class ProjectAnalyzer:
             suffix = p.suffix.lower()
             if suffix in {'.zip', '.tar', '.gz', '.tgz', '.tar.gz'}:
                 try:
-                    import zipfile, tarfile
+                    from utils.safe_extract import safe_extract_zip, safe_extract_tar
                     dest = p.parent / 'src'
                     dest.mkdir(parents=True, exist_ok=True)
                     if suffix == '.zip':
-                        with zipfile.ZipFile(p, 'r') as z:
-                            z.extractall(dest)
+                        safe_extract_zip(p, dest)
                     else:
-                        with tarfile.open(p, 'r:*') as t:
-                            t.extractall(dest)
+                        safe_extract_tar(p, dest)
                     p = dest.resolve()
                 except Exception:
                     p = p.parent

@@ -1,3 +1,0 @@
-@startuml
-actor Usuario as user
-@enduml

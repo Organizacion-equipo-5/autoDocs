@@ -24,3 +24,10 @@ services/exports/
 # Python
 __pycache__/
 *.pyc
+# Datos de usuario y dependencias (no versionar)
+uploads/
+exports/
+services/exports/
+node_modules/
+__pycache__/
+*.pyc

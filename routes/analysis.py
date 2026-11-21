@@ -155,7 +155,8 @@ def run_analysis_async(project_id, project_path, db, source=None, lang=None):
     except Exception as e:
         import traceback
         tb = traceback.format_exc()
-        err_info = {"status": "error", "error_message": str(e), "error_trace": tb}
+        print(f"[ERROR] Analysis failed for project {project_id}: {e}\n{tb}")
+        err_info = {"status": "error", "error_message": "El análisis falló. Revisa los registros del servidor."}
         try:
             db.projects.update_one({"_id": project_id}, {"$set": err_info})
         except Exception:
@@ -456,7 +457,7 @@ def get_predictions(project_id):
         tb = traceback.format_exc()
         print(f"[ERROR] ML prediction failed for project {project_id}: {str(e)}")
         print(tb)
-        return jsonify({"error": f"Error en análisis ML: {str(e)}", "trace": tb}), 500
+        return jsonify({"error": "Error en análisis ML"}), 500
 
 @analysis_bp.route('/etl', methods=['POST'])
 @jwt_required()

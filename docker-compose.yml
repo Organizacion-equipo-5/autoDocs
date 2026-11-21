@@ -8,8 +8,9 @@ services:
     environment:
       - FLASK_DEBUG=False
       - MONGO_URI=mongodb://mongo:27017/autodocs_ai
-      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-change-me}
+      - SECRET_KEY=${SECRET_KEY:?Define SECRET_KEY en .env}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Define JWT_SECRET_KEY en .env}
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
       - GROQ_API_KEY=${GROQ_API_KEY}
     volumes:
       - ./backend:/app
@@ -22,15 +23,15 @@ services:
   mongo:
     image: mongo:7
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
 
   mongo-express:
-    image: mongo-express:latest
+    image: mongo-express:1.0.2
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
     depends_on:

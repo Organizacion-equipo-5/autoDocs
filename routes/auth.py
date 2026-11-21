@@ -4,7 +4,7 @@ from services.db import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import uuid
-import random
+import secrets
 import string
 import re
 import secrets
@@ -23,6 +23,40 @@ from email.mime.multipart import MIMEMultipart
 
 auth_bp = Blueprint('auth', __name__)
 
+MAX_RESET_ATTEMPTS = 5
+
+
+def _password_is_strong(password):
+    return (
+        isinstance(password, str)
+        and len(password) >= 8
+        and re.search(r'[A-Z]', password)
+        and re.search(r'[a-z]', password)
+        and re.search(r'[0-9]', password)
+    )
+
+
+def _check_reset_code(db, email, code):
+    """Valida el codigo de recuperacion con comparacion en tiempo constante y limite de intentos.
+
+    Devuelve (registro, mensaje_de_error). Tras MAX_RESET_ATTEMPTS fallos el codigo se invalida.
+    """
+    if not isinstance(email, str) or not isinstance(code, str):
+        return None, "Invalid code"
+    record = db.password_reset_codes.find_one({"email": email})
+    if not record:
+        return None, "Invalid code"
+    if record.get('attempts', 0) >= MAX_RESET_ATTEMPTS:
+        db.password_reset_codes.delete_one({"email": email})
+        return None, "Too many attempts. Request a new code"
+    if not secrets.compare_digest(str(record.get('code', '')), code.strip()):
+        db.password_reset_codes.update_one({"email": email}, {"$inc": {"attempts": 1}})
+        return None, "Invalid code"
+    if datetime.utcnow() > datetime.fromisoformat(record['expires_at']):
+        db.password_reset_codes.delete_one({"email": email})
+        return None, "Code expired"
+    return record, None
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -30,6 +64,12 @@ def register():
 
     if not data or not all(k in data for k in ['email', 'password', 'name']):
         return jsonify({"error": "Missing required fields"}), 400
+
+    if not isinstance(data['email'], str) or not isinstance(data['name'], str):
+        return jsonify({"error": "Invalid fields"}), 400
+
+    if not _password_is_strong(data['password']):
+        return jsonify({"error": "Password must be at least 8 characters with uppercase, lowercase, and number"}), 400
 
     if db.users.find_one({"email": data['email']}):
         return jsonify({"error": "Email already registered"}), 409
@@ -40,7 +80,7 @@ def register():
         "email": data['email'],
         "password": generate_password_hash(data['password']),
         "created_at": datetime.utcnow().isoformat(),
-        "plan": data.get('plan', 'free'),
+        "plan": "free",  # el plan solo cambia por pago verificado, nunca por el cliente
         "projects_count": 0,
         "role": "user"
     }
@@ -88,6 +128,8 @@ def update_me():
     if data.get('name'):
         update['name'] = data.get('name')
     if data.get('password'):
+        if not _password_is_strong(data.get('password')):
+            return jsonify({"error": "Password must be at least 8 characters with uppercase, lowercase, and number"}), 400
         update['password'] = generate_password_hash(data.get('password'))
     # Idioma preferido de la app/cuenta (para UI y documentación generada)
     lang = data.get('language') or data.get('locale') or data.get('preferred_language')
@@ -171,7 +213,7 @@ def github_login_exchange():
     return jsonify({"token": token, "user": user_payload}), 200
 
 def generate_reset_code():
-    return ''.join(random.choices(string.digits, k=6))
+    return ''.join(secrets.choice(string.digits) for _ in range(6))
 
 def send_reset_email(email, code):
     try:
@@ -266,7 +308,8 @@ def forgot_password():
     user = db.users.find_one({"email": email})
 
     if not user:
-        return jsonify({"error": "Email not found"}), 404
+        # Misma respuesta que en el caso exitoso para no revelar que correos existen.
+        return jsonify({"message": "Reset code sent to email"}), 200
 
     code = generate_reset_code()
     expires_at = datetime.utcnow() + timedelta(minutes=15)
@@ -275,6 +318,7 @@ def forgot_password():
     db.password_reset_codes.insert_one({
         "email": email,
         "code": code,
+        "attempts": 0,
         "expires_at": expires_at.isoformat(),
         "created_at": datetime.utcnow().isoformat()
     })
@@ -286,7 +330,7 @@ def forgot_password():
         return jsonify({"message": "Reset code sent to email"}), 200
     else:
         # Si falla el envío de correo, aún guardamos el código para desarrollo
-        print(f"[Password Reset] Code for {email}: {code} (expires at {expires_at})")
+        print(f"[Password Reset] No se pudo enviar el correo a {email}")
         return jsonify({"message": "Reset code sent to email"}), 200
 
 @auth_bp.route('/verify-code', methods=['POST'])
@@ -299,15 +343,9 @@ def verify_code():
         return jsonify({"error": "Email and code are required"}), 400
 
     db = get_db()
-    reset_record = db.password_reset_codes.find_one({"email": email, "code": code})
-
-    if not reset_record:
-        return jsonify({"error": "Invalid code"}), 400
-
-    expires_at = datetime.fromisoformat(reset_record['expires_at'])
-    if datetime.utcnow() > expires_at:
-        db.password_reset_codes.delete_one({"email": email})
-        return jsonify({"error": "Code expired"}), 400
+    _, error = _check_reset_code(db, email, code)
+    if error:
+        return jsonify({"error": error}), 400
 
     return jsonify({"message": "Code verified"}), 200
 
@@ -322,19 +360,13 @@ def reset_password():
         if not email or not code or not new_password:
             return jsonify({"error": "Email, code, and new password are required"}), 400
 
-        if len(new_password) < 8 or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password) or not re.search(r'[0-9]', new_password):
+        if not _password_is_strong(new_password):
             return jsonify({"error": "Password must be at least 8 characters with uppercase, lowercase, and number"}), 400
 
         db = get_db()
-        reset_record = db.password_reset_codes.find_one({"email": email, "code": code})
-
-        if not reset_record:
-            return jsonify({"error": "Invalid code"}), 400
-
-        expires_at = datetime.fromisoformat(reset_record['expires_at'])
-        if datetime.utcnow() > expires_at:
-            db.password_reset_codes.delete_one({"email": email})
-            return jsonify({"error": "Code expired"}), 400
+        _, error = _check_reset_code(db, email, code)
+        if error:
+            return jsonify({"error": error}), 400
 
         user = db.users.find_one({"email": email})
         if not user:
@@ -348,4 +380,4 @@ def reset_password():
         print(f"[Reset Password Error] {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+        return jsonify({"error": "Internal server error"}), 500

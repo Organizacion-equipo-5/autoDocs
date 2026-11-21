@@ -310,7 +310,7 @@ def export_pdf(project_id):
     except Exception as exc:
         error_text = traceback.format_exc()
         print(f"[Export] Error al generar PDF para proyecto {project_id}: {exc}\n{error_text}")
-        return jsonify({"error": "Error interno al generar PDF", "details": str(exc)}), 500
+        return jsonify({"error": "Error interno al generar PDF"}), 500
 
 @export_bp.route('/<project_id>/html', methods=['GET'])
 def export_html(project_id):

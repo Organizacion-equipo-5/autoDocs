@@ -13,7 +13,7 @@ def create_app():
 
     app.config.from_object(Config)
 
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
     JWTManager(app)
 
     from routes.auth import auth_bp
@@ -58,7 +58,7 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     app.run(
-        debug=True,
+        debug=app.config["DEBUG"],
         use_reloader=False,
         host="0.0.0.0",
         port=5000

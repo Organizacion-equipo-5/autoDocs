@@ -1,28 +1,42 @@
 import os
+import secrets
 from datetime import timedelta
 
 
+def _env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+_DEBUG = _env_bool('FLASK_DEBUG', False)
+
+
+def _secret(name):
+    """Lee un secreto del entorno. Nunca hay valores por defecto incrustados en el codigo.
+
+    En produccion (FLASK_DEBUG apagado) es obligatorio definirlo. En desarrollo se genera
+    uno aleatorio por proceso para no dejar una clave conocida en el repositorio.
+    """
+    value = os.environ.get(name)
+    if value:
+        return value
+    if _DEBUG or os.environ.get('PYTEST_CURRENT_TEST') or os.environ.get('TESTING'):
+        return secrets.token_urlsafe(48)
+    raise RuntimeError(
+        f'Falta la variable de entorno {name}. Defínela en .env o en el entorno del despliegue.'
+    )
+
+
 class Config:
-    SEND_FILE_MAX_AGE_DEFAULT = 0
-    TEMPLATES_AUTO_RELOAD = True
+    TEMPLATES_AUTO_RELOAD = _DEBUG
 
-    SECRET_KEY = os.environ.get(
-        'SECRET_KEY',
-        'autodocs-secret-key-change-in-production'
-    )
+    SECRET_KEY = _secret('SECRET_KEY')
 
-    JWT_SECRET_KEY = os.environ.get(
-        'JWT_SECRET_KEY',
-        'jwt-secret-key-change-in-production'
-    )
+    JWT_SECRET_KEY = _secret('JWT_SECRET_KEY')
 
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
 
     # MongoDB
-    MONGO_URI = os.environ.get(
-        'MONGO_URI',
-        'mongodb+srv://bri_db_user:hc087879@cluster.uvx8yek.mongodb.net/autodocs_ai?retryWrites=true&w=majority&appName=Cluster'
-    )
+    MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/autodocs_ai')
 
     # PayPal
     PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
@@ -45,4 +59,7 @@ class Config:
     MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', '500000'))  # 500KB
 
     # Debug
-    DEBUG = os.environ.get('FLASK_DEBUG', 'True') == 'True'
+    DEBUG = _DEBUG
+
+    # Orígenes permitidos para CORS en /api/* (separados por coma). Vacío = solo mismo origen.
+    CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '').split(',') if o.strip()]

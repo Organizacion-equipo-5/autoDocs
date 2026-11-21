@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PlantUML
-RUN wget -O /usr/local/bin/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.5/plantuml-1.2024.5.jar && \
-    chmod +x /usr/local/bin/plantuml.jar
+# Version fijada; la descarga es por HTTPS. chmod 644: es un JAR, no un ejecutable.
+RUN wget -q -O /usr/local/bin/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.5/plantuml-1.2024.5.jar && \
+    chmod 644 /usr/local/bin/plantuml.jar
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --timeout 300 -r requirements.txt
@@ -26,7 +27,11 @@ COPY . .
 
 RUN npm ci --no-audit --no-fund
 
-RUN mkdir -p uploads exports
+# Ejecutar como usuario sin privilegios
+RUN useradd --create-home --uid 10001 appuser && \
+    mkdir -p uploads exports && \
+    chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 5000
 
