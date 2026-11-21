@@ -145,7 +145,6 @@ _NATIVE_DLL_DIRECTORIES = set()
 
 def _configure_native_libraries():
     """Hace visibles a Python las DLL requeridas por WeasyPrint (Pango, GLib, Cairo, etc.) en Windows."""
-    global _NATIVE_DLL_HANDLES, _NATIVE_DLL_DIRECTORIES
     if os.name != 'nt':
         return
 
