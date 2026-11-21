@@ -4,7 +4,9 @@ from flask_jwt_extended.exceptions import JWTExtendedException
 from services.db import get_db
 from services.exporter import DocumentExporter
 from services.doc_generator import DocGenerator
+from services.ai_enhancer import AIEnhancer
 from datetime import datetime
+import copy
 import os
 import re
 import traceback
@@ -163,6 +165,52 @@ def _populate_file_line_counts(results, project):
             _logger.warning("No se pudieron contar líneas de un archivo del proyecto: %s", error)
 
 
+def _is_enriched(results, lang):
+    """True si los resultados ya traen la mejora con IA vigente para ese idioma."""
+    return bool(
+        results.get('ai_documentation_enhanced')
+        and results.get('ai_output_language') == lang
+        and results.get('ai_documentation_version') == AIEnhancer.DOCUMENTATION_VERSION
+    )
+
+
+def _prepare_documentation_results(db, project_id, project, analysis_result, selected, lang):
+    """
+    Devuelve los resultados listos para generar la documentación.
+
+    1. Trabaja sobre una copia del análisis completo (no modifica el original).
+    2. Mejora con IA el análisis COMPLETO, no solo la selección, y lo guarda para
+       reutilizarlo: así exportar una selección no repite las llamadas a la IA.
+    3. Al final aplica la selección del usuario.
+    """
+    full_results = copy.deepcopy(analysis_result.get('results') or {})
+    if not isinstance(full_results, dict):
+        return full_results
+    full_results['doc_language'] = lang
+    _populate_file_line_counts(full_results, project or {})
+
+    use_ai = os.environ.get('ENABLE_AI_ANALYSIS', 'true').lower() == 'true'
+    ai = AIEnhancer() if use_ai else None
+    if ai is not None and ai.is_available():
+        if not _is_enriched(full_results, lang):
+            try:
+                full_results = ai.enhance_documentation(full_results, output_language=lang)
+            except Exception:
+                # Sin IA la documentación se genera igual, con las descripciones básicas
+                _logger.exception("No se pudo mejorar la documentación con IA; se usa la básica.")
+        try:
+            db.analysis_results.update_one(
+                {"project_id": project_id}, {"$set": {"results": full_results}}
+            )
+        except Exception:
+            _logger.exception("No se pudo guardar el análisis mejorado.")
+
+    selected_results = filter_results_by_selection(full_results, selected) if selected else full_results
+    if isinstance(selected_results, dict):
+        selected_results['doc_language'] = lang
+    return selected_results
+
+
 def get_identity_flexible():
     """Acepta JWT del header Authorization O del query param ?token="""
     try:
@@ -201,12 +249,10 @@ def export_pdf(project_id):
     try:
         results_to_use = result.get('results')
         if results_to_use:
-            _populate_file_line_counts(results_to_use, project)
-            # Filter results based on selection
-            if selected:
-                results_to_use = filter_results_by_selection(results_to_use, selected)
-            if isinstance(results_to_use, dict):
-                results_to_use['doc_language'] = lang
+            # Mejora con IA el análisis completo (con caché) y luego aplica la selección
+            results_to_use = _prepare_documentation_results(
+                db, project_id, project, result, selected, lang
+            )
             _logger.info("Iniciando generación del documento para exportación PDF.")
             try:
                 documentation = DocGenerator(results_to_use, lang=lang).generate()
@@ -287,12 +333,10 @@ def export_html(project_id):
 
     results_to_use = result.get('results')
     if results_to_use:
-        _populate_file_line_counts(results_to_use, project)
-        # Filter results based on selection
-        if selected:
-            results_to_use = filter_results_by_selection(results_to_use, selected)
-        if isinstance(results_to_use, dict):
-            results_to_use['doc_language'] = lang
+        # Mejora con IA el análisis completo (con caché) y luego aplica la selección
+        results_to_use = _prepare_documentation_results(
+            db, project_id, project, result, selected, lang
+        )
         try:
             documentation = DocGenerator(results_to_use, lang=lang).generate()
         except TypeError:
@@ -341,12 +385,10 @@ def export_markdown(project_id):
 
     results_to_use = result.get('results')
     if results_to_use:
-        _populate_file_line_counts(results_to_use, project)
-        # Filter results based on selection
-        if selected:
-            results_to_use = filter_results_by_selection(results_to_use, selected)
-        if isinstance(results_to_use, dict):
-            results_to_use['doc_language'] = lang
+        # Mejora con IA el análisis completo (con caché) y luego aplica la selección
+        results_to_use = _prepare_documentation_results(
+            db, project_id, project, result, selected, lang
+        )
         try:
             documentation = DocGenerator(results_to_use, lang=lang).generate()
         except TypeError:

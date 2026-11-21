@@ -1,5 +1,6 @@
 from datetime import datetime
 from services.ai_enhancer import AIEnhancer
+from services import diagram_fallback
 import subprocess
 import os
 import re
@@ -8,6 +9,7 @@ import zlib
 import struct
 import base64
 import mimetypes
+import socket
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -457,7 +459,8 @@ class DocGenerator:
 
     def _get_plantuml_command(self, temp_file: Path, output_dir: Path):
         if not self._graphviz_available():
-            return []
+            # Sin Graphviz, PlantUML puede dibujar igual con su motor de diseño interno (Smetana)
+            self._use_smetana = True
 
         jar_path = os.environ.get('PLANTUML_JAR_PATH')
         if jar_path and Path(jar_path).exists():
@@ -525,6 +528,9 @@ class DocGenerator:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'image/png,*/*;q=0.8',
         }
+        if getattr(self, '_remote_diagrams_down', False):
+            return None  # ya se comprobó que no hay red: no se espera de nuevo por cada diagrama
+        reached_a_server = False
         for server in filter(None, servers):
             for path_variant in ['png', 'svg']:
                 ext = 'png' if path_variant == 'png' else 'svg'
@@ -532,7 +538,8 @@ class DocGenerator:
                 output_path = output_file.with_suffix(f'.{ext}')
                 try:
                     request = urllib.request.Request(target_url, headers=headers)
-                    with urllib.request.urlopen(request, timeout=10) as response:
+                    with urllib.request.urlopen(request, timeout=6) as response:
+                        reached_a_server = True
                         if response.status != 200:
                             continue
                         content = response.read()
@@ -547,6 +554,10 @@ class DocGenerator:
                         if self._is_valid_image(output_path):
                             return output_path
                         output_path.unlink(missing_ok=True)
+                except urllib.error.HTTPError:
+                    reached_a_server = True  # el servidor respondió (con error): probar la otra variante
+                except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, OSError):
+                    break  # servidor inalcanzable: no probar su otra variante
                 except Exception:
                     pass
 
@@ -571,8 +582,12 @@ class DocGenerator:
                         if self._is_valid_image(png_out):
                             return png_out
                         png_out.unlink(missing_ok=True)
+        except urllib.error.HTTPError:
+            reached_a_server = True
         except Exception:
             pass
+        if not reached_a_server:
+            self._remote_diagrams_down = True
         return None
 
     def _image_to_data_uri(self, image_path: Path) -> str:
@@ -629,8 +644,14 @@ class DocGenerator:
             temp_name = f"temp_{os.getpid()}"
             temp_file = output_dir_path / f"{temp_name}.puml"
             temp_file.write_text(plantuml_code, encoding='utf-8')
-            
+
+            self._use_smetana = False
             cmd = self._get_plantuml_command(temp_file, output_dir_path)
+            if cmd and self._use_smetana:
+                temp_file.write_text(
+                    plantuml_code.replace('@startuml', '@startuml\n!pragma layout smetana', 1),
+                    encoding='utf-8',
+                )
             if cmd:
                 result = subprocess.run(
                     cmd,
@@ -673,15 +694,21 @@ class DocGenerator:
                 return self._image_to_data_uri(remote_image)
 
             temp_file.unlink(missing_ok=True)
-            encoded = self._plantuml_encode(plantuml_code)
-            return f"https://www.planttext.com/plantuml/png/{encoded}"
+            return self._offline_or_link(plantuml_code)
         except Exception as e:
             print(f"[PlantUML Error] {e}")
             try:
-                encoded = self._plantuml_encode(plantuml_code)
-                return f"https://www.planttext.com/plantuml/png/{encoded}"
+                return self._offline_or_link(plantuml_code)
             except Exception:
                 return ""
+
+    def _offline_or_link(self, plantuml_code: str) -> str:
+        """Dibuja el diagrama localmente; solo si no se puede, devuelve el enlace externo."""
+        png = diagram_fallback.render_png(plantuml_code)
+        if png:
+            return 'data:image/png;base64,' + base64.b64encode(png).decode('ascii')
+        encoded = self._plantuml_encode(plantuml_code)
+        return f"https://www.planttext.com/plantuml/png/{encoded}"
 
     def _render_diagram_block(self, title: str, plantuml_code: str) -> str:
         """

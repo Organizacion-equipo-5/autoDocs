@@ -33,6 +33,10 @@ class AIEnhancer:
     y proporciona insights técnicos avanzados.
     """
 
+    # Versión del formato/prompt de las descripciones. Súbela cuando cambien los prompts:
+    # los análisis guardados con una versión anterior se vuelven a enriquecer al exportar.
+    DOCUMENTATION_VERSION = 2
+
     GROQ_CANDIDATE_MODELS = [
         "openai/gpt-oss-120b",
         "openai/gpt-oss-20b",
@@ -484,6 +488,7 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         if (
             results.get('ai_documentation_enhanced')
             and results.get('ai_output_language') == lang
+            and results.get('ai_documentation_version') == self.DOCUMENTATION_VERSION
         ):
             return results
 
@@ -550,6 +555,7 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         )
         results['ai_documentation_enhanced'] = True
         results['ai_output_language'] = lang
+        results['ai_documentation_version'] = self.DOCUMENTATION_VERSION
 
         print("[AI] Documentación mejorada exitosamente con Groq")
         return results

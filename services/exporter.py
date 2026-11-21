@@ -145,7 +145,6 @@ _NATIVE_DLL_DIRECTORIES = set()
 
 def _configure_native_libraries():
     """Hace visibles a Python las DLL requeridas por WeasyPrint (Pango, GLib, Cairo, etc.) en Windows."""
-    global _NATIVE_DLL_HANDLES, _NATIVE_DLL_DIRECTORIES
     if os.name != 'nt':
         return
 
@@ -289,10 +288,26 @@ class DocumentExporter:
             i += 1
         return '\n'.join(output)
 
+    _STANDALONE_IMG_RE = re.compile(
+        r'^[ \t]*<img\s+src="(?P<src>[^"\s]+)"(?:\s+alt="(?P<alt>[^"]*)")?\s*/?>[ \t]*$',
+        flags=re.MULTILINE,
+    )
+
+    @classmethod
+    def _standalone_img_to_markdown(cls, md: str) -> str:
+        """Convierte `<img src="..." alt="...">` (solo en su línea) en `![alt](src)`."""
+        def convert(match):
+            alt = (match.group('alt') or '').replace('[', '(').replace(']', ')')
+            return f"![{alt}]({match.group('src')})"
+        return cls._STANDALONE_IMG_RE.sub(convert, md)
+
     def _render_markdown_with_node(self, md: str) -> str:
         script_path = Path(__file__).resolve().parents[1] / 'markdown_to_html.js'
         if script_path.exists() is not True:
             raise FileNotFoundError('Node markdown script not found')
+        # El conversor descarta el HTML crudo; los diagramas se escriben como <img> solo en su
+        # línea, así que se pasan a sintaxis Markdown de imagen, que sí se conserva.
+        md = self._standalone_img_to_markdown(md)
         result = subprocess.run(
             ['node', str(script_path)],
             input=md,
