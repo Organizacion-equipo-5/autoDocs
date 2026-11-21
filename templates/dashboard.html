@@ -1313,7 +1313,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
                                 id="gh-permission-settings">
                                 Abrir permisos de aplicaciones en GitHub
                             </a>
-                            <button type="button" onclick="connectGithub()"
+                            <button type="button" onclick="connectGithub(true)"
                                 class="w-full mt-2 py-2 border border-primary/30 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5">
                                 Reautorizar acceso a organizaciones
                             </button>
@@ -2574,9 +2574,13 @@ function onGithubRepoSelect(select) {
     if (!nameInput.value.trim()) nameInput.value = select.selectedOptions[0].dataset.name;
 }
 
-async function connectGithub() {
+async function connectGithub(reauthorize = false) {
     try {
-        const res = await fetch('/api/github/connect-url', { method: 'POST', headers: authHeaders() });
+        const res = await fetch('/api/github/connect-url', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ reauthorize: reauthorize === true })
+        });
         const data = await res.json();
         if (!res.ok) { alert(data.error || 'No se pudo iniciar la conexión'); return; }
         window.location.href = data.url;
