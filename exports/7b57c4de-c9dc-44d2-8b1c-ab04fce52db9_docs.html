@@ -226,23 +226,6 @@
   }
   .table-landscape { page: landscape; }
   .table-landscape table { break-inside: auto; }
-  .diagram-section { margin: 6mm 0; break-inside: avoid; page-break-inside: avoid; }
-  .diagram-section h3 { break-after: avoid; page-break-after: avoid; }
-  .diagram-section img { margin-top: 2mm; }
-  .code-fragment {
-    margin: 4mm 0 5mm;
-    padding: 3.5mm 4mm;
-    background: var(--panel);
-    border: .25mm solid var(--rule);
-    border-left: 1.1mm solid var(--blue);
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  .code-fragment-header { margin-bottom: 2mm; }
-  .frag-title { font-family: "Arial", sans-serif; font-weight: 700; color: var(--navy); }
-  .frag-file { font-family: "Consolas", "Courier New", monospace; font-size: 8pt; color: var(--muted); }
-  .code-explanation { margin-top: 2.5mm; font-size: 9.5pt; color: #334155; line-height: 1.45; }
-  .code-explanation strong { color: var(--navy); }
   .document-control {
     margin-top: 12mm;
     border-top: .6mm solid var(--navy);
@@ -270,7 +253,7 @@
     <div class="cover-spacer"></div>
     <div class="cover-meta">
       <div><strong>Proyecto</strong>Proyecto</div>
-      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 15:59</div>
+      <div><strong>Fecha de emisión</strong>20 de noviembre de 2026, 09:21</div>
       <div><strong>Lenguaje principal</strong>Python</div>
       <div><strong>Evaluación</strong><span class="cover-score">Score de Calidad: 71/100 · Aceptable</span></div>
       <div><strong>Alcance analizado</strong>16 archivos · 21 funciones</div>
@@ -288,7 +271,7 @@
   <main class="content">
     <h1 id="sec1">Documentación del Proyecto</h1>
 <blockquote>
-<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 21:59 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
+<p><strong>Alcance del documento.</strong> Esta edición consolida los elementos identificados mediante el análisis estático del código fuente. Los valores reflejan el estado del proyecto al 2026-11-20 15:21 UTC y deben validarse frente al entorno de ejecución antes de una liberación productiva.</p>
 </blockquote>
 <h2 id="sec2">1.1 Resumen Ejecutivo</h2>
 <p>El análisis del proyecto determinó que <strong>Python</strong> es el lenguaje predominante.
@@ -297,7 +280,7 @@ El alcance examinado comprende <strong>16 archivos fuente</strong>, <strong>21 f
 asigna al código un resultado de calidad de <strong>71/100</strong>. Las secciones siguientes
 desarrollan estos hallazgos desde la perspectiva de arquitectura, interfaces,
 componentes, datos, despliegue y mantenibilidad.</p>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h2 id="sec3">1.2 Stack Tecnológico</h2>
+<h2 id="sec3">1.2 Stack Tecnológico</h2>
 <p>La distribución siguiente permite identificar la composición tecnológica del repositorio y dimensionar el esfuerzo de mantenimiento por lenguaje.</p>
 <table class="report-table">
 <thead>
@@ -312,8 +295,8 @@ componentes, datos, despliegue y mantenibilidad.</p>
 <td>16 archivos</td>
 </tr>
 </tbody>
-</table></div>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h2 id="sec4">1.3 Estadísticas del Proyecto</h2>
+</table>
+<h2 id="sec4">1.3 Estadísticas del Proyecto</h2>
 <p>Las métricas resumen el inventario técnico detectado. La ausencia de un elemento indica que el analizador no lo identificó de forma estática; no implica necesariamente que la capacidad no exista durante la ejecución.</p>
 <table class="report-table">
 <thead>
@@ -352,7 +335,7 @@ componentes, datos, despliegue y mantenibilidad.</p>
 <td>0 / 5</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <hr />
 <h2 id="sec5">2. Documentación de Arquitectura y Diseño</h2>
 <p>La presente sección describe la organización lógica y física observada en el repositorio. Los diagramas y patrones se derivan de los artefactos disponibles y constituyen una referencia para la comprensión y evolución del sistema.</p>
@@ -368,7 +351,7 @@ componentes, datos, despliegue y mantenibilidad.</p>
 ├── settings/
 ├── auth/
 </code></pre>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h3 id="sec7">2.1.1 Líneas por archivo analizado</h3>
+<h3 id="sec7">2.1.1 Líneas por archivo analizado</h3>
 <table class="report-table">
 <thead>
 <tr>
@@ -379,7 +362,7 @@ componentes, datos, despliegue y mantenibilidad.</p>
 <tbody>
 <tr>
 <td><code>requirements.txt</code></td>
-<td>253</td>
+<td>252</td>
 </tr>
 <tr>
 <td><code>__init__.py</code></td>
@@ -387,7 +370,7 @@ componentes, datos, despliegue y mantenibilidad.</p>
 </tr>
 <tr>
 <td><code>app.py</code></td>
-<td>67</td>
+<td>65</td>
 </tr>
 <tr>
 <td><code>requeriments.txt</code></td>
@@ -395,7 +378,7 @@ componentes, datos, despliegue y mantenibilidad.</p>
 </tr>
 <tr>
 <td><code>.env</code></td>
-<td>17</td>
+<td>24</td>
 </tr>
 <tr>
 <td><code>README.md</code></td>
@@ -466,8 +449,8 @@ componentes, datos, despliegue y mantenibilidad.</p>
 <td>—</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Total de líneas de archivos contadas:</strong> 1318 (7/22 archivos)</p>
+</table>
+<p><strong>Total de líneas de archivos contadas:</strong> 1322 (7/22 archivos)</p>
 <h3 id="sec8">2.2 Distribución por Capas</h3>
 <ul>
 <li><strong><code>(raíz)/</code></strong> — 8 archivos [.txt(2), .py(2), .env(1), .md(1), .example(1), .gitignore(1)]</li>
@@ -506,24 +489,20 @@ componentes, datos, despliegue y mantenibilidad.</p>
 </ul>
 <h3 id="sec14">2.8 Observaciones Complementarias de Arquitectura (Insights de Arquitectura)</h3>
 <p><strong>1. Patrones arquitectónicos probables</strong><br />
-- Con 5 clases y 5 endpoints, parece una arquitectura <strong>Monolítica ligera</strong> o <strong>API‑First</strong> (tipo “Micro‑framework” como Flask/FastAPI).<br />
-- La presencia de varios módulos (16 funciones) sugiere un <strong>estilo “MVC” implícito</strong> donde las funciones actúan como controladores y las clases como modelos/servicios.  </p>
+- <em>Monolito ligero</em> con un único proyecto Python (probable Flask/FastAPI).<br />
+- Tendencia a <em>MVC</em> implícito: funciones ≈ controladores, clases ≈ modelos/servicios, endpoints ≈ vistas.  </p>
 <p><strong>2. Buenas prácticas detectadas</strong><br />
-- Uso consistente de Python como único lenguaje → evita fricción de interoperabilidad.<br />
-- Separación básica entre lógica (clases) y exposición (endpoints).<br />
-- Tamaño reducido de código facilita pruebas unitarias y revisión.</p>
+- Uso de clases (5) sugiere encapsulación de lógica de negocio.<br />
+- Número reducido de funciones y endpoints indica un alcance bien delimitado.<br />
+- Separación básica entre capa de presentación (endpoints) y lógica interna.  </p>
 <p><strong>3. Áreas de mejora sugeridas</strong><br />
-- <strong>Organización de paquetes</strong>: agrupar funciones relacionadas en sub‑paquetes (e.g., <code>services</code>, <code>schemas</code>, <code>utils</code>).<br />
-- <strong>Documentación de API</strong>: añadir OpenAPI/Swagger para los 5 endpoints.<br />
-- <strong>Validación y serialización</strong>: usar Pydantic o Marshmallow en vez de lógica manual.<br />
-- <strong>Manejo de errores</strong>: centralizar excepciones con middleware o decoradores.  </p>
+- <strong>Modularidad:</strong> crear paquetes por dominio (e.g., <code>users</code>, <code>orders</code>).<br />
+- <strong>Tipado estático:</strong> añadir anotaciones y usar <em>mypy</em> para evitar errores en tiempo de ejecución.<br />
+- <strong>Pruebas unitarias:</strong> cubrir al menos 80 % del código con <em>pytest</em>.<br />
+- <strong>Manejo de errores y logging estructurado</strong> (p.ej., <em>structlog</em>).<br />
+- <strong>Validación de entrada</strong> (pydantic o marshmallow).  </p>
 <p><strong>4. Complejidad del proyecto</strong><br />
-- <strong>Baja a media</strong>: 21 funciones / 5 clases indica un dominio de negocio limitado.<br />
-- La complejidad radica más en la interacción externa (API) que en la lógica interna.</p>
-<p><strong>5. Recomendaciones de escalabilidad</strong><br />
-- <strong>Modularizar</strong> en paquetes independientes para facilitar la extracción a microservicios futuros.<br />
-- Adoptar un <strong>framework async</strong> (FastAPI) si se espera mayor tráfico.<br />
-- Implementar **c</p>
+- Baja‑</p>
 <hr />
 <h2 id="sec15">3. Documentación Técnica de Código</h2>
 <h3 id="sec16">3.1 Guía de Configuración del Entorno de Desarrollo</h3>
@@ -546,7 +525,7 @@ cp .env.example .env
 # 5. Ejecutar en modo desarrollo
 python app.py  # o npm run dev
 </code></pre>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h3 id="sec17">3.2 Catálogo de Endpoints de API</h3>
+<h3 id="sec17">3.2 Catálogo de Endpoints de API</h3>
 <p>El proyecto expone <strong>5 endpoints</strong>. A continuación se presenta el catálogo completo organizado por módulo:</p>
 <table class="report-table">
 <thead>
@@ -589,12 +568,44 @@ python app.py  # o npm run dev
 <td>Flask</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <h4>Módulo: <code>routes/auth.py</code></h4>
 <h5><code>POST /register</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> Endpoint POST /register</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
+Este punto de la aplicación sirve para crear una nueva cuenta de usuario. En otras palabras, permite que una persona se registre en la página o la aplicación, de modo que después pueda iniciar sesión y usar los servicios que ofrece.</p>
 </blockquote>
+<p><strong>2. Qué hace este endpoint</strong><br />
+Cuando alguien envía sus datos de registro (como nombre, correo y contraseña) a la ruta <strong>/register</strong>, el servidor revisa que la información sea válida y que el correo no esté ya registrado. Si todo está bien, guarda esos datos en la base de datos y “crea” la cuenta del nuevo usuario.</p>
+<p><strong>3. Qué información necesita para funcionar</strong><br />
+Para que el registro sea exitoso se le deben enviar al servidor los siguientes datos, normalmente en formato JSON:</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Campo</th>
+<th>Qué significa</th>
+<th>Ejemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>name</strong></td>
+<td>El nombre o alias de la persona</td>
+<td><code>"Ana Gómez"</code></td>
+</tr>
+<tr>
+<td><strong>email</strong></td>
+<td>Dirección de correo electrónico (debe ser única)</td>
+<td><code>"ana@example.com"</code></td>
+</tr>
+<tr>
+<td><strong>password</strong></td>
+<td>Una contraseña segura que la persona elige</td>
+<td><code>"M1cR0s3gur0!"</code></td>
+</tr>
+</tbody>
+</table>
+<p>Estos tres valores son los mínimos; el código podría aceptar otros campos</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -603,10 +614,6 @@ python app.py  # o npm run dev
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>Significado del método</td>
-<td>Crea un recurso o procesa los datos enviados.</td>
-</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -660,8 +667,14 @@ python app.py  # o npm run dev
 <h4>Módulo: <code>controllers/UserController.py</code></h4>
 <h5><code>GET /me</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> Endpoint GET /me</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
+El endpoint <strong><code>GET /me</code></strong> sirve para que la aplicación le devuelva al usuario la información básica que tiene guardada sobre él mismo, como su nombre, su correo electrónico u otros datos de identificación. Es como pedirle a la aplicación “¿quién soy yo dentro del sistema?”.</p>
 </blockquote>
+<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
+Cuando alguien llama a esa URL, el código ubicado en el archivo <strong><code>controllers/UserController.py</code></strong> (dentro del proyecto Flask) busca la información del usuario que está “logueado” (es decir, que ya inició sesión) y la envía de vuelta al cliente que hizo la petición. En otras palabras, toma los datos del usuario desde la base de datos y los muestra.</p>
+<p><strong>3. Qué información necesita para funcionar</strong><br />
+Para poder responder, el endpoint necesita saber <strong>quién es el usuario que está haciendo la petición</strong>.<br />
+- Normalmente eso se indica mediante un <strong>token</strong> (una pequeña pieza de texto) que el cliente envía en la cabecera de la solicitud (por ejemplo, `Authorization:</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -670,10 +683,6 @@ python app.py  # o npm run dev
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>Significado del método</td>
-<td>Consulta o recupera el recurso solicitado sin modificarlo.</td>
-</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -723,8 +732,29 @@ python app.py  # o npm run dev
 <h4>Módulo: <code>controllers/AuthController.py</code></h4>
 <h5><code>POST /register</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> Endpoint POST /register</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
+Este punto de la aplicación permite que una persona se “registre” o cree una cuenta nueva en el sistema. Es como cuando te apuntas a un sitio web o a una aplicación y necesitas dar algunos datos para que el sitio te reconozca y guarde tu información.</p>
 </blockquote>
+<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
+Cuando alguien envía sus datos al endpoint mediante una petición <strong>POST</strong> a la ruta <strong>/register</strong>, el programa revisa que la información esté completa y sea válida, la guarda en la base de datos y crea una nueva cuenta para esa persona. Si todo está correcto, el usuario queda registrado y listo para usar el resto de la aplicación.</p>
+<p><strong>3. Qué información necesita para funcionar (datos de entrada)</strong><br />
+Para poder registrar a una persona, el endpoint espera recibir, típicamente, los siguientes datos en formato JSON (un “paquete” de información estructurada):</p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Campo</th>
+<th>Qué significa</th>
+<th>Por qué se necesita</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>username</strong> (o nombre de usuario)</td>
+<td>Un identificador único que la</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <table class="report-table">
 <thead>
 <tr>
@@ -733,10 +763,6 @@ python app.py  # o npm run dev
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>Significado del método</td>
-<td>Crea un recurso o procesa los datos enviados.</td>
-</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -789,8 +815,19 @@ python app.py  # o npm run dev
 </table>
 <h5><code>GET /register/&lt;int:id&gt;</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> Endpoint GET /register/<int:id></p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint (¿para qué sirve?)</strong><br />
+Este recurso permite consultar los datos de una persona que ya está registrada en el sistema. Es como preguntar “¿qué información tengo guardada de la persona con el número X?” y recibir la respuesta.</p>
 </blockquote>
+<p><strong>2. Qué hace este endpoint (funcionalidad)</strong><br />
+Cuando se le llama, el servidor busca en la base de datos el registro cuyo identificador coincide con el número que se le envía en la URL y devuelve esa información. Si el número no corresponde a ningún registro, avisa que no se encontró nada.</p>
+<p><strong>3. Qué información necesita para funcionar</strong><br />
+Solo necesita un dato: <strong>el número de identificación</strong> (un entero) que se coloca en la dirección de la petición.<br />
+Ejemplo de la URL completa:  </p>
+<pre><code>GET  https://mi‑sitio.com/register/27
+</code></pre>
+<p>En este caso “27” es el número que identifica al registro que queremos consultar.</p>
+<p><strong>4. Qué resultado devuelve</strong><br />
+- <strong>Si el registro existe:</strong> devuelve una respuesta en formato JSON (un texto estructurado) con los datos del usuario, por ejemplo nombre, correo,</p>
 <table class="report-table">
 <thead>
 <tr>
@@ -799,10 +836,6 @@ python app.py  # o npm run dev
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>Significado del método</td>
-<td>Consulta o recupera el recurso solicitado sin modificarlo.</td>
-</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -851,8 +884,31 @@ python app.py  # o npm run dev
 </table>
 <h5><code>POST /login</code></h5>
 <blockquote>
-<p><strong>Descripción:</strong> Endpoint POST /login</p>
+<p><strong>Descripción:</strong> <strong>1. Propósito del endpoint</strong><br />
+Este endpoint sirve para <strong>identificar a un usuario</strong> que quiere entrar a la aplicación. Es como la “puerta de entrada” que comprueba que la persona que dice ser “Juan Pérez” realmente es Juan antes de permitirle usar el sitio.</p>
 </blockquote>
+<p><strong>2. Qué hace este endpoint</strong><br />
+Cuando se llama, recibe los datos de inicio de sesión (normalmente el nombre de usuario y la contraseña) y los compara con la información que ya está guardada en la base de datos.<br />
+- Si los datos coinciden, el servidor le devuelve una “llave” (un token) que le permitirá acceder a las demás partes de la aplicación sin volver a escribir su usuario y contraseña en cada página.<br />
+- Si los datos no coinciden, le avisa que el acceso está denegado y le pide que vuelva a intentarlo.</p>
+<p><strong>3. Qué información necesita para funcionar</strong><br />
+Para que el endpoint pueda trabajar, debe recibir un <strong>paquete pequeño de datos</strong> (un JSON) con dos campos:  </p>
+<table class="report-table">
+<thead>
+<tr>
+<th>Campo</th>
+<th>Qué representa</th>
+<th>Ejemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>username</code> (o <code>email</code>)</td>
+<td>El nombre o correo con el que el usuario se registró</td>
+<td>`"</td>
+</tr>
+</tbody>
+</table>
 <table class="report-table">
 <thead>
 <tr>
@@ -861,10 +917,6 @@ python app.py  # o npm run dev
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>Significado del método</td>
-<td>Crea un recurso o procesa los datos enviados.</td>
-</tr>
 <tr>
 <td>Framework</td>
 <td>Flask</td>
@@ -915,7 +967,7 @@ python app.py  # o npm run dev
 </tr>
 </tbody>
 </table>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h3 id="sec18">3.3 Estado de Comentarios y Docstrings</h3>
+<h3 id="sec18">3.3 Estado de Comentarios y Docstrings</h3>
 <table class="report-table">
 <thead>
 <tr>
@@ -937,7 +989,7 @@ python app.py  # o npm run dev
 <td>20 (95%)</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <pre><code class="language-text">[█░░░░░░░░░░░░░░░░░░░] 5% documentado
 </code></pre>
 <h4>Fragmentos de Código con Documentación</h4>
@@ -994,7 +1046,7 @@ responses:
     description: Datos incompletos</div>
 </div>
 
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Funciones que Requieren Documentación</h4>
+<h4>Funciones que Requieren Documentación</h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1055,7 +1107,7 @@ responses:
 <td><code>controllers/AuthController.py</code></td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <p><em>... y 10 funciones más sin documentar.</em></p>
 <h3 id="sec19">3.4 Planes de Prueba</h3>
 <blockquote>
@@ -1157,7 +1209,7 @@ responses:
 <hr />
 <h2 id="sec20">4. Documentación de Clases y Módulos</h2>
 <p>El proyecto contiene <strong>5 clases</strong> distribuidas en los siguientes módulos.</p>
-<div class="table-landscape"><div style="break-inside:avoid;page-break-inside:avoid;"><h3 id="sec21">4.1 Tabla Resumen de Módulos</h3>
+<div class="table-landscape"><h3 id="sec21">4.1 Tabla Resumen de Módulos</h3>
 <table class="report-table">
 <thead>
 <tr>
@@ -1211,20 +1263,32 @@ responses:
 <td>❌ No</td>
 </tr>
 </tbody>
-</table></div></div>
+</table></div>
 <h3 id="sec22">4.2 Detalle de Clases</h3>
 <div style="page-break-inside: avoid; break-inside: avoid;">
 
 #### `UserRepository`
 
-> **Descripción:** Repositorio que encapsula las operaciones de persistencia de usuarios en la base de datos.
+> **Descripción:** **1. Propósito de la clase (en palabras muy simples)**  
+`UserRepository` es como el “archivista” de un edificio: se encarga de guardar, buscar y recuperar la información de las personas que usan la aplicación. Cada vez que la aplicación necesita crear un nuevo registro de usuario o encontrar a un usuario ya existente, recurre a esta clase.
 
-| Método | Descripción |
-| --- | --- |
-| `create()` | Crea y persiste una nueva entidad `User` con los datos recibidos. |
-| `find_user_by_id()` | Busca y devuelve un usuario a partir de su identificador único. |
-| `find_by_user()` | Localiza un usuario mediante su nombre de usuario. |
-| `find_by_email()` | Recupera un usuario utilizando su dirección de correo electrónico. |
+**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
+Imagina una biblioteca municipal. En la biblioteca hay un catálogo donde se anotan los datos de todos los lectores: su nombre, número de identificación, dirección de correo, etc. El catálogo no es el lector en sí, sino la herramienta que permite al personal de la biblioteca consultar y actualizar la información.  
+`UserRepository` cumple ese mismo papel dentro del software: es el “catálogo” (o archivo) de usuarios.
+
+**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
+
+| Método | Qué hace (explicado sin jerga) |
+|--------|--------------------------------|
+| **`create`** | Añade una nueva ficha de usuario al archivo, como si se inscribiera a una persona nueva en la biblioteca. |
+| **`find_user_by_id`**
+
+| Métodos disponibles |
+| --- |
+| `create()` |
+| `find_user_by_id()` |
+| `find_by_user()` |
+| `find_by_email()` |
 
 </div>
 
@@ -1233,7 +1297,15 @@ responses:
 
 #### `Config`
 
-> **Descripción:** Clase de configuración que agrupa variables y ajustes del entorno de la aplicación.
+> **Descripción:** **1. Propósito de la clase (explicado sin jerga)**  
+La clase **`Config`** es como una hoja de instrucciones que le dice al programa cómo debe comportarse en diferentes situaciones. Sirve para guardar y leer valores que el programa necesita para funcionar, como “dónde está la base de datos”, “qué idioma se debe usar” o “qué nivel de detalle mostrar”. En vez de escribir esos datos en cada parte del código, la clase los concentra en un solo lugar.
+
+**2. Qué representa esta clase en el sistema (analógica)**  
+Imagínate que la aplicación es una fábrica y cada trabajador necesita saber la dirección del almacén, el horario de trabajo y el tipo de material que debe usar. La clase `Config` sería el **tablero de anuncios** de la fábrica: allí están escritos todos esos datos importantes para que cualquier trabajador (cualquier parte del programa) pueda consultarlos cuando lo necesite.
+
+**3. Qué puede hacer esta clase (funcionalidades principales)**  
+- **Almacenar valores**: guarda información como rutas de archivos, credenciales, opciones de depuración, etc.  
+- **Leer esos valores**: cualquier parte del programa puede preguntar a `Config` “¿cuál es la ruta del archivo de
 
 
 </div>
@@ -1243,13 +1315,25 @@ responses:
 
 #### `User`
 
-> **Descripción:** Modelo que representa a un usuario del sistema, heredando de `db.Model`.
+> **Descripción:** **1. Propósito de la clase (en palabras simples)**  
+La clase **User** es como una “tarjeta de identificación” que guarda la información básica de cada persona que usa la aplicación. Sirve para registrar quién es cada usuario y para proteger su contraseña.
 
-| Método | Descripción |
-| --- | --- |
-| `set_password()` | Genera y almacena el hash de la contraseña proporcionada. |
-| `check_password()` | Comprueba la coincidencia entre una contraseña en texto plano y el hash almacenado. |
-| `to_dict()` | Convierte la instancia del usuario en un diccionario con los campos `id`, `username` y `email`. |
+**2. Qué representa esta clase en el sistema (una analogía del día a día)**  
+Imagina que la aplicación es un edificio de oficinas y cada persona que entra necesita una credencial de acceso.  
+- **User** sería la credencial (el carnet) que lleva el nombre de la persona, su correo electrónico y, de forma segura, la clave que le permite entrar.  
+- Cada vez que alguien quiere entrar, el guardia (el programa) verifica que la clave escrita en la credencial coincida con la que el usuario ingresó.
+
+**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
+
+| Acción | Qué hace realmente | Explicación fácil |
+|--------|-------------------|-------------------|
+| **set_password** | Guarda la contraseña de forma segura | Cuando el usuario elige una clave, la clase la “cifra” (la transforma en un código ilegible) antes de guardarla, de modo que nadie pueda leer
+
+| Métodos disponibles |
+| --- |
+| `set_password()` |
+| `check_password()` |
+| `to_dict()` |
 
 </div>
 
@@ -1258,13 +1342,27 @@ responses:
 
 #### `authService`
 
-> **Descripción:** Clase authService
+> **Descripción:** **1. Propósito de la clase (en palabras simples)**  
+`authService` es la “puerta de entrada” del sistema. Su trabajo es decidir quién puede entrar, quién puede crear una cuenta nueva y quién puede iniciar sesión para usar la aplicación. En otras palabras, se encarga de manejar todo lo relacionado con la identificación de los usuarios.
 
-| Método | Descripción |
-| --- | --- |
-| `register()` | Crea un nuevo usuario mediante `UserRepository.create` con los datos suministrados y devuelve la instancia creada. |
-| `find_by_id()` | Obtiene y devuelve un usuario a partir de su identificador llamando a `UserRepository.find_user_by_id`. |
-| `login()` | Intenta iniciar sesión buscando al usuario por nombre de usuario. Si el usuario existe y la contraseña es válida, genera un JWT mediante `create_access_token` con el `id` del usuario y la reclamación `username`. Devuelve el token generado o `None` si la autenticación falla. |
+**2. Qué representa esta clase en el sistema (una analogía del mundo real)**  
+Imagínate un club deportivo con una recepción.  
+- Cuando alguien quiere ser miembro, va a la recepción, entrega sus datos y recibe una credencial.  
+- Cuando ya es miembro y llega al club, muestra su credencial y la recepcionista verifica que sea válida antes de dejarle pasar.  
+
+`authService` actúa como esa recepción digital: registra nuevos miembros, busca la información de un miembro cuando es necesario y verifica que la persona que intenta entrar sea quien dice ser.
+
+**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
+
+| Método | Qué hace (explicado sin jerga) |
+|--------|--------------------------------|
+| **register** | Crea una nueva cuenta para una persona que aún no está registrada. Es como inscribir a un nuevo socio en el club.
+
+| Métodos disponibles |
+| --- |
+| `register()` |
+| `find_by_id()` |
+| `login()` |
 
 </div>
 
@@ -1273,12 +1371,29 @@ responses:
 
 #### `AwsSecretManager`
 
-> **Descripción:** Clase AwsSecretManager
+> **Descripción:** **Clase: AwsSecretManager**  
+*Archivo: settings/key.py*  
 
-| Método | Descripción |
-| --- | --- |
-| `__init__()` | Constructor de la clase que muestra un mensaje en consola y crea un cliente de AWS Secrets Manager mediante `boto3.client`. |
-| `get_secret()` | Recupera un secreto de AWS Secrets Manager mediante su nombre, lo parsea como JSON y lo devuelve. En caso de error, muestra un mensaje en consola. |
+---
+
+### 1. Propósito de la clase (en palabras muy sencillas)
+
+Imagina que la aplicación necesita guardar información muy delicada, como la contraseña de una base de datos o la clave para acceder a un servicio externo. Esa información no debe estar escrita a la vista en los archivos del proyecto, porque cualquiera que tenga acceso al código podría verla.  
+
+**AwsSecretManager** es la “caja fuerte” que la aplicación usa para ir a buscar esos datos confidenciales cuando los necesita, sin que estén expuestos en el código.
+
+---
+
+### 2. Qué representa esta clase en el sistema (una analogía)
+
+Piensa en un banco que tiene una caja de seguridad donde guardas tus documentos importantes. Tú tienes una llave (o un código) para abrirla y recuperar lo que necesitas, pero el banco nunca te muestra el contenido de la caja a menos que tú lo pidas.  
+
+En la aplicación, **AwsSecretManager** es esa caja de seguridad digital. El “banco” en este caso es el **AWS Secret Manager**, un servicio en la nube de Amazon que guarda secretos. La clase actúa como el portero
+
+| Métodos disponibles |
+| --- |
+| `__init__()` |
+| `get_secret()` |
 
 </div>
 
@@ -1286,7 +1401,7 @@ responses:
 <hr />
 <h2 id="sec23">5. Documentación de Funciones</h2>
 <p>El proyecto contiene <strong>21 funciones</strong> distribuidas en <strong>10 módulos</strong>.</p>
-<div class="table-landscape"><div style="break-inside:avoid;page-break-inside:avoid;"><h3 id="sec24">5.1 Resumen por Módulo</h3>
+<div class="table-landscape"><h3 id="sec24">5.1 Resumen por Módulo</h3>
 <table class="report-table">
 <thead>
 <tr>
@@ -1369,9 +1484,9 @@ responses:
 <td>—</td>
 </tr>
 </tbody>
-</table></div></div>
+</table></div>
 <h3 id="sec25">5.2 Detalle por Módulo</h3>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>app.py</code></h4>
+<h4>Módulo: <code>app.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1391,11 +1506,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>create_app</code></strong>: Inicializa la aplicación Flask y configura componentes como JWT, base de datos, migraciones, Swagger y obtiene secretos de AWS.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1424,7 +1535,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>routes/auth.py</code></h4>
+<h4>Módulo: <code>routes/auth.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1451,12 +1562,7 @@ responses:
 <td>✅</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>create_cognito_user</code></strong>: Registra un nuevo usuario en Amazon Cognito utilizando email y contraseña.</li>
-<li><strong><code>register</code></strong>: Endpoint que recibe datos JSON para registrar un usuario en Cognito; valida los campos obligatorios y devuelve 200 o 400.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1535,7 +1641,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>repository/userRepository.py</code></h4>
+<h4>Módulo: <code>repository/userRepository.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1576,14 +1682,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>create</code></strong>: Crea una entidad User, asigna contraseña, la persiste en la base de datos y devuelve el objeto creado.</li>
-<li><strong><code>find_user_by_id</code></strong>: Obtiene un registro User mediante su identificador primary key.</li>
-<li><strong><code>find_by_user</code></strong>: Busca el primer usuario cuyo nombre de usuario coincida con el valor proporcionado.</li>
-<li><strong><code>find_by_email</code></strong>: Busca el primer usuario cuyo correo electrónico coincida con el valor proporcionado.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1633,7 +1732,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>controllers/UserController.py</code></h4>
+<h4>Módulo: <code>controllers/UserController.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1653,11 +1752,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>me</code></strong>: Endpoint que devuelve la información del usuario autenticado (id y username) extraída del JWT.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1678,7 +1773,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>controllers/AuthController.py</code></h4>
+<h4>Módulo: <code>controllers/AuthController.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1712,13 +1807,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>register</code></strong>: Endpoint que crea un nuevo usuario a partir de JSON con username, email y password; valida datos y delega al servicio de autenticación.</li>
-<li><strong><code>get_user_by_id</code></strong>: Endpoint que busca un usuario por id; devuelve sus datos o un error 404 si no existe.</li>
-<li><strong><code>login</code></strong>: Endpoint de inicio de sesión que valida credenciales y delega al servicio de autenticación para generar el token.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1796,7 +1885,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>controllers/controller.py</code></h4>
+<h4>Módulo: <code>controllers/controller.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1816,11 +1905,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>home</code></strong>: Endpoint sencillo que responde con un mensaje de saludo.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1835,7 +1920,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>models/user.py</code></h4>
+<h4>Módulo: <code>models/user.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1869,13 +1954,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>set_password</code></strong>: Asigna una contraseña al usuario convirtiéndola a un hash seguro usando pbkdf2_sha256 y la guarda en el atributo <code>password</code> del objeto.</li>
-<li><strong><code>check_password</code></strong>: Verifica si la contraseña provista coincide con el hash almacenado en <code>self.password</code>. Devuelve <code>True</code> si la verificación es exitosa, de lo contrario <code>False</code>.</li>
-<li><strong><code>to_dict</code></strong>: Devuelve un diccionario con los campos públicos del usuario: <code>id</code>, <code>username</code> y <code>email</code>.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -1921,7 +2000,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>services/authService.py</code></h4>
+<h4>Módulo: <code>services/authService.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -1955,13 +2034,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>register</code></strong>: Crea un nuevo usuario mediante <code>UserRepository.create</code> con los datos suministrados y devuelve la instancia creada.</li>
-<li><strong><code>find_by_id</code></strong>: Obtiene y devuelve un usuario a partir de su identificador llamando a <code>UserRepository.find_user_by_id</code>.</li>
-<li><strong><code>login</code></strong>: Intenta iniciar sesión buscando al usuario por nombre de usuario. Si el usuario existe y la contraseña es válida, genera un JWT mediante <code>create_access_token</code> con el <code>id</code> del usuario y la reclamación <code>username</code>. Devuelve el token generado o <code>None</code> si la autenticación falla.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2017,7 +2090,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>settings/key.py</code></h4>
+<h4>Módulo: <code>settings/key.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -2044,12 +2117,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>__init__</code></strong>: Constructor de la clase que muestra un mensaje en consola y crea un cliente de AWS Secrets Manager mediante <code>boto3.client</code>.</li>
-<li><strong><code>get_secret</code></strong>: Recupera un secreto de AWS Secrets Manager mediante su nombre, lo parsea como JSON y lo devuelve. En caso de error, muestra un mensaje en consola.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2086,7 +2154,7 @@ responses:
 </div>
 
 <hr />
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>Módulo: <code>auth/cognito_service.py</code></h4>
+<h4>Módulo: <code>auth/cognito_service.py</code></h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -2106,11 +2174,7 @@ responses:
 <td>❌</td>
 </tr>
 </tbody>
-</table></div>
-<p><strong>Descripción de cada función:</strong></p>
-<ul>
-<li><strong><code>create_cognito_user</code></strong>: Crea un usuario en Amazon Cognito con el email indicado, marca el email como verificado y asigna la contraseña especificada. No devuelve valor explícito.</li>
-</ul>
+</table>
 <div class="code-fragment">
   <div class="code-fragment-header">
     <div class="frag-icon">&lt;/&gt;</div>
@@ -2144,7 +2208,7 @@ responses:
 <p>Se detectaron <strong>1 modelos de datos</strong>:</p>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKgAAAB8CAMAAADKOgu/AAAAYFBMVEUAAAAJCQkREREYGBggICApKSk3Nzc/Pz9HR0dOTk5QUFBeXl5lZWVvb29wcHB9fX2FhYWLi4uVlZWcnJylpaWpqamxsbG+vr7GxsbOzs7X19fa2trg4ODt7e3x8fH///+989ZNAAAAKnRFWHRjb3B5bGVmdABHZW5lcmF0ZWQgYnkgaHR0cHM6Ly9wbGFudHVtbC5jb212zsofAAAAsmlUWHRwbGFudHVtbAABAAAAeJxdjkELgkAUhO/7Kx52KUJRD0EgYkRB5+gs6+4jF9ddefskKvrvqadoDgPzMQxTBZbEY29F6IwbJMkelJUhHJjJNCPjRXl3NS+E9KfSSNXdyY9OH731BKvzItEajaAMKYtimYHoFpAikAF6r9HWGRTFybHhZ1nCWwDE8WTbgFwPU//hSa83M1Etqu6Psa+1UTyFj6jQ6fm3yJI8zXfJ/gts20Lf5JiphwAACAhJREFUeNrtm4lyo7gWho/EaoyNnaTTk5mpuu//Wremp7N022axDQjESKwCgwMBd5IZn0pZ0BLyb218/KjR/+BzBH5vAVehV6FXob845DylXvLeUk5C11qEevOP17bHg1GdFPKSj6cTZkQ4+YD6qkCfRagY/3Wh8eRriDy6huSZf5rz4nyvSwDfvyppOl2Mb9EwtFjope4N/7iT03TCGNWiCWJ/oaLngqU9svA2cWBFiMpTy14hoLaFeLmRQse0aPwDDi6EMiEkBjjYgUm3gFV9hg4kTfEhBHAoZqV+Ru/Xov52vY1ugTC9YFgQGiugLgZ9xlrXyFI10Ij3AMYzNl/uxw3ZtwuNfjy48RdIwt/U9DxcARAFwgU7JmqWaiFsLQnQ8ucfirsaJfTtXS+b2wU5AgElPY0pS0OV/6XHPAUtOMQmgGt/eZGtUTrHjNEVol8OTFA2TdI0VGiSJihNQaWbGwRR+DVYrEbOpjGznmm4YZP9/+zwT8xbkMYqmn/Hv7NjzFNAisxQTbqFxdhJDyh/XLaXY2tqi+jxYcwUcgVR4+9M3UG9/Wqyu9NFhSar2WSVXVLo2Ilei/8U5pH09kjDDy/0p80/j48XfY79NF0/7WQKHYIUtiQd3VhZsjuALdO9cvvxhCbPxjoJqORtLTV4+qqCH6nL0fekCwiN6FKGGSS71QL0yLljI+vLVHVPKlRWnoyZhggldgIxg2nQRtc5pVCcTnfKwOHr4fgi3SeA2MOHzvt8urk6hVA54J9ERoBNkz66FmjG2DpPW2OCOkziJMlxb0J05G0r4fmOLf7En1ToFC2qru0dk7sA+pNK8WwB6+0jTtC4R49mTMOjSZTIad9ENEtphKXx69L0PIqURnVYnaReIT7NLfQq9Cr0o8enEVouT/v4vaV0a6udzIdXdPFwheNP0/VXoVehHz0+jdByefr23kpaQmTkUugf762qJa7r6FXoVehr4XrsI9lG4PR++B8gdONMJjTg3so+lEHe9nV/W4Ru9+1Fo4mJ1VkAGPTYs3TLcz3J3w01XFmXMKXrPI87tGCarG08ApqFy9JZEnm3QDezORz4q1xvT9WlUri6zgGZvAo/5u92DK+nTdXd9ckzXlsSBe+HvlaeQtAk2TAK98Pf+paxYU0fKKtl+FKWzhNpT8A/sPV6z3rW3c5W9ImCv/OXBjj2fOnxkemnL1G1oGffdzslTVdWxYq4sesOzWJ7nt7ltG9EyUuTLAHZV3zTo8i/g8S2lqD/7axSVzdxWHUav1+H6VcrSaRAn2gItfkLDn8HcK+furJiaKw5Zm6CYjeg7Ecpeek8Ad1f+DdBgBON/WAdAOkkc3XTM8yPqJL1aPwmoSZrja065/9+6so2hwwCKr3gpYS+J0VpOU/0TRRruo9VDElWlmbXJOn2sNTjze3fnutOQ6jEJguSMoer6coicTTxt18ESXH4oACpSq/zRKeOivQd1vk38E4mcvF9/IiwJpXT12hxX5uu+/ecuLJyGNMyNzhA5Jjsch/otiqdJ4BVTwedBLyfDTuGfWDm32fYFFyuUQ950UB9W4sKceLKLsK/k4diQM3tDdUsQOutnVhBWZrkFzEZOiAt5INx/eMbglXx2mH9/BdW+MI0A/4zDmY/nWeN3DOu7JO2IkjOMrNCRenionpFinB9fiHsojsIn38/06J9jdzzrqzSyJS7K5TbLoTlcyTvV33v4cMc5zjfx3Yzge8N+Dc2EHqXHiYUF1PibrzOgTFMKJpu68XQ+BeBs7MfnvOW4DDNWboDpl8XeiTDc94SHKY5S3fA9ABw/gXBWboDps+AMxy9CBvsUs9Dcz7di30NZQaLeDcr4O8EpmssLQUiTOcs3YDpjKXbYfpM13svytpkeLf3l/qGjZuCoMsM/qMecbkQNGG6ztIgwnTB0g2Yzli6Haa7l6dkZ2UbrKQ7ziB6SdBlBvvnl6Vwl2vANDRYuoLpiqXrMJ2xdDtMd4MzoXlbcZyQYygJuswA370VO6kB03qdpQWYrli6DtMZS7fDdDc4J8X/gMiTkqDLDJbWwL8B0w2Whgqmo5Kl6zCdsXQ7THeDs8I3AguhFARdZWjWSyJ0fROm6ywNFUzXWbqC6Yyl22G6ezJhY0cgCarzgqCFDP3esasrGjDdYGkBpussXcF0xtLtMH3mXn+z+Y7prNoPVBK0kKHdP9OSgBow3WRpAabrLF3CdMbS7TB9dgdEHEu1jaolQTcz0jiF6d4sXcA0Z2kBpnvvgGiqKSFZ6tho24Dp3ixdXMhZGtphevxWjSlhmrN0B0yPF/qLYHq80F8E028CZ46OpzA6zJidUGi3ccvRMQybBYcZsxMILXj0vHF7V435vOAwY3ZodPNobtwW5FhE4cM6fBKlYApZwYHG7AQtmkdm3JbkWOgsfNigBNPc4R1ozE7Qonmkxq1AjmlUPixUxJo5vAON2ZFCBR5NzwVyrM5xfpOuwJTHQGN2pFCBR7NGq8gxPy982PKkiIHG7EihopHLjdsGOQo+LFRgmjm8A43ZoXHm93PjtkGOgg8LFbFmDu9AY3Zki4qRGrcNcqx8WB45mGYO70Bjdmi8viO3QY6lD5uGCKavG7NDQ+TR16uV1Tq+KWInSGpFpssogv7G7NDoOfQr6OwuM8yYvZDQEjovJmQioe/o4ObxkY3cWBRXHOuXwrMROl1xqSu6Xju4b6nskoFrM7McoxfCyOlkv7eAq9Cr0KvQq9Cr0KvQWvwDvfojAJHgSjgAAAAASUVORK5CYII=" alt="Diagrama de Modelos de Datos"></p>
 <p><a href="https://www.planttext.com/?text=NOx12i8m44Jl-Of5BueKz5vAHHGyY-UIRXORccRBPeke-E_6diGv3CnZ6APEQaMd8PZK-pXQiGDWi2djLSMtaz8PELxyas3xKsajzZVXARe31nPOdcQPpZi2z8A1p3m3YsiYMO1DCB2ZqEoWB8zHlJwg2bu6e2YoRH9fC-R-dSMjrb-27M7_nvGRvr5pU9kQeik_Fm">🔗 Abrir y editar diagrama en PlantText</a></p>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h3 id="sec27">6.1 Tabla Resumen de Modelos</h3>
+<h3 id="sec27">6.1 Tabla Resumen de Modelos</h3>
 <table class="report-table">
 <thead>
 <tr>
@@ -2166,13 +2230,25 @@ responses:
 <td><code>set_password()</code>, <code>check_password()</code>, <code>to_dict()</code></td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <h3 id="sec28">6.2 Detalle de Modelos</h3>
 <div style="page-break-inside: avoid; break-inside: avoid;">
 
 #### `User`
 
-> **Descripción:** Modelo que representa a un usuario del sistema, heredando de `db.Model`.
+> **Descripción:** **1. Propósito de la clase (en palabras simples)**  
+La clase **User** es como una “tarjeta de identificación” que guarda la información básica de cada persona que usa la aplicación. Sirve para registrar quién es cada usuario y para proteger su contraseña.
+
+**2. Qué representa esta clase en el sistema (una analogía del día a día)**  
+Imagina que la aplicación es un edificio de oficinas y cada persona que entra necesita una credencial de acceso.  
+- **User** sería la credencial (el carnet) que lleva el nombre de la persona, su correo electrónico y, de forma segura, la clave que le permite entrar.  
+- Cada vez que alguien quiere entrar, el guardia (el programa) verifica que la clave escrita en la credencial coincida con la que el usuario ingresó.
+
+**3. Qué puede hacer esta clase (funcionalidades principales explicadas de forma sencilla)**  
+
+| Acción | Qué hace realmente | Explicación fácil |
+|--------|-------------------|-------------------|
+| **set_password** | Guarda la contraseña de forma segura | Cuando el usuario elige una clave, la clase la “cifra” (la transforma en un código ilegible) antes de guardarla, de modo que nadie pueda leer
 
 | Propiedad | Valor |
 | --- | --- |
@@ -2182,11 +2258,11 @@ responses:
 
 **Métodos del Modelo:**
 
-| Método | Descripción |
-| --- | --- |
-| `set_password()` | Genera y almacena el hash de la contraseña proporcionada. |
-| `check_password()` | Comprueba la coincidencia entre una contraseña en texto plano y el hash almacenado. |
-| `to_dict()` | Convierte la instancia del usuario en un diccionario con los campos `id`, `username` y `email`. |
+| Métodos disponibles |
+| --- |
+| `set_password()` |
+| `check_password()` |
+| `to_dict()` |
 
 </div>
 
@@ -2314,7 +2390,7 @@ Tendencia: ↓ Baja
 </ul>
 <h3 id="sec45">9.4 Minería de Datos Aplicada al Código</h3>
 <p><em>Análisis automático realizado sobre las funciones y clases extraídas del proyecto.</em></p>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>A) Funciones de Alta Complejidad Ciclomática</h4>
+<h4>A) Funciones de Alta Complejidad Ciclomática</h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -2344,11 +2420,11 @@ Tendencia: ↓ Baja
 <td>Complejidad aceptable</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <blockquote>
 <p>✅ No se detectaron funciones con complejidad ciclomática alta. El código mantiene un buen nivel de simplicidad.</p>
 </blockquote>
-<div style="break-inside:avoid;page-break-inside:avoid;"><h4>B) Funciones Sin Documentación</h4>
+<h4>B) Funciones Sin Documentación</h4>
 <p><strong>20 de 21 funciones</strong> carecen de docstring (95%).</p>
 <table class="report-table">
 <thead>
@@ -2481,7 +2557,7 @@ Tendencia: ↓ Baja
 <td>2</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <p>💡 <strong>Sugerencia:</strong> Agrega docstrings a todas las funciones públicas. Prioriza las de mayor complejidad primero, ya que son las más difíciles de entender sin documentación.</p>
 <h4>C) Detección de Funciones con Nombres Similares (Posibles Duplicados)</h4>
 <p><em>Se comparan los nombres de funciones entre archivos para detectar lógica duplicada o que podría unificarse.</em></p>
@@ -2577,7 +2653,7 @@ Tendencia: ↓ Baja
 </tr>
 </tbody>
 </table>
-<p>💡 <strong>Sugerencia:</strong> Las funciones <code>create_cognito_user</code> y <code>create_cognito_user</code> realizan operaciones similares (<code>cognito_user</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/cognito_user.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>routes/auth.py</code>, <code>auth/cognito_service.py</code>).</p>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>create_cognito_user</code> y <code>create_cognito_user</code> realizan operaciones similares (<code>cognito_user</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/cognito_user.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>auth/cognito_service.py</code>, <code>routes/auth.py</code>).</p>
 <hr />
 <p><strong>Patrón: <code>*_login</code> / <code>login_*</code></strong> — aparece en 2 archivos distintos</p>
 <table class="report-table">
@@ -2604,9 +2680,9 @@ Tendencia: ↓ Baja
 </tr>
 </tbody>
 </table>
-<p>💡 <strong>Sugerencia:</strong> Las funciones <code>login</code> y <code>login</code> realizan operaciones similares (<code>login</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/login.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>services/authService.py</code>, <code>controllers/AuthController.py</code>).</p>
+<p>💡 <strong>Sugerencia:</strong> Las funciones <code>login</code> y <code>login</code> realizan operaciones similares (<code>login</code>) en módulos distintos. Considera crear una función compartida en un módulo utilitario (por ejemplo <code>utils/login.py</code> o <code>helpers/common.py</code>) que reciba el contexto como parámetro, y llamarla desde ambos archivos (<code>controllers/AuthController.py</code>, <code>services/authService.py</code>).</p>
 <hr />
-<div class="table-landscape"><div style="break-inside:avoid;page-break-inside:avoid;"><h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
+<div class="table-landscape"><h4>D) Análisis de Módulos — Archivos con Mayor Concentración de Funciones</h4>
 <table class="report-table">
 <thead>
 <tr>
@@ -2689,7 +2765,7 @@ Tendencia: ↓ Baja
 <td>🟢 OK</td>
 </tr>
 </tbody>
-</table></div></div>
+</table></div>
 <h3 id="sec46">9.5 Pipeline ETL Utilizado</h3>
 <p>El proceso de generación de documentación sigue un pipeline ETL (Extract, Transform, Load):</p>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAw8AAALKCAMAAABDUJ1XAAAAYFBMVEUAAAAKCgoTExMYGBgnJycrKyswMDA/Pz9HR0dLS0tXV1daWlplZWVpaWlwcHB4eHiHh4eIiIiVlZWYmJilpaWsrKyysrK+vr7AwMDLy8vT09Pa2trm5ubt7e3x8fH+/v6xfXApAAAAKnRFWHRjb3B5bGVmdABHZW5lcmF0ZWQgYnkgaHR0cHM6Ly9wbGFudHVtbC5jb212zsofAAABc2lUWHRwbGFudHVtbAABAAAAeJxVktFPwjAQxt/7V1z0GaI8mPhiQDYEA0qA+KAx5tjKqGxt03YGNf7v9tqFseyhd78v1+v3ZUPr0Li6Kpk9CKnRYAVbzA6FUbXMx6pUBi4nKX3MCVdyWArNSyE5pJs59GBUO5WozMJoxpj2k1hwuEiPzmDmLuCXAby9zpawVrXJ+DughR+hiT4IN623sOJaBVwIt6+3pIzXL5CgQ8tdUDL7Rfhx/fwUeICfVkmiiTA8c8p8B5oLw/7OHrIxKO1Omap5Co3DuOQouYl3x5q00QxSuUeZNRIKokt0jhsJCyGFLIJQhZLEVV1y66cKH0iQDIHOC+YK82b5dLOYQ3rUykRfe+dzpxXJ5BzrfEd0oWShkvu4kepTBhNR8lMGHzvf0UYfK/R6dydHMc8O8kF2eprvAB9fp2dNEaDPA0WomgDiEUj0zcIRQPDWtuSp7aKdtm99DLnM6W9k1/3B1eCmf/sPEqLXMNgXSS8AAEAgSURBVHja7Z2HmuI6uq4lZ2xixe41Z/bc/2WdM3utrkRyzjo2SUBRlAEniu99uilH+besTznQ/xAAwAqhaQMAaBHQAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAI7UtAGtJk6zH1HMN2ex1j10yeL4Vye5I5lPC+H6iMhSonxxNYvIl+e2HKRisZhs41ycfucsINDDccZ+/isOs8DuRuRgkF8c/+rkliPkvvvCVkeGvi/8+4ur7Qkhv9TtI3NHejrgoNTvFXiDjXPjrx8JONDDN3RYkIzFDhmlR7zq6EmyjKFFoqYkSfLtYxfb+f8dPcQR++xgGscT//F78z87B44BPRxHeCLBC3E7xI81lUxjTTRZZ5id8OxI0PqrTMvmpJXqg/2TmSO/F3+eCZma5ElchtLDRCFRA+eOknGqG8Ty5eHUJ8k76Wm5o1TtSysH44/AdYytg74dEXkgR2ZIBGUg7DkHigE9fEvmRVkE7UW0l/0ECSFhekfmMyJFgfN7Ge62T9L+3snsdjf76RQKlA6h9/8w1yBuKhnEd5WhF+f3d3JHKQudX/LKqoe/iWPwg+Y0K1SEHfElFYXA7wp7zoFiQA/HYWYemHmGI/2tfDjWgMzIcJD+HZvD7YuTJ/UlcvvJ/kn2nv3860uvzrNDa7HYxJCV0N4KwL8mjvSLCJmj+mP8J52uyxKSmET8YDIl6pMQkSil/6IkEL90DhwFejgOy6JdYvCSq6aQnkPCLAgHeSD3dy7WOkSNEhJ8OqmTIzXbWX6MkP9ZCsJPiEGM0E/EzWmB5mWP3NE+kXSbO8oI5QezraFAZJIQ9r+yoq/zcZ+dA0eBHo5Dh0RU5K39RcBmmR6ibEvYDWeLPUY+nRQKFHyXZAWLWX6/PSBLtzawxbMpPxSkROEH2Upw4vM8CALrUT/kHPgW6OE4WWlgh2AR7ee+NsqCHEsP3SMfO/kZlQ9hz/NmQb7hDIQ0Julie6mBzNFAyU6utJn6E0J6dHMwO+wqmQNU00j8Fnn6nnNN++O1AD2cRvJHdoiiEM0fB0LsDvoHrlH2T6b/N/sZ7BQ1DhzKcBh5zEK1O41CNXZfo4WiskzQH/qoqME0jELS39xNRirZHMyeOQ/koK+86iJLlinVtnNoiysG9HAaOnOI9EDI48QxSS6MQxw8+bkR4fMhm4h5xN6dEnsYxL6xqJjq+n5IUvFp7NpEGKza/aio9rJSPj/4OLV9P8ukUSu3crDv3F3THnclUMw3cwL/RMZDki6zLCwm0pdVqEdPFiSme6VgFtPP0Rc/uHpmmlz+6NsF6cOpiKtQSuUjFx09WZBPn+ago/zgaktAF80LgOedgoDA9sNB+nAKv5o2AFQM4jsAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4KzHPyTR2U5QTA8KfgorPcxnl7jxiNkbwM9gqYdkZnTPdiKdvv+r6dcAoBSWeohJVzvfDfrmdZp+DwDKYFmeZhe50RGcpl8DgFLYnk9gs7DTqY4YNsOMP+AnsK2HzcJO/NCntZp2WZ02LKwwAH4Ee/PNLBd24hxaq+nzaVV0oAfwE9jVw2phJ9+iIzGZsq6/XKvJy5eJEp5sL0lXy0AtF2ey10s5GWaKhj3wA9jVw2phJ20WJM9jT+lMl2s1eVEYZ1c6gUSCwMs0s1qcab2UU6YH9/z6WgBaw54eVgs7PfzxX336uF6rySTxQE/JKMtNeW9hqKwXZ1qdzrJZsgM9gB/AXvlhtbCTdP/uk3tpvVZTFuAXKxW8h/nCOLGyXpyJrE8TY4YlmcAPYK/8sF7YSSS75ep86ujkhckdZm8tzsQxZk6fAHDtHC4Gpx+ZUD7SnfXKSMDI091iHaZ8cSayWNBvfVpS0CQHfgC76cN6FadxLP/+E308rdZqWp7M0oupkq8+s1mcyViezhMSYxpjqnBw9RxIHxixXPJIH6lnkq4uhMFqXUC1T9z5ciGmxy7xrVDYOm0QJBDg+lmul+W/Phfpz5cmm5WYPi0I9Zr81fS7AHApJzWjCfJGAlSWd7ssGVHY9LsAcCmlNSvryDCB66c0PQgd6AFcPeV1OzKSoOmXAeBCytODTpFAgGtn2WjASAmFYdXuYFQQuCqoshdkl3qIyLQM19+afj0AToMOd/sZLfUgL/quXkooI30AVwWzp2RHEEs9UKJcML/GmhKcAKBWOu+z3nYsjmFt4Kbpsp2iM/QAbhq6O9kS9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEAzleTYgR+LY/Xiqw9x6wLF6go36aaTdqFkl6RjmI1fcKvKPRp67bxW6/7Qg8uqWd6Mc/Vv7/IMmpNxYrYVLNJe6RWga9T1yf8iiLeWL+N33ndF581rmkBrE6RZU1ZvWGviE01m7RHoYfX9Qm/oog31m/jd17XdPmhjT3E22jTFXKV3ti0HgBoE3VOMmnu7bdhBuQ22nRtFrbWyDOsqnXS1V17zDNd+fk2XZuFrTXydKvq04NJUrMl8Uarbbo2C1tr5FlW1Zg+9NsTb7TapmuzsLVGnmNVjXowI7lO37ham67NwtYaeY5V9emhT8zWJalttOnaLGytkWdZhfJD22y6NgtbayTKDz/DpmuzsLVGovzwI2y6NgtbayTKDz/BpmuzsLVGtrz8QFqZprbSpmuzsLVGnm5VnXpoYRzSSpuuzcLWGnmGVejPBwAHegCAAz0AwIEeAOBADwBwitYvxWmmncXFpmg0bHPMZEJYkAjywiDmp4IqLGyUsj9pvFqmiJtcBxt7Vhvh6tGhKNZvzFc2hjGV5e1PuPBK7mU5O983N3v5ArWQxsu/VM4Nyx8ubSJs/sGrpOgD5o5AUqoPxewDf6WHiVRPtds8fibBB5OTOF/8y5lSKWYjI7fRuCckev2XuGdyDRa601Rmkf6wMcwKf+fHg9df4lnGVGCqN0llEkl3av4Jl+7nXpl72W/ekuttzxOTmc2Yel+XkKPlCoRM/p0btni4dr/0Mv7BK6Xwm6rPWUQ8e/klPnx5SVzjCPKxek8XEYg/7g8oM8eilkXATn+7hX5jcvUW+h+9YWbPjNG1YYYT5kvy2bJynjHlm+q/5zYyO1IfirufmR29TZ4q8rZPT/t3/uuMh1sPny4D3OaDV8spyqcd5R9raApdMpdSR74nnpXI/fx7e3Ys6CSKEzISie2kShYuF9fo3l122k4GJZvN4gFdGj+TM8+jA2/2ixCFzR4PmUwCOyLqQLCWFq72yrRnJo9yz3zghmmSk/lM6g73jVk/fc+Y0IyonCUfKz9dnS3VRjW3kfayLJHQ/eT+TO0QYtFutmk5pNvlZ2TDzv+sP3b+XZfnVx+6bMLJgE9DI+vLVc35B988dm3xOjDmYbDH7TyP00KF2PFIEGZRzczv68T+0Ebya7Zrv8ujbqKKkq5TYk07w/Q1XV4j20H2LrPSS+1UtILFBHlJuPxy3TDJfofep3W0c5NJIA/74TtZWbjaK5G1FVuGZQlE9tdlO5NyLfxv9fRdY9ibMBqI6cZPV2dLtXGTzw223Gc52V8vny4pyL4Wsf2BPnG27ozyz7f52P50dX79oUsmee9sx56psOevm8euLV4FxkUY3LLzPE7MGUqr+QWFxzyYD3tEi80HNhss3kCQs4/P5oM+0f4xh4trSMdWicfKL4E/jF+pahgkWb2BRJIsslM7s09Je25ynutU/46UhYXrvRJjtoT749owYsw9nTid3Sg+M2b99F1jSNqXSIf76epsiSxt9BgR8wLC2v3gv58uFB5oJ5mvPlliktB72PrYm/P8Q5cK+xDu1ttpwAKnv+uvBx67DIzLMLhl51mcqIf1pKW5l0ZpNGckSbKNrWnW4jTLyFMtWl5Duh8jwa5gckf1ryDwxuFobdLKsOEffz9Szc8kVpBFKPFKAbt75bCZzXVjmKQ5ehw8frps7+mrXU1+1Tsq3fhpFeQ2mixWtqMM5T77Ccc7Xpv5YMdiS3/Mg2Sns/WxN+f5hy6VafRrE1qiDyKNurv+euCxy8C4DIOXeuCJeohW1wsL76WUEi1foHErDLLFOZqusmId0en4v0r2s6UvqP2pNZTI0mei5ZvIxmx0wOR3oS/SP+swu7tXBmsrtgyjWVSQ2OLemtyZMXtPX+3SZ9d7F582flo+mY1ZkHkm7zsvThf1rTsXLr4fSZcJm/xI4pf5kGwZtjrPP3SZ2PYTD5Lq8/appb8eeOwqMC62L/XA0/QQ+lvJlExUfbWxzHtQtnAwlLhusgTCTpSzSzffIBMmaHaf5uvMa8tYZfCP+9nkJPwtL0LswsLNXnmsrCCrSDU3jJKO4DjG7ofJjOFP3zVG6HbTF2uw9tPl2XJtdLbntt53X8hD2CLVyvPeEeX5PGkw64mbj705T/c+dCkEk6F25HTmrzx8cYsJD4Nbdp7nS0UvZFEUzF/V3tatxizzmsgngj6LCAuIFCZptjNPiBNs6ieMyOoWfUZx2EdWuoosRSCj9CMhyThZJQtSz/psskB8kk7zswsL13slMkrfMy/wXxg3jNDMJ3jBaW0Mf/qOMbGXh09x46fLs+XaGL/nbq+yEvvuK25C7EUxNHBJbG5/s64w5x97c37/Q5dB8q52opxPZzb+yh/LLc5Yh8EtO8+isLzDP1l5edjdju9G0xeB0SzFuJv8EdLOYy/8h/2WRx9/UzLcNOqIuldywXCRD07fGGVaVvKSnyd/U6Y8r/PjfXsT8W1MpqPpnA0CQlYWrvZKRP41+UOZ0KdsY1ieNKq8jLIxZvP0HWPScSomnR730+XZcm2cvmR/VrU3++73/b+ptsiDG/NJqm5X8dD+tC9tDNuc3/vQZeClwZ/Fxv98OrXx181jucU5qzDIPfA86H/yX//1eTeZMnuF7k5jQVwoJEm2WvXjdKv5n7zKd0dcKLKSwXzvmhcpr/BImLhK3HYe/pWhkvDV3jk2zT9fksZLK7YMK2LLZnfZ22TLTy/0tUOfMI2p9KXb8SZyjOihaHJl2Ks6XJ/f/dBnGFkwmC3g/rp5bLwTna+DwXEP3LdqL+hflv0T1iWDnQC57WbsB3cnOFgA3wvzV9r6ZAU62AjK13slsXaUfuele09f70qHT1di40G43fI3N8uf7qgB7q+fNxasg8FFHlj1K72zu5JbML34oewMGDiBbxOvq6ZqPfwu3cXR5U6ACzi3pes6wPgHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4Hyhh7I7V4LauYZP2D4bv9CD7NXz7l6R9sCy+9h/aU1xm6owqTiFHv79J6w2NBbxxq9trMq277zuC6P1oPQJzO1DwyC0It0je1b53rPd9fQMmy41yTqhI9snKCly97efMCq3r/Y+RbzxSxvDsBrbvvW6r0SsltqPN8eYBHfn9Q6hFUy6o4/FSzp+XGqSVfaEIwc4/gnZJHluen60r2wMp+Kv+iZB26G+8rT0pL9ZlztTEvJz+lrNKOXrIHwRWyCHg7DZuPfQkBxq7bLb1SZu2b1dz4be26932uXuXCem3dp396far+a60NYaR0hP9nu3NUvJdJWxXkO2pYUkE/LcVAT8nWmz+L7CASDfUnP7Q/c5fC17hpKzUZ7D90briRrCe9UeWyoH+1V5blIO9aYPGeKD+270WzKkRHg0X+9KrzhoOWzuPTQa5L4mK0c/NVyoqf/xujZ7GbUl89pXxr1Lqj6vj2giN5g9P0YyDwaNj3xsQI7CXTCVhy1JsLXncXjXzvBRCc580PTyHV9gWUYLhNpI/yX1l/zalqpX8UlsT4mmatjYfmqnHPyX4GnQvByaSB9y+vrMHbUkFzv03tsaZ5ZMOO7cN23DQZJZNGxHFrqp4ov04I61ctdgOJuOPA5GLYibqqatjQ7Msntt0WlzIVL/RV/cy50pA+mJvMVNG1E1yXvw3Eo5eC/xc2vqNJbpQyORIx0aU3vYikwTvXPeRp3L3Wkx3rSdFWnBnDVa5c12A/9SDyKJmog65Cd3rLSjpslQPoKSV/ZoE21tdIhnUcN1rDbd8Zfl/K3kT9pUpaPrdTqtyLszK+3Xlnv8qHdWr8SUuq3w5F1SN9CbTZWZ7Y52OhCt9BC8NjdUiVLWjnFStL5RPmKtfWtb48PtM4vureC70gNhYXOmxU7abUW318jSakq860wfsoSv14o86S6eq+qN1y9SZS/ZXNe30ibLNF1vpgxa0BtfM8b2XT3fqL7iWjjutLBg5M7lVo6/EFvhV3IvmcZK47EFoUY0U+uIS83aer2bs7tKh4WehTOJRvUV1k6hLRrtda1XvQVeNFA/+u0LP2fTxpEOzLHEUVt7FbcjfSB5hq0bTZnceC2IpM+D6iu8akofvA9j1HwcswOzx+mwDZnjw7RGD7kijGCWKk0rQugG88rzTLXogc3tti0dk1oTNuq3Vg2t0kO+zLYRTptXREeYiBXXd9Whh/hDeGxXyEvNiXDXa5dNe7TMOGHQs/7oTXuZnjdWN63KS2ndSIfIdo1W1ilt06r0IYdq3XgaiM36m2B4llZlxrvy9IFN/MdW9d7zZrZ212lZYeYzrdPDomTN5p7QaAsd7ZCJVKEFVeshfFceWhT2mDOJunfqFSS5rUy/aLfrmrOe0aT/dZVxeLWz0bRrpENsu9pdG3sTHqCF6cMCuSs7MyY3GMeJhmNXlmeqNH1Ixslje4JfMDOVO6NtjSBf0VY9ZCmXofmzWGrOI6mezJSK0s8q9dCmRocsoxQYd5UWxcqllfmlFcp9Yr8pveZS/r46MVoznWBRZu0Z6RDZbudaMkor2ps+5Ahaj5kObcxLJd3ytCpKMZWlD/E7bUujgzt1tDv9WjJKK9qth7xDbld05qSpfhxCRR38qtKDM+m3YdaWrAxjTdLe6BpqlHZpSVxyjE4nsv7oTY2QGCjX08GPTeKm53tc4jmh0Q5LTuUqjJbvUudD7DYzrrQjj8PrmI2mJdMrJbYrdu+vwsc+0/b80gqq9rJsUyo1UVEhGOV38Ksiv9SOkQ7ezJRHveb7KZ/JVaQPCzQtr20yGhh/Tkfu+7BlHUU/0YqRDrHjyEbbfeoo16OHLC0bDFxrZnTrTyT0fAa/pl//KP6k8YVmmGfHV1pq4FyZ+boe2X+0bu2jq+TnyWtja5oVoPlGh9DxlN71T+l2ZXrIQuZo6MxYt7a+Tclq8m/De+mVFORKn7shHkvNThWfuA4xms+ulcDV6WHR2y+05zVVwM5nW9tlTRcklDtzZNMjHTwnvLZm6C+5Qj1kKIsKWEOvPFJMsuLKZoeZpFdG2SV15yVGpQ03OoSuKxvXWrv6mevUQx7F9nxn1jEqLknEpLvVfapjzkuZe1fXZl5ZWe1w3GlufaM8n6T/iHzSmmvVA8krYFN3lhqVdiXeyyD11XKWm+vOnJL0YFmNzUueek78Y/JJa65YD/lUGN3IeZWNihuuw/WGKKrP4+CbGfxCJyHDb73VZWXY3FyjA/PcoNNv0aCjkrhqPWTIw6HnTHWjymjqZZ1KDAdEfJq/PhwryYd/sp/vmwKYW0IRuLFGB9/1VP3nFBq2uHY9kLy/X+pMiFFdz2I1JUlClJVnDZT3Yx38PEL+XaDQLTqX66GhRofQ8SR9eD1DfE7iB+hhUbgOndfK+nI8EzI1yVOut2msiaZomZQJWj67Zr5vpfqAkMgMiaAMLIeQMXkknh1RNZ94a3GH8JT9oTYZdOauOMiL5IaZXhiimml0iFxX+Fkl6F1+hB4yFGXo2VNdrzjC9KIwJpIUUiEIvN/5fpBkMSbtpy+pKAR+14+yssGi2YKy0Pklr+4gbuynhLxpfpbZ+JeY68G9rPNdE40Oieum+kMrliaoip+ih3y4s55k+SZdr/aV4oGeCkoWGudhmIsveVJfIrcfpfRflATi49yk/yLJjOiP8Z90+rS6I/vDftN/SPhX+sK8TAmK7FyiBzaNHmsOl6nnRp1hW+chLoufo4cMsd8P3TdJ71SYnivDfHajkNmUxbketA5RoyTzR/a/sqIL+ep8Yp5C9Imk2/76jvxChQhpJw/Ei7WBjFlyvpXhuPNUa15pUZ3U4Ej22vhReiCLfJPvzhW9sqbrLEAnL0zuMJcuwvUiUDMiPs+DILAel52d2WLJVrpsvljF48Lm6gXGzDm7bqjmRodcDNrPrE76xE/TA8nb6ZjvzjS9kokAcgJGniTPpqa8FWFqGonfIm+ph0wCgUICciRLIynn6qHeRgfmejcjBvIj9ZDPNtlhnj3p6NUk8FlgnCoWYd0pH/oSveoiS9bxv6IG0zAKj7ZDGNP4LM+vs9Eh9W5KDOSH6oEsStepa04qqXBS+6brjSZEeh5vFiQVqJX96usZLp/Grk2EwbEiszF1zpkPs75Gh6wAHd6WGAhfX/RnkjhequsXVMT4r8+H0pg0kZbBxHQ2HfzSrFC9FXZYTI/ENf/7fwh5Tf462Z54LNUz917ielGnU1mWs7X81PRhidjvR+4H1Tsl100K6zDZVzYd/ITdcEq/faQxDk+N6d1ZLY0OseslP7FzUgF+th4y5MEg9CqQxArteRycmaXQx85peqin0SH0PPbz2xm+4sfrgeR1sBVKQnyavZzXZCt0nJPmKKij0cH3fKr/tD7cp3ALeiDVSmKovp+XizG84IRouPJGhzQTg6K1ZfbXhridt19IYsw6ndKzAp18NpozYm6dOoVtqbrRIfa9UOu0Zp78xrgdPZCFJCJvlnT0wsGQ8cFAxxhYL/3TQuuiJ4dqFx3JFNqaHkXHr6FnL8yaFRnSTu/6Jh+ugJ9d33qQ2CtelWhOCzpK6UmTb4jJSSZTmha5anhGQx3zfF/saDdcZNjhptKH1Sv3eolnTzStwGqXMhkVDCmxqRYrRCy68X08L7bCQvOcJpbQK3Ads6cFBubtGu35odoZ/NzhDCdzg3rIELtd5nkzRet88/6UKEWr4Y2Jeb8MWMHRjIsl5bm1zNUgNY65zcJVrq7wSIfO+6yIbtYEns805JJ2uU09kEWHDuJ7b+VlFei99bpc1VOwjvZberlfBPRg/Ouoe9ayNumURoeuGxYsGSW+F8ja/Y8e2nMWN6uHHE0bhd6EaZ1yIsmeslxuTn47NgeOIH88ZKE2eDeOZteSpahOanSgpFAZJvC99OY6JhXkpvVAFlVOsW+N1Y5WQiZafR6/32ehnM7vjlylBx8PmRzI8YmcZgu1lN7okPi+L1/NatD1c+t6yL0gL0z4M1m7vLFOeJy/3itEcntHnDJm4ph8UPWo10eeWnqjAwt8P0Ujw1Ggh5y8MBH4Y6Zpl/boHKgf/a4cLgZOf4Vhaz4TjycPU6KUO9Ih8v1QQYnhO6CHNaqa5ZzsidLRLvIT7fkjULPQd6TqaGD7hB6f9N6PiFzeSIfU9wOKqqQiQA9b5Dkn37eodrBPR8Hx/+Lz1CJsdqTyiGo++S55YNSUS5leiQWBH2taHx+6EPCmXWink+Xd59GBAnYcf1eZmXhesNpMj82/N/pD0qNNCnZKWEzGqnphApFnkmStaJMigB4OIcv9rIA9F/aSCXVCvhHEopnPCfNaz3R+ZIYPUY6OTr7E5nm9aRr4+QJh5w7LSfzAF5BJOhHo4SB5ATtPJmS61dFo8Hr/bXNXfmPouamQHmuUG34c1cOcySRNREVWzyz+ppkW8gIROmKcCvTwJXkyYfpzc1PpJHYWLWlZ/G190/Clszgy0yMxc8c6cjezBSIqQj6I+YsrKFl3zIji/fYJFvhBrKk9fNlzgK8dg6rsTvLsiaIuenUM3ffHXBCWUaAKn6Xnxs5p/9s8zjr18aa75fYoCCIFBYbzgR6+Q+r1sih3kmqqJvbMRQrBirRo0bMzKwVcF5bpkz1TNxezMHAFtzO41ZHP5QA9FIBqWl48zUrYlK2yTK1g6q07eAdBEMqqMRnc5KQYJQI9FEQ0DBL6lLH3+5asOs4+olRU83Qh10JekeQ3bdL1Az2cQOrk2ZTxSbNilIC5t79ME5L3hEmqudYCKAXooTDJJMjnpSTJTL/csZPYrbldyiN6y7QZMx1aKBXooSimRSRJEiVRFOe1Ppek5udxoOnbokSdJpBDqUAPBUmMZpbyXKQO5qeDwl+Rv1iby697naCfDfRQkOaaes3oUIinitInSRD6b6O6s28/Geih7fSJ+WXKJOo6YdEFC2+BPaCHtnO4/MChaIwuEeih9RwsP4BqgB5az+HyA6gE6KHtHCs/gLKBHq4AZJdqA3poP0ge6gNz8QDAgR4A4EAPAHCgBwA40AMAHNQvlUCcZhFLAZ9kQSLI2XWmWMeq6uAMoIcSmDsCSak+3OpXN5E+15K601Rmkf5AAuihrUAPZaA+E+bPXn5xQcSfh+n4H70hJfGMYQRPe4EeSoJ2lH+sIQnsiKgDwYrihIzE1d7yipmcD7yWHlY3eFYi9xWyuWQuMZsaXX5mLqWOfN/0e90YKE+XhtjxCAnkYT98J6oo6Tpd7y1Iwp05Ku0PbSS/hvwSf+b3tYnPz+QHMNSnZpA+lIfkL/tWqH9HiiDnQXm1t+ifmuz4NZsNe0SLzQd+iZilHIGrbc4Q4bHpN7o9oIfyyEf4J1aQZqWHVQ/t3b3tOV+jNJozkiRbl+TznEkJP/PdbOKgAqCH8ogyz3wX+iL9sw7523sSibauZYRSSjS6dQndO4O8bANAD6UR+sOskPBbXoR7ukgs1ns5gmYv5ileVi/JRF2UDXYuIdtnQBMgDioDFkXB/FXtZd7pk3SaHZHCJOV7C0bpe0SY/7JILgRjFubr9+xesn2m6Xe6TZA+lEH4hwjysEsJHU3nbBAQ0gv/Yb/l9d4C+dfkD2XCajL70fRFYHSo7Vyyfabpd7pN6H+atqDV+K/PB2bMnh8ZoZPGkvDVXrYrils7gkg/XbJ15hjmoLC14ASQPpSMoHy9t7u72hGUb9wANYLyAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70cAY0bdqCFHMSVAP6L51Bz9oZ63YGVu+i2ym57H7wFdDDGdCLZ6C3Bpe6ACoB+SUAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70AAAHegCAAz0AwIEeAOBADwBwoAcAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70AAAHegCAAz0AwIEeAOBAD3UTH9gCbQF6qBsvWG0EXtOmgE9AD3VjfCwF4Y6Npk0Bn4Ae6kaQ33NB2JMO/L594JvUzpBkKYQ9I72mDQGfkZo24PZQxOSDzCQJXt9CkD7Uz4Cw7BfJQxuBHupHp1kiQdWmzQAHgB4aoLv6D1oH9NAAAyLFqGxtJdBDE3RiJA/tBJUcZ8KsRan4PESSzs9/tIaiR2VAD2diGZckrRcFac/Vm377HwvyS2fCLvK5i2L4TtT0y/9coIcrhDZtwM8FegCAg/JDyzH39vtNG/SzgR7azq4AzDNdAcWAHlqNSVITSUKNQA/tpo8koVagh3ZjRnLTJtwU0EOr6RMTuaU6gR5aDcoPNQM9tBuUH+oFemg3KD/UC/TQalB+qBnooe0gu1Qn0EPLQfJQK+jPBwAHegCAAz0AwIEeAOBADwBwUL9UHqGw8M2YLZvQ4jT/pVvtaaaIWZdaDvRQGv6b9Ff+dx4/L/bnTj7OWf7Fr/AwUUzbgR5Kw1aDYCfAq89NmwROBXooi9R7sOyDCcBcYjY1FjPy2cuNwI6IOhC2znh2LOi97K+VyH0lvyd15Pum3+n2gB7KwhG0dHK3MxXMYgI/SvxY7UcTScuuWW0EspFa78/8jD3p95Io08t0oASvz0p2RuljWpn6gR7KwtGpPnG3C8zBf7MfI4vkxYdsx9X4Rt4JQ/07ktcH2GwwyO9gs2GPaLGZHRUem36hmwR6KIkwvCNUt7f1oOT5nbxCO89FScnWRmIFKSGxvD4QpZ3FHVEazRlJ1peC2oEeSsIh0yycx/GWh26qWjcZn/XGu9AX6R+2OcBWG9lfSomW76BhqBGgh3JgjpHH6HN7WODiJPwtk+1JWLM9eflXxVTFjQI9lIOXDnKvjJ0BLwWzRZA/ML5NIL6cTrcP6DNZZqEqGDNJIVGiNf06Nwv0UA6OuvBJw/Q7m2Phn+yH/vvzxXQ0nbNBsHXkbvJHSDuPZDR9ERgtksaASqD/adqCVuO/Pn8RV88vGqiTxtJeASFJRHF5RhC/q2i1vnj219aCgiB9aARB2T+yVMOhM6BGUI0BAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70AAAHegCAAz2cCU0be7SHTjaVAa89k561HB59HlbvgkdrGDtXGdDDmdCL+rdag6btBwdBfgkADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70AAAHegCAAz0AwIEeAOBADwBwoAcAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70AAAHegCAAz0AwIEeAOBADwBwoAcAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQQ93EB7ZAW4Ae6sYLVhuB17Qp4BPQQ90YH0tBuGOjaVPAJ6CHuhHk91wQ9qQDv28f+Ca1MyRZCmHPSK9pQ8BnpKYNuD0UMfkgM0mC17cQpA/1MyAs+0Xy0Eagh/rRaZZIULVpM8ABoIcG6K7+g9YBPTTAgEgxKltbCfTQBJ0YyUM7QSXHaTBrURi+EJGk8xKM0VAGKRvo4TQso5QUtZyQ7Ll6s77x80B+6TRYOR5WTsTeiZr0ih8J9HDN0KYN+HFADwBwUH64Fsy9/X7TBv1IoIerYVcA5pmugKNAD9eBSVITSUL1QA9XQh9JQh1AD1eCGclNm3ALQA/XQZ+YyC3VAPRwHaD8UA/Qw5WA8kMtQA9XAsoPtQA9XAcoP9QD9HA1ILtUA9DDtYDkoQ7Qnw8ADvQAAAd6AIADPQDAgR4A4KB+6TLiNPPDMyKVOBXF7E+SUJmY4tZkTDs7oG6gh8uYOwJj2r24OTCR+pvfo/d1HrM/M0d7IuG2BELooUmghwtRn0n0Nn3Y7MeU/x5D9hKRMDfvhPGwffzhuxtBlUAPlyPrDgnsiKgDgVhRnJCRu/gVPSuR+0qWGEipI0sSs6mxmZdPFJw+cSU5y2+ZQje7ZHU229lsM8ul3ZRiLr/6gB5KIBVIIBup9f5MVFHQCV3+2tOBErw+K8SPlT41Y7UfTSRtfVPX7BO7my8VFGS5LX99NtvZbJvmSLTCDvRQH9DDhaQBC7KYPi8uqH9HsiLIOiGLXzYb9ogWm1kOSHjMC8rZRuBu9KBPQiF4WC+uSLbPrraZOeoS7e+m3/CmgB4uJPogUhZsEyvIcj7xdp/sKI3mjCQJWU3Hl/9IyeY01R3a4eXw7bOr7ZhlG1Rp+g1vCujhQrLydM670Bfpn52pjhmhlBItL1kvKmT3i9jddzrie9tn6cYBgjn46gV6KIUk/C2TxWyqlK1/ZaIenW5YFdLOUUclEkqEhRoBtQE9lIJAfDmd5ltSkFBh+WvMJIVEyZfh+fc3cb/QnYmilTb9bjcF9FAKdDSds0FeOO6F/7Df8uJ3NH0RGB1+fdN3rg6nb7SroUtNjdD/NG1Bq/Ffn3ej9/lX7c5pfKDbRhoL4oX5f/ZP/+uVSK1daz5ZC04F6UNJCErRg8UJQ4VZDP03agR6aDHUNYnyjPxSjUAPLUZ+atqCmwORDwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40MNp0DZ1N/XQmlo28NHT6FmEXe4KsXqXu0GZpjbtHT8O6OE0aDnTzluDpl8EHAT5JQA40AMAHOgBAA70AAAHegCAAz0AwIEeAOBADwBwoAcAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPAHCgBwA40AMAHOgBAA70AAAHegCAAz0AwIEeAOBADwBwoAcAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4EAPdRMf2AJtAXqoGy9YbQRe06aAT0APdWN8LAXhjo2mTQGfgB7qRpDfc0HYkw78vn3gm9TOkGQphD0jvaYNAZ+Rmjbg9lDE5IPMJAle30KQPtTPgLDsF8lDG4Ee6kenWSJB1abNAAeAHhqgu/oPWgf00AADIsWobG0l0EMTdGIkD+0ElRznEPiX3S+SdH6RAxpKH9UAPZyBS/oXunBpePZcvWlP+Jkgv3QGcedSFy6N3jtR037wQ4EerhPatAE/FOgBAA7KD+3H3Nu/tPACvgZ6uAJ2BWCe6QooAPTQdkySmkgS6gJ6aD19JAn1AT20HjOSmzbhdoAe2k6fmMgt1Qb00HZQfqgT6KH1oPxQI9BD60H5oUagh7aD8kOdQA9XALJLtQE9tB8kD/WB/nwAcKAHADjQAwAc6AEADvQAAAf1S2UQp4SI4vYRUzS+vJIQeqiF7atbQI1AD2UwdwTG1Pstzwy+CNxzJx/5LP86cCqEHpoHeigF9ZlEb5OnYld+wUPTLwGgh/KQDZuQmdohxKKr2fc8K5H7ShbzmxGVhzv5KTKXmE2N7EJmubSbZreYQpcf3dwLagXl6dKIMr/08nmRgtUKcfaHNpJfQ8LehNFATFeXsRxC/Jnf1yZ+VmyYd/vOPLslCLeOru8F9YL0oRQSk4TeXoaHzYY9osXmQ5z2JbKewiz4b/Zj3Gfl7+zywNWYOeoS7e/1Teuj63ubfrFbA3oohTRgQWdv1r4ojeaMJAmR5Fe9o65mEFMyKSxS5XyKPikhMcs26CZjtDq6uRfUC/RQCvIjiV/mw51jjFBKiUYJfXa9d/Fp6dWbqla6uYpsTbdH9+4F9QI9lIU0mPVEIS8lxMsgLxN1Nemw0O2mL9bo8G0klAgLtd2j/F5QKyhPl0ZXmBPFTYi9KgULxizbinwSe/l6cavqJRbl8LuE7iyIZ+meW5t7Qb0gfSgN2p/2+/7fVFuXI0bTF4HRIUnHqZh0Vusnhn/yS//NbxtO32hX24+X1veCeqH/adqCVuO/Pmufj5pH1gaNt6OYNBbEvAwQp9LRhJj90//k5Prew1iHBgkdthacANKHktnxUEE5cHCPMFSYxT531RDQGNcA0EPTUNckyjPKce0AemgauUivJ1ATiJcA4EAPAHCgBwA40AMAHOjhDFjTBrTChB8J6pdOhfmu32u6ox2z406naSN+ItDDafiup+hS4yGRdmV3qkESpQM9nEDoupI+FMi8aUMyQeg68yCJ0oEeihI7LtWfF71UZa9z8u2MnnPqKzyJS0LHMInygB4KwVwnNh7WQ3n04OQZ6JnT/fKcbZwcoDV18SeXhGtPOjq68ZUE9FCArNCg9beDnKqe6sRH/+s+sUJwwTBpahipa050Hd3/ygB6+I4snyTmhYaL8JIjXcR77hn5ry2Ebjd2J0THiLrLgR6OQ2ep8XixJ7HZ/bHTo/GlRQCp34+cd0rRLHEhIoZgfU1kzUnvQbu8zXIudY+dFuPg8gKAqPWYH0QUiy9eAtqnv4K5bx/CKC0jWx5638Q6Q6+UmcdkdqfZ/8yiy126WZBfOkxsu0qvQ8oZ0D8dfJMdooPpczGnviErXSfOh2DoiOfOA3o4hGclxrN4uTtLLPHbkq7uWr0iThVA7PcDZ64aFxXRbxbo4ROpY0u9EkNTYhUYATd800vTH1FV5lkzvVueizcD9LBHZLv6Q6ll0mmvgCdLvWmZc7VSXY/tVwWJxKlADzt4dtz9XW7e+2jTA+fSRohPSMOha08NA1/4FOBbHGbbYpkZpaWjx5seOJc3QnwiSyScN9lAO11xoIc1ie1o5WaUFsy0gjW2ijYbFbvyBKTBwLNnXQMliYJAD0tiy9MP1ChdHGOH/q+ilw5fwgsbO9ghezudrCShdk/ucXWbQA85oRV0fx0qNogkuqzleDosLCk6vLQRwqYHBSUNB86UdnV0C/8e6IEQ30y7d4cDi6SYFw2Gcykt3qRH6eSSrD6z3dEXttJu13fmKFt/D+Yzdi3S/7oQHbxe1EVOSKu8fA867B87nRWQlB6yTce5dT24ptA/miNi4QWCmCunVVd54eD8h1Hlu5SMuTbpobbpGLedgmZqGH5TPqAXxKguObHGSHtNqwyu1DB8a97toiDxJbfc39sdR4NBhRFC+vFwaj2nOjl97OhJSIbmzVIZ3f2+4Hb1ULUaCJkqxqm3iEnJrdQHHtHRw2kkoUXiILeqB69yNZDAfjg9rlfnSuVZWEHrJjNfuu2s8hfcph7CcTCsWA2EfIzOaO2m8qx7+l0nP0Xt0bkrQhGfuEU9xFO7P6o8LJikf85tUhDXUicqdwXTETG4dI/b00M6m+v31YeDePpwXqFVnXbqKe3KXRGK2OfW9MCsiXpfx+xdH+c2fQmCeXIx/EzkrmRZAhSxxY3pwR4L97XMeOpEZ3dWVRxS29xikiHZUMQWN6WH8CO579aSGUnH9+dXaCpVN0JsIxmybSHXtOaG9JDMrMGgpmr3SeeCdmaROXV2qsjSCNNF7euS29FDXnCoKxr03btLYnjFrDd4Sl0692W00JHb0UPwwe5rGwDAPu4uCs9Untbcx0jusmmEXhy3oodk6gz79X3tb6an/B6pjAksT0PpJtNYuXlF3IQerEnnvsYMSDg/o6PGLupUrTv7QlUjmrJv+4z/cG5AD9E4eah1HqKPwcX1pVSc19BtY/+hmu7Nb7yq6efrwZz1Ll294TSspAQ/lb20gaFsQkedu8otF6x/uh7Cd/JQb8BKJmd21NhFnTYyJ7HYJZNYvd1M08/WA5vP6yxHL5jopWTOBGI3M7JT6YZTerOLb/1oPUTv9LHuL+v6d+U4pDbVj4JqHcu+1UzTT9aDNR18t/BC6aQfF3TU2KXWbhs7CIYwSW4z01Tt/BpJwaVqLhm0/+WzJ+Su/khuSsuLYGas/Aksi8Jm/vAWJwevtFp+Pit6pdArOyZ3Z72yVhg5gaD49JTfM3gJGpsuiY7CqTO6vUxTlXpIZkbBSvTUnQflLBi1gk3DxyZy3ydMT/k9dDgtUV2nojxbr/36G0Eapko9xKRbtNeBro3LnFgi/lCem8j+mnKpeYyOa5415rQkep2JV/242nZRZWXkKRPbdQWnvAe7b72L+peeS2yXXDsxtOMGXmOD9NR5s5s0oIFXrvwJcfrNcC/bF7Nyo2GzkoIwmwWN5JUImfRLznCL/UmBtecqpKtNvAZqJZqj+saq8Z/X4xcEjpv9Gswt53nxG3tuRg4OKT273SUlJpvnID1prw2bUCut6eCriuV4u/9mNJJXIiSdV1A9OppfNOV3CfSenI+mbaiPOotLnh1RtZ890faSVNDyjhRzl65rRQ0zLUGclv3QVF+DqVFBsiQb04Lrz1WG9GS+juoejtHYy9b3qPmMUBY6v2TiBBIJAu83mVhZdmmVPTVM9+LsBptGT03ldv2opI4au/Rf/cbDYl8bd2pv6W+G+vJLyYzo//MvIZ1mmYD/+euvJxKGiUX0//xeJcaKfHGGKXknjcmBTUeVhBg6ml60IkspKL/St4JdDa6c+tKHIItniKTb+fpR7yHLPnKcZLlTomje8gJjllwWmMNxt4Em6RWmWlFbsqqaFyySUhL0zn2/ica5+tIHtlitk2Z/kxeX6np2hC2evzbBuLAuxfsYNSeHyKmsY+TQaUPUrD+54+YTqsqpTw/yIokIsr8BI093+vKQvzi6QFIu0oM1e2wwoz2pbgyeMJw0914c6Ul8aYMwK37LGp6R/t/sZzBUg2kYhVmmScyXCslK0kReHNo0wRrT+HxzZkFjRYcMW6hw8I7u2K3IqgzVn59nqi19yNIEndmBMOoStU/c+SJP/CATR9zM3ntBhol9NFexlJGYlfbMHplJc++2RefJmfzwPFOV4x/81+fdHAyL6TIBSJP1qs6RsBWMX5O/zntS+q40N1Qg40Optt+dGT40+XocNgtqm+SwEWptn6byKj8kyOu6yZ1ZEo0sO3UOyVunUTl4ccXdUPux1+T7ceio/94SU6qhNf01cvTzMkzxW7fJbtFZpFlJS9w2d7O25FP0x9m8aRsqpFV6EDrn6CF8GzRbyptrlXcRUbTWBEL5OXz/uf2ZWqUHYiTByfcEH3fNTMyyJvRqmJNh6J2XlawA4VF5/bEVr+3Sg05PTiC88UPD/XumdXTtoYNps2+5zWD4XlLn/NZRZfsDIyfHaap94mpWgdNP/Qrf4Xs8ItRhgECm7Znvgg5mfhOJMq18uuUq61vN6qM0ShvPygp1WVDbg4pZQ5owhw4rrjmpMn2QyejkgmYoF4oBVn2gfbeuBbAOseh+OFfqira9cLB+aBuw47pnAs1yHPb0vFW9C1OlHihRTs7aF7zBXlzneE9NTv8wHRHiktpaPrTXVF8+tBVo1vx+Gd1d0MvmVDrvs16lWaZ2laeLwhY5dsd8bFIO+YBvVsUY0a8YzVkmwLY0RJDe6GNZqrZqfGiXVVvPdp16WMmh0dSBRNmnmXVqHJ2qdGYkZO2p6tQe52b+16mxJEFPmsXodK5TD3m85JqPzWalfRKFfq1DdQZ+GJFma9N2kJ/9RVf0HzRH03XqIQsT3qzRzBLJx20Ey+kpo9MbEU9/WJ4s0OE0IDU8rDDCI3tn9WaYKuYqpyPMspD+tGk5kCyqlsg8SNI6Jk5WrDdBVBWaJUoNv/YO9H72+pjlmIzLnWoHTQeqs8jKlJOHprsdJ4yk0YQRvZYqX9o35m6Y555Za2pcFwztN8JM6KFJsuJD+pZvGL3m7A+EhDCqjOrSpXjXm0b5iPOg2e5aO0RxlNuUNjcxf8lcox6SvD5DFJJut8nSTxZZE+Guzr5T8pM/SQkN26KHxHJWlT1s3uw0s+VxjXqws+x0InQbTqPDmPTrHnah/WWacWs6uorDge/5VMjip6jGNrlKucbX8EQm9JuetI5FSinr6p5Iv/sRlTUR+uXQToeEns+k2Kx8SFQ91KuHoJTK81hWhODLakdKirToX26JQYtUMxazhlnFm5lUxbzU9OKGFfInjcWpK1Qh0oJGlkitenBL6YyVflNsSK3vn1KOJYWsLWANsYz6k5pChhX2J8YqeYNCRpZJrd8hLmel8m9sFgpEteVYUsjaIhF/NYHpG8OKXFTYn2g1b1DI90p9YM3PA6DNQA8AcK6xfmmb/bJloxPPtMyaazCsbUZeux72PK2UqpcfY801GNYyI69bDyZJzfbEde2y5hoMa5+R162H3P9aFNe1y5prMKx1Rl65Hsyo6W6u7bXmGgxrnZHXrYc+MRtPYdtqzTUY1j4jr1sP7chzttOaazCsfUZetx7akedsqTXXYFjrjLxyPbQiz9lSa67BsNYZed16aEees53WXINh7TPyuvVA2pDEtteaazCsZUZeux5aEKW01pprMKxtRqI/HwAc6AEADvQAAAd6AIADPQDAabZ+KWYyISxIhOVC7cxPBTVXaJxK2Z80Xi4WFC/mU8+OmKKR/avGklTMp4FMElqkUSi3SJD4pljyLBC5o7kP7D1neXCzU8jUsv0p/2LZl5Hi1QFB2va65Wn+Es0YeQHN6mEeP5Pgg8lJnK8L5kypFLNRFuDnjnFPSPT6r8VUpXMnD25PKglFI6hID3On85j9mTlakZnm5o5AUqoPxdWmUPKSv5mjjGn34s5zVp7AfUT+9Z07E6nsOsz8i+Vf5tdrvl5mZkV3tO11y9Prl2jKyAtovv1hrN7TRVzij/sDysyxqGWxjtPfilfUlSc/VGiG7CUiYW7B2CyziPmzl1/icnMyPnFZ1ALuR2/Th73nfPaRb4grm72I/psQa/rvo17XuJFn0LgeWJwv35ybMZOH+Uqu3iyLURQ2e/x8rSl0F389K5H7JS/MI2YSJK4k54m87aRKpse5xGxqdPPpwlzaTWl3cyaHdpR/rOVK7NRw4tKzBbLu7D/nE8m0q5F0qnfmUuqQbnfb9tSRlShOyKjy6cC3va61Rhak8fI0Fa1gMclOEi4DezdMst+htz1NKcvI/gTLY/aHNpJfy57GtJsFP3thgjXtDNPXlPgzv69N/EyH827fmQf8zBKx4y03ElusIF5J199m9ZyVJ3AfYUSUPxIyiTTiT/2BPnF2bddVUdL1smNftmPHntcdurQJI8+m8fSBPIxfqWoYJFnZIi2WlFU7M56RD/6bpRibfCibDXtEi82Sc0/6JBSChyCfrHrQJ9o/5pCI2SMCV2PmqEu0v7fPrDwvn8wx+H9ZiH0s+YOmAQucTbZ6+ZxtT8h3SFbG6gfjjvc7n2n8gXaSucEtFPL0VZBLnwt88eSvvO7ApY0YeT7N60H9Kwi8cTgiqylMV3HP8I+/CWPKQz6V55oojeaMJEnJdlDdoZ082Y7TrABDtSgzLfeghMQs26DK9hnCTc2MS+23X+V6ZPRBpNEmxl0/h3uCck8WaTu9/+Pf549Ws1Mdi+3aXgWLJ4fjw1534NJGjDyf5vWQ+Yran1pDabUSVLS0STZmm6Vs6Y6VjFBKiVZ6Ett9p6Ol+3lGhaab4LeoR8n/8zNLImll3J1rD09/4DEv2SmKbp6zYbsWcxEQF4aRlFtYVUZ48eT9ksLa6w5c2oiR59MSi2TCBM3O40Fma0ubBqH71bVqP6P0RdtUgS1mK5Xy9emWYXDJ4kC+7vHemdBfJ/TVzjLKn/MJNlb64zylXBhGxT0LaU3Tn669rtVGFqLx9IGNewqNLEUgo5ePOzGZJquKJan3xXzygjGTFBIlpa8A8XuZIAj6XBWdgEf4Qncmila6fYZFJPVNNddktsnstKL5kbees3+c5DGDGf4WgvFTXszRY7O7b7sUJBVNNHzY61aGrZKythlZhGb1kMcM6RujTLvLVzOe/E2Z8rxOZfv2FxHHaPoiMFpuBiVnnQMbffxNyXArbzucvtFunmxtzoR/smLgsJvfkW1S+aGinPDWc/aP520AwfxJJPcvZp8Y80mqDvZt74X/sN91NBBvDFwYtmrTbJuRhV7kP9W57b8+78bh5n489yJlhUSWMHEVPySJWKgiOo2PdZEwv18k3Tye24pTed959s8ih3bgzHePKrBk+/zSFtpXdRjRdceOghYWWVrBLDNXeo6R+773KUyVTJPpg++F+SfZKigWU0OWcSm5MW6fPV8JQ4VZzDhwpkWsY9j2WngNRjZpmBc/tKjm+QjUNYny3Jo87gHK7lB4s0Y2qYfR5U7Ug9z61WSr7Nl1U0a2OdIDoG6gBwA40AMAHOgBAA70AAAHegCAAz0AwKlVD+3pyNgeS9rNzflTrXqQvTqekhZoBq3HkqLWbA2pqI9Cj6zPn74wsu4m7Vrbp/WghhnNKSnQB60WSwpbQ3pW7TFxMcNq86dLjCyTevtrqK0ZINgeS3Joi2Yg2qVd/lQ9KE8DwIEeAOBADwBwoAcAONADABzoAQAO9AAAB3oAgAM9AMCBHgDgQA8AcKrUwxVMtwOuDFZxqKpSDyKJLncEgC1sWu3UjFX2b5UUU0IaAcqD2e6o2hBV5XzGJHi9ufFVoFLosOKe8ZXqgbAQggDlQZWq8xvVjgeiNzaaBFw7qG8FgAM9AMCBHgDgQA8AcKAHADjQAwAc6AEADvQAAAd6AIADPQDAgR4A4Px/zK6Vf5t7TlcAAAAASUVORK5CYII=" alt="Diagrama del Pipeline ETL"></p>
@@ -2701,9 +2777,9 @@ Tendencia: ↓ Baja
 <li><strong>Load:</strong> Generación de documentación en HTML, PDF o almacenamiento en MongoDB</li>
 </ul>
 <hr />
-<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 21:59 UTC</em></p>
+<p><em>AutoDocs AI · Fin del documento técnico · Estado del análisis: 2026-11-20 15:21 UTC</em></p>
     <div class="document-control">
-      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 15:59. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de Calidad: 71/100.
+      <strong>Control del documento.</strong> Proyecto: Proyecto. Fecha de emisión: 20 de noviembre de 2026, 09:21. Alcance analizado: 16 archivos, 21 funciones, 5 clases y 5 endpoints. Score de calidad: 71/100.
     </div>
   </main>
 </body>

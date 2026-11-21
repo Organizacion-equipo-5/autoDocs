@@ -62,21 +62,11 @@ class ProjectAnalyzer:
     }
 
     IGNORE_DIRS = {
-        # Version control / IDE
-        '.git', '.github', '.gitlab', '.idea', '.vscode',
-        # Python
-        '__pycache__', '.venv', 'venv', 'env', '.pytest_cache', '.mypy_cache',
-        # JS / TS
-        'node_modules', 'bower_components', '.next', '.nuxt',
-        # Build output
-        'dist', 'build', 'target', 'coverage', 'vendor',
-        # DB migrations
-        'migrations',
-        # Test dirs
+        '.git', '__pycache__', 'node_modules', '.venv', 'venv',
+        'env', 'dist', 'build', '.idea', '.vscode', 'migrations',
+        '.next', '.nuxt', 'coverage', '.pytest_cache', '.mypy_cache',
+        'target', 'vendor', 'bower_components', '.gitlab', '.github',
         'tests', 'test', 'spec', '__tests__', 'cypress', 'e2e',
-        # Binary/generated asset dirs (not source code)
-        'media', 'images', 'fonts',
-        'tmp', 'temp', '.cache',
     }
 
     # Ignorar archivos grandes y archivos de prueba (valores desde config)
@@ -85,17 +75,6 @@ class ProjectAnalyzer:
     IGNORE_FILE_PATTERNS = {
         'test', 'spec', 'mock', 'fixture', '__pycache__',
         '.min.js', '.min.css', 'bundle.js', 'webpack',
-    }
-
-    # Extensiones binarias/generadas que nunca deben analizarse como código
-    IGNORE_EXTENSIONS = {
-        '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.svg', '.webp',
-        '.pdf', '.zip', '.tar', '.gz', '.tgz', '.rar', '.7z',
-        '.exe', '.dll', '.so', '.dylib', '.bin', '.wasm',
-        '.pyc', '.pyo', '.pyd', '.class', '.o', '.obj',
-        '.db', '.sqlite', '.sqlite3',
-        '.lock',  # package-lock.json is handled by name, but *.lock files skip
-        '.puml',  # PlantUML source files in exports/
     }
 
     def __init__(self, project_path: str):
@@ -198,10 +177,6 @@ class ProjectAnalyzer:
 
                 full_path = Path(root) / fname
                 ext = Path(fname).suffix.lower()
-
-                # Ignorar extensiones binarias/generadas
-                if ext in self.IGNORE_EXTENSIONS:
-                    continue
 
                 # Ignorar archivos de prueba y minificados
                 fname_lower = fname.lower()
@@ -354,41 +329,17 @@ class ProjectAnalyzer:
         is_en = str(lang).lower().startswith('en')
 
         if any(k in p_lower or k in h_lower for k in ['login', 'signin', 'auth']):
-            return (
-                "User authentication endpoint: validates submitted credentials, verifies security policies, and issues a secure authorization session token."
-                if is_en else
-                "Endpoint de autenticación de usuarios: valida las credenciales provistas, comprueba permisos de acceso y emite un token seguro de sesión para peticiones subsecuentes."
-            )
+            return "User authentication endpoint: validates credentials and returns session token." if is_en else "Endpoint de autenticación: verifica credenciales de acceso y emite token de sesión."
         if any(k in p_lower or k in h_lower for k in ['logout', 'signout']):
-            return (
-                "Session termination endpoint: invalidates current user authentication, revoking active session tokens on the server."
-                if is_en else
-                "Endpoint de cierre de sesión: invalida la autenticación actual del usuario, revocando los tokens activos de sesión en el servidor."
-            )
+            return "Session termination endpoint: invalidates current user authentication." if is_en else "Endpoint de cierre de sesión: invalida la autenticación actual del usuario."
         if any(k in p_lower or k in h_lower for k in ['register', 'signup']):
-            return (
-                "User registration endpoint: processes new user account creation, validating data integrity and provisioning initial user settings."
-                if is_en else
-                "Endpoint de registro de usuarios: procesa la creación de nuevas cuentas de usuario, validando políticas de seguridad y dando de alta el perfil."
-            )
+            return "User registration endpoint: creates new user accounts in the platform." if is_en else "Endpoint de registro: procesa la creación de nuevas cuentas de usuario."
         if any(k in p_lower or k in h_lower for k in ['profile', 'me']):
             if m == 'GET':
-                return (
-                    "Profile retrieval endpoint: returns comprehensive user profile details, roles, and settings for the authenticated caller."
-                    if is_en else
-                    "Endpoint de consulta de perfil: devuelve la información detallada, roles y configuraciones del usuario autenticado."
-                )
-            return (
-                "Profile update endpoint: modifies account settings, preferences, and personal details for the authenticated user."
-                if is_en else
-                "Endpoint de actualización de perfil: permite modificar datos de cuenta, preferencias y configuraciones del usuario autenticado."
-            )
+                return "Profile retrieval endpoint: returns authenticated user profile details." if is_en else "Endpoint de perfil: consulta la información y detalles del usuario autenticado."
+            return "Profile update endpoint: modifies authenticated user account details." if is_en else "Endpoint de actualización de perfil: modifica datos de la cuenta del usuario."
         if any(k in p_lower or k in h_lower for k in ['export', 'download', 'pdf', 'csv', 'report']):
-            return (
-                f"Export and reporting endpoint: compiles, formats, and serves downloadable documents or analytical reports for {p}."
-                if is_en else
-                f"Endpoint de exportación y reportes: compila, serializa y sirve documentos descargables o reportes analíticos para {p}."
-            )
+            return f"Export endpoint: generates downloadable documents or data for {p}." if is_en else f"Endpoint de exportación: genera y descarga reportes o documentos para {p}."
 
         segments = [s for s in p.strip('/').split('/') if s and not s.startswith(('<', '{', ':', '['))]
         resource = segments[-1].replace('_', ' ').replace('-', ' ') if segments else 'recurso'
@@ -397,58 +348,22 @@ class ProjectAnalyzer:
 
         if m == 'GET':
             if has_id:
-                return (
-                    f"Detailed retrieval of {resource_en}: fetches complete data and specific attributes for an individual record identified by its path parameter, ensuring safe read-only access without altering database state."
-                    if is_en else
-                    f"Consulta detallada de {resource}: recupera la información completa y los atributos específicos del registro individual identificado por su parámetro en la ruta, garantizando acceso de solo lectura sin alteraciones en la base de datos."
-                )
-            return (
-                f"Collection query and listing for {resource_en}: retrieves the list of available records for this entity, potentially supporting pagination parameters, search filters, and sorting criteria for client consumption."
-                if is_en else
-                f"Consulta y catálogo de {resource}: devuelve el listado de elementos disponibles de tipo {resource}, permitiendo consultar múltiples registros con soporte de filtros o parámetros de búsqueda."
-            )
+                return f"Retrieves details of a specific {resource_en} by identifier." if is_en else f"Obtiene los detalles del recurso {resource} especificado por su identificador."
+            return f"Retrieves the list or collection of {resource_en} resources." if is_en else f"Consulta y devuelve la lista de elementos de {resource}."
         elif m == 'POST':
-            return (
-                f"Creation and persistence of {resource_en}: accepts and validates incoming request payload data, instantiates a new {resource_en} entity, and commits the record to the database."
-                if is_en else
-                f"Creación y registro de {resource}: recibe y valida la carga de datos (payload) en el cuerpo de la petición, crea una nueva entidad de tipo {resource} en el sistema y persiste los cambios de forma duradera en la base de datos."
-            )
+            return f"Creates or registers a new {resource_en} resource." if is_en else f"Crea o registra un nuevo recurso de tipo {resource}."
         elif m == 'PUT':
-            return (
-                f"Complete replacement and update of {resource_en}: comprehensively overwrites all fields of the target {resource_en} record identified in the route with the payload provided."
-                if is_en else
-                f"Reemplazo y actualización integral de {resource}: actualiza de forma completa todos los campos del recurso existente especificado por su identificador con la información suministrada en la solicitud."
-            )
+            return f"Updates or completely replaces the specified {resource_en} resource." if is_en else f"Actualiza o reemplaza completamente el recurso {resource} especificado."
         elif m == 'PATCH':
-            return (
-                f"Partial update of {resource_en}: applies selective delta updates to specific fields submitted in the request body for the indicated record, preserving all other existing attributes."
-                if is_en else
-                f"Actualización parcial de {resource}: aplica modificaciones únicamente sobre los campos específicos enviados en la solicitud para el registro indicado, preservando sin cambios los demás atributos de la entidad."
-            )
+            return f"Partially updates specific attributes of the {resource_en} resource." if is_en else f"Aplica cambios parciales a los atributos del recurso {resource}."
         elif m == 'DELETE':
-            return (
-                f"Deletion of {resource_en}: processes permanent removal or soft-delete decommissioning for the specified {resource_en} record, cleaning up associated dependencies."
-                if is_en else
-                f"Eliminación de {resource}: procesa la baja o remoción definitiva (o marcado como inactivo/soft-delete) del registro de {resource} especificado, depurando sus dependencias asociadas."
-            )
+            return f"Deletes or permanently removes the specified {resource_en} resource." if is_en else f"Elimina de forma permanente el recurso {resource} especificado."
         elif m == 'OPTIONS':
-            return (
-                f"Inspects permitted HTTP communication options and CORS policies for {p}."
-                if is_en else
-                f"Consulta las opciones HTTP permitidas y políticas CORS para la ruta {p}."
-            )
+            return f"Inspects permitted HTTP communication options for {p}." if is_en else f"Consulta las opciones HTTP permitidas para la ruta {p}."
         elif m == 'HEAD':
-            return (
-                f"Retrieves HTTP response headers without payload body for {p}."
-                if is_en else
-                f"Obtiene las cabeceras HTTP de respuesta sin cuerpo para {p}."
-            )
+            return f"Retrieves HTTP response headers without body for {p}." if is_en else f"Obtiene las cabeceras HTTP de respuesta sin cuerpo para {p}."
 
-        return (
-            f"Processes {m} requests for path {p}, executing business logic for {resource_en}."
-            if is_en else
-            f"Procesa solicitudes {m} para la ruta {p}, ejecutando la lógica operativa asociada a {resource}."
-        )
+        return f"Endpoint {m} {p}"
 
     @staticmethod
     def _generate_class_description(name: str, bases: list, methods: list, fields: list = None, docstring: str = "", is_model: bool = False, lang: str = "es") -> str:

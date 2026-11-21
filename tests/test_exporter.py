@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 
-from services.exporter import DocumentExporter, EXPORT_BASE, WEASYPRINT_MAX_HTML_BYTES
+from services.exporter import DocumentExporter, EXPORT_BASE
 from services.doc_generator import DocGenerator
 
 
@@ -395,24 +395,6 @@ class TestIsValidPdf:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestToPdf:
-    def test_large_html_usa_reportlab_sin_weasyprint(self, exporter):
-        large_html = "<html>" + ("x" * (WEASYPRINT_MAX_HTML_BYTES + 1)) + "</html>"
-
-        with patch("weasyprint.HTML") as mock_weasy:
-            with patch.object(exporter, "_pdf_with_reportlab") as mock_rl:
-                def fake_reportlab(path):
-                    p = Path(path)
-                    p.write_bytes(b"%PDF-1.4\n" + b"x" * 2000 + b"\n%%EOF")
-                    return str(p)
-
-                mock_rl.side_effect = fake_reportlab
-                with patch.object(exporter, "to_html", return_value=large_html):
-                    result = exporter.to_pdf()
-
-        mock_weasy.assert_not_called()
-        mock_rl.assert_called_once()
-        assert result.endswith(".pdf")
-
     def test_weasyprint_exitoso(self, exporter, tmp_path):
         def fake_write_pdf(path_str):
             Path(path_str).write_bytes(b"%PDF-1.4\n" + b"x" * 2000 + b"\n%%EOF")
@@ -577,31 +559,3 @@ class TestIntegration:
                 result = exporter.to_pdf()
                 assert Path(result).exists()
                 assert Path(result).suffix == ".pdf"
-
-    def test_guia_configuracion_no_se_envuelve_en_landscape(self, exporter):
-        html_input = (
-            "<h2>3. Documentación Técnica de Código</h2>\n"
-            "<h3>3.1 Guía de Configuración del Entorno de Desarrollo</h3>\n"
-            "<pre><code class=\"language-bash\"># 1. Clonar repo\ngit clone url\n</code></pre>\n"
-            "<h3>3.2 Catálogo de Endpoints de API</h3>\n"
-            "<p>El proyecto expone endpoints.</p>\n"
-            "<table>\n"
-            "<thead><tr><th>Método</th><th>Ruta</th><th>Archivo</th><th>Framework</th><th>Descripción</th><th>Seguridad</th><th>Versión</th></tr></thead>\n"
-            "<tbody><tr><td>GET</td><td>/api/v1/users</td><td>routes/users.py</td><td>Flask</td><td>List users</td><td>Bearer</td><td>v1</td></tr></tbody>\n"
-            "</table>\n"
-        )
-        wrapped = exporter._wrap_wide_tables(html_input)
-        # 3.1 no debe estar dentro de table-landscape
-        assert '<div class="table-landscape"><h3>3.1' not in wrapped
-        # 3.2 y su tabla ancha sí deben estar en table-landscape
-        assert '<div class="table-landscape"><h3>3.2' in wrapped
-
-    def test_tablas_clave_valor_se_mantienen_en_vertical(self, exporter):
-        # Tabla de 2 columnas con path largo no debe ser considerada tabla ancha
-        table_html = (
-            "<table>\n"
-            "<thead><tr><th>Propiedad</th><th>Valor</th></tr></thead>\n"
-            "<tbody><tr><td>Archivo</td><td><code>uploads/9fea4d25-579e-4807-9c10-595e3496d244/src/app/__init__.py</code></td></tr></tbody>\n"
-            "</table>"
-        )
-        assert exporter._is_wide_table(table_html) is False

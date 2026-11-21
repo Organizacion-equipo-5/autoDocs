@@ -1,9 +1,8 @@
 import app as app_module
-import services.db as db_module
 
 
 def test_insights_page_and_api_routes_are_registered(monkeypatch):
-    monkeypatch.setattr(db_module, "init_db_indexes", lambda app: None)
+    monkeypatch.setattr(app_module, "init_db_indexes", lambda app: None)
     app = app_module.create_app()
 
     rules = {rule.rule for rule in app.url_map.iter_rules()}

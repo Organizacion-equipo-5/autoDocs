@@ -2,11 +2,9 @@ from flask import Blueprint, request, jsonify, send_file, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from flask_jwt_extended.exceptions import JWTExtendedException
 from services.db import get_db
-from services.ai_enhancer import AIEnhancer
 from services.exporter import DocumentExporter
 from services.doc_generator import DocGenerator
 from datetime import datetime
-from copy import deepcopy
 import os
 import re
 import traceback
@@ -165,35 +163,6 @@ def _populate_file_line_counts(results, project):
             _logger.warning("No se pudieron contar líneas de un archivo del proyecto: %s", error)
 
 
-def _prepare_documentation_results(db, project_id, project, analysis_result, selected, lang):
-    """Enriquece y guarda el análisis completo antes de filtrar la selección exportada."""
-    full_results = deepcopy(analysis_result.get('results'))
-    if not isinstance(full_results, dict):
-        return full_results
-
-    _populate_file_line_counts(full_results, project)
-    full_results['doc_language'] = lang
-    ai = AIEnhancer()
-    if ai.is_available() and not (
-        full_results.get('ai_documentation_enhanced')
-        and full_results.get('ai_output_language') == lang
-        and full_results.get('ai_documentation_version') == AIEnhancer.DOCUMENTATION_VERSION
-    ):
-        full_results = ai.enhance_documentation(full_results, output_language=lang)
-
-    if (
-        full_results.get('ai_documentation_enhanced')
-        and full_results.get('ai_output_language') == lang
-        and full_results.get('ai_documentation_version') == AIEnhancer.DOCUMENTATION_VERSION
-    ):
-        db.analysis_results.update_one(
-            {"project_id": project_id},
-            {"$set": {"results": full_results}},
-        )
-
-    return filter_results_by_selection(full_results, selected) if selected else full_results
-
-
 def get_identity_flexible():
     """Acepta JWT del header Authorization O del query param ?token="""
     try:
@@ -210,7 +179,7 @@ def get_identity_flexible():
                 pass
     return None
 
-@export_bp.route('/<project_id>/pdf', methods=['GET', 'POST'])
+@export_bp.route('/<project_id>/pdf', methods=['GET'])
 def export_pdf(project_id):
     user_id = get_identity_flexible()
     if not user_id:
@@ -225,19 +194,19 @@ def export_pdf(project_id):
     if not result:
         return jsonify({"error": "Sin resultados de análisis"}), 404
 
-    # POST keeps large selections out of the URL; GET remains for backwards compatibility.
-    if request.method == 'POST':
-        payload = request.get_json(silent=True) or {}
-        selected = payload.get('selected')
-    else:
-        selected = request.args.get('selected')
+    # Get selected items from query parameter
+    selected = request.args.get('selected')
     lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
     try:
-        results_to_use = _prepare_documentation_results(
-            db, project_id, project, result, selected, lang
-        )
+        results_to_use = result.get('results')
         if results_to_use:
+            _populate_file_line_counts(results_to_use, project)
+            # Filter results based on selection
+            if selected:
+                results_to_use = filter_results_by_selection(results_to_use, selected)
+            if isinstance(results_to_use, dict):
+                results_to_use['doc_language'] = lang
             _logger.info("Iniciando generación del documento para exportación PDF.")
             try:
                 documentation = DocGenerator(results_to_use, lang=lang).generate()
@@ -316,10 +285,14 @@ def export_html(project_id):
     selected = request.args.get('selected')
     lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
-    results_to_use = _prepare_documentation_results(
-        db, project_id, project, result, selected, lang
-    )
+    results_to_use = result.get('results')
     if results_to_use:
+        _populate_file_line_counts(results_to_use, project)
+        # Filter results based on selection
+        if selected:
+            results_to_use = filter_results_by_selection(results_to_use, selected)
+        if isinstance(results_to_use, dict):
+            results_to_use['doc_language'] = lang
         try:
             documentation = DocGenerator(results_to_use, lang=lang).generate()
         except TypeError:
@@ -366,10 +339,14 @@ def export_markdown(project_id):
     selected = request.args.get('selected')
     lang = _get_request_lang(_resolve_saved_lang(db, user_id, project_id, result))
 
-    results_to_use = _prepare_documentation_results(
-        db, project_id, project, result, selected, lang
-    )
+    results_to_use = result.get('results')
     if results_to_use:
+        _populate_file_line_counts(results_to_use, project)
+        # Filter results based on selection
+        if selected:
+            results_to_use = filter_results_by_selection(results_to_use, selected)
+        if isinstance(results_to_use, dict):
+            results_to_use['doc_language'] = lang
         try:
             documentation = DocGenerator(results_to_use, lang=lang).generate()
         except TypeError:

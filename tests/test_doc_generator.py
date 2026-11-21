@@ -10,7 +10,6 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from services.doc_generator import DocGenerator
-from services.ai_enhancer import AIEnhancer
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -194,7 +193,6 @@ class TestInit:
         minimal_results.update({
             "ai_documentation_enhanced": True,
             "ai_output_language": "es",
-            "ai_documentation_version": AIEnhancer.DOCUMENTATION_VERSION,
         })
         gen = DocGenerator(minimal_results, lang="es")
         gen.ai_enhancer.enhance_documentation.assert_not_called()
@@ -569,70 +567,6 @@ class TestApiSection:
         assert "GET" in section
         assert "POST" in section
         assert "/api/users" in section
-        assert "Consulta o recupera" in section
-        assert "Crea un recurso" in section
-
-    def test_documenta_significado_de_todos_los_metodos_http(self, minimal_results):
-        minimal_results["endpoints"] = [
-            {"method": method, "path": "/api/resource"}
-            for method in ("GET", "POST", "PUT", "PATCH", "DELETE")
-        ]
-        section = DocGenerator(minimal_results)._api_section()
-        for description in (
-            "Consulta o recupera",
-            "Crea un recurso",
-            "Reemplaza o actualiza completamente",
-            "Actualiza parcialmente",
-            "Elimina el recurso",
-        ):
-            assert description in section
-
-    def test_descripcion_get_y_metodos_larga_y_entendible(self, minimal_results):
-        gen = DocGenerator(minimal_results, lang="es")
-        # GET estándar
-        get_desc = gen._http_method_description("GET", "/api/items")
-        assert "Consulta o recupera" in get_desc
-        assert "solo lectura" in get_desc.lower()
-        assert len(get_desc) > 80  # Explicación completa y detallada
-
-        # GET export/download
-        get_export_desc = gen._http_method_description("GET", "/api/export/pdf")
-        assert "descarga" in get_export_desc.lower()
-        assert len(get_export_desc) > 80
-
-        # POST, PUT, DELETE
-        post_desc = gen._http_method_description("POST", "/api/items")
-        assert "Crea un recurso" in post_desc
-        assert len(post_desc) > 80
-
-        put_desc = gen._http_method_description("PUT", "/api/items/1")
-        assert "Reemplaza o actualiza completamente" in put_desc
-        assert len(put_desc) > 80
-
-    def test_infer_standalone_function_description_para_get_y_demas(self, minimal_results):
-        gen = DocGenerator(minimal_results, lang="es")
-        fn_get = {"name": "_get_project"}
-        desc_get = gen._infer_standalone_function_description(fn_get)
-        assert "consulta y lectura" in desc_get.lower()
-        assert "project" in desc_get
-
-        fn_create = {"name": "create_user"}
-        desc_create = gen._infer_standalone_function_description(fn_create)
-        assert "creación y registro" in desc_create.lower()
-        assert "user" in desc_create
-
-    def test_endpoint_description_detallada(self, minimal_results):
-        gen = DocGenerator(minimal_results, lang="es")
-        ep_get_list = {"method": "GET", "path": "/users"}
-        desc_list = gen._generate_endpoint_description(ep_get_list)
-        assert "users" in desc_list
-        assert len(desc_list) > 50
-
-        ep_get_item = {"method": "GET", "path": "/users/<user_id>"}
-        desc_item = gen._generate_endpoint_description(ep_get_item)
-        assert "users" in desc_item
-        assert len(desc_item) > 50
-
 
     def test_incluye_setup(self, full_results):
         gen = DocGenerator(full_results)
@@ -699,7 +633,6 @@ class TestClassesSection:
         section = gen._classes_section()
         assert "UserModel" in section
         assert "bad_name" in section
-        assert "Elimina el elemento relacionado" in section
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -744,12 +677,10 @@ class TestFunctionsSection:
         assert "No se detectaron funciones" in section
 
     def test_con_funciones(self, full_results):
-        full_results["functions"][0]["ai_description"] = "Obtiene el usuario solicitado"
         gen = DocGenerator(full_results)
         section = gen._functions_section()
         assert "get_user" in section
         assert "create_user" in section
-        assert "Obtiene el usuario solicitado" in section
 
     def test_marca_funciones_async(self, full_results):
         gen = DocGenerator(full_results)

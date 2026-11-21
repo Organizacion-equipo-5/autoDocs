@@ -206,19 +206,13 @@ def github_callback():
     if request.args.get("error"):
         return fail("Autorización cancelada")
 
-    # Validar state: existe en BD y no expiró.
-    # El registro vincula el state al usuario y actúa como segundo factor CSRF.
-    # La cookie se conserva para reforzar el flujo web, pero no es el único validador:
-    # puede perderse al navegar desde GitHub o en navegadores con políticas estrictas.
+    # Validar state: existe en BD, no expiró y (si no es móvil) coincide con la cookie
     record = db.oauth_states.find_one_and_delete({"_id": state}) if state else None
     ctx["mobile"] = bool(record and record.get("client") == "mobile")
     ctx["redirect_to"] = _safe_redirect((record or {}).get("redirect_to"))
     cookie_state = request.cookies.get(STATE_COOKIE)
-    cookie_ok = (
-        ctx["mobile"]
-        or not cookie_state
-        or not state
-        or secrets.compare_digest(cookie_state, state)
+    cookie_ok = ctx["mobile"] or (
+        cookie_state and state and secrets.compare_digest(cookie_state, state)
     )
     if (
         not record

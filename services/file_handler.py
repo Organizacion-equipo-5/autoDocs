@@ -5,37 +5,6 @@ import subprocess
 from pathlib import Path
 from werkzeug.utils import secure_filename
 
-
-def _safe_zip_extractall(zf: zipfile.ZipFile, dest: Path) -> None:
-    """Extract zip while blocking path traversal (zip-slip)."""
-    dest = dest.resolve()
-    dest.mkdir(parents=True, exist_ok=True)
-    for member in zf.infolist():
-        # Resolve where the member would land
-        member_path = (dest / member.filename).resolve()
-        try:
-            member_path.relative_to(dest)
-        except ValueError:
-            # Path escapes the destination – skip it
-            continue
-        zf.extract(member, dest)
-
-
-def _safe_tar_extractall(tf: tarfile.TarFile, dest: Path) -> None:
-    """Extract tar while blocking path traversal (tar-slip) and symlink attacks."""
-    dest = dest.resolve()
-    dest.mkdir(parents=True, exist_ok=True)
-    for member in tf.getmembers():
-        # Reject absolute paths and symlinks pointing outside dest
-        if os.path.isabs(member.name) or member.name.startswith('..'):
-            continue
-        member_path = (dest / member.name).resolve()
-        try:
-            member_path.relative_to(dest)
-        except ValueError:
-            continue
-        tf.extract(member, dest, set_attrs=False)
-
 UPLOAD_BASE = Path('./uploads')
 ALLOWED_EXTENSIONS = {'zip', 'tar', 'gz', 'py', 'js', 'ts', 'java', 'php', 'go', 'rb', 'csv', 'json', 'sql'}
 
@@ -169,16 +138,16 @@ def save_uploaded_project(file, project_id: str) -> str:
     ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
     
     if ext == 'zip':
-        dest = project_dir / 'src'
         with zipfile.ZipFile(file_path, 'r') as z:
-            _safe_zip_extractall(z, dest)
+            z.extractall(project_dir / 'src')
+        # Remove the zip file after extraction
         file_path.unlink()
-        return str(dest.resolve())
+        return str((project_dir / 'src').resolve())
     elif ext in ('tar', 'gz'):
-        dest = project_dir / 'src'
         with tarfile.open(file_path, 'r:*') as t:
-            _safe_tar_extractall(t, dest)
+            t.extractall(project_dir / 'src')
+        # Remove the tar file after extraction
         file_path.unlink()
-        return str(dest.resolve())
+        return str((project_dir / 'src').resolve())
     else:
         return str(project_dir.resolve())

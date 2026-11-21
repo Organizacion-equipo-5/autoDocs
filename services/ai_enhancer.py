@@ -30,8 +30,6 @@ class AIEnhancer:
         "llama-3.3-70b-versatile",
         "llama-3.1-8b-instant",
     ]
-    DOCUMENTATION_VERSION = 2
-    GROQ_TIMEOUT = (5, 20)
 
     def __init__(self):
         # Soporte para múltiples API keys de Groq
@@ -46,7 +44,6 @@ class AIEnhancer:
 
         self.current_key_index = 0
         self.working_groq_model = None
-        self._groq_unavailable = False
         self.API_URL = "https://api.groq.com/openai/v1/chat/completions"
         # Ollama desactivado
         self._ollama_model = None
@@ -69,8 +66,8 @@ class AIEnhancer:
         return bool(self.api_keys) or bool(self._check_ollama())
 
     def _call_groq(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
-        """Llama a Groq con fallbacks limitados a errores específicos de modelo o clave."""
-        if not self.api_keys or self._groq_unavailable:
+        """Intenta llamar a la API de Groq probando modelos compatibles y rotando keys."""
+        if not self.api_keys:
             return None
 
         models_to_try = (
@@ -103,76 +100,34 @@ class AIEnhancer:
                     })
                 else:
                     payload["max_tokens"] = max_tokens
-
-                print(f"[AI] Enviando solicitud a Groq ({model_name})...", flush=True)
                 try:
-                    response = requests.post(
-                        self.API_URL,
-                        json=payload,
-                        headers=headers,
-                        timeout=self.GROQ_TIMEOUT,
-                    )
-                except requests.RequestException as error:
-                    self._groq_unavailable = True
-                    print(
-                        f"[AI] No se pudo conectar con Groq ({model_name}): {error}. "
-                        "Se continúa con documentación de respaldo.",
-                        flush=True,
-                    )
-                    return None
-
-                if response.status_code == 200:
-                    try:
+                    response = requests.post(self.API_URL, json=payload, headers=headers, timeout=25)
+                    if response.status_code == 200:
                         result = response.json()
-                    except ValueError as error:
-                        self._groq_unavailable = True
-                        print(f"[AI] Groq devolvió una respuesta JSON inválida: {error}", flush=True)
-                        return None
-                    if not isinstance(result, dict):
-                        self._groq_unavailable = True
-                        print("[AI] Groq devolvió una respuesta con formato inesperado.", flush=True)
-                        return None
-                    choices = result.get("choices")
-                    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
-                        self._groq_unavailable = True
-                        print("[AI] Groq no incluyó una respuesta de chat utilizable.", flush=True)
-                        return None
-                    message = choices[0].get("message")
-                    if not isinstance(message, dict):
-                        self._groq_unavailable = True
-                        print("[AI] Groq devolvió un mensaje con formato inesperado.", flush=True)
-                        return None
-                    content = (
-                        message.get("content", "")
-                    )
-                    content = content.strip() if isinstance(content, str) else ""
-                    if content:
-                        self.working_groq_model = model_name
-                        print(f"[AI] Llamada exitosa con Groq ({model_name})", flush=True)
-                        return content
-                    self._groq_unavailable = True
-                    print(f"[AI] Groq devolvió contenido vacío con {model_name}.", flush=True)
-                    return None
-                if response.status_code == 429:
-                    print(f"[AI] Groq rate-limit (429) en {model_name}; probando modelo alternativo.", flush=True)
-                    continue
-                if response.status_code in [401, 403]:
-                    print(f"[AI] Groq API key inválida o expirada #{attempt + 1}", flush=True)
-                    break
-                if response.status_code in [400, 404]:
-                    print(f"[AI] Modelo Groq no compatible ({response.status_code}): {model_name}", flush=True)
+                        content = (
+                            result.get("choices", [{}])[0]
+                            .get("message", {})
+                            .get("content", "")
+                            .strip()
+                        )
+                        if content:
+                            self.working_groq_model = model_name
+                            print(f"[AI] Llamada exitosa con Groq ({model_name})")
+                            return content
+                    elif response.status_code == 429:
+                        print(f"[AI] Groq rate-limit (429) en {model_name}, probando modelo alternativo...")
+                        continue
+                    elif response.status_code in [401, 403]:
+                        print(f"[AI] Groq API key inválida o expirada #{attempt + 1}")
+                        break
+                    elif response.status_code == 404:
+                        continue
+                    else:
+                        print(f"[AI] Groq HTTP {response.status_code} ({model_name}): {response.text[:120]}")
+                except Exception as e:
+                    print(f"[AI] Error llamando a Groq ({model_name}): {e}")
                     continue
 
-                self._groq_unavailable = True
-                print(
-                    f"[AI] Groq HTTP {response.status_code} ({model_name}): {response.text[:120]}. "
-                    "Se detienen los reintentos para continuar con documentación de respaldo.",
-                    flush=True,
-                )
-                return None
-
-        self._groq_unavailable = True
-        print("[AI] No hay modelos de Groq disponibles para esta ejecución.", flush=True)
         return None
 
     def _call_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int = 400) -> Optional[str]:
@@ -220,188 +175,6 @@ class AIEnhancer:
             prompt
             + "\n\nImportante: escribe TODA la respuesta en español natural."
         )
-
-    @staticmethod
-    def _parse_documentation_batch(response: str) -> Optional[dict]:
-        """Lee el JSON de una respuesta por lotes, incluso si viene entre fences, con texto adicional o truncado."""
-        if not response or not isinstance(response, str):
-            return None
-        text = response.strip()
-
-        # 1. Si viene en un bloque de código Markdown ```json ... ``` en cualquier parte de la respuesta
-        fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL | re.IGNORECASE)
-        if fence_match:
-            candidate = fence_match.group(1).strip()
-            try:
-                parsed = json.loads(candidate)
-                if isinstance(parsed, dict):
-                    items = parsed.get("items", parsed)
-                    if isinstance(items, dict):
-                        return items
-            except Exception:
-                pass
-
-        if text.startswith("```"):
-            text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.IGNORECASE).strip()
-
-        try:
-            parsed = json.loads(text)
-        except json.JSONDecodeError:
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if not match:
-                return None
-            candidate = match.group(0).strip()
-            try:
-                parsed = json.loads(candidate)
-            except json.JSONDecodeError:
-                # Intento de recuperación si la respuesta fue cortada a mitad por límite de tokens (max_tokens)
-                repaired = candidate
-                if repaired.count('"') % 2 == 1:
-                    repaired += '"'
-                open_braces = repaired.count('{') - repaired.count('}')
-                if open_braces > 0:
-                    repaired += '}' * open_braces
-                try:
-                    parsed = json.loads(repaired)
-                except Exception:
-                    # Extracción individual mediante regex de los elementos que sí se alcanzaron a generar
-                    items_recovered = {}
-                    item_matches = re.finditer(
-                        r'"([^"]+)":\s*\{\s*"description":\s*"([^"]+)"(?:,\s*"methods":\s*(\{[^}]*\}))?',
-                        candidate,
-                    )
-                    for im in item_matches:
-                        item_id = im.group(1)
-                        desc = im.group(2)
-                        methods_dict = {}
-                        if im.group(3):
-                            try:
-                                methods_dict = json.loads(im.group(3))
-                            except Exception:
-                                pass
-                        items_recovered[item_id] = {"description": desc, "methods": methods_dict}
-                    if items_recovered:
-                        return items_recovered
-                    return None
-
-        if not isinstance(parsed, dict):
-            return None
-        items = parsed.get("items", parsed)
-        return items if isinstance(items, dict) else None
-
-    def _enhance_documentation_batch(self, results: dict, lang: str) -> None:
-        """Enriquece funciones, clases, modelos y endpoints con pocas llamadas."""
-        records = []
-        targets = {}
-        collections = (
-            ("function", results.get("functions", [])),
-            ("class", results.get("classes", [])),
-            ("model", results.get("models", [])),
-            ("endpoint", results.get("endpoints", [])),
-        )
-        for kind, entities in collections:
-            for index, entity in enumerate(entities):
-                if not isinstance(entity, dict):
-                    continue
-                methods = entity.get("methods") or []
-                method_descriptions = entity.get("method_descriptions")
-                if not isinstance(method_descriptions, dict):
-                    method_descriptions = {}
-                needs_method_descriptions = (
-                    kind in ("class", "model")
-                    and any(
-                        str(method.get("name", "") if isinstance(method, dict) else method)
-                        not in method_descriptions
-                        for method in methods
-                    )
-                )
-                if entity.get("ai_description") and not needs_method_descriptions:
-                    continue
-                record_id = f"{kind}_{index}"
-                record = {
-                    "id": record_id,
-                    "type": kind,
-                    "name": entity.get("name") or entity.get("path", ""),
-                    "file": entity.get("file", ""),
-                    "docstring": entity.get("docstring", ""),
-                    "description": entity.get("description", ""),
-                }
-                if kind == "function":
-                    record.update({
-                        "parameters": entity.get("params", []),
-                        "code": str(entity.get("code_snippet", ""))[:700],
-                    })
-                elif kind in ("class", "model"):
-                    record.update({
-                        "bases": entity.get("bases", []),
-                        "fields": entity.get("fields", []),
-                        "methods": entity.get("methods", []),
-                    })
-                else:
-                    record.update({
-                        "method": entity.get("method", "GET"),
-                        "path": entity.get("path", "/"),
-                        "framework": entity.get("framework", ""),
-                        "handler": entity.get("handler") or entity.get("function", ""),
-                    })
-                records.append(record)
-                targets[record_id] = (kind, entity)
-
-        if not records:
-            return
-
-        system_prompt = self._localize_system(
-            "Eres especialista en documentación de software. Describe con precisión usando solo la evidencia recibida; no inventes contratos, campos ni comportamientos. "
-            "Devuelve exclusivamente JSON válido con la forma "
-            '{"items":{"id":{"description":"...","methods":{"nombre":"..."}}}}. '
-            "Las descripciones deben ser concretas, claras y breves. En métodos de clase/modelo, describe cada método listado.",
-            lang,
-        )
-        for start in range(0, len(records), 12):
-            batch = records[start:start + 12]
-            prompt = (
-                "Documenta todos los registros siguientes. En endpoints explica la función concreta "
-                "del recurso y el significado de su método HTTP: GET consulta/recupera, POST crea o "
-                "procesa, PUT reemplaza/actualiza, PATCH actualiza parcialmente y DELETE elimina. "
-                "En funciones explica propósito, entradas y resultado a partir del código/docstring. "
-                "En clases y modelos explica qué representan y devuelve también una descripción breve "
-                "para cada método listado. Escribe todas las descripciones en el idioma solicitado.\n"
-                "Responde solo con el objeto JSON indicado en las instrucciones del sistema.\n"
-                "Registros:\n"
-                + json.dumps(batch, ensure_ascii=False, default=str)
-            )
-            response = self._call_ai(
-                system_prompt,
-                self._localize_prompt(prompt, lang),
-                max_tokens=min(3200, max(800, len(batch) * 220)),
-            )
-            if not response:
-                print("[AI] No se recibieron descripciones para un lote de documentación.")
-                break
-            batch_results = self._parse_documentation_batch(response)
-            if batch_results is None:
-                print("[AI] La respuesta por lotes no contiene JSON válido; se usarán descripciones de respaldo.")
-                continue
-
-            for record in batch:
-                kind, entity = targets[record["id"]]
-                description_data = batch_results.get(record["id"])
-                if not isinstance(description_data, dict):
-                    continue
-                description = description_data.get("description")
-                if isinstance(description, str) and description.strip() and not entity.get("ai_description"):
-                    entity["ai_description"] = description.strip()
-                methods = description_data.get("methods")
-                if kind in ("class", "model") and isinstance(methods, dict):
-                    saved_methods = entity.get("method_descriptions")
-                    if not isinstance(saved_methods, dict):
-                        saved_methods = {}
-                        entity["method_descriptions"] = saved_methods
-                    saved_methods.update({
-                        str(name): value.strip()
-                        for name, value in methods.items()
-                        if isinstance(value, str) and value.strip()
-                    })
 
     def enhance_function_description(self, function: dict, context: str = "",
                                       output_language: str = "es") -> str:
@@ -693,7 +466,6 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         if (
             results.get('ai_documentation_enhanced')
             and results.get('ai_output_language') == lang
-            and results.get('ai_documentation_version') == self.DOCUMENTATION_VERSION
         ):
             return results
 
@@ -702,48 +474,57 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
                   "Agrega GROQ_API_KEY en tu archivo .env para habilitar la mejora con IA.")
             return results
 
-        if results.get('ai_documentation_enhanced') and (
-            results.get('ai_output_language') != lang
-            or results.get('ai_documentation_version') != self.DOCUMENTATION_VERSION
-        ):
-            for collection_name in ('functions', 'classes', 'models', 'endpoints'):
-                for entity in results.get(collection_name, []):
-                    if isinstance(entity, dict):
-                        entity.pop('ai_description', None)
-                        entity.pop('method_descriptions', None)
-            results.pop('ai_architecture_insights', None)
-
         results['ai_output_language'] = lang
         print(f"[AI] Mejorando documentación con Groq en {lang}...")
-        self._enhance_documentation_batch(results, lang)
+
+        # Contexto del proyecto
+        context = (
+            f"Project in {results.get('primary_language', 'unknown')} "
+            f"with {len(results.get('functions', []))} functions"
+            if lang == 'en' else
+            f"Proyecto en {results.get('primary_language', 'desconocido')} "
+            f"con {len(results.get('functions', []))} funciones"
+        )
+
+        # Mejorar funciones (limitar a 5 para reducir consumo de tokens)
+        for func in results.get('functions', [])[:5]:
+            func['ai_description'] = self.enhance_function_description(
+                func, context, output_language=lang
+            )
+
+        # Mejorar clases (limitar a 5)
+        for cls in results.get('classes', [])[:5]:
+            cls['ai_description'] = self.enhance_class_description(
+                cls, context, output_language=lang
+            )
+
+        # Mejorar modelos (limitar a 5)
+        for model in results.get('models', [])[:5]:
+            model['ai_description'] = self.enhance_model_description(
+                model, context, output_language=lang
+            )
+
+        # Mejorar endpoints (limitar a 5)
+        for ep in results.get('endpoints', [])[:5]:
+            ep['ai_description'] = self.enhance_endpoint_description(
+                ep, context, output_language=lang
+            )
 
         # Asegurar que todos los elementos restantes tengan ai_description coherente
-        for func in results.get('functions', []):
-            if not func.get('ai_description'):
-                func['ai_description'] = func.get('description') or func.get('docstring') or (
-                    f"Function {func.get('name', 'unknown')}" if lang == 'en'
-                    else f"Función {func.get('name', 'desconocida')}"
-                )
-
         for m in results.get('models', []):
             if not m.get('ai_description'):
                 m['ai_description'] = m.get('description') or m.get('docstring') or (
-                    f"Domain model representing {m.get('name', 'unknown')} entity." if lang == 'en'
-                    else f"Modelo de datos que define la entidad {m.get('name', 'desconocida')}."
+                    f"Domain model representing {m['name']} entity." if lang == 'en'
+                    else f"Modelo de datos que define la entidad {m['name']}."
                 )
 
         for ep in results.get('endpoints', []):
             if not ep.get('ai_description'):
-                ep['ai_description'] = ep.get('description') or ep.get('docstring') or (
-                    f"Endpoint {ep.get('method')} {ep.get('path')}"
-                )
+                ep['ai_description'] = ep.get('description') or f"Endpoint {ep.get('method')} {ep.get('path')}"
 
         for cls in results.get('classes', []):
             if not cls.get('ai_description'):
-                cls['ai_description'] = cls.get('description') or cls.get('docstring') or (
-                    f"Class {cls.get('name', 'unknown')}" if lang == 'en'
-                    else f"Clase {cls.get('name', 'desconocida')}"
-                )
+                cls['ai_description'] = cls.get('description') or cls.get('docstring') or f"Clase {cls.get('name')}"
 
         # Generar insights de arquitectura
         results['ai_architecture_insights'] = self.generate_architecture_insights(
@@ -751,15 +532,8 @@ Mantén los insights concisos y accionables (máximo 200 palabras)."""
         )
         results['ai_documentation_enhanced'] = True
         results['ai_output_language'] = lang
-        results['ai_documentation_version'] = self.DOCUMENTATION_VERSION
 
-        if self._groq_unavailable:
-            print(
-                "[AI] Groq no respondió; se completó el análisis con descripciones de respaldo.",
-                flush=True,
-            )
-        else:
-            print("[AI] Documentación mejorada exitosamente con Groq", flush=True)
+        print("[AI] Documentación mejorada exitosamente con Groq")
         return results
 
     def enhance_database_analysis(self, raw_sql: str, metadata: dict,

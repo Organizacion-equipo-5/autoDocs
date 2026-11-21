@@ -2,11 +2,10 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# System deps for weasyprint (PDF generation), git, graphviz (PlantUML), and Java (PlantUML)
+# System deps for weasyprint (PDF generation), git, and PlantUML (requires Java)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
     libcairo2 libgdk-pixbuf-2.0-0 libffi-dev \
-    graphviz \
     git \
     wget \
     nodejs \
@@ -29,4 +28,4 @@ RUN mkdir -p uploads exports
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--timeout", "300", "--graceful-timeout", "300", "app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:create_app()"]

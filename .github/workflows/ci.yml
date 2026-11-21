@@ -22,13 +22,10 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-test.txt
 
-      - name: Instalar librerias del sistema (WeasyPrint + PlantUML)
+      - name: Instalar librerias del sistema (WeasyPrint)
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
-            libcairo2 libgdk-pixbuf-2.0-0 \
-            graphviz
+          sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0
 
       - name: Instalar dependencias
         run: |

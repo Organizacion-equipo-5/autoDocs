@@ -56,22 +56,15 @@ def run_analysis_async(project_id, project_path, db, source=None, lang=None):
 
         project_path = str(p)
 
-        now_iso = datetime.utcnow().isoformat()
-        db.projects.update_one({"_id": project_id}, {"$set": {
-            "status": "analyzing",
-            "updated_at": now_iso,
-        }})
+        db.projects.update_one({"_id": project_id}, {"$set": {"status": "analyzing"}})
 
         analyzer = ProjectAnalyzer(project_path)
         results = analyzer.analyze()
 
-        # Heartbeat: actualizar updated_at para que el watcher de timeout no lo mate
-        db.projects.update_one({"_id": project_id}, {"$set": {"updated_at": datetime.utcnow().isoformat()}})
-
         try:
             results["code_health"] = analyze_code_health(project_path, results)
         except Exception as e:
-            print(f"[Análisis] Code health fallido: {e}")
+            print(f"[DEBUG] Code health failed: {e}")
 
         # Resolver idioma de documentación (param > proyecto > usuario/default)
         doc_lang = lang
@@ -97,31 +90,27 @@ def run_analysis_async(project_id, project_path, db, source=None, lang=None):
             mining_results = {}
             try:
                 ai_enhancer = AIEnhancer()
-
+                print(f"[DEBUG] AI Enhancer disponible: {ai_enhancer.is_available()}")
                 try:
                     mining_results = ai_enhancer.mine_code_patterns(
                         results, output_language=doc_lang
                     )
-
+                    print(f"[DEBUG] Mining results: {mining_results}")
                     results["mining_results"] = mining_results
                 except Exception as e:
-                    print(f"[Análisis] Minería de patrones fallida: {e}")
+                    print(f"[DEBUG] AI mining failed: {e}")
 
                 try:
+                    print("[DEBUG] Mejorando documentación con IA...")
                     try:
                         results = ai_enhancer.enhance_documentation(results, output_language=doc_lang)
                     except TypeError:
                         results = ai_enhancer.enhance_documentation(results)
+                    print("[DEBUG] Documentación mejorada")
                 except Exception as e:
-                    print(f"[Análisis] Mejora de documentación fallida: {e}")
+                    print(f"[DEBUG] AI enhance failed: {e}")
             except Exception as e:
-                print(f"[Análisis] AIEnhancer no disponible: {e}")
-
-            # Heartbeat tras IA (puede tardar minutos con proyectos grandes)
-            try:
-                db.projects.update_one({"_id": project_id}, {"$set": {"updated_at": datetime.utcnow().isoformat()}})
-            except Exception:
-                pass
+                print(f"[DEBUG] AI Enhancer initialization failed: {e}")
 
         documentation = ""
         try:
@@ -131,7 +120,7 @@ def run_analysis_async(project_id, project_path, db, source=None, lang=None):
                 doc_gen = DocGenerator(results)
             documentation = doc_gen.generate()
         except Exception as e:
-            print(f"[Análisis] DocGenerator fallido: {e}")
+            print(f"[DEBUG] DocGenerator failed: {e}")
 
         db.analysis_results.replace_one(
             {"project_id": project_id},
@@ -147,7 +136,7 @@ def run_analysis_async(project_id, project_path, db, source=None, lang=None):
         try:
             save_snapshot(db, project_id, results, source=source)
         except Exception as e:
-            print(f"[Análisis] Snapshot fallido: {e}")
+            print(f"[DEBUG] Snapshot failed: {e}")
 
         db.projects.update_one({"_id": project_id}, {
             "$set": {
@@ -237,15 +226,6 @@ def start_analysis(project_id):
         db.projects.update_one({"_id": project_id}, {"$set": {"doc_language": req_lang, "updated_at": datetime.utcnow().isoformat()}})
 
     project_path = project.get('file_path', '')
-
-    # Limpiar error anterior y marcar como pending para que el frontend
-    # muestre "analizando" en lugar del error viejo del stale checker
-    db.projects.update_one({"_id": project_id}, {"$set": {
-        "status": "pending",
-        "error_message": None,
-        "updated_at": datetime.utcnow().isoformat(),
-    }})
-
     thread = threading.Thread(target=run_analysis_async, args=(project_id, project_path, db), kwargs={'lang': req_lang})
     thread.daemon = True
     thread.start()
@@ -466,6 +446,10 @@ def get_predictions(project_id):
             print(f"[WARN] No se pudo construir dataset de proyectos reales: {e}")
 
         ml_results = run_ml_analysis(result["results"], all_projects_data=all_projects_data)
+        print(f"[DEBUG] ML results for project {project_id}:")
+        print(f"  - regresion_simple: {ml_results.get('regresion_simple', {}).keys() if ml_results.get('regresion_simple') else 'None'}")
+        print(f"  - regresion_multiple: {ml_results.get('regresion_multiple', {}).keys() if ml_results.get('regresion_multiple') else 'None'}")
+        print(f"  - regresion_logistica: {ml_results.get('regresion_logistica', {}).keys() if ml_results.get('regresion_logistica') else 'None'}")
         return jsonify({"status": "ok", "predictions": ml_results}), 200
     except Exception as e:
         import traceback
@@ -615,31 +599,22 @@ def download_database_pdf():
         return jsonify({"error": "No analysis data provided"}), 400
 
     try:
-        from services.exporter import _weasyprint_available, _configure_native_libraries
+        from services.exporter import _configure_native_libraries
+        _configure_native_libraries()
+        from services.doc_generator import DocGenerator
+        from io import BytesIO
+        from weasyprint import HTML, CSS
         from datetime import datetime
 
         analysis = data.get('analysis', {})
         html_content = generate_database_pdf_html(analysis)
+        pdf_bytes = HTML(string=html_content).write_pdf()
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         filename = f'database_analysis_{timestamp}.pdf'
 
-        if _weasyprint_available():
-            try:
-                _configure_native_libraries()
-                from weasyprint import HTML
-                pdf_bytes = HTML(string=html_content).write_pdf()
-                return pdf_bytes, 200, {
-                    'Content-Type': 'application/pdf',
-                    'Content-Disposition': f'attachment; filename="{filename}"'
-                }
-            except Exception as e:
-                print(f"[PDF] WeasyPrint falló para DB PDF: {e}")
-
-        # Fallback: devolver HTML descargable
-        html_filename = filename.replace('.pdf', '.html')
-        return html_content, 200, {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Content-Disposition': f'attachment; filename="{html_filename}"'
+        return pdf_bytes, 200, {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': f'attachment; filename="{filename}"'
         }
     except Exception as e:
         print(f"[PDF Error] {str(e)}")

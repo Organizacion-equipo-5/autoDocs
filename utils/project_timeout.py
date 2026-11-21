@@ -3,8 +3,7 @@ from datetime import datetime, timedelta
 
 # Tiempo máximo (en minutos) que un proyecto puede estar en
 # "pending" o "analyzing" antes de marcarse automáticamente como error.
-# 30 min da margen suficiente para proyectos grandes con llamadas a la IA de Groq.
-STALE_TIMEOUT_MINUTES = 30
+STALE_TIMEOUT_MINUTES = 5
 
 
 def mark_stale_projects_as_error(db, extra_filter=None):

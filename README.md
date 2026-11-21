@@ -307,7 +307,7 @@ python -m venv .venv
 # Linux / macOS
 source .venv/bin/activate
 
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 npm ci
 ```
 
@@ -334,7 +334,7 @@ La aplicación queda disponible en `http://localhost:5000`.
 Para ejecutar con Gunicorn:
 
 ```bash
-gunicorn --bind 0.0.0.0:5000 --workers 1 --timeout 300 --graceful-timeout 300 "app:create_app()"
+gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 "app:create_app()"
 ```
 
 ### Docker
@@ -556,7 +556,7 @@ El reporte de calidad más reciente está en [`QA_REPORT/`](QA_REPORT/). Allí s
 
 - **IA opcional.** Sin `GROQ_API_KEY` y sin Ollama, la generación de documentación sigue funcionando con plantillas, pero se omite el enriquecimiento con lenguaje natural.
 - **Diagramas.** PlantUML puede generar los diagramas con el servidor público o con Kroki. Para un entorno sin red se necesita el JAR local y Java instalado.
-- **PDF en Windows.** Para generar PDF con WeasyPrint instala MSYS2 y ejecuta `C:\msys64\usr\bin\pacman.exe -S --needed mingw-w64-ucrt-x86_64-pango mingw-w64-ucrt-x86_64-cairo mingw-w64-ucrt-x86_64-gdk-pixbuf`. Después instala las dependencias con el mismo intérprete que ejecuta la aplicación: `python -m pip install --upgrade -r requirements.txt` (el proyecto requiere WeasyPrint 70.0; versiones antiguas junto con pydyf reciente no pueden escribir el PDF). El exportador busca las DLL en `C:\msys64\ucrt64\bin`; si MSYS2 está en otra ruta, configura `WEASYPRINT_DLL_DIRECTORIES` con el directorio `bin` correspondiente. Sin estas DLL o con dependencias incompatibles, se usa ReportLab como respaldo.
+- **PDF en Windows.** Para generar PDF con WeasyPrint instala MSYS2 y ejecuta `C:\msys64\usr\bin\pacman.exe -S --needed mingw-w64-ucrt-x86_64-pango mingw-w64-ucrt-x86_64-cairo mingw-w64-ucrt-x86_64-gdk-pixbuf`. El exportador busca las DLL en `C:\msys64\ucrt64\bin`; si MSYS2 está en otra ruta, configura `WEASYPRINT_DLL_DIRECTORIES` con el directorio `bin` correspondiente. Sin estas DLL, se usa ReportLab como respaldo.
 - **Pagos.** El módulo de pagos está integrado con PayPal y con una actualización de plan validada en el backend; no procesa cobros reales en el entorno de desarrollo.
 - **Docker Compose.** El `docker-compose.yml` actual apunta el build a `./backend`, mientras que el `Dockerfile` está en la raíz. Ajusta el contexto a `build: .` o usa el comando `docker build` de este README.
 - **Credenciales.** `config.py` y `.env.example` contienen valores de ejemplo. Cámbialos y no publiques claves reales en el repositorio.

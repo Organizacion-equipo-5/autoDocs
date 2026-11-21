@@ -8,11 +8,8 @@ import mimetypes
 import subprocess
 import os
 import urllib.request
-import concurrent.futures
 
 EXPORT_BASE = Path('./exports')
-
-WEASYPRINT_MAX_HTML_BYTES = 1_500_000
 
 EXPORT_I18N = {
     'es': {
@@ -136,79 +133,14 @@ _TAG_RE   = re.compile(r'<[^>]+>')
 _SEP_RE   = re.compile(r'^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$')
 # Encabezado (+ párrafo opcional) que está justo antes de una tabla:
 # se mueve junto con la tabla a la página horizontal para no quedar huérfano.
-# Debe coincidir ÚNICAMENTE con el último encabezado inmediatamente adyacente a la tabla,
-# sin cruzar bloques de código (<pre>), divisores, ni encabezados de secciones previas.
 _LEAD_RE  = re.compile(
-    r'(<h[1-6]\b(?:(?!</?h[1-6]\b).)*?</h[1-6]>\s*(?:<p\b(?:(?!</?p\b).)*?</p>\s*)*)$',
+    r'<h[1-6][^>]*>(?:(?!</h[1-6]>).)*</h[1-6]>\s*'
+    r'(?:<p[^>]*>(?:(?!</p>).)*</p>\s*)?$',
     re.DOTALL | re.IGNORECASE,
 )
 _EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
 _NATIVE_DLL_HANDLES = []
 _NATIVE_DLL_DIRECTORIES = set()
-_WEASYPRINT_CHECKED = False   # se evalúa una sola vez por proceso
-_WEASYPRINT_OK = False        # resultado de la comprobación
-
-
-def _weasyprint_available() -> bool:
-    """
-    Comprueba de forma segura (sin crashear el proceso) si WeasyPrint
-    puede importarse y tiene las dependencias nativas necesarias.
-    El resultado se cachea para no repetir la comprobación.
-    En Windows, verifica la existencia de DLLs de Pango antes de intentar
-    el import, ya que un import fallido puede matar el proceso con un
-    error nativo de C en lugar de levantar una excepción Python normal.
-    """
-    global _WEASYPRINT_CHECKED, _WEASYPRINT_OK
-    if _WEASYPRINT_CHECKED:
-        return _WEASYPRINT_OK
-
-    _WEASYPRINT_CHECKED = True
-
-    # En Windows: comprobamos si las DLLs de Pango existen ANTES de importar.
-    # Rutas candidatas idénticas a las de _configure_native_libraries().
-    if os.name == 'nt':
-        project_root = Path(__file__).resolve().parents[1]
-        candidate_dirs = [
-            Path('C:/msys64/ucrt64/bin'),
-            Path('C:/msys64/mingw64/bin'),
-            Path('C:/msys64/clang64/bin'),
-            project_root / '.native' / 'msys64' / 'ucrt64' / 'bin',
-            project_root / '.native' / 'msys64' / 'mingw64' / 'bin',
-            project_root / '.native' / 'bin',
-            Path('C:/Program Files/GTK3-Runtime Win64/bin'),
-            Path('C:/Program Files (x86)/GTK3-Runtime Win64/bin'),
-        ]
-        custom = os.environ.get('WEASYPRINT_DLL_DIRECTORIES') or os.environ.get('GTK_BASEPATH')
-        if custom:
-            for d in custom.split(os.pathsep):
-                if d.strip():
-                    candidate_dirs.insert(0, Path(d.strip()))
-
-        pango_found = any(
-            d.exists() and d.is_dir() and any(d.glob('*pango*.dll'))
-            for d in candidate_dirs
-        )
-        if not pango_found:
-            print("[PDF] WeasyPrint no disponible en Windows: DLLs de Pango no encontradas. Usando ReportLab.")
-            _WEASYPRINT_OK = False
-            return False
-
-    # Verificamos el import en un subproceso aislado — si WeasyPrint crashea
-    # el proceso, solo muere el subproceso y Flask sigue funcionando.
-    import subprocess
-    import sys
-    try:
-        result = subprocess.run(
-            [sys.executable, '-c', 'import weasyprint; print("ok")'],
-            capture_output=True, text=True, timeout=15,
-        )
-        _WEASYPRINT_OK = (result.returncode == 0 and 'ok' in result.stdout)
-    except Exception:
-        _WEASYPRINT_OK = False
-
-    if not _WEASYPRINT_OK:
-        print("[PDF] WeasyPrint no disponible — usando ReportLab.")
-    return _WEASYPRINT_OK
 
 
 def _configure_native_libraries():
@@ -243,39 +175,37 @@ def _configure_native_libraries():
                 custom_dirs.extend([custom_path, custom_path / 'bin'])
         candidate_dirs = custom_dirs + candidate_dirs
 
-    pango_dll_dir = None
+    registered_paths = set()
+    pango_found = False
     for candidate in candidate_dirs:
-        if candidate.exists() and candidate.is_dir() and any(candidate.glob('*pango*.dll')):
-            pango_dll_dir = candidate.resolve()
-            break
+        if not candidate.exists() or not candidate.is_dir():
+            continue
+        if not any(candidate.glob('*pango*.dll')):
+            continue
 
-    if pango_dll_dir is None:
-        print(
-            "[WeasyPrint] Advertencia: no se encontraron DLL de Pango. "
-            "En Windows instala Pango con MSYS2 UCRT64 y configura "
-            "WEASYPRINT_DLL_DIRECTORIES=C:\\msys64\\ucrt64\\bin. "
-            "Se usará ReportLab como generador de PDF alternativo."
-        )
-        return
+        pango_found = True
+        candidate_str = str(candidate.resolve())
+        normalized_path = os.path.normcase(candidate_str)
+        if normalized_path in registered_paths:
+            continue
+        registered_paths.add(normalized_path)
 
-    candidate_str = str(pango_dll_dir)
-    normalized_path = os.path.normcase(candidate_str)
-    current_path = os.environ.get('PATH', '')
-    path_entries = {
-        os.path.normcase(os.path.abspath(entry.strip('"')))
-        for entry in current_path.split(os.pathsep)
-        if entry
-    }
-    if normalized_path not in path_entries:
-        os.environ['PATH'] = candidate_str + os.pathsep + current_path
-
-    if normalized_path not in _NATIVE_DLL_DIRECTORIES and hasattr(os, 'add_dll_directory'):
-        try:
-            handle = os.add_dll_directory(candidate_str)
+        if normalized_path not in _NATIVE_DLL_DIRECTORIES and hasattr(os, 'add_dll_directory'):
+            try:
+                handle = os.add_dll_directory(candidate_str)
+            except OSError as error:
+                raise RuntimeError(
+                    f"No se pudo registrar el directorio de DLL de WeasyPrint: {candidate_str}"
+                ) from error
             _NATIVE_DLL_HANDLES.append(handle)
             _NATIVE_DLL_DIRECTORIES.add(normalized_path)
-        except OSError as error:
-            print(f"[WeasyPrint] No se pudo registrar directorio de DLL: {candidate_str} — {error}")
+
+    if not pango_found:
+        raise RuntimeError(
+            "No se encontraron DLL de Pango para WeasyPrint. En Windows instala "
+            "Pango con MSYS2 UCRT64 y configura WEASYPRINT_DLL_DIRECTORIES "
+            "con la ruta C:\\msys64\\ucrt64\\bin."
+        )
 
     # Generar un fonts.conf limpio y aislado para evitar los avisos de sintaxis en conf.d de MSYS2 (xsi:nil, etc.)
     try:
@@ -412,11 +342,6 @@ class DocumentExporter:
             return False
 
         n_cols = max(len(r) for r in grid)
-        # Tablas de 1 a 3 columnas nunca son tablas grandes (son tablas clave-valor o listas)
-        # y deben mantenerse en vertical (portrait) donde el CSS aplica overflow-wrap: anywhere.
-        if n_cols <= 3:
-            return False
-
         if n_cols >= LANDSCAPE_MIN_COLS:
             return True
 
@@ -429,10 +354,8 @@ class DocumentExporter:
                 if c < len(r):
                     text = r[c]
                     longest_text = max(longest_text, len(text))
-                    # Partir por espacios y considerar caracteres de ruta/separador (\, /, .)
-                    # dado que en CSS overflow-wrap: anywhere permite cortar tokens extensos.
-                    for tok in re.split(r'[\s/\\\.]+', text):
-                        longest_token = max(longest_token, min(len(tok), NATURAL_CAP_CHARS))
+                    for tok in text.split():
+                        longest_token = max(longest_token, len(tok))
             min_total += longest_token * CHAR_PX + CELL_PAD_PX
             nat_total += min(longest_text, NATURAL_CAP_CHARS) * CHAR_PX + CELL_PAD_PX
 
@@ -464,31 +387,6 @@ class DocumentExporter:
             pos = end
         out.append(html_body[pos:])
         return ''.join(out)
-
-    def _wrap_table_titles(self, html_body: str) -> str:
-        """
-        Wraps each heading immediately followed by a narrow table in a
-        break-inside:avoid div so the title never ends up orphaned on its own
-        page without the table.
-        Wide (landscape) tables are already handled by _wrap_wide_tables.
-        """
-        # Match: heading tag + optional paragraph + non-landscape table
-        _HEADING_TABLE_RE = re.compile(
-            r'(<h[1-6]\b[^>]*>(?:(?!</h[1-6]>).)*</h[1-6]>)'
-            r'(\s*(?:<p\b[^>]*>(?:(?!</p>).)*</p>\s*)?)'
-            r'(<table\b(?![^>]*table-landscape)[^>]*>.*?</table>)',
-            re.DOTALL | re.IGNORECASE,
-        )
-
-        def wrap(m):
-            # Only wrap if the table is not already inside a landscape div
-            return (
-                '<div style="break-inside:avoid;page-break-inside:avoid;">'
-                f'{m.group(1)}{m.group(2)}{m.group(3)}'
-                '</div>'
-            )
-
-        return _HEADING_TABLE_RE.sub(wrap, html_body)
 
     def _wrap_diagram_sections(self, html_body: str) -> str:
         """Agrupa cada diagrama con su título y descripción para WeasyPrint."""
@@ -1038,46 +936,24 @@ class DocumentExporter:
             toc_html = f'<p class="toc-empty">{_html.escape(self.t("no_sections_analysis"))}</p>'
 
         html_body = self._wrap_wide_tables(html_body)
-        html_body = self._wrap_table_titles(html_body)
-
-        # Collect all remote image URLs first so we can fetch them in parallel
-        _remote_cache: dict[str, str] = {}
-
-        def _fetch_remote_src(src: str) -> tuple[str, str]:
-            """Fetch a remote image and return (original_src, data_uri)."""
-            try:
-                req = urllib.request.Request(
-                    src,
-                    headers={'User-Agent': 'Mozilla/5.0 AutoDocs/1.0'},
-                )
-                with urllib.request.urlopen(req, timeout=10) as response:
-                    image_bytes = response.read()
-                    content_type = response.headers.get_content_type()
-                mime_type = content_type if content_type.startswith('image/') else 'image/png'
-                return src, f'data:{mime_type};base64,{base64.b64encode(image_bytes).decode("ascii")}'
-            except Exception:
-                return src, src
-
-        remote_srcs = list({
-            m.group(1) for m in re.finditer(
-                r'<img\s+[^>]*?src=["\']([^"\']+)["\'][^>]*>',
-                html_body, flags=re.IGNORECASE,
-            )
-            if m.group(1).startswith(('http://', 'https://'))
-        })
-        if remote_srcs:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-                for orig, resolved in pool.map(_fetch_remote_src, remote_srcs):
-                    _remote_cache[orig] = resolved
 
         def image_replacer(match):
             before, src, after = match.group(1), match.group(2), match.group(3)
+            resolved_src = src
             if src.startswith(('http://', 'https://')):
-                resolved_src = _remote_cache.get(src, src)
-            elif src.startswith('data:'):
-                resolved_src = src
-            else:
-                resolved_src = src
+                try:
+                    request = urllib.request.Request(
+                        src,
+                        headers={'User-Agent': 'Mozilla/5.0 AutoDocs/1.0'},
+                    )
+                    with urllib.request.urlopen(request, timeout=15) as response:
+                        image_bytes = response.read()
+                        content_type = response.headers.get_content_type()
+                    mime_type = content_type if content_type.startswith('image/') else 'image/png'
+                    resolved_src = f'data:{mime_type};base64,{base64.b64encode(image_bytes).decode("ascii")}'
+                except Exception:
+                    pass
+            elif not src.startswith('data:'):
                 try:
                     image_path = Path(src)
                     if not image_path.is_absolute():
@@ -1129,7 +1005,6 @@ class DocumentExporter:
         total_endpoints = len(self.results.get('endpoints', []))
         page_word = self.t('page')
         of_word = self.t('of')
-        css_project_name = safe_project_name.replace('\\', '\\\\').replace('"', '\\"')
 
         return f"""<!DOCTYPE html>
 <html lang="{self.lang}">
@@ -1163,7 +1038,7 @@ class DocumentExporter:
       letter-spacing: .08em;
     }}
     @top-right {{
-      content: "{css_project_name}";
+      content: "{safe_project_name}";
       color: #52657a;
       font-family: "Arial", sans-serif;
       font-size: 7.5pt;
@@ -1357,27 +1232,8 @@ class DocumentExporter:
     padding: 2mm;
     break-inside: avoid;
   }}
-  .content > * {{ page: portrait; }}
-  .content > .table-landscape {{ page: landscape; }}
   .table-landscape {{ page: landscape; }}
   .table-landscape table {{ break-inside: auto; }}
-  .diagram-section {{ margin: 6mm 0; break-inside: avoid; page-break-inside: avoid; }}
-  .diagram-section h3 {{ break-after: avoid; page-break-after: avoid; }}
-  .diagram-section img {{ margin-top: 2mm; }}
-  .code-fragment {{
-    margin: 4mm 0 5mm;
-    padding: 3.5mm 4mm;
-    background: var(--panel);
-    border: .25mm solid var(--rule);
-    border-left: 1.1mm solid var(--blue);
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }}
-  .code-fragment-header {{ margin-bottom: 2mm; }}
-  .frag-title {{ font-family: "Arial", sans-serif; font-weight: 700; color: var(--navy); }}
-  .frag-file {{ font-family: "Consolas", "Courier New", monospace; font-size: 8pt; color: var(--muted); }}
-  .code-explanation {{ margin-top: 2.5mm; font-size: 9.5pt; color: #334155; line-height: 1.45; }}
-  .code-explanation strong {{ color: var(--navy); }}
   .document-control {{
     margin-top: 12mm;
     border-top: .6mm solid var(--navy);
@@ -1397,37 +1253,38 @@ class DocumentExporter:
 </head>
 <body>
   <section class="cover">
-    <div class="cover-kicker">{self.t('tech_doc_kicker')}</div>
+    <div class="cover-kicker">{_html.escape(self.t('tech_doc_kicker'))}</div>
     <h1>{safe_project_name}</h1>
-    <p class="cover-subtitle">{self.t('tech_doc_sub2')}</p>
+    <p class="cover-subtitle">{_html.escape(self.t('tech_doc_sub2'))}</p>
     <div class="cover-rule"></div>
-    <p class="cover-purpose">{self.t('cover_purpose')}</p>
+    <p class="cover-purpose">{_html.escape(self.t('cover_purpose'))}</p>
     <div class="cover-spacer"></div>
     <div class="cover-meta">
-      <div><strong>{self.t('project')}</strong>{safe_project_name}</div>
-      <div><strong>{self.t('issue_date')}</strong>{generated_at}</div>
-      <div><strong>{self.t('primary_language')}</strong>{primary_lang}</div>
-      <div><strong>{self.t('evaluation')}</strong><span class="cover-score">{self.t('score_of_quality')}: {score}/100 · {score_label}</span></div>
-      <div><strong>{self.t('scope')}</strong>{total_files} {self.t('files').lower()} · {total_functions} {self.t('functions').lower()}</div>
-      <div><strong>{self.t('elements')}</strong>{total_classes} {self.t('classes').lower()} · {total_endpoints} {self.t('endpoints').lower()}</div>
+      <div><strong>{_html.escape(self.t('project'))}</strong>{safe_project_name}</div>
+      <div><strong>{_html.escape(self.t('issue_date'))}</strong>{generated_at}</div>
+      <div><strong>{_html.escape(self.t('primary_language'))}</strong>{primary_lang}</div>
+      <div><strong>{_html.escape(self.t('evaluation'))}</strong><span class="cover-score">{_html.escape(self.t('score_of_quality'))}: {score}/100 · {_html.escape(score_label)}</span></div>
+      <div><strong>{_html.escape(self.t('scope'))}</strong>{total_files} {_html.escape(self.t('files').lower())} · {total_functions} {_html.escape(self.t('functions').lower())}</div>
+      <div><strong>{_html.escape(self.t('elements'))}</strong>{total_classes} {_html.escape(self.t('classes').lower())} · {total_endpoints} {_html.escape(self.t('endpoints').lower())}</div>
     </div>
-    <div class="cover-footer">{self.t('technical_edition')}</div>
+    <div class="cover-footer">{_html.escape(self.t('technical_edition'))}</div>
   </section>
 
   <section class="toc">
-    <h1 class="toc-title">{self.t('toc_general')}</h1>
-    <p class="toc-intro">{self.t('toc_intro')}</p>
+    <h1 class="toc-title">{_html.escape(self.t('toc_general'))}</h1>
+    <p class="toc-intro">{_html.escape(self.t('toc_intro'))}</p>
     {toc_html}
   </section>
 
   <main class="content">
     {html_body}
     <div class="document-control">
-      <strong>{self.t('doc_control')}</strong> {self.t('project')}: {safe_project_name}. {self.t('issue_date')}: {generated_at}. {self.t('scope')}: {total_files} {self.t('files').lower()}, {total_functions} {self.t('functions').lower()}, {total_classes} {self.t('classes').lower()} y {total_endpoints} {self.t('endpoints').lower()}. {self.t('score_of_quality')}: {score}/100.
+      <strong>{_html.escape(self.t('doc_control'))}</strong> {_html.escape(self.t('project'))}: {safe_project_name}. {_html.escape(self.t('issue_date'))}: {generated_at}. {_html.escape(self.t('scope'))}: {total_files} {_html.escape(self.t('files').lower())}, {total_functions} {_html.escape(self.t('functions').lower())}, {total_classes} {_html.escape(self.t('classes').lower())} {_html.escape('and' if self.lang == 'en' else 'y')} {total_endpoints} {_html.escape(self.t('endpoints').lower())}. {_html.escape(self.t('quality_score'))}: {score}/100.
     </div>
   </main>
 </body>
 </html>"""
+
     def _is_valid_pdf(self, path: Path) -> bool:
         try:
             with path.open('rb') as f:
@@ -1449,24 +1306,20 @@ class DocumentExporter:
 
         html_path.write_text(html_content, encoding='utf-8')
 
-        html_size = len(html_content.encode('utf-8'))
-        use_weasyprint = html_size <= WEASYPRINT_MAX_HTML_BYTES
-
-        # WeasyPrint uses considerably more memory while laying out large documents.
-        # For large HTML payloads, ReportLab is faster and more predictable.
-        if use_weasyprint and _weasyprint_available():
-            try:
-                from weasyprint import HTML
-                HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
-                if output_path.exists() and output_path.stat().st_size > 1000 and self._is_valid_pdf(output_path):
-                    print(f"[PDF] WeasyPrint generado exitosamente: {output_path.stat().st_size} bytes")
-                    return str(output_path)
-                else:
-                    print(f"[PDF] WeasyPrint generó archivo inválido o muy pequeño")
-                    output_path.unlink(missing_ok=True)
-            except Exception as e:
-                print(f"[PDF] Error en WeasyPrint: {str(e)}")
+        # 1st attempt: WeasyPrint
+        try:
+            _configure_native_libraries()
+            from weasyprint import HTML
+            HTML(string=html_content, base_url=str(EXPORT_BASE.resolve())).write_pdf(str(output_path))
+            if output_path.exists() and output_path.stat().st_size > 1000 and self._is_valid_pdf(output_path):
+                print(f"[PDF] WeasyPrint generado exitosamente: {output_path.stat().st_size} bytes")
+                return str(output_path)
+            else:
+                print(f"[PDF] WeasyPrint generó archivo inválido o muy pequeño")
                 output_path.unlink(missing_ok=True)
+        except Exception as e:
+            print(f"[PDF] Error en WeasyPrint: {str(e)}")
+            output_path.unlink(missing_ok=True)
 
         # 2nd attempt: ReportLab
         try:
