@@ -1072,16 +1072,26 @@
         async function loadGithubStatus() {
             var message = document.getElementById('githubStatusMessage');
             message.textContent = i18n('settings.githubLoading');
+
+            // Si GitHub/el callback devolvió un error (?github_error=...), mostrarlo
+            var params = new URLSearchParams(window.location.search);
+            var callbackError = params.get('github_error');
+            if (params.has('github') || params.has('github_error')) {
+                history.replaceState({}, '', window.location.pathname);
+            }
+
             try {
                 var res = await fetch('/api/github/status', { headers: authHeaders() });
                 if (!res.ok) throw new Error('github status failed');
                 cachedGithub = await res.json();
                 renderGithubStatus();
-                message.textContent = '';
+                message.textContent = callbackError ? 'GitHub: ' + callbackError : '';
             } catch (error) {
                 cachedGithub = { connected: false };
                 renderGithubStatus();
-                message.textContent = i18n('settings.githubError');
+                message.textContent = callbackError
+                    ? 'GitHub: ' + callbackError
+                    : i18n('settings.githubError');
             }
         }
 
