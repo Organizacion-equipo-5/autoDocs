@@ -6,13 +6,9 @@ from datetime import timedelta
 # Never commit real credentials to source control.
 _DEV_SECRET      = 'autodocs-dev-secret-change-in-production'
 _DEV_JWT_SECRET  = 'jwt-dev-secret-change-in-production'
-# The Atlas URI below is the shared development database.
-# Set MONGO_URI in your .env / deployment secrets to point to your own cluster.
-_DEV_MONGO_URI   = (
-    'mongodb+srv://bri_db_user:hc087879'
-    '@cluster.uvx8yek.mongodb.net/autodocs_ai'
-    '?retryWrites=true&w=majority&appName=Cluster'
-)
+# Use MONGO_URI in .env/deployment. In local development this falls back
+# to a local MongoDB instance instead of embedding a shared credential.
+_DEV_MONGO_URI = 'mongodb://localhost:27017/autodocs_ai'
 
 
 class Config:

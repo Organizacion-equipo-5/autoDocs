@@ -1071,17 +1071,23 @@
 
         async function loadGithubStatus() {
             var message = document.getElementById('githubStatusMessage');
-            message.textContent = i18n('settings.githubLoading');
+            if (!message.textContent) {
+                message.textContent = i18n('settings.githubLoading');
+            }
             try {
                 var res = await fetch('/api/github/status', { headers: authHeaders() });
                 if (!res.ok) throw new Error('github status failed');
                 cachedGithub = await res.json();
                 renderGithubStatus();
-                message.textContent = '';
+                if (!message.textContent.startsWith('GitHub:')) {
+                    message.textContent = '';
+                }
             } catch (error) {
                 cachedGithub = { connected: false };
                 renderGithubStatus();
-                message.textContent = i18n('settings.githubError');
+                if (!message.textContent.startsWith('GitHub:')) {
+                    message.textContent = i18n('settings.githubError');
+                }
             }
         }
 
@@ -1420,6 +1426,19 @@
 
         // Cargar el perfil y el estado de GitHub al cargar la página
         renderDynamicTranslations();
+
+        const githubParams = new URLSearchParams(window.location.search);
+        if (githubParams.has('github_error')) {
+            document.getElementById('githubStatusMessage').textContent =
+                'GitHub: ' + githubParams.get('github_error');
+        } else if (githubParams.get('github') === 'connected') {
+            document.getElementById('githubStatusMessage').textContent =
+                i18n('settings.githubConnected');
+        }
+        if (githubParams.has('github') || githubParams.has('github_error')) {
+            history.replaceState({}, '', window.location.pathname);
+        }
+
         loadGithubStatus();
         loadProfile();
     </script>

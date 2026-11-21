@@ -28,3 +28,14 @@ def test_settings_route_redirects_to_profile_page():
     assert response.status_code == 302
     assert response.location.endswith("/perfil")
     assert client.get(response.location).status_code == 200
+
+
+def test_profile_handles_github_oauth_return_parameters():
+    app = Flask(__name__, template_folder="../templates")
+    app.register_blueprint(web_bp)
+
+    response = app.test_client().get("/perfil")
+
+    assert response.status_code == 200
+    assert b"githubParams" in response.data
+    assert b"github_error" in response.data
