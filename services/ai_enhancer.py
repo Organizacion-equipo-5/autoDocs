@@ -16,6 +16,16 @@ if _root_env.exists():
     load_dotenv(_root_env, override=False)
 
 
+# Estilo común de las descripciones: largas, completas y con palabras claras.
+LONG_DESCRIPTION_STYLE = (
+    "Escribe la descripción en 2 o 3 párrafos cortos, de entre 120 y 220 palabras en total. "
+    "Usa palabras claras y frases cortas, como si se lo explicaras a alguien sin experiencia en programación. "
+    "Explica el para qué, el cómo y un ejemplo cotidiano. No uses viñetas, encabezados ni bloques de código, "
+    "y no repitas el nombre del elemento al inicio de cada frase."
+)
+LONG_DESCRIPTION_TOKENS = 700
+
+
 class AIEnhancer:
     """
     Mejora la documentación técnica usando IA (Groq con modelos compatibles y fallback local Ollama).
@@ -213,7 +223,9 @@ Genera una descripción que incluya:
 4. Para qué se usa en la vida real (ejemplos prácticos)
 5. Importancia de esta función en el sistema
 
-Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla. Mantén la descripción concisa pero técnica (máximo 150 palabras)."""
+Evita términos técnicos complejos y explica cada concepto de forma sencilla.
+
+{LONG_DESCRIPTION_STYLE}"""
 
         result = self._call_ai(
             self._localize_system(
@@ -221,7 +233,7 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
                 lang,
             ),
             self._localize_prompt(prompt, lang),
-            max_tokens=300
+            max_tokens=LONG_DESCRIPTION_TOKENS
         )
         if result:
             return result
@@ -268,7 +280,9 @@ Genera una descripción que incluya:
 4. Para qué se usa en la vida real (ejemplos prácticos)
 5. Importancia de esta clase en el sistema
 
-Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla."""
+Evita términos técnicos complejos y explica cada concepto de forma sencilla.
+
+{LONG_DESCRIPTION_STYLE}"""
 
         result = self._call_ai(
             self._localize_system(
@@ -276,7 +290,7 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
                 lang,
             ),
             self._localize_prompt(prompt, lang),
-            max_tokens=300
+            max_tokens=LONG_DESCRIPTION_TOKENS
         )
         if result:
             return result
@@ -316,7 +330,9 @@ Genera una descripción que incluya:
 4. Qué resultado devuelve (explicado de forma sencilla)
 5. Para qué se usa en la vida real (ejemplos prácticos)
 
-Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos de forma sencilla."""
+Evita términos técnicos complejos y explica cada concepto de forma sencilla.
+
+{LONG_DESCRIPTION_STYLE}"""
 
         result = self._call_ai(
             self._localize_system(
@@ -324,7 +340,7 @@ Usa lenguaje claro, evita términos técnicos complejos, y explica los conceptos
                 lang,
             ),
             self._localize_prompt(prompt, lang),
-            max_tokens=300
+            max_tokens=LONG_DESCRIPTION_TOKENS
         )
         if result:
             return result
@@ -372,7 +388,9 @@ Genera una descripción que incluya:
 3. Cómo se utiliza dentro del flujo de la aplicación
 4. Su importancia en el modelo relacional o de dominio
 
-Mantén la descripción concisa, profesional y explicativa (máximo 120 palabras)."""
+Mantén un tono profesional, pero con palabras claras que cualquier persona pueda entender.
+
+{LONG_DESCRIPTION_STYLE}"""
 
         result = self._call_ai(
             self._localize_system(
@@ -380,7 +398,7 @@ Mantén la descripción concisa, profesional y explicativa (máximo 120 palabras
                 lang,
             ),
             self._localize_prompt(prompt, lang),
-            max_tokens=300
+            max_tokens=LONG_DESCRIPTION_TOKENS
         )
         if result:
             return result
