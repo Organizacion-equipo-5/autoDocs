@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nodejs \
     npm \
     openjdk-17-jre-headless \
+    graphviz \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PlantUML
