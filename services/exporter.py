@@ -134,9 +134,10 @@ _TAG_RE   = re.compile(r'<[^>]+>')
 _SEP_RE   = re.compile(r'^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$')
 # Encabezado (+ párrafo opcional) que está justo antes de una tabla:
 # se mueve junto con la tabla a la página horizontal para no quedar huérfano.
+# Debe coincidir ÚNICAMENTE con el último encabezado inmediatamente adyacente a la tabla,
+# sin cruzar bloques de código (<pre>), divisores, ni encabezados de secciones previas.
 _LEAD_RE  = re.compile(
-    r'<h[1-6][^>]*>(?:(?!</h[1-6]>).)*</h[1-6]>\s*'
-    r'(?:<p[^>]*>(?:(?!</p>).)*</p>\s*)?$',
+    r'(<h[1-6]\b(?:(?!</?h[1-6]\b).)*?</h[1-6]>\s*(?:<p\b(?:(?!</?p\b).)*?</p>\s*)*)$',
     re.DOTALL | re.IGNORECASE,
 )
 _EMOJI_RE = re.compile('[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]')
@@ -409,6 +410,11 @@ class DocumentExporter:
             return False
 
         n_cols = max(len(r) for r in grid)
+        # Tablas de 1 a 3 columnas nunca son tablas grandes (son tablas clave-valor o listas)
+        # y deben mantenerse en vertical (portrait) donde el CSS aplica overflow-wrap: anywhere.
+        if n_cols <= 3:
+            return False
+
         if n_cols >= LANDSCAPE_MIN_COLS:
             return True
 
@@ -421,8 +427,10 @@ class DocumentExporter:
                 if c < len(r):
                     text = r[c]
                     longest_text = max(longest_text, len(text))
-                    for tok in text.split():
-                        longest_token = max(longest_token, len(tok))
+                    # Partir por espacios y considerar caracteres de ruta/separador (\, /, .)
+                    # dado que en CSS overflow-wrap: anywhere permite cortar tokens extensos.
+                    for tok in re.split(r'[\s/\\\.]+', text):
+                        longest_token = max(longest_token, min(len(tok), NATURAL_CAP_CHARS))
             min_total += longest_token * CHAR_PX + CELL_PAD_PX
             nat_total += min(longest_text, NATURAL_CAP_CHARS) * CHAR_PX + CELL_PAD_PX
 
@@ -1347,6 +1355,8 @@ class DocumentExporter:
     padding: 2mm;
     break-inside: avoid;
   }}
+  .content > * {{ page: portrait; }}
+  .content > .table-landscape {{ page: landscape; }}
   .table-landscape {{ page: landscape; }}
   .table-landscape table {{ break-inside: auto; }}
   .diagram-section {{ margin: 6mm 0; break-inside: avoid; page-break-inside: avoid; }}

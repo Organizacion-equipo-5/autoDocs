@@ -227,47 +227,209 @@ class DocGenerator:
         name = ' '.join(words) or method_name
         if self.lang == 'en':
             if words and words[0] in ('get', 'find', 'fetch', 'list', 'read', 'load'):
-                return f"Retrieves or lists {name[len(words[0]):].strip() or 'the related data'}."
+                target = name[len(words[0]):].strip() or 'the requested data'
+                return f"Reads or retrieves {target}: queries and returns the corresponding data structure from storage or internal state without modifying system state."
             if words and words[0] in ('create', 'add', 'insert', 'register'):
-                return f"Creates or registers {name[len(words[0]):].strip() or 'the related item'}."
+                target = name[len(words[0]):].strip() or 'the new item'
+                return f"Creates or registers {target}: validates input parameters, instantiates the entity, and persists it into the application structure."
             if words and words[0] in ('update', 'edit', 'set', 'patch'):
-                return f"Updates {name[len(words[0]):].strip() or 'the related item'}."
+                target = name[len(words[0]):].strip() or 'the target item'
+                return f"Updates {target}: applies requested changes to designated properties, maintaining domain integrity and consistency."
             if words and words[0] in ('delete', 'remove', 'destroy'):
-                return f"Removes {name[len(words[0]):].strip() or 'the related item'}."
-            return f"Performs the {name} operation for this {owner.get('name', 'component')}."
+                target = name[len(words[0]):].strip() or 'the target item'
+                return f"Removes {target}: safely cleans up the record from storage, unlinking dependencies and freeing resources."
+            return f"Performs the {name} operation for this {owner.get('name', 'component')}, processing business logic and domain workflows."
 
         if words and words[0] in ('get', 'find', 'fetch', 'list', 'read', 'load'):
-            return f"Consulta o recupera {name[len(words[0]):].strip() or 'los datos relacionados'}."
+            target = name[len(words[0]):].strip() or 'los datos correspondientes'
+            return f"Consulta o recupera {target}: obtiene y retorna la estructura de información requerida desde el origen de datos o estado interno, sin alterar el sistema."
         if words and words[0] in ('create', 'add', 'insert', 'register'):
-            return f"Crea o registra {name[len(words[0]):].strip() or 'el elemento relacionado'}."
+            target = name[len(words[0]):].strip() or 'el nuevo registro'
+            return f"Crea o registra {target}: valida los parámetros recibidos, inicializa la entidad y la da de alta en la capa de persistencia de la aplicación."
         if words and words[0] in ('update', 'edit', 'set', 'patch'):
-            return f"Actualiza {name[len(words[0]):].strip() or 'el elemento relacionado'}."
+            target = name[len(words[0]):].strip() or 'el elemento relacionado'
+            return f"Actualiza {target}: aplica las modificaciones solicitadas sobre las propiedades y atributos correspondientes, garantizando la consistencia de los datos."
         if words and words[0] in ('delete', 'remove', 'destroy'):
-            return f"Elimina {name[len(words[0]):].strip() or 'el elemento relacionado'}."
-        return f"Realiza la operación «{name}» de {owner.get('name', 'este componente')}."
+            target = name[len(words[0]):].strip() or 'el elemento relacionado'
+            return f"Elimina {target}: gestiona la baja del registro en el sistema, desvinculando dependencias y liberando recursos asociados."
+        return f"Realiza la operación «{name}» de {owner.get('name', 'este componente')}, procesando las instrucciones y reglas de negocio configuradas."
 
     def _http_method_description(self, method: str, path: str) -> str:
         method = str(method).upper()
         path_lower = str(path).lower()
         if self.lang == 'en':
             if method == 'GET' and any(term in path_lower for term in ('export', 'download', '/pdf')):
-                return "Generates or downloads the requested document or resource."
+                return "Generates or downloads the requested document or resource (safe and idempotent read-only operation). Processes request parameters to compile and stream the generated document or file directly to the client without modifying persistent server state."
             return {
-                'GET': "Reads or retrieves the requested resource without changing it.",
-                'POST': "Creates a resource or processes the submitted data.",
-                'PUT': "Replaces or fully updates the target resource.",
-                'PATCH': "Partially updates the target resource.",
-                'DELETE': "Removes the target resource.",
-            }.get(method, "Executes the operation defined by this endpoint.")
+                'GET': "Reads or retrieves the requested resource without changing it (safe and idempotent read-only method). Queries and returns data structures, collections, or specific entities identified in the route. Supports query parameters for filtering, pagination, and sorting without introducing side effects on the server, allowing response caching.",
+                'POST': "Creates a resource or processes the submitted data payload (non-idempotent operation). Submits request body contents (JSON or form data) to execute transactions, validate domain rules, and register new entries into the persistence layer.",
+                'PUT': "Replaces or fully updates the target resource identified in the route (idempotent operation). Completely overwrites the existing record's state with the provided representation, expecting all necessary entity fields in the payload.",
+                'PATCH': "Partially updates the target resource (granular delta update). Modifies only the designated properties sent in the request body while leaving all remaining existing attributes and relationships intact.",
+                'DELETE': "Removes the target resource specified by its unique identifier (idempotent operation). Decommissions or deletes the record from the active dataset (physically or via soft-delete), releasing associated references.",
+                'OPTIONS': "Discovers communication options and supported HTTP methods for this URI (safe diagnostic operation). Used in CORS preflight handshakes to negotiate permitted headers, origins, and credentials.",
+                'HEAD': "Retrieves HTTP response headers identically to a GET request but omits the body payload. Enables rapid verification of resource availability, caching headers, content types, and payload size with minimal network overhead.",
+            }.get(method, f"Executes the operation defined by this endpoint ({method}) according to the business logic implemented in the routing controller.")
+
         if method == 'GET' and any(term in path_lower for term in ('export', 'download', '/pdf')):
-            return "Genera o descarga el documento o recurso solicitado."
+            return "Genera o descarga el documento o recurso solicitado (método seguro y de solo lectura). Procesa los parámetros de la solicitud para compilar y transmitir el archivo generado (PDF, reporte o datos exportables) directamente al cliente para su almacenamiento o visualización, sin generar efectos secundarios ni modificaciones persistentes en el servidor."
         return {
-            'GET': "Consulta o recupera el recurso solicitado sin modificarlo.",
-            'POST': "Crea un recurso o procesa los datos enviados.",
-            'PUT': "Reemplaza o actualiza completamente el recurso.",
-            'PATCH': "Actualiza parcialmente el recurso.",
-            'DELETE': "Elimina el recurso indicado.",
-        }.get(method, "Ejecuta la operación definida por este endpoint.")
+            'GET': "Consulta o recupera el recurso solicitado sin modificarlo (operación segura e idempotente de solo lectura). Diseñado para obtener información estructurada, colecciones o detalles de registros específicos mediante parámetros de ruta o consulta (query params). Las respuestas no alteran el estado del servidor y son aptas para almacenamiento en memoria caché para optimizar el rendimiento.",
+            'POST': "Crea un recurso o procesa los datos enviados en el cuerpo de la solicitud (operación no idempotente). Recibe una carga útil (payload JSON o formulario) con la información a procesar, aplica validaciones de negocio e inserta nuevos registros en la base de datos o ejecuta flujos transaccionales en el sistema.",
+            'PUT': "Reemplaza o actualiza completamente el recurso destino identificado en la ruta (operación idempotente). Sustituye íntegramente todos los atributos del registro existente con los datos provistos en la solicitud; requiere enviar el modelo completo para evitar la omisión involuntaria de campos preexistentes.",
+            'PATCH': "Actualiza parcialmente el recurso indicado (modificación delta o granular). Aplica cambios exclusivamente sobre los campos y atributos específicos incluidos en el cuerpo de la petición, preservando intactos todos los demás valores existentes del recurso en la base de datos.",
+            'DELETE': "Elimina el recurso indicado por su identificador en la ruta (operación idempotente). Da de baja o suprime de manera controlada el registro correspondiente (mediante borrado físico o inactivación lógica soft-delete), liberando las referencias y recursos asociados en el sistema.",
+            'OPTIONS': "Consulta las opciones de comunicación y métodos HTTP permitidos por el servidor para este endpoint (operación segura de diagnóstico). Se emplea principalmente en la negociación de políticas CORS (Cross-Origin Resource Sharing) y solicitudes preliminares (preflight) entre navegadores y el servidor.",
+            'HEAD': "Obtiene únicamente las cabeceras HTTP de respuesta sin transferir el cuerpo del mensaje (idéntico a GET en metadatos pero sin payload). Permite comprobar de forma rápida la disponibilidad del recurso, tipos MIME, fechas de modificación y encabezados de caché con mínimo consumo de red.",
+        }.get(method, f"Ejecuta la operación definida por este endpoint ({method}), procesando las solicitudes dirigidas a la ruta indicada conforme a la lógica de negocio configurada en el controlador.")
+
+    def _infer_standalone_function_description(self, fn: dict) -> str:
+        """Genera una descripción explicativa para funciones que no tienen docstring ni IA."""
+        name = fn.get('name', '')
+        clean_name = name.lstrip('_')
+        normalized = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', clean_name)
+        normalized = normalized.replace('_', ' ').strip().lower()
+        words = normalized.split()
+        verb = words[0] if words else ''
+        subject = ' '.join(words[1:]) if len(words) > 1 else 'los datos correspondientes'
+        subject_en = ' '.join(words[1:]) if len(words) > 1 else 'the corresponding data'
+
+        is_en = (self.lang == 'en')
+        if verb in ('get', 'find', 'fetch', 'list', 'read', 'load', 'retrieve', 'select', 'obtain'):
+            if is_en:
+                return f"Query and read function: retrieves and returns {subject_en} from the relevant data source or runtime context without altering system state."
+            return f"Función de consulta y lectura: obtiene y recupera {subject} desde la fuente de datos o contexto correspondiente, retornando la información para su procesamiento sin modificar el estado del sistema."
+
+        if verb in ('create', 'add', 'insert', 'register', 'build', 'make', 'generate', 'produce'):
+            if is_en:
+                return f"Creation and registration function: processes input parameters to instantiate, construct, or register {subject_en} into the application structure."
+            return f"Función de creación y registro: procesa los argumentos recibidos para inicializar, construir o dar de alta {subject} en el sistema."
+
+        if verb in ('update', 'edit', 'set', 'patch', 'modify', 'change', 'save', 'store'):
+            if is_en:
+                return f"Update and mutation function: applies requested modifications to {subject_en}, keeping attributes consistent and accurate."
+            return f"Función de actualización y modificación: aplica los cambios solicitados sobre las propiedades de {subject}, garantizando la consistencia e integridad de los datos."
+
+        if verb in ('delete', 'remove', 'destroy', 'clean', 'clear', 'drop', 'purge', 'reset'):
+            if is_en:
+                return f"Deletion and cleanup function: safely decommissions or removes {subject_en}, releasing associated dependencies and resources."
+            return f"Función de eliminación y limpieza: gestiona la baja o remoción controlada de {subject}, liberando recursos y desvinculando referencias asociadas."
+
+        if verb in ('validate', 'check', 'verify', 'is', 'has', 'can', 'test', 'ensure'):
+            if is_en:
+                return f"Validation and inspection function: evaluates criteria, requirements, or permissions for {subject_en} and returns the verification result."
+            return f"Función de validación y comprobación: evalúa los criterios de integridad, requisitos o permisos para {subject}, retornando el resultado de la verificación."
+
+        if verb in ('handle', 'process', 'run', 'execute', 'dispatch', 'trigger', 'apply'):
+            if is_en:
+                return f"Execution and processing function: orchestrates the computational workflow and business operations for {subject_en}."
+            return f"Función de procesamiento y ejecución: orquesta el flujo de trabajo y las operaciones correspondientes para {subject}."
+
+        if verb in ('render', 'show', 'display', 'format', 'print', 'draw', 'view'):
+            if is_en:
+                return f"Presentation and rendering function: prepares and outputs the visual representation or structured format for {subject_en}."
+            return f"Función de presentación y renderizado: prepara y genera la representación visual o formato estructurado para {subject}."
+
+        if verb in ('send', 'receive', 'notify', 'emit', 'post', 'broadcast', 'mail'):
+            if is_en:
+                return f"Communication function: handles dispatching or receiving events and messages related to {subject_en}."
+            return f"Función de comunicación y notificación: gestiona el envío, recepción o difusión de eventos y mensajes relacionados con {subject}."
+
+        if is_en:
+            return f"Executes the «{name}» function, managing operational logic for {subject_en}."
+        return f"Ejecuta la función «{name}», gestionando la lógica operativa asociada a {subject}."
+
+    def _generate_endpoint_description(self, ep: dict) -> str:
+        """Genera una descripción contextual clara y comprensible para un endpoint."""
+        m = str(ep.get('method', 'GET')).upper()
+        p = ep.get('path', '/')
+        p_lower = p.lower()
+        is_en = (self.lang == 'en')
+
+        # Casos especiales por palabras clave
+        if any(k in p_lower for k in ['login', 'signin', 'auth']):
+            return (
+                "User authentication endpoint: validates submitted credentials, verifies security policies, and issues a secure authorization session token."
+                if is_en else
+                "Endpoint de autenticación de usuarios: valida las credenciales provistas, comprueba permisos de acceso y emite un token seguro de sesión para peticiones subsecuentes."
+            )
+        if any(k in p_lower for k in ['logout', 'signout']):
+            return (
+                "Session termination endpoint: invalidates current user authentication, revoking active session tokens on the server."
+                if is_en else
+                "Endpoint de cierre de sesión: invalida la autenticación actual del usuario, revocando los tokens activos de sesión en el servidor."
+            )
+        if any(k in p_lower for k in ['register', 'signup']):
+            return (
+                "User registration endpoint: processes new user account creation, validating data integrity and provisioning initial user settings."
+                if is_en else
+                "Endpoint de registro de usuarios: procesa la creación de nuevas cuentas de usuario, validando políticas de seguridad y dando de alta el perfil."
+            )
+        if any(k in p_lower for k in ['profile', 'me']):
+            if m == 'GET':
+                return (
+                    "Profile retrieval endpoint: returns comprehensive user profile details, roles, and settings for the authenticated caller."
+                    if is_en else
+                    "Endpoint de consulta de perfil: devuelve la información detallada, roles y configuraciones del usuario autenticado."
+                )
+            return (
+                "Profile update endpoint: modifies account settings, preferences, and personal details for the authenticated user."
+                if is_en else
+                "Endpoint de actualización de perfil: permite modificar datos de cuenta, preferencias y configuraciones del usuario autenticado."
+            )
+        if any(k in p_lower for k in ['export', 'download', 'pdf', 'csv', 'report']):
+            return (
+                f"Export and reporting endpoint: compiles and serves downloadable documents or analytical reports for {p}."
+                if is_en else
+                f"Endpoint de exportación y reportes: compila, serializa y sirve documentos descargables o reportes analíticos para {p}."
+            )
+
+        segments = [s for s in p.strip('/').split('/') if s and not s.startswith(('<', '{', ':', '['))]
+        resource = segments[-1].replace('_', ' ').replace('-', ' ') if segments else 'recurso'
+        resource_en = segments[-1].replace('_', ' ').replace('-', ' ') if segments else 'resource'
+        has_id = any(s.startswith(('<', '{', ':', '[')) for s in p.strip('/').split('/'))
+
+        if m == 'GET':
+            if has_id:
+                return (
+                    f"Detailed retrieval of {resource_en}: fetches complete data and specific attributes for an individual record identified by its path parameter, ensuring safe read-only access without altering database state."
+                    if is_en else
+                    f"Consulta detallada de {resource}: recupera la información completa y los atributos específicos del registro individual identificado por su parámetro en la ruta, garantizando acceso de solo lectura sin alteraciones en la base de datos."
+                )
+            return (
+                f"Collection query and listing for {resource_en}: retrieves the list of available records for this entity, potentially supporting pagination parameters, search filters, and sorting criteria for client consumption."
+                if is_en else
+                f"Consulta y catálogo de {resource}: devuelve el listado de elementos disponibles de tipo {resource}, permitiendo consultar múltiples registros con soporte de filtros o parámetros de búsqueda."
+            )
+        elif m == 'POST':
+            return (
+                f"Creation and persistence of {resource_en}: accepts and validates incoming request payload data, instantiates a new {resource_en} entity, and commits the record to the database."
+                if is_en else
+                f"Creación y registro de {resource}: recibe y valida la carga de datos (payload) en el cuerpo de la petición, crea una nueva entidad de tipo {resource} en el sistema y persiste los cambios de forma duradera en la base de datos."
+            )
+        elif m == 'PUT':
+            return (
+                f"Complete replacement and update of {resource_en}: comprehensively overwrites all fields of the target {resource_en} record identified in the route with the payload provided."
+                if is_en else
+                f"Reemplazo y actualización integral de {resource}: actualiza de forma completa todos los campos del recurso existente especificado por su identificador con la información suministrada en la solicitud."
+            )
+        elif m == 'PATCH':
+            return (
+                f"Partial update of {resource_en}: applies selective delta updates to specific fields submitted in the request body for the indicated record, preserving all other existing attributes."
+                if is_en else
+                f"Actualización parcial de {resource}: aplica modificaciones únicamente sobre los campos específicos enviados en la solicitud para el registro indicado, preservando sin cambios los demás atributos de la entidad."
+            )
+        elif m == 'DELETE':
+            return (
+                f"Deletion of {resource_en}: processes permanent removal or soft-delete decommissioning for the specified {resource_en} record, cleaning up associated dependencies."
+                if is_en else
+                f"Eliminación de {resource}: procesa la baja o remoción definitiva (o marcado como inactivo/soft-delete) del registro de {resource} especificado, depurando sus dependencias asociadas."
+            )
+
+        return (
+            f"Processes {m} requests for path {p}, executing business logic for {resource_en}."
+            if is_en else
+            f"Procesa solicitudes {m} para la ruta {p}, ejecutando la lógica operativa asociada a {resource}."
+        )
 
     @staticmethod
     def _sanitize_ai_markdown(text: str) -> str:
@@ -985,7 +1147,12 @@ cli --> routes
     def _api_docs(self) -> list:
         docs = []
         for ep in self.r.get("endpoints", []):
-            description = ep.get("ai_description") or f"Endpoint {ep.get('method')} {ep.get('path')}"
+            description = (
+                ep.get("ai_description")
+                or (ep.get("description") if ep.get("description") and not ep.get("description", "").startswith("Endpoint ") else None)
+                or ep.get("docstring")
+                or self._generate_endpoint_description(ep)
+            )
             docs.append({
                 "method":      ep.get("method"),
                 "path":        ep.get("path"),
@@ -1168,7 +1335,12 @@ python app.py  # or npm run dev
                 method = ep.get('method', 'GET')
                 out += f"##### `{method} {ep.get('path')}`\n\n"
                 # Cerrar bloques ``` abiertos si la IA se cortó a la mitad
-                ai_desc = self._sanitize_ai_markdown(ep.get("ai_description") or ep.get("description") or ep.get("docstring") or f"Endpoint {method} {ep.get('path')}")
+                ai_desc = self._sanitize_ai_markdown(
+                    ep.get("ai_description")
+                    or (ep.get("description") if ep.get("description") and not ep.get("description", "").startswith("Endpoint ") else None)
+                    or ep.get("docstring")
+                    or self._generate_endpoint_description(ep)
+                )
                 if ai_desc:
                     out += f"> **{self.t('description')}:** {ai_desc}\n\n"
 
@@ -1503,7 +1675,7 @@ python app.py  # or npm run dev
             for fn in funcs:
                 description = self._sanitize_ai_markdown(
                     fn.get('ai_description') or fn.get('description') or fn.get('docstring')
-                    or self.tx(f"Función {fn['name']}", f"Function {fn['name']}")
+                    or self._infer_standalone_function_description(fn)
                 )
                 out += f"- **`{fn['name']}`**: {description}\n"
             out += "\n"
