@@ -61,5 +61,11 @@ class Config:
     # Debug
     DEBUG = _DEBUG
 
-    # Orígenes permitidos para CORS en /api/* (separados por coma). Vacío = solo mismo origen.
-    CORS_ORIGINS = [o.strip() for o in os.environ.get('CORS_ORIGINS', '').split(',') if o.strip()]
+    # Orígenes permitidos para CORS en /api/* (separados por coma).
+    # Si no se define, se permite cualquier origen ("*") para no bloquear al frontend.
+    _cors_raw = os.environ.get('CORS_ORIGINS', '').strip()
+    CORS_ORIGINS = (
+        [o.strip() for o in _cors_raw.split(',') if o.strip()]
+        if _cors_raw
+        else ["*"]
+    )
