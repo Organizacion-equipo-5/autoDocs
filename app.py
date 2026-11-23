@@ -14,10 +14,9 @@ def create_app():
     app.config.from_object(Config)
 
     CORS(app, resources={r"/api/*": {
-        "origins": app.config["CORS_ORIGINS"],
+        "origins": "*",
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "Accept", "Accept-Language"],
-        "supports_credentials": True,
     }})
     JWTManager(app)
 
@@ -43,6 +42,13 @@ def create_app():
     app.register_blueprint(github_bp, url_prefix='/api/integrations/github')
     app.register_blueprint(chat_bp, url_prefix='/api/chat')
     app.register_blueprint(web_bp)
+
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Accept, Accept-Language'
+        return response
 
     @app.errorhandler(404)
     def not_found(e):
