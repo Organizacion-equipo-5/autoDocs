@@ -1509,7 +1509,7 @@ CUERPO DE LA PÁGINA
                         <p class="text-3xl font-bold text-on-surface mt-4">
                             $<span id="paypal-price">1</span> <span class="text-base text-on-surface-variant/60">MXN</span>
                         </p>
-                        <p class="text-on-surface-variant/50 text-sm" id="paypal-plan-label">Plan Pro</p>
+                        <p class="text-on-surface-variant/50 text-sm" id="paypal-plan-label">Plan</p>
                     </div>
 
                     <!-- Contenedor de botones de PayPal -->
@@ -1672,13 +1672,6 @@ CUERPO DE LA PÁGINA
             enterprise: 'Empresarial'
         };
 
-        // Plan interno del backend que corresponde a cada plan mostrado
-        const BACKEND_PLAN = {
-            free: 'free',
-            student: 'pro',
-            team: 'pro',
-            enterprise: 'enterprise'
-        };
 
         // ===================================================================
         // FUNCIÓN: MOSTRAR/OCULTAR CONTRASEÑA
@@ -2053,7 +2046,7 @@ CUERPO DE LA PÁGINA
                         name,
                         email,
                         password,
-                        plan: BACKEND_PLAN[regSelectedPlan] || 'free',
+                        plan: regSelectedPlan,
                         accepted_terms: terms,
                         payment_method: 'paypal',
                         paypal_order_id: orderId || regData.paypal_order_id || null,

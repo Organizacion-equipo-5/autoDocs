@@ -68,6 +68,8 @@ def create_project():
         plan = user.get('plan', 'free')
         project_limits = {
             'free': 3,
+            'student': 20,
+            'team': 20,
             'pro': 20,
             'enterprise': -1
         }
@@ -75,7 +77,7 @@ def create_project():
         current_count = db.projects.count_documents({"user_id": user_id})
 
         if limit != -1 and current_count >= limit:
-            plan_names = {'free': 'Gratuito', 'pro': 'Pro', 'enterprise': 'Enterprise'}
+            plan_names = {'free': 'Gratuito', 'student': 'Estudiante', 'team': 'Equipo de trabajo', 'pro': 'Equipo de trabajo', 'enterprise': 'Empresarial'}
             return jsonify({
                 "error": f"Has alcanzado el límite de proyectos para tu plan {plan_names.get(plan, plan)}. Límite actual: {limit} proyectos."
             }), 400
@@ -380,7 +382,7 @@ def refresh_project_contributors(project_id):
 def sync_project(project_id):
     """
     Sincroniza un proyecto con GitHub (git pull + re-análisis)
-    Solo disponible para usuarios Pro y Enterprise
+    Solo disponible para usuarios con plan de pago
     """
     user_id = get_jwt_identity()
     db = get_db()
@@ -392,7 +394,7 @@ def sync_project(project_id):
 
     plan = user.get('plan', 'free')
     if plan == 'free':
-        return jsonify({"error": "La función de sincronización con GitHub solo está disponible para planes Pro y Enterprise. Actualiza tu plan para usar esta función."}), 403
+        return jsonify({"error": "La función de sincronización con GitHub solo está disponible para planes de pago. Actualiza tu plan para usar esta función."}), 403
 
     project = db.projects.find_one({"_id": project_id, "user_id": user_id})
     if not project:

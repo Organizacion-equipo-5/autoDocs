@@ -92,8 +92,8 @@ El contenido no es genérico: se construye con los nombres reales de las funcion
 
 | Planes | Flujo de uso |
 |---|---|
-| ![Planes Gratuito, Pro y Enterprise con sus límites y precios](docs/images/pricing.png) | ![Sección Cómo funciona con los cinco pasos del flujo](docs/images/how.png) |
-| Planes Gratuito, Pro y Enterprise. | Del ZIP al documento exportado en cinco pasos. |
+| ![Planes Gratuito, Estudiante, Equipo de trabajo y Empresarial con sus límites y precios](docs/images/pricing.png) | ![Sección Cómo funciona con los cinco pasos del flujo](docs/images/how.png) |
+| Planes Gratuito, Estudiante, Equipo de trabajo y Empresarial. | Del ZIP al documento exportado en cinco pasos. |
 
 ---
 
@@ -160,7 +160,7 @@ El generador produce un paquete con varias secciones:
 - Consulta de colaboradores mediante la API de GitHub.
 - Sincronización del proyecto para volver a analizar cambios.
 - Selección de la rama que se analiza desde el dashboard.
-- Sondeo automático de la rama seleccionada cada 5 minutos mientras el dashboard está abierto (planes Pro y Enterprise); no requiere configurar un webhook.
+- Sondeo automático de la rama seleccionada cada 5 minutos mientras el dashboard está abierto (planes de pago); no requiere configurar un webhook.
 
 El webhook sigue disponible como alternativa para recibir cambios al instante. Para activarlo, configura `GITHUB_WEBHOOK_SECRET` en el entorno de AutoDocs y agrega un webhook en **Settings → Webhooks → Add webhook** del repositorio:
 
@@ -175,7 +175,7 @@ La URL debe ser accesible desde GitHub y usar HTTPS. El proyecto debe estar regi
 
 - Registro y login con JWT de 24 horas.
 - Recuperación de contraseña mediante código de seis dígitos enviado por SMTP.
-- Planes **Gratuito** (3 proyectos), **Pro** (20 proyectos) y **Enterprise** (proyectos ilimitados).
+- Planes **Gratuito** (3 proyectos), **Estudiante** ($99, 20 proyectos), **Equipo de trabajo** ($899, 20 proyectos) y **Empresarial** ($1,299, proyectos ilimitados).
 - Seguimiento de uso por usuario y recomendación de plan basada en clústeres.
 - Panel de administración con usuarios, proyectos, métricas globales, PCA y clasificación de proyectos.
 

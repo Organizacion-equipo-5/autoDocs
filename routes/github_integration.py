@@ -330,7 +330,7 @@ def get_project_branches(project_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
     if user.get("plan", "free") == "free":
-        return jsonify({"error": "La selección de ramas está disponible para planes Pro y Enterprise."}), 403
+        return jsonify({"error": "La selección de ramas está disponible para planes de pago."}), 403
 
     try:
         github_token = (user.get("github") or {}).get("access_token")
@@ -397,7 +397,7 @@ def select_project_branch(project_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
     if user.get("plan", "free") == "free":
-        return jsonify({"error": "La selección de ramas está disponible para planes Pro y Enterprise."}), 403
+        return jsonify({"error": "La selección de ramas está disponible para planes de pago."}), 403
     if project.get("status") == "analyzing":
         return jsonify({"error": "El proyecto ya se está analizando. Inténtalo de nuevo cuando termine."}), 409
 
@@ -449,7 +449,7 @@ def poll_project_branch(project_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
     if user.get("plan", "free") == "free":
-        return jsonify({"error": "El sondeo de ramas está disponible para planes Pro y Enterprise."}), 403
+        return jsonify({"error": "El sondeo de ramas está disponible para planes de pago."}), 403
     if project.get("status") == "analyzing":
         return jsonify({"status": "analyzing"}), 202
 
