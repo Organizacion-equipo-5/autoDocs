@@ -42,7 +42,7 @@
         legibilidad en pantalla.
         Geist: Fuente sans-serif moderna y limpia para textos generales.
     -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- 
         Material Symbols: Iconos de Google Material Design.
@@ -589,7 +589,7 @@
             opacity: 1;
         }
         .pwd-requirement .req-icon {
-            font-size: 0.875rem;
+            font-size: 1rem;
         }
 
         /* 
@@ -624,6 +624,234 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        /*
+            FONDO DEL HERO
+            ====================================================================
+            Rejilla sutil con desvanecido radial y un resplandor detrás del
+            título. Ambos son decorativos (aria-hidden) y no capturan clics.
+        */
+        .hero-grid {
+            --grid-line: rgba(123, 208, 255, 0.07);
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 48px 48px;
+            -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, #000 25%, transparent 78%);
+            mask-image: radial-gradient(ellipse 75% 60% at 50% 38%, #000 25%, transparent 78%);
+        }
+        body[data-theme="light"] .hero-grid { --grid-line: rgba(15, 23, 42, 0.07); }
+        .hero-glow {
+            position: absolute;
+            top: 7rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(900px, 92vw);
+            height: 420px;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(closest-side, color-mix(in srgb, var(--color-primary) 20%, transparent), transparent);
+            filter: blur(40px);
+        }
+
+        /*
+            ICONO EN TARJETA (ICON TILE)
+            ====================================================================
+            Contenedor cuadrado con tinte del color de acento. Sustituye a los
+            emojis: cada icono es un Material Symbol y hereda el tema.
+        */
+        .icon-tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.875rem;
+            color: var(--color-primary);
+            background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+            border: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+        }
+        .icon-tile .material-symbols-outlined { font-size: 1.5rem; }
+        .icon-tile.solid { background: var(--color-surface-container); }
+        .icon-tile.violet {
+            color: var(--color-secondary);
+            background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+            border-color: color-mix(in srgb, var(--color-secondary) 28%, transparent);
+        }
+
+        /* Tarjeta de plan destacado */
+        .plan-featured { box-shadow: 0 0 48px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+
+        /*
+            TERMINAL INTERACTIVA
+            ====================================================================
+            Ventana con barra de título, salida desplazable, línea de entrada y
+            atajos. Usa las variables del tema, así que funciona en claro/oscuro.
+        */
+        .term-window {
+            background: color-mix(in srgb, var(--color-surface-container) 90%, transparent);
+            border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-outline-variant));
+            box-shadow: 0 24px 70px -20px color-mix(in srgb, var(--color-primary) 35%, transparent);
+            backdrop-filter: blur(16px);
+        }
+        .term-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 60%, transparent);
+            background: color-mix(in srgb, var(--color-surface-container-high) 55%, transparent);
+        }
+        .term-dot { width: 0.75rem; height: 0.75rem; border-radius: 9999px; display: block; }
+        .term-title {
+            flex: 1;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: color-mix(in srgb, var(--color-on-surface-variant) 70%, transparent);
+        }
+        .term-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 0.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-on-surface-variant);
+            transition: color 0.2s, background 0.2s;
+        }
+        .term-icon-btn:hover { color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, transparent); }
+        .term-icon-btn .material-symbols-outlined { font-size: 1.15rem; }
+
+        .term-body {
+            height: 21rem;
+            overflow-y: auto;
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.65;
+            color: var(--color-on-surface-variant);
+            cursor: text;
+        }
+        .term-line { white-space: pre-wrap; word-break: break-word; }
+        .term-indent { padding-left: 1.25rem; }
+        .term-dim { color: color-mix(in srgb, var(--color-on-surface-variant) 65%, transparent); }
+        .term-ok { color: var(--color-green-accent); }
+        .term-prompt { color: var(--color-green-accent); font-weight: 700; user-select: none; }
+        .term-cmd { color: var(--color-on-surface); }
+        .term-icon { font-size: 1rem; vertical-align: -0.2em; }
+        .term-method { display: inline-block; min-width: 3.75rem; font-weight: 700; }
+        .term-link {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font: inherit;
+            color: var(--color-primary);
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 3px;
+        }
+        .term-link:hover { color: var(--color-secondary); }
+
+        .term-input-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.15rem; }
+        .term-input {
+            flex: 1;
+            min-width: 0;
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            font: inherit;
+            color: var(--color-on-surface) !important;
+            caret-color: var(--color-primary);
+        }
+        .term-input::placeholder { color: color-mix(in srgb, var(--color-on-surface-variant) 45%, transparent); }
+        .term-input:read-only { opacity: 0.6; }
+
+        .term-progress {
+            height: 6px;
+            margin: 0.35rem 0 0.35rem 1.25rem;
+            max-width: 22rem;
+            border-radius: 9999px;
+            background: color-mix(in srgb, var(--color-outline-variant) 70%, transparent);
+            overflow: hidden;
+        }
+        .term-progress > span {
+            display: block;
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            transition: width 0.18s linear;
+        }
+        .term-meter {
+            display: inline-block;
+            width: 7rem;
+            height: 6px;
+            margin: 0 0.6rem;
+            border-radius: 9999px;
+            vertical-align: middle;
+            background: color-mix(in srgb, var(--color-outline-variant) 70%, transparent);
+            overflow: hidden;
+        }
+        .term-meter > span { display: block; height: 100%; border-radius: inherit; background: var(--color-green-accent); }
+
+        .term-chips {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 60%, transparent);
+            background: color-mix(in srgb, var(--color-surface-container-high) 40%, transparent);
+        }
+        .term-chips-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-right: 0.25rem;
+            color: color-mix(in srgb, var(--color-on-surface-variant) 60%, transparent);
+        }
+        .term-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: var(--color-on-surface-variant);
+            background: transparent;
+            border: 1px solid var(--color-outline-variant);
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+        .term-chip .material-symbols-outlined { font-size: 1rem; }
+        .term-chip:hover:not(:disabled) {
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+        }
+        .term-chip:disabled { opacity: 0.5; cursor: progress; }
+
+        /* En móvil el input debe medir 16px para que iOS no haga zoom al enfocarlo */
+        @media (max-width: 640px) {
+            .term-input { font-size: 16px; }
+            .term-body { height: 19rem; padding: 0.85rem 1rem; }
+            .term-title { font-size: 0.6rem; letter-spacing: 0.06em; }
         }
     </style>
     <script src="/static/web_language.js"></script>
@@ -721,64 +949,86 @@ CUERPO DE LA PÁGINA
         Sección principal de presentación. Ocupa al menos el 100% de la altura 
         de la pantalla (min-h-screen) y centra su contenido.
     -->
-    <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-8 pt-28 pb-16 z-10">
+    <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-6 md:px-8 pt-32 pb-20 z-10">
+        <!-- Fondo decorativo: rejilla con desvanecido y resplandor detrás del título -->
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="hero-glow" aria-hidden="true"></div>
+
         <!-- Badge de tecnología: Muestra "Powered by Python + AI Analysis" -->
         <div class="stagger-in" style="animation-delay: 0.1s;">
             <span class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-xs font-code-md text-primary border border-primary/20 mb-8">
-                <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span> Powered by Python + AI Analysis
+                <span class="material-symbols-outlined text-base">auto_awesome</span> Powered by Python + AI Analysis
             </span>
         </div>
-        
+
         <!-- Título principal con efecto de degradado -->
         <h1 class="stagger-in font-display-lg text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight tracking-tight text-on-surface mb-6" style="animation-delay: 0.15s;">
             Documenta tu código<br />
             <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">automáticamente</span>
         </h1>
-        
+
         <!-- Descripción del producto -->
         <p class="stagger-in text-lg text-on-surface-variant/70 max-w-xl mb-10" style="animation-delay: 0.2s;">
-            AutoDocs AI analiza tu proyecto, detecta funciones, clases y endpoints, 
+            AutoDocs AI analiza tu proyecto, detecta funciones, clases y endpoints,
             y genera documentación técnica profesional en segundos.
         </p>
-        
+
         <!-- Botones de acción principal -->
         <div class="stagger-in flex gap-4 flex-wrap justify-center" style="animation-delay: 0.3s;">
-            <button class="px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
+            <button class="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
                 Empieza ahora — gratis
+                <span class="material-symbols-outlined text-xl">arrow_forward</span>
             </button>
-            <a href="#how" class="px-8 py-3.5 glass rounded-xl font-semibold text-on-surface-variant hover:text-primary border border-outline-variant/20 transition-all text-lg no-underline">
-                Ver cómo funciona
+            <a href="#demo" class="inline-flex items-center gap-2 px-8 py-3.5 glass rounded-xl font-semibold text-on-surface-variant hover:text-primary border border-outline-variant/20 transition-all text-lg no-underline">
+                <span class="material-symbols-outlined text-xl">terminal</span>
+                Probar la demo
             </a>
         </div>
 
         <!-- =================================================================
-        MOCKUP DE TERMINAL
+        TERMINAL INTERACTIVA (DEMO DEL PRODUCTO)
         ================================================================== -->
-        <!-- 
-            Simulación de una terminal mostrando el análisis de código.
-            Este mockup da una idea visual de cómo funciona el producto.
+        <!--
+            Terminal funcional: el visitante escribe comandos de AutoDocs
+            (analyze, endpoints, quality, export, plans, signup...) y obtiene
+            resultados de ejemplo. La lógica vive en el script "TERMINAL
+            INTERACTIVA" al final de la página.
         -->
-        <div class="stagger-in mt-20 w-full max-w-3xl glass rounded-3xl overflow-hidden shadow-[0_20px_60px_var(--color-primary)] border border-outline-variant/20" style="animation-delay: 0.4s;">
-            <!-- Barra superior de la terminal (similar a las ventanas de macOS) -->
-            <div class="bg-surface-container/20 backdrop-blur-md px-6 py-3 border-b border-outline-variant/10 flex items-center gap-3">
-                <!-- Botones de control (rojo, amarillo, verde) -->
-                <div class="flex gap-2">
-                    <div class="w-3 h-3 rounded-full bg-red-400/60"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-400/60"></div>
-                    <div class="w-3 h-3 rounded-full bg-green-400/60"></div>
+        <div id="demo" class="stagger-in mt-16 w-full max-w-3xl text-left scroll-mt-28" style="animation-delay: 0.4s;">
+            <div class="term-window rounded-2xl overflow-hidden">
+                <!-- Barra superior de la ventana -->
+                <div class="term-bar">
+                    <div class="flex gap-2" aria-hidden="true">
+                        <span class="term-dot bg-red-400/70"></span>
+                        <span class="term-dot bg-yellow-400/70"></span>
+                        <span class="term-dot bg-green-400/70"></span>
+                    </div>
+                    <span class="term-title">autodocs — demo interactiva</span>
+                    <button type="button" class="term-icon-btn" data-term-action="restart" aria-label="Reiniciar demo" title="Reiniciar demo">
+                        <span class="material-symbols-outlined">restart_alt</span>
+                    </button>
                 </div>
-                <span class="ml-auto mr-auto font-code-md text-xs text-on-surface-variant/50 uppercase tracking-widest">autodocs — análisis en curso</span>
-            </div>
-            <!-- Contenido de la terminal: Simula la salida del comando -->
-            <div class="p-6 font-code-md text-sm space-y-2 text-on-surface-variant/80">
-                <div><span class="text-green-accent font-bold">$</span> <span class="text-on-surface">autodocs analyze ./mi-proyecto</span></div>
-                <div class="pl-6"> Escaneando estructura del proyecto...</div>
-                <div class="pl-6"><span class="text-green-accent">✓</span> <span class="text-primary">47 archivos</span> detectados en 12 directorios</div>
-                <div class="pl-6"><span class="text-green-accent">✓</span> Lenguaje principal: <span class="text-primary">Python</span> · secundario: <span class="text-secondary">JavaScript</span></div>
-                <div class="pl-6"><span class="text-green-accent">✓</span> <span class="text-primary">134 funciones</span> · <span class="text-primary">23 clases</span> · <span class="text-secondary">18 endpoints API</span></div>
-                <div class="pl-6"><span class="text-green-accent">✓</span> Score de calidad: <span class="text-primary">87/100</span></div>
-                <div class="pl-6"><span class="text-green-accent">✓</span> Documentación generada → <span class="text-secondary">README.md · API.md · docs/</span></div>
-                <div class="mt-3"><span class="text-green-accent font-bold">$</span> <span class="cursor-blink"></span></div>
+
+                <!-- Salida + línea de entrada -->
+                <div id="termBody" class="term-body" role="log" aria-live="polite" tabindex="-1">
+                    <div id="termOut"></div>
+                    <form id="termForm" class="term-input-row" autocomplete="off">
+                        <span class="term-prompt" aria-hidden="true">$</span>
+                        <input id="termInput" class="term-input" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Comando de AutoDocs" placeholder="escribe un comando… (help)" />
+                    </form>
+                </div>
+
+                <!-- Atajos: cada botón ejecuta el comando en la terminal -->
+                <div class="term-chips">
+                    <span class="term-chips-label">Prueba un comando</span>
+                    <button type="button" class="term-chip" data-cmd="analyze ./mi-proyecto"><span class="material-symbols-outlined">manage_search</span>analyze</button>
+                    <button type="button" class="term-chip" data-cmd="endpoints"><span class="material-symbols-outlined">api</span>endpoints</button>
+                    <button type="button" class="term-chip" data-cmd="quality"><span class="material-symbols-outlined">monitoring</span>quality</button>
+                    <button type="button" class="term-chip" data-cmd="export pdf"><span class="material-symbols-outlined">file_save</span>export</button>
+                    <button type="button" class="term-chip" data-cmd="languages"><span class="material-symbols-outlined">translate</span>languages</button>
+                    <button type="button" class="term-chip" data-cmd="plans"><span class="material-symbols-outlined">payments</span>plans</button>
+                    <button type="button" class="term-chip" data-cmd="help"><span class="material-symbols-outlined">help</span>help</button>
+                </div>
             </div>
         </div>
     </section>
@@ -793,21 +1043,25 @@ CUERPO DE LA PÁGINA
     <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-outline-variant/20 border-y border-outline-variant/20 stagger-in" style="animation-delay: 0.5s;">
         <!-- Lenguajes soportados -->
         <div class="glass text-center py-10 rounded-none border-none">
+            <span class="material-symbols-outlined text-3xl text-primary/80 mb-3 block">translate</span>
             <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">12<span class="text-primary">+</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Lenguajes soportados</p>
         </div>
         <!-- Formatos de exportación -->
         <div class="glass text-center py-10 rounded-none border-none">
+            <span class="material-symbols-outlined text-3xl text-secondary/80 mb-3 block">file_download</span>
             <span class="font-code-md text-5xl font-bold glow-violet text-on-surface">3<span class="text-secondary">×</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Formatos de exportación</p>
         </div>
         <!-- Código abierto -->
         <div class="glass text-center py-10 rounded-none border-none">
+            <span class="material-symbols-outlined text-3xl text-primary/80 mb-3 block">code</span>
             <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">100<span class="text-primary">%</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Código abierto-listo</p>
         </div>
         <!-- Velocidad de análisis -->
         <div class="glass text-center py-10 rounded-none border-none">
+            <span class="material-symbols-outlined text-3xl text-primary/80 mb-3 block">bolt</span>
             <span class="font-code-md text-5xl font-bold glow-cyan text-on-surface">&lt;30<span class="text-primary">s</span></span>
             <p class="text-xs text-on-surface-variant/50 uppercase tracking-widest mt-2">Análisis completo</p>
         </div>
@@ -834,7 +1088,7 @@ CUERPO DE LA PÁGINA
             <!-- Tarjeta 1: Escaneo automático -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.2s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">search</span>
+                    <span class="icon-tile mb-5"><span class="material-symbols-outlined">search</span></span>
                     <h3 class="text-xl font-bold text-on-surface mb-2">Escaneo automático</h3>
                     <p class="text-on-surface-variant/70 text-sm">Analiza tu árbol de archivos, detecta el lenguaje primario y extrae funciones, clases e imports con AST.</p>
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">ast · regex · pathlib</span>
@@ -844,7 +1098,7 @@ CUERPO DE LA PÁGINA
             <!-- Tarjeta 2: Detección de endpoints API -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.25s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">api</span>
+                    <span class="icon-tile mb-5"><span class="material-symbols-outlined">api</span></span>
                     <h3 class="text-xl font-bold text-on-surface mb-2">Detección de endpoints API</h3>
                     <p class="text-on-surface-variant/70 text-sm">Encuentra rutas Flask, FastAPI, Django REST y Express.js automáticamente y las documenta como OpenAPI.</p>
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Flask · FastAPI · Express</span>
@@ -854,7 +1108,7 @@ CUERPO DE LA PÁGINA
             <!-- Tarjeta 3: Generación de README -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.3s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">description</span>
+                    <span class="icon-tile mb-5"><span class="material-symbols-outlined">description</span></span>
                     <h3 class="text-xl font-bold text-on-surface mb-2">Generación de README</h3>
                     <p class="text-on-surface-variant/70 text-sm">README profesional con estadísticas del proyecto, instrucciones de instalación y estructura generado en segundos.</p>
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">Markdown · AI</span>
@@ -864,7 +1118,7 @@ CUERPO DE LA PÁGINA
             <!-- Tarjeta 4: Dashboard de calidad -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.35s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">analytics</span>
+                    <span class="icon-tile mb-5"><span class="material-symbols-outlined">analytics</span></span>
                     <h3 class="text-xl font-bold text-on-surface mb-2">Dashboard de calidad</h3>
                     <p class="text-on-surface-variant/70 text-sm">Score de calidad, complejidad ciclomática, porcentaje de funciones documentadas y detección de code smells.</p>
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">McCabe · métricas</span>
@@ -874,7 +1128,7 @@ CUERPO DE LA PÁGINA
             <!-- Tarjeta 5: Exportación profesional -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.4s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">file_save</span>
+                    <span class="icon-tile mb-5"><span class="material-symbols-outlined">file_save</span></span>
                     <h3 class="text-xl font-bold text-on-surface mb-2">Exportación profesional</h3>
                     <p class="text-on-surface-variant/70 text-sm">Exporta tu documentación en PDF, Markdown o HTML listo para GitHub Pages o entrega universitaria.</p>
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">PDF · Markdown · HTML</span>
@@ -884,7 +1138,7 @@ CUERPO DE LA PÁGINA
             <!-- Tarjeta 6: Integración GitHub -->
             <div class="tilt-card stagger-in" style="animation-delay: 0.45s;">
                 <div class="glass p-8 rounded-3xl glass-hover card-interaction h-full">
-                    <span class="material-symbols-outlined text-3xl text-primary mb-4 block">link</span>
+                    <span class="icon-tile mb-5"><span class="material-symbols-outlined">link</span></span>
                     <h3 class="text-xl font-bold text-on-surface mb-2">Integración GitHub</h3>
                     <p class="text-on-surface-variant/70 text-sm">Conecta directamente tu repositorio de GitHub y analiza el código sin necesidad de descargar nada.</p>
                     <span class="inline-block mt-4 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-code-md">GitHub API · OAuth</span>
@@ -909,38 +1163,45 @@ CUERPO DE LA PÁGINA
         </div>
         
         <!-- Grid de pasos del flujo -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div class="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            <!-- Línea que conecta los pasos en pantallas grandes -->
+            <div class="hidden lg:block absolute top-6 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" aria-hidden="true"></div>
             <!-- Paso 1: Subir proyecto -->
             <div class="text-center stagger-in" style="animation-delay: 0.1s;">
-                <span class="font-code-md text-5xl font-bold text-primary/20">01</span>
+                <span class="icon-tile solid mx-auto relative z-10"><span class="material-symbols-outlined">upload_file</span></span>
+                <span class="font-code-md text-xs font-bold text-primary/60 tracking-[0.3em] block mt-4">01</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Subir proyecto</h3>
                 <p class="text-on-surface-variant/60 text-sm">Sube un .zip, .tar.gz o conecta tu repo de GitHub directamente desde el dashboard.</p>
             </div>
             
             <!-- Paso 2: Análisis estático -->
             <div class="text-center stagger-in" style="animation-delay: 0.2s;">
-                <span class="font-code-md text-5xl font-bold text-primary/20">02</span>
+                <span class="icon-tile solid mx-auto relative z-10"><span class="material-symbols-outlined">account_tree</span></span>
+                <span class="font-code-md text-xs font-bold text-primary/60 tracking-[0.3em] block mt-4">02</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Análisis estático</h3>
                 <p class="text-on-surface-variant/60 text-sm">El motor Python usa AST para analizar funciones, clases, imports y detectar endpoints de API.</p>
             </div>
             
             <!-- Paso 3: Generación de docs -->
             <div class="text-center stagger-in" style="animation-delay: 0.3s;">
-                <span class="font-code-md text-5xl font-bold text-primary/20">03</span>
+                <span class="icon-tile solid mx-auto relative z-10"><span class="material-symbols-outlined">description</span></span>
+                <span class="font-code-md text-xs font-bold text-primary/60 tracking-[0.3em] block mt-4">03</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Generación de docs</h3>
                 <p class="text-on-surface-variant/60 text-sm">DocGenerator produce README, referencia de API, documentación de clases y arquitectura del proyecto.</p>
             </div>
             
             <!-- Paso 4: Dashboard visual -->
             <div class="text-center stagger-in" style="animation-delay: 0.4s;">
-                <span class="font-code-md text-5xl font-bold text-primary/20">04</span>
+                <span class="icon-tile solid mx-auto relative z-10"><span class="material-symbols-outlined">dashboard</span></span>
+                <span class="font-code-md text-xs font-bold text-primary/60 tracking-[0.3em] block mt-4">04</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Dashboard visual</h3>
                 <p class="text-on-surface-variant/60 text-sm">React muestra métricas de calidad, diagramas de estructura y la documentación navegable.</p>
             </div>
             
             <!-- Paso 5: Exportar -->
             <div class="text-center stagger-in" style="animation-delay: 0.5s;">
-                <span class="font-code-md text-5xl font-bold text-primary/20">05</span>
+                <span class="icon-tile solid mx-auto relative z-10"><span class="material-symbols-outlined">file_download</span></span>
+                <span class="font-code-md text-xs font-bold text-primary/60 tracking-[0.3em] block mt-4">05</span>
                 <h3 class="text-lg font-bold text-on-surface mt-2 mb-2">Exportar</h3>
                 <p class="text-on-surface-variant/60 text-sm">Descarga PDF, Markdown o HTML en un clic, listo para entregar o publicar en GitHub Pages.</p>
             </div>
@@ -963,14 +1224,14 @@ CUERPO DE LA PÁGINA
         
         <!-- Grid de tecnologías con iconos -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🐍</span><span class="font-code-md font-bold text-on-surface">Python</span><p class="text-xs text-on-surface-variant/50 mt-1">Backend · Análisis</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">⚡</span><span class="font-code-md font-bold text-on-surface">Flask</span><p class="text-xs text-on-surface-variant/50 mt-1">API REST</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🌐</span><span class="font-code-md font-bold text-on-surface">HTML/CSS/JS</span><p class="text-xs text-on-surface-variant/50 mt-1">Frontend</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🍃</span><span class="font-code-md font-bold text-on-surface">MongoDB</span><p class="text-xs text-on-surface-variant/50 mt-1">Base de datos</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🐳</span><span class="font-code-md font-bold text-on-surface">Docker</span><p class="text-xs text-on-surface-variant/50 mt-1">Contenedores</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🔐</span><span class="font-code-md font-bold text-on-surface">JWT</span><p class="text-xs text-on-surface-variant/50 mt-1">Autenticación</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">📦</span><span class="font-code-md font-bold text-on-surface">PyMongo</span><p class="text-xs text-on-surface-variant/50 mt-1">ORM NoSQL</p></div>
-            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="text-3xl mb-2 block">🔬</span><span class="font-code-md font-bold text-on-surface">AST</span><p class="text-xs text-on-surface-variant/50 mt-1">Análisis código</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">code</span></span><span class="font-code-md font-bold text-on-surface">Python</span><p class="text-xs text-on-surface-variant/50 mt-1">Backend · Análisis</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">science</span></span><span class="font-code-md font-bold text-on-surface">Flask</span><p class="text-xs text-on-surface-variant/50 mt-1">API REST</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">web</span></span><span class="font-code-md font-bold text-on-surface">HTML/CSS/JS</span><p class="text-xs text-on-surface-variant/50 mt-1">Frontend</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">database</span></span><span class="font-code-md font-bold text-on-surface">MongoDB</span><p class="text-xs text-on-surface-variant/50 mt-1">Base de datos</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">deployed_code</span></span><span class="font-code-md font-bold text-on-surface">Docker</span><p class="text-xs text-on-surface-variant/50 mt-1">Contenedores</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">key</span></span><span class="font-code-md font-bold text-on-surface">JWT</span><p class="text-xs text-on-surface-variant/50 mt-1">Autenticación</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">inventory_2</span></span><span class="font-code-md font-bold text-on-surface">PyMongo</span><p class="text-xs text-on-surface-variant/50 mt-1">ORM NoSQL</p></div>
+            <div class="glass p-6 rounded-2xl text-center glass-hover stagger-in"><span class="icon-tile mx-auto mb-3"><span class="material-symbols-outlined">account_tree</span></span><span class="font-code-md font-bold text-on-surface">AST</span><p class="text-xs text-on-surface-variant/50 mt-1">Análisis código</p></div>
         </div>
     </section>
 
@@ -1006,7 +1267,7 @@ CUERPO DE LA PÁGINA
             <!-- Plan Pro (destacado) -->
             <div class="glass rounded-3xl p-8 border border-primary/40 plan-featured stagger-in relative">
                 <!-- Badge "POPULAR" flotante -->
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 whitespace-nowrap bg-primary text-white text-xs font-bold px-3 py-1 rounded-full"><span class="material-symbols-outlined text-sm">star</span>POPULAR</div>
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-on-surface mb-2">Pro</h3>
                     <p class="text-4xl font-bold text-primary mb-1">$350<span class="text-lg text-on-surface-variant/60">/mes</span></p>
@@ -1050,8 +1311,9 @@ CUERPO DE LA PÁGINA
             <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/5 blur-[100px] pointer-events-none"></div>
             <h2 class="text-4xl font-bold text-on-surface relative z-10 mb-4">Empieza a documentar en 30 segundos</h2>
             <p class="text-on-surface-variant/60 relative z-10 mb-8">Crea tu cuenta gratis y analiza tu primer proyecto hoy mismo.</p>
-            <button class="relative z-10 px-10 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
-                Crear cuenta gratuita →
+            <button class="relative z-10 inline-flex items-center gap-2 px-10 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all active:scale-95 text-lg" onclick="openModal('register')">
+                Crear cuenta gratuita
+                <span class="material-symbols-outlined text-xl">arrow_forward</span>
             </button>
         </div>
     </section>
@@ -1075,7 +1337,7 @@ CUERPO DE LA PÁGINA
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="authModal" onclick="if(event.target===this)closeModal()">
         <div class="glass p-8 rounded-3xl w-full max-w-lg modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)] max-h-[90vh] overflow-y-auto">
             <!-- Botón para cerrar el modal -->
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer leading-none"><span class="material-symbols-outlined text-2xl">close</span></button>
             
             <!-- Título del modal -->
             <h3 class="text-2xl font-bold text-on-surface mb-1">AutoDocs AI</h3>
@@ -1161,10 +1423,10 @@ CUERPO DE LA PÁGINA
                             </div>
                             <p id="pwd-strength-label" class="text-xs mt-1 font-semibold text-white"></p>
                             <div class="mt-2 space-y-0.5">
-                                <div id="req-length" class="pwd-requirement">✗ Mínimo 8 caracteres</div>
-                                <div id="req-upper" class="pwd-requirement">✗ Al menos 1 mayúscula</div>
-                                <div id="req-lower" class="pwd-requirement">✗ Al menos 1 minúscula</div>
-                                <div id="req-number" class="pwd-requirement">✗ Al menos 1 número</div>
+                                <div id="req-length" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Mínimo 8 caracteres</span></div>
+                                <div id="req-upper" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Al menos 1 mayúscula</span></div>
+                                <div id="req-lower" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Al menos 1 minúscula</span></div>
+                                <div id="req-number" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Al menos 1 número</span></div>
                             </div>
                         </div>
                     </div>
@@ -1175,8 +1437,9 @@ CUERPO DE LA PÁGINA
                         </label>
                     </div>
                     <div class="text-error text-xs font-code-md mb-2 hidden" id="step1-error"></div>
-                    <button class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="goToStep(2)">
-                        Siguiente →
+                    <button class="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-colors active:scale-95" onclick="goToStep(2)">
+                        Siguiente
+                        <span class="material-symbols-outlined text-xl">arrow_forward</span>
                     </button>
                 </div>
 
@@ -1201,8 +1464,9 @@ CUERPO DE LA PÁGINA
                         </button>
                     </div>
                     <div class="flex gap-3">
-                        <button class="flex-1 py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="goToStep(1)">
-                            ← Atrás
+                        <button class="flex-1 flex items-center justify-center gap-2 py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="goToStep(1)">
+                            <span class="material-symbols-outlined text-xl">arrow_back</span>
+                            Atrás
                         </button>
                         <button id="step2-next-btn" class="flex-1 py-3 bg-green-accent text-white font-bold rounded-xl hover:bg-green-accent/80 transition-colors active:scale-95" onclick="handleStep2Next()">
                             Registrarse
@@ -1240,14 +1504,16 @@ CUERPO DE LA PÁGINA
                         <h3 class="text-2xl font-bold text-green-accent mt-4">¡Pago exitoso!</h3>
                         <p class="text-on-surface-variant/70 mt-2">Tu suscripción ha sido activada correctamente.</p>
                         <p class="text-on-surface-variant/50 text-sm mt-1" id="transaction-id">ID de transacción: ---</p>
-                        <a href="/dashboard" class="inline-block mt-6 px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all">
-                            Ir al Dashboard →
+                        <a href="/dashboard" class="inline-flex items-center gap-2 mt-6 px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/80 transition-all">
+                            Ir al Dashboard
+                            <span class="material-symbols-outlined text-xl">arrow_forward</span>
                         </a>
                     </div>
 
                     <div class="flex gap-3 mt-4">
-                        <button class="flex-1 py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="goToStep(2)">
-                            ← Atrás
+                        <button class="flex-1 flex items-center justify-center gap-2 py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="goToStep(2)">
+                            <span class="material-symbols-outlined text-xl">arrow_back</span>
+                            Atrás
                         </button>
                         <button class="flex-1 py-3 bg-green-accent text-white font-bold rounded-xl hover:bg-green-accent/80 transition-colors active:scale-95" onclick="handleRegisterWithPayPal()">
                             Pagar y registrarse
@@ -1269,7 +1535,7 @@ CUERPO DE LA PÁGINA
     -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="forgotModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
-            <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer leading-none"><span class="material-symbols-outlined text-2xl">close</span></button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Recuperar contraseña</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu correo para recibir un código de recuperación</p>
             <div class="mb-4">
@@ -1290,7 +1556,7 @@ CUERPO DE LA PÁGINA
     -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="verifyModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
-            <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer leading-none"><span class="material-symbols-outlined text-2xl">close</span></button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Verificar código</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa el código de 6 dígitos que recibiste en tu correo</p>
             <div class="mb-4">
@@ -1313,7 +1579,7 @@ CUERPO DE LA PÁGINA
     -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="resetModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
-            <button onclick="closeResetModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer text-2xl">&times;</button>
+            <button onclick="closeResetModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition-colors bg-transparent border-none cursor-pointer leading-none"><span class="material-symbols-outlined text-2xl">close</span></button>
             <h3 class="text-2xl font-bold text-on-surface mb-1">Nueva contraseña</h3>
             <p class="text-on-surface-variant/60 text-sm mb-6">Ingresa tu nueva contraseña</p>
             <div class="mb-4">
@@ -1331,10 +1597,10 @@ CUERPO DE LA PÁGINA
                     </div>
                     <p id="reset-pwd-strength-label" class="text-xs mt-1 font-semibold text-white"></p>
                     <div class="mt-2 space-y-0.5">
-                        <div id="reset-req-length" class="pwd-requirement">✗ Mínimo 8 caracteres</div>
-                        <div id="reset-req-upper" class="pwd-requirement">✗ Al menos 1 mayúscula</div>
-                        <div id="reset-req-lower" class="pwd-requirement">✗ Al menos 1 minúscula</div>
-                        <div id="reset-req-number" class="pwd-requirement">✗ Al menos 1 número</div>
+                        <div id="reset-req-length" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Mínimo 8 caracteres</span></div>
+                        <div id="reset-req-upper" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Al menos 1 mayúscula</span></div>
+                        <div id="reset-req-lower" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Al menos 1 minúscula</span></div>
+                        <div id="reset-req-number" class="pwd-requirement"><span class="material-symbols-outlined req-icon">cancel</span><span>Al menos 1 número</span></div>
                     </div>
                 </div>
             </div>
@@ -1366,6 +1632,9 @@ CUERPO DE LA PÁGINA
         let isRegistering = false;        // Bandera para evitar registros duplicados
         let forgotEmail = '';             // Email para recuperación de contraseña
         let paypalRendered = false;       // Bandera para saber si PayPal ya se renderizó
+
+        // Contenido del botón "Siguiente" (texto + icono de flecha)
+        const NEXT_BTN_HTML = 'Siguiente <span class="material-symbols-outlined align-middle text-xl">arrow_forward</span>';
 
         // Precios en MXN para los planes de pago
         const PRICES = {
@@ -1432,7 +1701,7 @@ CUERPO DE LA PÁGINA
                 dot.classList.remove('active', 'completed');
                 if (i < step) {
                     dot.classList.add('completed');
-                    dot.textContent = '✓';      // Check para pasos completados
+                    dot.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.25rem">check</span>'; // Icono de check en pasos completados
                 } else if (i === step) {
                     dot.classList.add('active');
                     dot.textContent = i;        // Número para el paso activo
@@ -1540,7 +1809,7 @@ CUERPO DE LA PÁGINA
                 btn.classList.remove('bg-primary');
                 btn.classList.add('bg-green-accent');
             } else {
-                btn.textContent = 'Siguiente →';
+                btn.innerHTML = NEXT_BTN_HTML;
                 btn.classList.remove('bg-green-accent');
                 btn.classList.add('bg-primary');
             }
@@ -1823,27 +2092,17 @@ CUERPO DE LA PÁGINA
             const hasLower = /[a-z]/.test(password);
             const hasNumber = /[0-9]/.test(password);
 
-            // Guardar los textos base en atributos data si no existen
             const reqLength = document.getElementById('req-length');
             const reqUpper = document.getElementById('req-upper');
             const reqLower = document.getElementById('req-lower');
             const reqNumber = document.getElementById('req-number');
 
-            // Almacenar el texto base solo una vez para preservar los textos originales
-            if (!reqLength.dataset.baseText) {
-                reqLength.dataset.baseText = 'Mínimo 8 caracteres';
-                reqUpper.dataset.baseText = 'Al menos 1 mayúscula';
-                reqLower.dataset.baseText = 'Al menos 1 minúscula';
-                reqNumber.dataset.baseText = 'Al menos 1 número';
-            }
-
-            // Función para actualizar cada requisito
+            // Cambia el icono (check/cancel) sin tocar el texto del requisito
             const updateReq = (el, ok) => {
-                const icon = ok ? '✓' : '✗';
-                el.textContent = `${icon} ${el.dataset.baseText}`;
+                el.querySelector('.req-icon').textContent = ok ? 'check_circle' : 'cancel';
                 el.classList.toggle('met', ok);
             };
-            
+
             updateReq(reqLength, hasLength);
             updateReq(reqUpper, hasUpper);
             updateReq(reqLower, hasLower);
@@ -1897,7 +2156,7 @@ CUERPO DE LA PÁGINA
 
             const updateReq = (id, ok) => {
                 const el = document.getElementById(id);
-                el.textContent = (ok ? '✓' : '✗') + ' ' + el.textContent.slice(2);
+                el.querySelector('.req-icon').textContent = ok ? 'check_circle' : 'cancel';
                 el.classList.toggle('met', ok);
             };
             updateReq('reset-req-length', hasLength);
@@ -2164,7 +2423,7 @@ CUERPO DE LA PÁGINA
                     btn.classList.remove('bg-primary');
                     btn.classList.add('bg-green-accent');
                 } else {
-                    btn.textContent = 'Siguiente →';
+                    btn.innerHTML = NEXT_BTN_HTML;
                     btn.classList.remove('bg-green-accent');
                     btn.classList.add('bg-primary');
                 }
@@ -2490,6 +2749,423 @@ CUERPO DE LA PÁGINA
             animate();
             initTilt();
         });
+
+        // ===================================================================
+        // TERMINAL INTERACTIVA (DEMO DEL PRODUCTO)
+        // ===================================================================
+        /**
+         * Terminal de demostración de AutoDocs AI.
+         * Acepta los mismos comandos que la herramienta (analyze, endpoints,
+         * quality, export, languages, plans) y responde con datos de ejemplo.
+         * Además conecta con la página: "signup" y "login" abren el modal de
+         * acceso y "theme" cambia entre modo claro y oscuro.
+         *
+         * Todo el contenido se arma con nodos DOM y textContent (nunca con
+         * innerHTML), así que lo que escriba el visitante no se interpreta
+         * como HTML.
+         */
+        (function initDemoTerminal() {
+            const out = document.getElementById('termOut');
+            const body = document.getElementById('termBody');
+            const form = document.getElementById('termForm');
+            const input = document.getElementById('termInput');
+            const win = document.querySelector('.term-window');
+            if (!out || !body || !form || !input || !win) return;
+
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, reduceMotion ? 0 : ms));
+            // Textos en español/inglés según el idioma guardado de la web
+            const isEn = () => window.AutoDocsLanguage && AutoDocsLanguage.get && AutoDocsLanguage.get() === 'en';
+            const tr = (es, en) => (isEn() ? en : es);
+
+            // Datos del proyecto de ejemplo que "analiza" la demo
+            const SAMPLE = { path: './mi-proyecto', files: 47, dirs: 12, funcs: 134, classes: 23, endpoints: 18, score: 87 };
+            const EXPORTS = {
+                pdf: { file: 'mi-proyecto-docs.pdf', size: '1.2 MB' },
+                md: { file: 'mi-proyecto-docs.md', size: '48 KB' },
+                html: { file: 'mi-proyecto-docs.html', size: '312 KB' }
+            };
+
+            let busy = false;          // true mientras un comando se está ejecutando
+            let userTouched = false;   // el visitante ya interactuó: no lanzar la demo automática
+            let autoStarted = false;
+            const history = [];
+            let historyIndex = 0;
+
+            // ---------------------------------------------------------------
+            // Helpers de renderizado
+            // ---------------------------------------------------------------
+            function el(tag, className, text) {
+                const node = document.createElement(tag);
+                if (className) node.className = className;
+                if (text !== undefined) node.textContent = text;
+                return node;
+            }
+            function icon(name, className) {
+                return el('span', 'material-symbols-outlined term-icon ' + (className || ''), name);
+            }
+            function scrollEnd() { body.scrollTop = body.scrollHeight; }
+
+            /** Agrega una línea. Cada parte es un string, [texto, clase] o un Node. */
+            function line(parts, className) {
+                const row = el('div', 'term-line ' + (className || ''));
+                (parts || []).forEach((part) => {
+                    if (part instanceof Node) row.appendChild(part);
+                    else if (Array.isArray(part)) row.appendChild(el('span', part[1], part[0]));
+                    else row.appendChild(document.createTextNode(part));
+                });
+                out.appendChild(row);
+                scrollEnd();
+                return row;
+            }
+            /** Línea de resultado correcto, con icono de check y sangría. */
+            function ok(parts) {
+                return line([icon('check_circle', 'term-ok'), ' '].concat(parts), 'term-indent');
+            }
+            function note(text) { return line([[text, 'term-dim']], 'term-indent'); }
+            function blank() { return line([''], ''); }
+            /** Enlace-comando: al hacer clic ejecuta ese comando en la terminal. */
+            function cmdLink(command, label) {
+                const btn = el('button', 'term-link', label || command);
+                btn.type = 'button';
+                btn.dataset.cmd = command;
+                return btn;
+            }
+            /** Barra de progreso animada durante `duration` ms. */
+            async function progress(duration) {
+                const bar = el('div', 'term-progress');
+                const fill = el('span');
+                bar.appendChild(fill);
+                out.appendChild(bar);
+                scrollEnd();
+                const steps = 10;
+                for (let i = 1; i <= steps; i++) {
+                    fill.style.width = (i * 100 / steps) + '%';
+                    await sleep(duration / steps);
+                }
+            }
+            /** Fila con etiqueta, medidor y valor (usada por "quality"). */
+            function meter(label, percent, value) {
+                const bar = el('span', 'term-meter');
+                const fill = el('span');
+                fill.style.width = percent + '%';
+                bar.appendChild(fill);
+                return line([label.padEnd(24, ' '), bar, [value, 'text-primary']], 'term-indent');
+            }
+
+            // ---------------------------------------------------------------
+            // Comandos
+            // ---------------------------------------------------------------
+            const COMMANDS = {
+                help: {
+                    usage: 'help',
+                    run() {
+                        line([[tr('Comandos disponibles (haz clic en uno para ejecutarlo):', 'Available commands (click one to run it):'), 'term-dim']]);
+                        const rows = [
+                            ['analyze ./mi-proyecto', 'analyze [ruta]', tr('Escanea un proyecto de ejemplo', 'Scan a sample project')],
+                            ['endpoints', 'endpoints', tr('Detecta rutas API (Flask, FastAPI, Express)', 'Detect API routes (Flask, FastAPI, Express)')],
+                            ['quality', 'quality', tr('Métricas de calidad del código', 'Code quality metrics')],
+                            ['export pdf', 'export <pdf|md|html>', tr('Exporta la documentación', 'Export the documentation')],
+                            ['languages', 'languages', tr('Lenguajes soportados', 'Supported languages')],
+                            ['plans', 'plans', tr('Planes y precios (MXN)', 'Plans and pricing (MXN)')],
+                            ['signup', 'signup', tr('Crea tu cuenta gratis', 'Create your free account')],
+                            ['login', 'login', tr('Inicia sesión', 'Sign in')],
+                            ['theme', 'theme', tr('Cambia entre modo claro y oscuro', 'Switch light / dark mode')],
+                            ['clear', 'clear', tr('Limpia la terminal', 'Clear the terminal')]
+                        ];
+                        rows.forEach(([command, label, description]) => {
+                            // El relleno va fuera del enlace para que el subrayado no lo cubra
+                            line(['  ', cmdLink(command, label), ' '.repeat(Math.max(1, 24 - label.length)), [description, 'term-dim']]);
+                        });
+                    }
+                },
+
+                analyze: {
+                    usage: 'analyze [ruta]',
+                    async run(args) {
+                        const target = (args[0] || SAMPLE.path).slice(0, 60);
+                        line([[tr('Escaneando estructura del proyecto ', 'Scanning project structure '), 'term-dim'], [target, 'text-secondary'], [' ...', 'term-dim']]);
+                        await progress(1100);
+                        ok([[SAMPLE.files + ' ' + tr('archivos', 'files'), 'text-primary'], tr(' detectados en ' + SAMPLE.dirs + ' directorios', ' found in ' + SAMPLE.dirs + ' directories')]);
+                        await sleep(220);
+                        ok([tr('Lenguaje principal: ', 'Main language: '), ['Python', 'text-primary'], tr(' · secundario: ', ' · secondary: '), ['JavaScript', 'text-secondary']]);
+                        await sleep(220);
+                        ok([[SAMPLE.funcs + ' ' + tr('funciones', 'functions'), 'text-primary'], ' · ', [SAMPLE.classes + ' ' + tr('clases', 'classes'), 'text-primary'], ' · ', [SAMPLE.endpoints + ' ' + tr('endpoints API', 'API endpoints'), 'text-secondary']]);
+                        await sleep(220);
+                        ok([tr('Score de calidad: ', 'Quality score: '), [SAMPLE.score + '/100', 'text-primary']]);
+                        await sleep(220);
+                        ok([tr('Documentación generada en ', 'Documentation generated in '), ['README.md · API.md · docs/', 'text-secondary']]);
+                        blank();
+                        note(tr('Demo con datos de ejemplo. Prueba: ', 'Demo with sample data. Try: '));
+                        line(['  ', cmdLink('endpoints'), ' · ', cmdLink('quality'), ' · ', cmdLink('export pdf'), ' · ', cmdLink('signup', tr('signup (analiza tu código real)', 'signup (analyze your real code)'))], '');
+                    }
+                },
+
+                endpoints: {
+                    usage: 'endpoints',
+                    async run() {
+                        line([[tr('Buscando rutas con AST...', 'Looking for routes with AST...'), 'term-dim']]);
+                        await sleep(600);
+                        ok([tr('Framework detectado: ', 'Framework detected: '), ['Flask', 'text-primary']]);
+                        const routes = [
+                            ['GET', '/api/users', 'text-primary'],
+                            ['POST', '/api/users', 'term-ok'],
+                            ['GET', '/api/users/<id>', 'text-primary'],
+                            ['PUT', '/api/users/<id>', 'text-tertiary'],
+                            ['DELETE', '/api/users/<id>', 'text-error'],
+                            ['POST', '/api/auth/login', 'term-ok'],
+                            ['GET', '/api/projects', 'text-primary'],
+                            ['POST', '/api/reports/export', 'term-ok']
+                        ];
+                        for (const [method, path, color] of routes) {
+                            line([[method, 'term-method ' + color], path], 'term-indent');
+                            await sleep(90);
+                        }
+                        note(tr('... y ' + (SAMPLE.endpoints - routes.length) + ' endpoints más', '... and ' + (SAMPLE.endpoints - routes.length) + ' more endpoints'));
+                        ok([tr('Esquema OpenAPI generado en ', 'OpenAPI schema generated in '), ['docs/openapi.json', 'text-secondary']]);
+                    }
+                },
+
+                quality: {
+                    usage: 'quality',
+                    async run() {
+                        line([[tr('Calculando métricas de calidad...', 'Computing quality metrics...'), 'term-dim']]);
+                        await progress(800);
+                        meter(tr('Funciones documentadas', 'Documented functions'), 82, '82%');
+                        await sleep(160);
+                        meter(tr('Complejidad ciclomática', 'Cyclomatic complexity'), 76, tr('3.8 (buena)', '3.8 (good)'));
+                        await sleep(160);
+                        meter(tr('Code smells', 'Code smells'), 90, tr('5 detectados', '5 found'));
+                        await sleep(160);
+                        ok([tr('Score de calidad: ', 'Quality score: '), [SAMPLE.score + '/100', 'text-primary']]);
+                    }
+                },
+
+                export: {
+                    usage: 'export <pdf|md|html>',
+                    async run(args) {
+                        let format = (args[0] || '').toLowerCase();
+                        if (format === 'markdown') format = 'md';
+                        if (!EXPORTS[format]) {
+                            line([tr('Formatos disponibles: ', 'Available formats: '), cmdLink('export pdf', 'pdf'), ' · ', cmdLink('export md', 'md'), ' · ', cmdLink('export html', 'html')]);
+                            note(tr('Uso: export <pdf|md|html>', 'Usage: export <pdf|md|html>'));
+                            return;
+                        }
+                        line([[tr('Renderizando documentación en ', 'Rendering documentation as '), 'term-dim'], [format.toUpperCase(), 'text-secondary'], [' ...', 'term-dim']]);
+                        await progress(900);
+                        ok([[EXPORTS[format].file, 'text-primary'], ' (' + EXPORTS[format].size + ') ', tr('generado', 'generated')]);
+                        note(tr('En tu cuenta se descarga con un clic. ', 'In your account it downloads in one click. '));
+                        line(['  ', cmdLink('signup', tr('Crear cuenta gratis', 'Create a free account'))]);
+                    }
+                },
+
+                languages: {
+                    usage: 'languages',
+                    async run() {
+                        line([[tr('Lenguajes que AutoDocs reconoce:', 'Languages AutoDocs recognizes:'), 'term-dim']]);
+                        const groups = [
+                            ['Web', 'JavaScript · TypeScript · React · PHP · Ruby · HTML · CSS'],
+                            [tr('Sistemas', 'Systems'), 'C · C++ · C# · Go · Rust · Zig'],
+                            ['JVM', 'Java · Kotlin · Scala · Groovy · Clojure'],
+                            [tr('Móvil', 'Mobile'), 'Swift · Dart · Objective-C'],
+                            [tr('Datos', 'Data'), 'Python · R · Julia · SQL'],
+                            ['Shell', 'Bash · Zsh · PowerShell']
+                        ];
+                        for (const [name, list] of groups) {
+                            line([[name.padEnd(10, ' '), 'text-primary'], list], 'term-indent');
+                            await sleep(80);
+                        }
+                        note(tr('... y más formatos de configuración (YAML, JSON, TOML).', '... and more config formats (YAML, JSON, TOML).'));
+                    }
+                },
+
+                plans: {
+                    usage: 'plans',
+                    async run() {
+                        line([[tr('Planes (precios en MXN):', 'Plans (prices in MXN):'), 'term-dim']]);
+                        const plans = [
+                            [tr('Gratuito', 'Free'), '$0', tr('3 proyectos · análisis básico · PDF', '3 projects · basic analysis · PDF'), 'text-primary'],
+                            ['Pro', '$350/' + tr('mes', 'mo'), tr('20 proyectos · documentación con IA', '20 projects · AI documentation'), 'text-primary'],
+                            ['Enterprise', '$850/' + tr('mes', 'mo'), tr('ilimitado · API dedicada · soporte 24/7', 'unlimited · dedicated API · 24/7 support'), 'text-secondary']
+                        ];
+                        for (const [name, price, detail, color] of plans) {
+                            line([icon('check_circle', color), ' ', [name.padEnd(11, ' '), 'term-cmd'], [price.padEnd(10, ' '), color], [detail, 'term-dim']], 'term-indent');
+                            await sleep(110);
+                        }
+                        line(['  ', cmdLink('signup', tr('Empezar gratis', 'Start for free'))]);
+                    }
+                },
+
+                signup: {
+                    usage: 'signup',
+                    async run() {
+                        line([[tr('Abriendo registro...', 'Opening sign up...'), 'term-dim']]);
+                        await sleep(350);
+                        openModal('register');
+                    }
+                },
+
+                login: {
+                    usage: 'login',
+                    async run() {
+                        line([[tr('Abriendo inicio de sesión...', 'Opening sign in...'), 'term-dim']]);
+                        await sleep(350);
+                        openModal('login');
+                    }
+                },
+
+                theme: {
+                    usage: 'theme',
+                    run() {
+                        document.getElementById('themeButton').click();
+                        const dark = document.body.getAttribute('data-theme') === 'dark';
+                        ok([tr('Tema cambiado a modo ', 'Theme switched to '), [dark ? tr('oscuro', 'dark mode') : tr('claro', 'light mode'), 'text-primary']]);
+                    }
+                },
+
+                clear: {
+                    usage: 'clear',
+                    run() { out.textContent = ''; }
+                }
+            };
+
+            // ---------------------------------------------------------------
+            // Ejecución
+            // ---------------------------------------------------------------
+            function setBusy(state) {
+                busy = state;
+                input.readOnly = state;
+                win.querySelectorAll('.term-chip').forEach((chip) => { chip.disabled = state; });
+            }
+
+            /** Ejecuta lo que escribió el visitante (se ignora si ya hay un comando en curso). */
+            function execute(raw) {
+                const text = raw.trim();
+                if (!text || busy) return;
+                runCommand(text);
+            }
+
+            /** Ejecuta un comando ya validado y administra el estado "ocupado". */
+            async function runCommand(text) {
+                setBusy(true);
+                history.push(text);
+                historyIndex = history.length;
+
+                line([['$', 'term-prompt'], ' ', [text.slice(0, 120), 'term-cmd']]);
+
+                const parts = text.split(/\s+/);
+                if (parts[0].toLowerCase() === 'autodocs') parts.shift();
+                const name = (parts.shift() || 'help').toLowerCase();
+
+                try {
+                    if (Object.prototype.hasOwnProperty.call(COMMANDS, name)) {
+                        await COMMANDS[name].run(parts);
+                    } else {
+                        line([[tr('comando no reconocido: ', 'command not recognized: '), 'text-error'], [name.slice(0, 40), 'term-cmd']]);
+                        line([tr('Escribe ', 'Type '), cmdLink('help'), tr(' para ver los comandos disponibles.', ' to see the available commands.')]);
+                    }
+                } catch (err) {
+                    line([[tr('Error al ejecutar el comando.', 'Error running the command.'), 'text-error']]);
+                } finally {
+                    setBusy(false);
+                    scrollEnd();
+                }
+            }
+
+            /** Escribe el comando letra por letra y lo ejecuta (clic en atajos o demo automática). */
+            async function typeAndRun(command) {
+                if (busy) return;
+                setBusy(true);   // bloquea la entrada mientras se "teclea" el comando
+                input.value = '';
+                for (const ch of command) {
+                    input.value += ch;
+                    await sleep(26);
+                }
+                await sleep(200);
+                input.value = '';
+                await runCommand(command);
+            }
+
+            function welcome() {
+                line([icon('terminal', 'text-primary'), ' ', ['AutoDocs CLI', 'term-cmd'], [' · ' + tr('demo interactiva', 'interactive demo'), 'term-dim']]);
+                line([[tr('Escribe un comando o usa los atajos de abajo. ', 'Type a command or use the shortcuts below. '), 'term-dim'], cmdLink('help')]);
+                blank();
+            }
+
+            // ---------------------------------------------------------------
+            // Eventos
+            // ---------------------------------------------------------------
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                userTouched = true;
+                const value = input.value;
+                input.value = '';
+                execute(value);
+            });
+
+            input.addEventListener('keydown', (event) => {
+                userTouched = true;
+                if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    if (historyIndex > 0) input.value = history[--historyIndex];
+                } else if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    historyIndex = Math.min(historyIndex + 1, history.length);
+                    input.value = history[historyIndex] || '';
+                } else if (event.key === 'Tab') {
+                    event.preventDefault();
+                    const typed = input.value.trim().toLowerCase();
+                    if (!typed || typed.includes(' ')) return;
+                    const matches = Object.keys(COMMANDS).filter((name) => name.startsWith(typed));
+                    if (matches.length === 1) {
+                        input.value = matches[0] + ' ';
+                    } else if (matches.length > 1) {
+                        line([['$', 'term-prompt'], ' ', [typed, 'term-cmd']]);
+                        line([[matches.join('   '), 'term-dim']], 'term-indent');
+                    }
+                } else if (event.key === 'l' && event.ctrlKey) {
+                    event.preventDefault();
+                    COMMANDS.clear.run();
+                }
+            });
+
+            // Clic en un comando de la salida o en un atajo
+            win.addEventListener('click', (event) => {
+                const trigger = event.target.closest('[data-cmd]');
+                if (trigger) {
+                    userTouched = true;
+                    typeAndRun(trigger.dataset.cmd);
+                    return;
+                }
+                if (event.target.closest('[data-term-action="restart"]')) {
+                    if (busy) return;
+                    userTouched = true;
+                    out.textContent = '';
+                    welcome();
+                    typeAndRun('analyze ./mi-proyecto');
+                    return;
+                }
+                // Clic en el cuerpo de la terminal: enfocar la entrada (salvo si se selecciona texto)
+                if (event.target.closest('#termBody') && !String(window.getSelection()).length) {
+                    input.focus({ preventScroll: true });
+                }
+            });
+
+            // Mensaje de bienvenida inmediato y demo automática al ver la terminal
+            welcome();
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting && !autoStarted && !userTouched) {
+                            autoStarted = true;
+                            observer.disconnect();
+                            typeAndRun('analyze ./mi-proyecto');
+                        }
+                    });
+                }, { threshold: 0.45 });
+                observer.observe(win);
+            }
+        })();
 
         // Cerrar modal con tecla Escape
         document.addEventListener('keydown', (e) => {
