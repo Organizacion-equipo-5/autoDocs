@@ -430,79 +430,78 @@
             </div>
 
             <!-- ============================================================
-                 TARJETAS DE PLANES (3 columnas en desktop)
+                 TARJETAS DE PLANES (4 columnas en desktop)
                  ============================================================ -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-in" style="animation-delay:.25s;">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 stagger-in" style="animation-delay:.25s;">
 
-                <!-- ==========================================================
-                     PLAN FREE
-                     ========================================================== -->
                 <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
                     <div>
-                        <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant/60 mb-3">Free</p>
+                        <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant/60 mb-3">Gratuito</p>
                         <div class="flex items-end gap-1">
-                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$0</span>
-                            <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">Gratis</span>
                         </div>
-                        <p class="text-on-surface-variant/60 text-sm mt-2">Para proyectos personales y pruebas.</p>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Para empezar y probar AutoDocs AI.</p>
                     </div>
                     <div class="border-t border-outline-variant/20"></div>
-                    <!-- Lista de caracteristicas del plan Free -->
                     <ul class="flex flex-col gap-3 flex-1 text-sm">
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>3 proyectos</li>
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
                         <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Mejoras con IA</li>
                         <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
                     </ul>
-                    <!-- Boton para seleccionar plan Free -->
-                    <button onclick="openModal('free')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">
-                        Seleccionar Free
-                    </button>
+                    <button onclick="openModal('free')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">Seleccionar Gratuito</button>
                 </div>
 
-                <!-- ==========================================================
-                     PLAN PRO (DESTACADO)
-                     ========================================================== -->
-                <div class="glass rounded-3xl p-8 border plan-featured flex flex-col gap-6 relative">
-                    <!-- Badge "Mas popular" en la parte superior -->
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold tracking-wide shadow-lg">Mas popular</div>
+                <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
                     <div>
-                        <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Pro</p>
+                        <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Estudiante</p>
                         <div class="flex items-end gap-1">
-                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$350</span>
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$99</span>
                             <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
                         </div>
-                        <p class="text-on-surface-variant/60 text-sm mt-2">Para desarrolladores y equipos.</p>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Para aprender y proyectos académicos.</p>
                     </div>
-                    <div class="border-t border-primary/20"></div>
-                    <!-- Lista de caracteristicas del plan Pro -->
+                    <div class="border-t border-outline-variant/20"></div>
                     <ul class="flex flex-col gap-3 flex-1 text-sm">
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>20 proyectos</li>
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA</li>
                         <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>Soporte prioritario</li>
-                        <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>SSO / CI/CD</li>
                     </ul>
-                    <!-- Boton para suscribirse a Pro -->
-                    <button onclick="openModal('pro')" class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">
-                        Suscribirse a Pro
-                    </button>
+                    <button onclick="openModal('pro')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-outline-variant/20 text-on-surface-variant hover:text-primary transition-all">Suscribirse a Estudiante</button>
                 </div>
 
-                <!-- ==========================================================
-                     PLAN ENTERPRISE
-                     ========================================================== -->
-                <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
+                <div class="glass rounded-3xl p-8 border plan-featured flex flex-col gap-6 relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold tracking-wide shadow-lg">Mas popular</div>
                     <div>
-                        <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-3">Enterprise</p>
+                        <p class="text-xs uppercase tracking-widest font-bold text-primary mb-3">Equipo de trabajo</p>
                         <div class="flex items-end gap-1">
-                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$850</span>
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$899</span>
                             <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
                         </div>
-                        <p class="text-on-surface-variant/60 text-sm mt-2">Equipos grandes, acceso ilimitado.</p>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Para equipos de desarrollo.</p>
+                    </div>
+                    <div class="border-t border-primary/20"></div>
+                    <ul class="flex flex-col gap-3 flex-1 text-sm">
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>20 proyectos</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Mejoras con IA</li>
+                        <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Soporte prioritario</li>
+                        <li class="flex items-center gap-2 text-on-surface-variant/40"><span class="material-symbols-outlined text-base">cancel</span>SSO / CI/CD</li>
+                    </ul>
+                    <button onclick="openModal('pro')" class="w-full py-3 rounded-xl text-sm font-semibold bg-primary text-white hover:opacity-90 transition-all active:scale-95 shadow-[0_4px_20px_rgba(56,189,248,0.3)]">Suscribirse a Equipo de trabajo</button>
+                </div>
+
+                <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover flex flex-col gap-6">
+                    <div>
+                        <p class="text-xs uppercase tracking-widest font-bold text-secondary mb-3">Empresarial</p>
+                        <div class="flex items-end gap-1">
+                            <span class="text-5xl font-bold tracking-tighter text-on-surface">$1,299</span>
+                            <span class="text-on-surface-variant/60 text-sm mb-2">/mes</span>
+                        </div>
+                        <p class="text-on-surface-variant/60 text-sm mt-2">Para organizaciones y grandes proyectos.</p>
                     </div>
                     <div class="border-t border-outline-variant/20"></div>
-                    <!-- Lista de caracteristicas del plan Enterprise -->
                     <ul class="flex flex-col gap-3 flex-1 text-sm">
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Proyectos ilimitados</li>
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Exportar PDF</li>
@@ -510,10 +509,7 @@
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>Soporte prioritario 24/7</li>
                         <li class="flex items-center gap-2 text-on-surface"><span class="material-symbols-outlined text-primary text-base">check_circle</span>SSO / integracion CI/CD</li>
                     </ul>
-                    <!-- Boton para suscribirse a Enterprise -->
-                    <button onclick="openModal('enterprise')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/5 transition-all">
-                        Suscribirse a Enterprise
-                    </button>
+                    <button onclick="openModal('enterprise')" class="w-full py-3 glass glass-hover rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/5 transition-all">Suscribirse a Empresarial</button>
                 </div>
             </div>
 

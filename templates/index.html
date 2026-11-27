@@ -1239,7 +1239,7 @@ CUERPO DE LA PÁGINA
     SECCIÓN DE PLANES
     ====================================================================== -->
     <!-- 
-        Muestra los tres planes de suscripción: Gratuito, Pro y Enterprise,
+        Muestra los cuatro planes de suscripción: Gratuito, Estudiante, Equipo de trabajo y Empresarial,
         con sus características y precios.
     -->
     <section id="pricing" class="relative z-10 max-w-6xl mx-auto py-28 px-8">
@@ -1249,12 +1249,13 @@ CUERPO DE LA PÁGINA
             <p class="text-on-surface-variant/60 max-w-lg mx-auto">Comienza gratis y escala cuando lo necesites.</p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Plan Gratuito -->
             <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-on-surface mb-2">Gratuito</h3>
-                    <p class="text-4xl font-bold text-primary mb-1">$0<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                    <p class="text-4xl font-bold text-primary mb-1">Gratis</p>
+                    <p class="text-sm text-on-surface-variant/60">Para empezar y probar AutoDocs AI</p>
                 </div>
                 <ul class="space-y-3 mb-8">
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> 3 proyectos</li>
@@ -1263,14 +1264,29 @@ CUERPO DE LA PÁGINA
                 </ul>
                 <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register', 'free')">Empezar gratis</button>
             </div>
-            
-            <!-- Plan Pro (destacado) -->
+
+            <!-- Plan Estudiante -->
+            <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Estudiante</h3>
+                    <p class="text-4xl font-bold text-primary mb-1">$99<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                    <p class="text-sm text-on-surface-variant/60">Para aprender y proyectos académicos</p>
+                </div>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> 20 proyectos</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis avanzado</li>
+                    <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Documentación con IA</li>
+                </ul>
+                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register', 'pro')">Comenzar</button>
+            </div>
+
+            <!-- Plan Equipo de trabajo -->
             <div class="glass rounded-3xl p-8 border border-primary/40 plan-featured stagger-in relative">
-                <!-- Badge "POPULAR" flotante -->
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 whitespace-nowrap bg-primary text-white text-xs font-bold px-3 py-1 rounded-full"><span class="material-symbols-outlined text-sm">star</span>POPULAR</div>
                 <div class="text-center mb-6">
-                    <h3 class="text-2xl font-bold text-on-surface mb-2">Pro</h3>
-                    <p class="text-4xl font-bold text-primary mb-1">$350<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Equipo de trabajo</h3>
+                    <p class="text-4xl font-bold text-primary mb-1">$899<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                    <p class="text-sm text-on-surface-variant/60">Para equipos de desarrollo</p>
                 </div>
                 <ul class="space-y-3 mb-8">
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> 20 proyectos</li>
@@ -1280,12 +1296,13 @@ CUERPO DE LA PÁGINA
                 </ul>
                 <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register', 'pro')">Comenzar</button>
             </div>
-            
-            <!-- Plan Enterprise -->
+
+            <!-- Plan Empresarial -->
             <div class="glass rounded-3xl p-8 border border-outline-variant/20 glass-hover stagger-in">
                 <div class="text-center mb-6">
-                    <h3 class="text-2xl font-bold text-on-surface mb-2">Enterprise</h3>
-                    <p class="text-4xl font-bold text-secondary mb-1">$850<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                    <h3 class="text-2xl font-bold text-on-surface mb-2">Empresarial</h3>
+                    <p class="text-4xl font-bold text-secondary mb-1">$1,299<span class="text-lg text-on-surface-variant/60">/mes</span></p>
+                    <p class="text-sm text-on-surface-variant/60">Para organizaciones y grandes proyectos</p>
                 </div>
                 <ul class="space-y-3 mb-8">
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-secondary text-base">check_circle</span> Proyectos ilimitados</li>
@@ -2984,12 +3001,13 @@ CUERPO DE LA PÁGINA
                     async run() {
                         line([[tr('Planes (precios en MXN):', 'Plans (prices in MXN):'), 'term-dim']]);
                         const plans = [
-                            [tr('Gratuito', 'Free'), '$0', tr('3 proyectos · análisis básico · PDF', '3 projects · basic analysis · PDF'), 'text-primary'],
-                            ['Pro', '$350/' + tr('mes', 'mo'), tr('20 proyectos · documentación con IA', '20 projects · AI documentation'), 'text-primary'],
-                            ['Enterprise', '$850/' + tr('mes', 'mo'), tr('ilimitado · API dedicada · soporte 24/7', 'unlimited · dedicated API · 24/7 support'), 'text-secondary']
+                            [tr('Gratuito', 'Free'), tr('Gratis', 'Free'), tr('3 proyectos · análisis básico · PDF', '3 projects · basic analysis · PDF'), 'text-primary'],
+                            [tr('Estudiante', 'Student'), '$99/' + tr('mes', 'mo'), tr('para aprender y proyectos académicos', 'for learning and academic projects'), 'text-primary'],
+                            [tr('Equipo de trabajo', 'Team'), '$899/' + tr('mes', 'mo'), tr('para equipos de desarrollo', 'for development teams'), 'text-primary'],
+                            [tr('Empresarial', 'Enterprise'), '$1,299/' + tr('mes', 'mo'), tr('para organizaciones y grandes proyectos', 'for organizations and large projects'), 'text-secondary']
                         ];
                         for (const [name, price, detail, color] of plans) {
-                            line([icon('check_circle', color), ' ', [name.padEnd(11, ' '), 'term-cmd'], [price.padEnd(10, ' '), color], [detail, 'term-dim']], 'term-indent');
+                            line([icon('check_circle', color), ' ', [name.padEnd(18, ' '), 'term-cmd'], [price.padEnd(11, ' '), color], [detail, 'term-dim']], 'term-indent');
                             await sleep(110);
                         }
                         line(['  ', cmdLink('signup', tr('Empezar gratis', 'Start for free'))]);
