@@ -988,12 +988,16 @@
             if (cachedPlan) {
                 var planNames = {
                     free: i18n('profile.freePlan'),
-                    pro: i18n('profile.proPlan'),
+                    student: i18n('profile.studentPlan'),
+                    team: i18n('profile.teamPlan'),
+                    pro: i18n('profile.teamPlan'),
                     enterprise: i18n('profile.enterprisePlan')
                 };
                 var planDetails = {
                     free: i18n('profile.freeDetails'),
-                    pro: i18n('profile.proDetails'),
+                    student: i18n('profile.studentDetails'),
+                    team: i18n('profile.teamDetails'),
+                    pro: i18n('profile.teamDetails'),
                     enterprise: i18n('profile.enterpriseDetails')
                 };
                 document.getElementById('currentPlanName').textContent = planNames[cachedPlan] || cachedPlan;
@@ -1252,21 +1256,29 @@
                     cachedPlan = planData.plan;
                     var planNames = { 
                         free: i18n('profile.freePlan'), 
-                        pro: i18n('profile.proPlan'), 
+                        student: i18n('profile.studentPlan'),
+                        team: i18n('profile.teamPlan'),
+                        pro: i18n('profile.teamPlan'),
                         enterprise: i18n('profile.enterprisePlan') 
                     };
                     var planDetails = {
                         free: i18n('profile.freeDetails'),
-                        pro: i18n('profile.proDetails'),
+                        student: i18n('profile.studentDetails'),
+                        team: i18n('profile.teamDetails'),
+                        pro: i18n('profile.teamDetails'),
                         enterprise: i18n('profile.enterpriseDetails')
                     };
                     var planPrices = { 
                         free: '$0', 
-                        pro: '$350', 
-                        enterprise: '$850' 
+                        student: '$99', 
+                        team: '$899', 
+                        pro: '$899', 
+                        enterprise: '$1,299' 
                     };
                     var projectLimits = { 
                         free: 3, 
+                        student: 20, 
+                        team: 20, 
                         pro: 20, 
                         enterprise: -1 
                     };

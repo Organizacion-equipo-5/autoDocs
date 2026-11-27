@@ -7,30 +7,40 @@ payments_bp = Blueprint('payments', __name__)
 
 PLANS = {
     "free": {
-        "name": "Free",
+        "name": "Gratuito",
         "price": 0,
         "projects_limit": 3,
         "analyses_per_month": 10,
         "export_pdf": False,
         "ai_enhanced": False,
     },
-    "pro": {
-        "name": "Pro",
-        "price": 350,
+    "student": {
+        "name": "Estudiante",
+        "price": 99,
+        "projects_limit": 20,
+        "analyses_per_month": 100,
+        "export_pdf": True,
+        "ai_enhanced": True,
+    },
+    "team": {
+        "name": "Equipo de trabajo",
+        "price": 899,
         "projects_limit": 20,
         "analyses_per_month": 100,
         "export_pdf": True,
         "ai_enhanced": True,
     },
     "enterprise": {
-        "name": "Enterprise",
-        "price": 850,
+        "name": "Empresarial",
+        "price": 1299,
         "projects_limit": -1,
         "analyses_per_month": -1,
         "export_pdf": True,
         "ai_enhanced": True,
-    }
+    },
 }
+# "pro" se conserva como alias del plan "team" para usuarios que ya lo tenían guardado.
+PLANS["pro"] = dict(PLANS["team"])
 
 
 @payments_bp.route('/plans', methods=['GET'])
@@ -99,4 +109,4 @@ def cancel():
             "plan_updated_at": datetime.utcnow().isoformat()
         }}
     )
-    return jsonify({"message": "Suscripción cancelada, regresaste al plan Free"}), 200
+    return jsonify({"message": "Suscripción cancelada, regresaste al plan Gratuito"}), 200

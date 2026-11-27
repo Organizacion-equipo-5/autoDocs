@@ -1369,7 +1369,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
     ============================================================ -->
     <!-- 
         Modal que se muestra cuando el usuario alcanza el límite de proyectos.
-        Sugiere actualizar al plan Pro.
+        Sugiere actualizar a un plan de pago.
     -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="limitModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
@@ -1381,7 +1381,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
                 <div class="w-16 h-16 rounded-full bg-error/10 border border-error/30 flex items-center justify-center">
                     <span class="material-symbols-outlined text-error text-3xl">block</span>
                 </div>
-                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Has alcanzado tu límite de 3 proyectos en el plan Gratuito. Te recomendamos actualizar al plan Pro para crear hasta 20 proyectos y acceder a más funciones.</p>
+                <p id="limitMessage" class="text-center text-on-surface-variant/60 text-sm" style="color: #BFBDBD;">Has alcanzado tu límite de 3 proyectos en el plan Gratuito. Te recomendamos actualizar a un plan de pago para crear hasta 20 proyectos y acceder a más funciones.</p>
             </div>
             <!-- Botón para ver planes -->
             <button onclick="closeLimitModal(); window.location.href='/pricing'" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-all">
@@ -1419,7 +1419,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
     ============================================================ -->
     <!-- 
         Modal de confirmación para sincronizar un proyecto con GitHub.
-        Solo disponible para planes Pro y Enterprise.
+        Solo disponible para planes de pago.
     -->
     <div class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center" id="syncConfirmModal">
         <div class="glass p-8 rounded-3xl w-full max-w-md modal-anim relative border border-outline-variant/20 shadow-[0_0_60px_rgba(56,189,248,0.15)]">
@@ -1892,9 +1892,10 @@ CUERPO PRINCIPAL DE LA PÁGINA
          */
         const planName = document.getElementById('plan-name');
         if (planName && user.plan) {
-            const planDisplay = user.plan === 'free' ? 'Free' : 
-                               user.plan === 'pro' ? 'Pro' : 
-                               user.plan === 'enterprise' ? 'Enterprise' : 'Free';
+            const planDisplay = user.plan === 'free' ? 'Gratuito' : 
+                               user.plan === 'student' ? 'Estudiante' : 
+                               (user.plan === 'team' || user.plan === 'pro') ? 'Equipo de trabajo' : 
+                               user.plan === 'enterprise' ? 'Empresarial' : 'Gratuito';
             planName.textContent = planDisplay;
         }
 
@@ -2363,7 +2364,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
 
             // Obtener plan del usuario para determinar funcionalidades disponibles
             const userPlan = sessionStorage.getItem('userPlan') || 'free';
-            const canSync = userPlan !== 'free'; // Solo Pro/Enterprise pueden sincronizar
+            const canSync = userPlan !== 'free'; // Solo los planes de pago pueden sincronizar
 
             // Generar HTML para cada tarjeta de proyecto
             grid.innerHTML = sorted.map(p => {
@@ -2385,7 +2386,7 @@ CUERPO PRINCIPAL DE LA PÁGINA
                                 <button onclick="event.stopPropagation(); openEditModal('${p._id}', '${p.name}', '${p.description || ''}')" class="action-icon" title="Editar proyecto">
                                     <span class="material-symbols-outlined">edit</span>
                                 </button>
-                                <!-- Botón Sincronizar (solo para planes Pro/Enterprise) -->
+                                <!-- Botón Sincronizar (solo para planes de pago) -->
                                 ${canSync && p.github_url ? `
                                 <button onclick="event.stopPropagation(); syncProject('${p._id}', '${p.name}', event)" class="action-icon" title="Actualizar desde GitHub">
                                     <span class="material-symbols-outlined">sync</span>
@@ -3079,18 +3080,24 @@ window.addEventListener('load', () => {
                     // Mapeo de nombres y colores de planes
                     const planNames = {
                         'free': 'Gratuito',
-                        'pro': 'Pro',
-                        'enterprise': 'Enterprise'
+                        'student': 'Estudiante',
+                        'team': 'Equipo de trabajo',
+                        'pro': 'Equipo de trabajo',
+                        'enterprise': 'Empresarial'
                     };
                     
                     const planColors = {
                         'free': 'text-gray-500',
+                        'student': 'text-primary',
+                        'team': 'text-primary',
                         'pro': 'text-primary',
                         'enterprise': 'text-amber-500'
                     };
 
                     const planDetails = {
                         free: '3 proyectos · Análisis básico · Documentación automática',
+                        student: '20 proyectos · Análisis avanzado · PDF + IA',
+                        team: '20 proyectos · Análisis avanzado · PDF + IA',
                         pro: '20 proyectos · Análisis avanzado · PDF + IA',
                         enterprise: 'Proyectos ilimitados · Análisis ilimitados · Soporte prioritario'
                     };

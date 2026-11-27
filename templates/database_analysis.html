@@ -385,7 +385,7 @@ html.dark .history-item .h-date { color:rgba(148,163,184,.7); }
                         </div>
                         <div>
                             <h2 class="text-lg font-bold tracking-tight text-on-surface">Estado del plan</h2>
-                            <p class="text-muted text-xs">Solo Pro y Enterprise pueden analizar.</p>
+                            <p class="text-muted text-xs">Solo los planes de pago pueden analizar.</p>
                         </div>
                     </div>
 
@@ -529,7 +529,7 @@ async function initDatabaseAnalysis() {
         if (!res.ok) throw new Error('No autorizado');
         const data = await res.json();
         const plan = data.plan || 'free';
-        const planNames = { free: 'Plan Gratuito', pro: 'Plan Pro', enterprise: 'Plan Enterprise' };
+        const planNames = { free: 'Plan Gratuito', student: 'Plan Estudiante', team: 'Plan Equipo de trabajo', pro: 'Plan Equipo de trabajo', enterprise: 'Plan Empresarial' };
         planLabel.textContent = planNames[plan] || plan;
 
         if (plan === 'free') {

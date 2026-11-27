@@ -300,8 +300,8 @@
             const res = await fetch('/api/admin/users', { headers: authHeaders() });
             if (!res.ok) return;
             const users = await res.json();
-            const planNames = { free: 'Gratuito', pro: 'Pro', enterprise: 'Enterprise' };
-            const planColors = { free: 'pending', pro: 'completed', enterprise: 'error' };
+            const planNames = { free: 'Gratuito', student: 'Estudiante', team: 'Equipo de trabajo', pro: 'Equipo de trabajo', enterprise: 'Empresarial' };
+            const planColors = { free: 'pending', student: 'completed', team: 'completed', pro: 'completed', enterprise: 'error' };
             document.getElementById('users-table').innerHTML = users.map(u => `
                         <tr class="border-b border-outline-variant/20 hover:bg-surface-container/30 transition">
                             <td class="p-4 font-medium">${escapeHtml(u.name)}</td><td class="p-4">${escapeHtml(u.email)}</td><td class="p-4"><span class="badge ${u.role === 'admin' ? 'completed' : 'pending'}">${u.role}</span></td>
