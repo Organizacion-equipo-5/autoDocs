@@ -1277,7 +1277,7 @@ CUERPO DE LA PÁGINA
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Análisis avanzado</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Documentación con IA</li>
                 </ul>
-                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register', 'pro')">Comenzar</button>
+                <button class="w-full py-3 border border-outline-variant/20 rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-all font-semibold" onclick="openModal('register', 'student')">Comenzar</button>
             </div>
 
             <!-- Plan Equipo de trabajo -->
@@ -1294,7 +1294,7 @@ CUERPO DE LA PÁGINA
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Documentación con IA</li>
                     <li class="flex items-center gap-2 text-sm text-on-surface-variant/80"><span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario</li>
                 </ul>
-                <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register', 'pro')">Comenzar</button>
+                <button class="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary/80 transition-all font-semibold" onclick="openModal('register', 'team')">Comenzar</button>
             </div>
 
             <!-- Plan Empresarial -->
@@ -1466,18 +1466,23 @@ CUERPO DE LA PÁGINA
                     <div class="grid grid-cols-1 gap-3 mb-6" id="reg-plan-selector">
                         <button type="button" data-plan="free" onclick="selectRegPlan('free')" class="reg-plan-btn selected">
                             Gratuito
-                            <span class="plan-price">$0 MXN</span>
-                            <span class="plan-features">3 proyectos · Análisis básico · PDF</span>
+                            <span class="plan-price">Gratis</span>
+                            <span class="plan-features">Para empezar y probar AutoDocs AI</span>
                         </button>
-                        <button type="button" data-plan="pro" onclick="selectRegPlan('pro')" class="reg-plan-btn">
-                            Pro
-                            <span class="plan-price">$350 MXN</span>
-                            <span class="plan-features">20 proyectos · Análisis avanzado · IA · Soporte prioritario</span>
+                        <button type="button" data-plan="student" onclick="selectRegPlan('student')" class="reg-plan-btn">
+                            Estudiante
+                            <span class="plan-price">$99 MXN</span>
+                            <span class="plan-features">Para aprender y proyectos académicos</span>
+                        </button>
+                        <button type="button" data-plan="team" onclick="selectRegPlan('team')" class="reg-plan-btn">
+                            Equipo de trabajo
+                            <span class="plan-price">$899 MXN</span>
+                            <span class="plan-features">Para equipos de desarrollo</span>
                         </button>
                         <button type="button" data-plan="enterprise" onclick="selectRegPlan('enterprise')" class="reg-plan-btn">
-                            Enterprise
-                            <span class="plan-price">$850 MXN</span>
-                            <span class="plan-features">Ilimitado · Análisis ilimitado · API dedicada · 24/7</span>
+                            Empresarial
+                            <span class="plan-price">$1,299 MXN</span>
+                            <span class="plan-features">Para organizaciones y grandes proyectos</span>
                         </button>
                     </div>
                     <div class="flex gap-3">
@@ -1655,14 +1660,24 @@ CUERPO DE LA PÁGINA
 
         // Precios en MXN para los planes de pago
         const PRICES = {
-            pro: 350,
-            enterprise: 850
+            student: 99,
+            team: 899,
+            enterprise: 1299
         };
 
         // Nombres de los planes para mostrar
         const PLAN_NAMES = {
-            pro: 'Pro',
-            enterprise: 'Enterprise'
+            student: 'Estudiante',
+            team: 'Equipo de trabajo',
+            enterprise: 'Empresarial'
+        };
+
+        // Plan interno del backend que corresponde a cada plan mostrado
+        const BACKEND_PLAN = {
+            free: 'free',
+            student: 'pro',
+            team: 'pro',
+            enterprise: 'enterprise'
         };
 
         // ===================================================================
@@ -2038,7 +2053,7 @@ CUERPO DE LA PÁGINA
                         name,
                         email,
                         password,
-                        plan: regSelectedPlan,
+                        plan: BACKEND_PLAN[regSelectedPlan] || 'free',
                         accepted_terms: terms,
                         payment_method: 'paypal',
                         paypal_order_id: orderId || regData.paypal_order_id || null,
