@@ -1090,7 +1090,16 @@
     "\u2717 M\u00ednimo 8 caracteres": "\u2717 Minimum 8 characters",
     "\ud83c\uddf2\ud83c\uddfd M\u00e9xico": "\ud83c\uddf2\ud83c\uddfd Mexico",
     "\ud83d\udcda Chat de Documentaci\u00f3n": "\ud83d\udcda Documentation Chat",
-    "\ud83d\udce6 ' + selectedFile.name;\n                el.classList.remove(": "\ud83d\udce6 ' + selectedFile.name;\n                el.classList.remove("
+    "\ud83d\udce6 ' + selectedFile.name;\n                el.classList.remove(": "\ud83d\udce6 ' + selectedFile.name;\n                el.classList.remove(",
+    "Probar la demo": "Try the demo",
+    "Prueba un comando": "Try a command",
+    "autodocs \u2014 demo interactiva": "autodocs \u2014 interactive demo",
+    "escribe un comando\u2026 (help)": "type a command\u2026 (help)",
+    "Reiniciar demo": "Restart demo",
+    "Comando de AutoDocs": "AutoDocs command",
+    "Crear cuenta gratuita": "Create free account",
+    "Ir al Dashboard": "Go to Dashboard",
+    "Atr\u00e1s": "Back"
 }; // AUTO_INJECTED_PHRASES
 
     var originals = new WeakMap();
